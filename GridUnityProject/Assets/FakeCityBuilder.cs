@@ -37,6 +37,7 @@ public class FakeCityBuilder : MonoBehaviour
     private void Start()
     {
         this.city = MakeCity();
+        this.bounds = new Bounds(Vector3.one / 2, Vector3.one);
         CubeCount = city.SelectMany(item => item.TowerPoints).Count();
         positionsBuffer = GetPositionsBuffer();
     }

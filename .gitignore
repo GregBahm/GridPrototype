@@ -1,5 +1,8 @@
-﻿################################################################################
-# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
-################################################################################
-
-/.vs
+﻿*.vs
+/GridUnityProject/Library
+/GridUnityProject/Logs
+/GridUnityProject/obj
+/GridUnityProject/Packages
+/GridUnityProject/Temp
+*.csproj
+*.sln
