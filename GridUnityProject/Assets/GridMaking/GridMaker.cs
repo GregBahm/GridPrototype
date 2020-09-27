@@ -30,6 +30,10 @@ namespace GridMaking
         private TesselatedGrid tesselatedGrid;
         private EasedGrid easedGrid;
 
+        public IEnumerable<EasedQuad> Quads { get { return easedGrid.Quads; } }
+        public IEnumerable<EasedPoint> Points { get { return easedGrid.Points; } }
+        public IEnumerable<EasedEdge> Edges { get { return easedGrid.Edges; } }
+
         private void Start()
         {
             baseGrid = new BaseGrid(gridSize);
@@ -56,7 +60,7 @@ namespace GridMaking
 
         private void DisplayEasedConnections()
         {
-            foreach (var item in easedGrid.EasedEdges)
+            foreach (var item in easedGrid.Edges)
             {
                 Vector3 start = new Vector3(item.PointA.CurrentPos.x, 0, item.PointA.CurrentPos.y);
                 Vector3 end = new Vector3(item.PointB.CurrentPos.x, 0, item.PointB.CurrentPos.y);

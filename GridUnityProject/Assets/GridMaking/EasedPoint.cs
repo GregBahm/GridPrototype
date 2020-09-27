@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace GridMaking
 {
-    class EasedPoint
+    public class EasedPoint
     {
         public Vector2 BasePos { get; }
         public Vector2 CurrentPos { get; set; }

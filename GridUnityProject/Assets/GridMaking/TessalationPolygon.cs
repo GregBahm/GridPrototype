@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -10,11 +11,25 @@ namespace GridMaking
         public TessalationPoint SubPoint { get; }
         public IEnumerable<TessalationEdge> SubEdges { get; }
 
+        public IEnumerable<TessalationPoint> BasePoints { get; }
+
         public TessalationPolygon(IEnumerable<TessalationBaseEdge> edges)
         {
             BaseEdges = edges.ToArray();
             SubPoint = GetSubPoint();
             SubEdges = CreateSubEdges().ToArray();
+            BasePoints = GetBasePoints();
+        }
+
+        private IEnumerable<TessalationPoint> GetBasePoints()
+        {
+            HashSet<TessalationPoint> ret = new HashSet<TessalationPoint>();
+            foreach (TessalationBaseEdge edge in BaseEdges)
+            {
+                ret.Add(edge.PointA);
+                ret.Add(edge.PointB);
+            }
+            return ret;
         }
 
         private IEnumerable<TessalationEdge> CreateSubEdges()

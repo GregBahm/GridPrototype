@@ -7,25 +7,65 @@ namespace GridMaking
 {
     class EasedGrid
     {
-        public IEnumerable<EasedPoint> EasedPoints { get; }
+        public IEnumerable<EasedPoint> Points { get; }
 
-        public IEnumerable<EasedEdge> EasedEdges { get; }
+        public IEnumerable<EasedEdge> Edges { get; }
+
+        public IEnumerable<EasedQuad> Quads { get; }
 
         private readonly Vector2 centerPoint;
 
-        public EasedGrid(TesselatedGrid tesselatedGrid, Vector2 centerPoint)
+        public EasedGrid(TesselatedGrid tessalatedGrid, Vector2 centerPoint)
         {
             this.centerPoint = centerPoint;
-            Dictionary<TessalationPoint, EasedPoint> pointTable = CreatePointTable(tesselatedGrid.Points);
-            EasedPoints = GetPopulatedPoints(pointTable, tesselatedGrid.Edges);
-            EasedEdges = tesselatedGrid.Edges.Select(item =>
+            Dictionary<TessalationPoint, EasedPoint> pointTable = CreatePointTable(tessalatedGrid.Points);
+            Points = GetPopulatedPoints(pointTable, tessalatedGrid.Edges);
+            Edges = GetEdges(tessalatedGrid, pointTable);
+            Quads = GetQuads(tessalatedGrid, pointTable);
+        }
+
+        private IEnumerable<EasedEdge> GetEdges(TesselatedGrid tesselatedGrid, Dictionary<TessalationPoint, EasedPoint> pointTable)
+        {
+            return tesselatedGrid.Edges.Select(item =>
                 new EasedEdge(pointTable[item.PointA], pointTable[item.PointB])
                 ).ToArray();
         }
 
+        private IEnumerable<EasedQuad> GetQuads(TesselatedGrid tessalatedGrid, Dictionary<TessalationPoint, EasedPoint> pointTable)
+        {
+            List<EasedQuad> ret = new List<EasedQuad>();
+            foreach (TessalationPolygon polygon in tessalatedGrid.Polygons)
+            {
+                IEnumerable<EasedQuad> quadsOfThePolygon = GetQuadsOfThePolygon(polygon, pointTable);
+                ret.AddRange(quadsOfThePolygon);
+            }
+            return ret;
+        }
+
+        private IEnumerable<EasedQuad> GetQuadsOfThePolygon(TessalationPolygon polygon, Dictionary<TessalationPoint, EasedPoint> pointTable)
+        {
+            foreach (TessalationPoint point in polygon.BasePoints)
+            {
+                TessalationBaseEdge[] edges = polygon.BaseEdges.Where(edge => edge.PointA == point || edge.PointB == point).ToArray();
+                TessalationPoint[] points = new TessalationPoint[]
+                {
+                    point,
+                    edges[0].SubPoint,
+                    edges[1].SubPoint,
+                    polygon.SubPoint
+                };
+                yield return new EasedQuad(points.Select(item => pointTable[item]));
+            }
+        }
+
+        private TessalationEdge GetSubEdge(TessalationPoint point, TessalationBaseEdge tessalationBaseEdge)
+        {
+            throw new NotImplementedException();
+        }
+
         public void DoEase(float weight, float borderWeight, float hexSize, float targetCellLength)
         {
-            foreach (EasedPoint point in EasedPoints)
+            foreach (EasedPoint point in Points)
             {
                 if(point.IsBorder)
                 {

@@ -1,6 +1,6 @@
 ﻿namespace GridMaking
 {
-    class EasedEdge
+    public class EasedEdge
     {
         public EasedPoint PointA { get; }
         public EasedPoint PointB { get; }

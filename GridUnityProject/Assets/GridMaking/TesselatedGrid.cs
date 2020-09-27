@@ -12,13 +12,15 @@ namespace GridMaking
 
         public IEnumerable<TessalationEdge> Edges { get; }
 
+        public IEnumerable<TessalationPolygon> Polygons { get; }
+
         public TesselatedGrid(BaseGrid baseGrid)
         {
             Dictionary<BasePoint, TessalationPoint> pointTable = GetPointTable(baseGrid.Points);
             Dictionary<BaseEdge, TessalationBaseEdge> edgeTable = GetEdgeTable(pointTable, baseGrid.CulledEdges);
-            IEnumerable<TessalationPolygon> polys = GetPolygons(edgeTable, baseGrid.Polygons).ToArray();
+            Polygons = GetPolygons(edgeTable, baseGrid.Polygons).ToArray();
 
-            Edges = GetAllTheEdges(polys);
+            Edges = GetAllTheEdges();
             Points = GetAllThePoints();
         }
 
@@ -33,10 +35,10 @@ namespace GridMaking
             return ret;
         }
 
-        private IEnumerable<TessalationEdge> GetAllTheEdges(IEnumerable<TessalationPolygon> polys)
+        private IEnumerable<TessalationEdge> GetAllTheEdges()
         {
             HashSet<TessalationEdge> ret = new HashSet<TessalationEdge>();
-            foreach (TessalationPolygon polygon in polys)
+            foreach (TessalationPolygon polygon in Polygons)
             {
                 foreach (TessalationBaseEdge baseEdge in polygon.BaseEdges)
                 {
