@@ -6,13 +6,13 @@ namespace GridMaking
 {
     public class BaseTriangle : IPolygon
     {
-        public IEnumerable<TrianglePoint> Points { get; }
-        public TriangleEdge[] Edges { get; }
+        public IEnumerable<BasePoint> Points { get; }
+        public BaseEdge[] Edges { get; }
 
-        public BaseTriangle(TriangleEdge a, TriangleEdge b, TriangleEdge c)
+        public BaseTriangle(BaseEdge a, BaseEdge b, BaseEdge c)
         {
-            Edges = new TriangleEdge[3] { a, b, c };
-            Points = new HashSet<TrianglePoint> { a.PointA, a.PointB, b.PointA, b.PointB, c.PointA, c.PointB };
+            Edges = new BaseEdge[3] { a, b, c };
+            Points = new HashSet<BasePoint> { a.PointA, a.PointB, b.PointA, b.PointB, c.PointA, c.PointB };
         }
     }
 }

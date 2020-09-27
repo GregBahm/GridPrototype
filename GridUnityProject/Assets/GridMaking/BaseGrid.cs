@@ -7,60 +7,103 @@ namespace GridMaking
 {
     class BaseGrid
     {
-        public TrianglePoint[,] Points { get; }
-        public IEnumerable<TriangleEdge> BaseConnections { get; }
-        public IEnumerable<TriangleEdge> CulledConnections { get; }
+        public BasePoint[,] Points { get; }
 
-        private HashSet<IPolygon> polygons = new HashSet<IPolygon>();
+        public IEnumerable<BaseEdge> BaseEdges { get; }
+        public IEnumerable<BaseEdge> HexEdges { get; }
+        public IEnumerable<BaseEdge> CulledEdges { get; }
+
+        private HashSet<IPolygon> polygons;
         public IEnumerable<IPolygon> Polygons { get { return polygons; } }
 
-        private int gridRows;
-        private int gridColumns;
+        private int gridSize;
 
-        public BaseGrid(int rows, int columns)
+        public BaseGrid(int gridSize)
         {
-            gridRows = rows;
-            gridColumns = columns;
-            Points = CreateTrianglePoints();
-            BaseConnections = CreateConnectins(Points);
-            CulledConnections = DestroyConnections(BaseConnections);
+            this.gridSize = gridSize;
+            Points = CreateBasePoints();
+            BaseEdges = CreateConnections();
+            HexEdges = GetHexEdges();
+            polygons = GatherPolygons();
+            CulledEdges = DestroyConnections();
         }
 
-        private TrianglePoint[,] CreateTrianglePoints()
+        private HashSet<IPolygon> GatherPolygons()
         {
-            TrianglePoint[,] ret = new TrianglePoint[gridRows, gridColumns];
-            for (int x = 0; x < gridRows; x++)
+            HashSet<IPolygon> ret = new HashSet<IPolygon>();
+            foreach (BaseEdge edge in BaseEdges)
             {
-                for (int y = 0; y < gridColumns; y++)
+                foreach (BaseTriangle triangle in edge.Triangles.Where(item => item != null))
                 {
-                    bool isBorder = x == 0 || x == gridRows - 1 || y == 0 || y == gridColumns - 1;
-                    ret[x, y] = new TrianglePoint(x, y, isBorder);
+                    if(triangle.Points.All(item => item.IsWithinHex))
+                    {
+                        ret.Add(triangle);
+                    }
                 }
             }
             return ret;
         }
 
-        private void PopulateTriangles(Dictionary<string, TriangleEdge> baseEdges, TrianglePoint[,] points)
+        private BasePoint[,] CreateBasePoints()
         {
-            for (int x = 0; x < gridRows - 1; x++)
+            BasePoint[,] ret = new BasePoint[gridSize, gridSize];
+            for (int x = 0; x < gridSize; x++)
             {
-                for (int y = 0; y < gridColumns - 1; y++)
+                for (int y = 0; y < gridSize; y++)
                 {
-                    TrianglePoint pointA = points[x, y];
-                    TrianglePoint pointB = points[x, y + 1];
-                    TrianglePoint pointC = points[x + 1, y];
-                    TrianglePoint pointD = points[x + 1, y + 1];
-                    TriangleEdge edgeAB = baseEdges[TriangleEdge.GetKey(pointA, pointB)];
-                    TriangleEdge edgeAC = baseEdges[TriangleEdge.GetKey(pointA, pointC)];
-                    TriangleEdge edgeBC = baseEdges[TriangleEdge.GetKey(pointB, pointC)];
-                    TriangleEdge edgeCD = baseEdges[TriangleEdge.GetKey(pointC, pointD)];
-                    TriangleEdge edgeBD = baseEdges[TriangleEdge.GetKey(pointB, pointD)];
+                    bool isWithinHex = GetIsWithinHex(x, y);
+                    bool isBorder = GetIsBorder(x, y);
+                    ret[x, y] = new BasePoint(x, y, isBorder, isWithinHex);
+                }
+            }
+            return ret;
+        }
+
+        private bool GetIsBorder(int x, int y)
+        {
+            if(x == 0 || x == gridSize - 1)
+            {
+                return true;
+            }
+            if(y == 0 || y == gridSize - 1)
+            {
+                return true;
+            }
+            int halfSize = gridSize / 2;
+            int sum = x + y;
+            return sum == halfSize || sum == halfSize * 3;
+        }
+
+        private bool GetIsWithinHex(int x, int y)
+        {
+            int halfSize = gridSize / 2;
+            int sum = x + y;
+            return sum > halfSize - 1 && sum < (halfSize * 3) + 1;
+        }
+
+        private IEnumerable<BaseEdge> GetHexEdges()
+        {
+            return BaseEdges.Where(item => item.PointA.IsWithinHex && item.PointB.IsWithinHex).ToArray();
+        }
+
+        private void PopulateTriangles(Dictionary<string, BaseEdge> baseEdges)
+        {
+            for (int x = 0; x < gridSize - 1; x++)
+            {
+                for (int y = 0; y < gridSize - 1; y++)
+                {
+                    BasePoint pointA = Points[x, y];
+                    BasePoint pointB = Points[x, y + 1];
+                    BasePoint pointC = Points[x + 1, y];
+                    BasePoint pointD = Points[x + 1, y + 1];
+                    BaseEdge edgeAB = baseEdges[BaseEdge.GetKey(pointA, pointB)];
+                    BaseEdge edgeAC = baseEdges[BaseEdge.GetKey(pointA, pointC)];
+                    BaseEdge edgeBC = baseEdges[BaseEdge.GetKey(pointB, pointC)];
+                    BaseEdge edgeCD = baseEdges[BaseEdge.GetKey(pointC, pointD)];
+                    BaseEdge edgeBD = baseEdges[BaseEdge.GetKey(pointB, pointD)];
 
                     BaseTriangle triangleA = new BaseTriangle(edgeAB, edgeBC, edgeAC);
                     BaseTriangle triangleB = new BaseTriangle(edgeBC, edgeCD, edgeBD);
-
-                    polygons.Add(triangleA); // damn side effects
-                    polygons.Add(triangleB);
 
                     edgeAB.Triangles[0] = triangleA;
                     edgeAC.Triangles[0] = triangleA;
@@ -72,75 +115,75 @@ namespace GridMaking
             }
         }
 
-        private IEnumerable<TriangleEdge> DestroyConnections(IEnumerable<TriangleEdge> connections)
+        private IEnumerable<BaseEdge> DestroyConnections()
         {
-            IEnumerable<TriangleEdge> interiorEdges = connections.Where(item => item.Triangles.All(tri => tri != null));
-            HashSet<TriangleEdge> edgesThatCanBeDestroyed = new HashSet<TriangleEdge>(interiorEdges);
+            IEnumerable<BaseEdge> interiorEdges = HexEdges.Where(item => !item.IsBorderEdge);
+            HashSet<BaseEdge> edgesThatCanBeDestroyed = new HashSet<BaseEdge>(interiorEdges);
             while (edgesThatCanBeDestroyed.Any())
             {
                 int indexToDelete = Mathf.FloorToInt(edgesThatCanBeDestroyed.Count * UnityEngine.Random.value);
-                TriangleEdge edgeToDelete = edgesThatCanBeDestroyed.ElementAt(indexToDelete);
+                BaseEdge edgeToDelete = edgesThatCanBeDestroyed.ElementAt(indexToDelete);
 
                 edgeToDelete.Delete = true;
                 edgesThatCanBeDestroyed.Remove(edgeToDelete);
-                IEnumerable<TriangleEdge> edgesThatCantBeDestroyed = edgeToDelete.Triangles.SelectMany(item => item.Edges);
+                IEnumerable<BaseEdge> edgesThatCantBeDestroyed = edgeToDelete.Triangles.SelectMany(item => item.Edges);
                 foreach (var item in edgesThatCantBeDestroyed)
                 {
                     edgesThatCanBeDestroyed.Remove(item);
                 }
                 UpdatePolygons(edgeToDelete);
             }
-            return connections.Where(item => !item.Delete).ToArray();
+            return HexEdges.Where(item => !item.Delete).ToArray();
         }
 
-        private void UpdatePolygons(TriangleEdge edgeToDelete)
+        private void UpdatePolygons(BaseEdge edgeToDelete)
         {
             BaseTriangle triA = edgeToDelete.Triangles[0];
             BaseTriangle triB = edgeToDelete.Triangles[1];
             polygons.Remove(triA);
             polygons.Remove(triB);
 
-            List<TriangleEdge> edges = new List<TriangleEdge>();
+            List<BaseEdge> edges = new List<BaseEdge>();
             edges.AddRange(triA.Edges);
             edges.AddRange(triB.Edges);
-            HashSet<TriangleEdge> hash = new HashSet<TriangleEdge>(edges);
+            HashSet<BaseEdge> hash = new HashSet<BaseEdge>(edges);
             hash.Remove(edgeToDelete);
             BaseQuad quad = new BaseQuad(hash);
             polygons.Add(quad);
         }
 
-        private IEnumerable<TriangleEdge> CreateConnectins(TrianglePoint[,] points)
+        private IEnumerable<BaseEdge> CreateConnections()
         {
-            Dictionary<string, TriangleEdge> baseEdges = new Dictionary<string, TriangleEdge>();
-            for (int x = 0; x < gridRows - 1; x++)
+            Dictionary<string, BaseEdge> baseEdges = new Dictionary<string, BaseEdge>();
+            for (int x = 0; x < gridSize - 1; x++)
             {
-                for (int y = 0; y < gridColumns - 1; y++)
+                for (int y = 0; y < gridSize - 1; y++)
                 {
-                    TrianglePoint pointA = points[x, y];
-                    TrianglePoint pointB = points[x, y + 1];
-                    TrianglePoint pointC = points[x + 1, y];
-                    TrianglePoint pointD = points[x + 1, y + 1];
+                    BasePoint pointA = Points[x, y];
+                    BasePoint pointB = Points[x, y + 1];
+                    BasePoint pointC = Points[x + 1, y];
+                    BasePoint pointD = Points[x + 1, y + 1];
 
-                    TriangleEdge edgeAB = new TriangleEdge(pointA, pointB);
-                    TriangleEdge edgeAC = new TriangleEdge(pointA, pointC);
-                    TriangleEdge edgeBC = new TriangleEdge(pointB, pointC);
+                    BaseEdge edgeAB = new BaseEdge(pointA, pointB);
+                    BaseEdge edgeAC = new BaseEdge(pointA, pointC);
+                    BaseEdge edgeBC = new BaseEdge(pointB, pointC);
                     baseEdges.Add(edgeAB.Key, edgeAB);
                     baseEdges.Add(edgeAC.Key, edgeAC);
                     baseEdges.Add(edgeBC.Key, edgeBC);
 
-                    if (x == gridRows - 2)
+                    if (x == gridSize - 2)
                     {
-                        TriangleEdge edgeCD = new TriangleEdge(pointC, pointD);
+                        BaseEdge edgeCD = new BaseEdge(pointC, pointD);
                         baseEdges.Add(edgeCD.Key, edgeCD);
                     }
-                    if (y == gridColumns - 2)
+                    if (y == gridSize - 2)
                     {
-                        TriangleEdge edgeBD = new TriangleEdge(pointB, pointD);
+                        BaseEdge edgeBD = new BaseEdge(pointB, pointD);
                         baseEdges.Add(edgeBD.Key, edgeBD);
                     }
                 }
             }
-            PopulateTriangles(baseEdges, points);
+            PopulateTriangles(baseEdges);
             return baseEdges.Values;
         }
     }

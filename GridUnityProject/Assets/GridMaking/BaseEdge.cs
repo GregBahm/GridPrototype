@@ -2,14 +2,14 @@
 
 namespace GridMaking
 {
-    public class TriangleEdge
+    public class BaseEdge
     {
-        public TrianglePoint PointA { get; }
-        public TrianglePoint PointB { get; }
+        public BasePoint PointA { get; }
+        public BasePoint PointB { get; }
 
         public string Key { get; }
 
-        public TriangleEdge(TrianglePoint pointA, TrianglePoint pointB)
+        public BaseEdge(BasePoint pointA, BasePoint pointB)
         {
             PointA = pointA;
             PointB = pointB;
@@ -18,11 +18,11 @@ namespace GridMaking
 
         public BaseTriangle[] Triangles { get; } = new BaseTriangle[2];
 
-        public bool IsBorderEdge { get { return Triangles.All(item => item != null); } }
+        public bool IsBorderEdge { get { return PointA.IsBorder && PointB.IsBorder; } }
 
         public bool Delete { get; set; }
 
-        public static string GetKey(TrianglePoint a, TrianglePoint b)
+        public static string GetKey(BasePoint a, BasePoint b)
         {
             return "X:" + a.GridX + "Y:" + a.GridY + "to X:" + b.GridX + "Y:" + b.GridY;
         }

@@ -6,9 +6,9 @@ namespace GridMaking
 {
     class BaseQuad : IPolygon
     {
-        public TriangleEdge[] Edges { get; }
+        public BaseEdge[] Edges { get; }
 
-        public BaseQuad(IEnumerable<TriangleEdge> edges)
+        public BaseQuad(IEnumerable<BaseEdge> edges)
         {
             if(edges.Count() != 4)
             {

@@ -4,6 +4,6 @@ namespace GridMaking
 {
     interface IPolygon
     {
-        TriangleEdge[] Edges { get; }
+        BaseEdge[] Edges { get; }
     }
 }
