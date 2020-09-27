@@ -5,7 +5,6 @@ using UnityEngine;
 
 namespace GridMaking
 {
-
     public class GridMaker : MonoBehaviour
     {
         [SerializeField]
@@ -19,6 +18,13 @@ namespace GridMaking
         [SerializeField]
         [Range(0, 1)]
         private float easingBorderWeight;
+
+        [SerializeField]
+        [Range(0, 1)]
+        private float targetCellLength;
+
+        [SerializeField]
+        private bool DoEase;
 
         private BaseGrid baseGrid;
         private TesselatedGrid tesselatedGrid;
@@ -41,8 +47,10 @@ namespace GridMaking
         private void Update()
         {
             //DisplayBaseConnections();
-
-            easedGrid.DoEase(easingWeight, easingBorderWeight, gridSize);
+            if(DoEase)
+            {
+                easedGrid.DoEase(easingWeight, easingBorderWeight, gridSize, targetCellLength);
+            }
             DisplayEasedConnections();
         }
 

@@ -23,7 +23,7 @@ namespace GridMaking
                 ).ToArray();
         }
 
-        public void DoEase(float weight, float borderWeight, float hexSize)
+        public void DoEase(float weight, float borderWeight, float hexSize, float targetCellLength)
         {
             foreach (EasedPoint point in EasedPoints)
             {
@@ -33,11 +33,27 @@ namespace GridMaking
                 }
                 else
                 {
-                    DoEasePoint(point, weight);
+                    DoEasePointB(point, weight, targetCellLength);
                 }
             }
         }
 
+        // This one tries to move so that all of it's connections are the target length
+        private void DoEasePointB(EasedPoint point, float weight, float targetCellLength)
+        {
+            Vector2 normalAverage = Vector2.zero;
+            foreach (EasedPoint connection in point.ConnectedPoints)
+            {
+                Vector2 diff = point.CurrentPos - connection.CurrentPos;
+                Vector2 diffNormal = diff.normalized * targetCellLength;
+                Vector2 targetPos = connection.CurrentPos + diffNormal;
+                normalAverage += targetPos;
+            }
+            normalAverage /= point.ConnectedPoints.Count;
+            point.CurrentPos = Vector2.Lerp(point.BasePos, normalAverage, weight);
+        }
+
+        // This one tries to move the point to the average position of it's connections
         private void DoEasePoint(EasedPoint point, float weight)
         {
             Vector2 sumPos = Vector2.zero;
