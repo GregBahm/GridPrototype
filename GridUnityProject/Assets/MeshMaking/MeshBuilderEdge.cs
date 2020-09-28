@@ -17,6 +17,8 @@ namespace MeshBuilding
         public int CenterIndex { get; }
         public string Key { get; }
 
+        public Vector2 Uvs { get { return Vector2.up; } }
+
         public MeshBuilderEdge(MeshBuilderAnchorPoint pointA, MeshBuilderAnchorPoint pointB, int index)
         {
             PointA = pointA;

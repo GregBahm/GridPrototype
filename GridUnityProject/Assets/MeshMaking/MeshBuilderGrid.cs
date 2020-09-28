@@ -11,8 +11,9 @@ namespace MeshBuilding
 
         private readonly IMeshBuilderVert[] verticesSource;
         public int[] Triangles { get; }
+        public Vector2[] Uvs { get; }
 
-        private IEnumerable<MeshBuilderPoly> polys;
+        public IEnumerable<MeshBuilderPoly> Polys { get; }
 
         public IEnumerable<Vector3> Vertices
         {
@@ -27,25 +28,37 @@ namespace MeshBuilding
             this.gridMaker = gridMaker;
             Dictionary<EasedPoint, MeshBuilderAnchorPoint> anchorTable = GetAnchorTable();
             Dictionary<string, MeshBuilderEdge> edgeTable = GetEdgeTable(anchorTable);
-            polys = GetPolys(anchorTable, edgeTable);
+            PopulateVertEdges(edgeTable.Values);
+            Polys = GetPolys(anchorTable, edgeTable);
 
-            verticesSource = GetVertices(anchorTable.Values, edgeTable.Values);
+            verticesSource = GetVertSources(anchorTable.Values, edgeTable.Values);
             Triangles = GetTriangles();
+            Uvs = verticesSource.Select(item => item.Uvs).ToArray();
+
+        }
+
+        private void PopulateVertEdges(IEnumerable<MeshBuilderEdge> edges)
+        {
+            foreach (MeshBuilderEdge edge in edges)
+            {
+                edge.PointA.Connections.Add(edge);
+                edge.PointB.Connections.Add(edge);
+            }
         }
 
         private int[] GetTriangles()
         {
             List<int> ret = new List<int>();
-            foreach (MeshBuilderPoly poly in polys)
+            foreach (MeshBuilderPoly poly in Polys)
             {
                 ret.AddRange(poly.Triangles);
             }
             return ret.ToArray();
         }
 
-        private IMeshBuilderVert[] GetVertices(IEnumerable<MeshBuilderAnchorPoint> anchors, IEnumerable<MeshBuilderEdge> edges)
+        private IMeshBuilderVert[] GetVertSources(IEnumerable<MeshBuilderAnchorPoint> anchors, IEnumerable<MeshBuilderEdge> edges)
         {
-            int vertCount = anchors.Count() + edges.Count() + polys.Count();
+            int vertCount = anchors.Count() + edges.Count() + Polys.Count();
             IMeshBuilderVert[] ret = new IMeshBuilderVert[vertCount];
             foreach (MeshBuilderAnchorPoint point in anchors)
             {
@@ -55,7 +68,7 @@ namespace MeshBuilding
             {
                 ret[edge.CenterIndex] = edge;
             }
-            foreach (MeshBuilderPoly poly in polys)
+            foreach (MeshBuilderPoly poly in Polys)
             {
                 ret[poly.CenterIndex] = poly;
             }
@@ -90,6 +103,7 @@ namespace MeshBuilding
 
         private IEnumerable<MeshBuilderPoly> GetPolys(Dictionary<EasedPoint, MeshBuilderAnchorPoint> anchorTable, Dictionary<string, MeshBuilderEdge> edgeTable)
         {
+            int triStartIndex = 0;
             int index = anchorTable.Count + edgeTable.Count;
             List<MeshBuilderPoly> ret = new List<MeshBuilderPoly>();
             foreach (EasedQuad quad in gridMaker.Quads)
@@ -104,7 +118,8 @@ namespace MeshBuilding
                 MeshBuilderEdge edgeCD = edgeTable[MeshBuilderEdge.GetEdgeKey(pointC, pointD)];
                 MeshBuilderEdge edgeDA = edgeTable[MeshBuilderEdge.GetEdgeKey(pointD, pointA)];
 
-                MeshBuilderPoly poly = new MeshBuilderPoly(pointA, pointB, pointC, pointD, edgeAB, edgeBC, edgeCD, edgeDA, index);
+                MeshBuilderPoly poly = new MeshBuilderPoly(pointA, pointB, pointC, pointD, edgeAB, edgeBC, edgeCD, edgeDA, index, triStartIndex);
+                triStartIndex += 8;
                 ret.Add(poly);
                 index++;
             }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace MeshBuilding
@@ -24,7 +25,11 @@ namespace MeshBuilding
             }
         }
 
+        public Vector2 Uvs { get { return Vector2.one; } }
+
         public IEnumerable<int> Triangles { get; }
+
+        public IEnumerable<TriangleIndexPair> TriangleInteractionBindings { get; }
 
         public MeshBuilderPoly(MeshBuilderAnchorPoint basePointA,
             MeshBuilderAnchorPoint basePointB,
@@ -34,7 +39,8 @@ namespace MeshBuilding
             MeshBuilderEdge edgeBC,
             MeshBuilderEdge edgeCD,
             MeshBuilderEdge edgeDA,
-            int centerIndex)
+            int centerIndex,
+            int triangleStartIndex)
         {
             BasePointA = basePointA;
             BasePointB = basePointB;
@@ -46,6 +52,23 @@ namespace MeshBuilding
             EdgeDA = edgeDA;
             CenterIndex = centerIndex;
             Triangles = GetTriangle();
+            TriangleInteractionBindings = GetInteractionBindings(triangleStartIndex);
+        }
+
+        private IEnumerable<TriangleIndexPair> GetInteractionBindings(int triangleStartIndex)
+        {
+            List<TriangleIndexPair> ret = new List<TriangleIndexPair>();
+
+            ret.Add(new TriangleIndexPair(BasePointA, triangleStartIndex));
+            ret.Add(new TriangleIndexPair(BasePointB, triangleStartIndex + 1));
+            ret.Add(new TriangleIndexPair(BasePointB, triangleStartIndex + 2));
+            ret.Add(new TriangleIndexPair(BasePointC, triangleStartIndex + 3));
+            ret.Add(new TriangleIndexPair(BasePointC, triangleStartIndex + 4));
+            ret.Add(new TriangleIndexPair(BasePointD, triangleStartIndex + 5));
+            ret.Add(new TriangleIndexPair(BasePointD, triangleStartIndex + 6));
+            ret.Add(new TriangleIndexPair(BasePointA, triangleStartIndex + 7));
+
+            return ret;
         }
 
         private IEnumerable<int> GetTriangle()
@@ -84,6 +107,18 @@ namespace MeshBuilding
             ret.Add(BasePointA.Index);
 
             return ret;
+        }
+
+        public class TriangleIndexPair
+        {
+            public MeshBuilderAnchorPoint AnchorPoint { get; }
+            public int TriangleIndex { get; }
+
+            public TriangleIndexPair(MeshBuilderAnchorPoint anchorPoint, int triangleIndex)
+            {
+                AnchorPoint = anchorPoint;
+                TriangleIndex = triangleIndex;
+            }
         }
     }
 }
