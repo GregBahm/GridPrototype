@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 [RequireComponent(typeof(MeshBuilder))]
 public class MeshInteraction : MonoBehaviour
@@ -43,6 +44,14 @@ public class MeshInteraction : MonoBehaviour
     private void Update()
     {
         PlaceDebugCube();
+        if(selectedAnchor != null && Input.GetMouseButtonDown(0))
+        {
+            GameObject newBox = Instantiate(Selection.gameObject);
+            SelectionMeshMaker selectionMeshMaker = new SelectionMeshMaker(selectedAnchor);
+            Mesh meshClone = new Mesh();
+            selectionMeshMaker.SetMesh(meshClone);
+            newBox.GetComponent<MeshFilter>().mesh = meshClone;
+        }
     }
 
     private void PlaceDebugCube()
@@ -54,6 +63,7 @@ public class MeshInteraction : MonoBehaviour
             if(selectedAnchor != polyTable[hit.triangleIndex])
             {
                 selectedAnchor = polyTable[hit.triangleIndex];
+                Shader.SetGlobalVector("_DistToCursor", selectedAnchor.VertPos);
                 Selection.position = selectedAnchor.VertPos;
                 UpdateCubeMesh();
             }
@@ -62,6 +72,7 @@ public class MeshInteraction : MonoBehaviour
 
     private void UpdateCubeMesh()
     {
-        selectedAnchor.SetSelectionMesh(selectionMesh);
+        SelectionMeshMaker selectionMeshMaker = new SelectionMeshMaker(selectedAnchor);
+        selectionMeshMaker.SetMesh(selectionMesh);
     }
 }

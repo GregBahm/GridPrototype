@@ -25,6 +25,8 @@
             float _TuneB;
             float _TuneC;
 
+            float3 _DistToCursor;
+
             struct appdata
             {
                 float4 vertex : POSITION;
@@ -35,6 +37,7 @@
             {
                 float2 uv : TEXCOORD0;
                 float4 vertex : SV_POSITION;
+                float distToCursor : TEXCOORD1;
             };
 
             v2f vert (appdata v)
@@ -42,16 +45,20 @@
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 o.uv = 1 - v.uv;
+                float3 worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
+                o.distToCursor = length(worldPos - _DistToCursor);
                 return o;
             }
 
             fixed4 frag(v2f i) : SV_Target
             {
-                //return float4(1 - i.uv.x, 1 - i.uv.y, 0, 1);
-                //float ret = max(i.uv.x, i.uv.y);
+                float alpha = (1 - i.distToCursor / 40);
+                alpha = pow(saturate(alpha), 20);
+
                 float ret = pow(pow(i.uv.x, _TuneA) + pow(i.uv.y, _TuneA), _TuneB);
-                ret = saturate(ret - _TuneC) * 5;
-                return float4(saturate(ret).xxx, 1);
+                ret = saturate(ret - _TuneC) * 1;
+                ret = ret * alpha;
+                return float4(ret.xxx, 1);
             }
             ENDCG
         }
