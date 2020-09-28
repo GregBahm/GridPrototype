@@ -28,8 +28,8 @@ namespace MeshBuilding
             this.gridMaker = gridMaker;
             Dictionary<EasedPoint, MeshBuilderAnchorPoint> anchorTable = GetAnchorTable();
             Dictionary<string, MeshBuilderEdge> edgeTable = GetEdgeTable(anchorTable);
-            PopulateVertEdges(edgeTable.Values);
             Polys = GetPolys(anchorTable, edgeTable);
+            PopulateVertConnections();
 
             verticesSource = GetVertSources(anchorTable.Values, edgeTable.Values);
             Triangles = GetTriangles();
@@ -37,12 +37,14 @@ namespace MeshBuilding
 
         }
 
-        private void PopulateVertEdges(IEnumerable<MeshBuilderEdge> edges)
+        private void PopulateVertConnections()
         {
-            foreach (MeshBuilderEdge edge in edges)
+            foreach (MeshBuilderPoly poly in Polys)
             {
-                edge.PointA.Connections.Add(edge);
-                edge.PointB.Connections.Add(edge);
+                poly.BasePointA.Connections.Add(poly);
+                poly.BasePointB.Connections.Add(poly);
+                poly.BasePointC.Connections.Add(poly);
+                poly.BasePointD.Connections.Add(poly);
             }
         }
 

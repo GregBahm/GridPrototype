@@ -20,7 +20,7 @@ namespace MeshBuilding
 
         public int Index { get; }
 
-        public List<MeshBuilderEdge> Connections { get; } = new List<MeshBuilderEdge>();
+        public List<MeshBuilderPoly> Connections { get; } = new List<MeshBuilderPoly>();
 
         public MeshBuilderAnchorPoint(EasedPoint anchor, int index)
         {
@@ -55,27 +55,8 @@ namespace MeshBuilding
 
         private Vector3[] GetSurroundingAnchorVerts()
         {
-            List<Vector3> baseSurround = GetBaseSurroundingAnchorVerts();
+            List<Vector3> baseSurround = Connections.Select(item => item.VertPos - VertPos).ToList();
             return baseSurround.OrderByDescending(item => Vector3.SignedAngle(item, Vector3.forward, Vector3.up)).ToArray();
-        }
-
-        private List<Vector3> GetBaseSurroundingAnchorVerts()
-        {
-            List<Vector3> ret = new List<Vector3>();
-            foreach (MeshBuilderEdge edge in Connections)
-            {
-                if (edge.PointA != this)
-                {
-                    Vector3 selectionPos = (edge.PointA.VertPos - VertPos) / 2;
-                    ret.Add(selectionPos);
-                }
-                if (edge.PointB != this)
-                {
-                    Vector3 selectionPos = (edge.PointB.VertPos - VertPos) / 2;
-                    ret.Add(selectionPos);
-                }
-            }
-            return ret;
         }
     }
 }
