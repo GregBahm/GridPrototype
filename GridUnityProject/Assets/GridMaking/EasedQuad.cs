@@ -10,7 +10,15 @@ namespace GridMaking
 
         public EasedQuad(IEnumerable<EasedPoint> points)
         {
-            Points = points.ToArray();
+            List<EasedPoint> asList = points.ToList();
+            Vector2 center = (asList[0].BasePos + asList[1].BasePos + asList[2].BasePos + asList[3].BasePos) / 4;
+            IOrderedEnumerable<EasedPoint> ordered = asList.OrderByDescending(item => GetAngleToCenter(item, center));
+            Points = ordered.ToArray();
+        }
+
+        private static float GetAngleToCenter(EasedPoint point, Vector2 center)
+        {
+            return Vector2.SignedAngle(Vector2.up, point.BasePos - center);
         }
     }
 }

@@ -23,8 +23,7 @@ namespace GridMaking
         [Range(0, 1)]
         private float targetCellLength;
 
-        [SerializeField]
-        private bool DoEase;
+        public bool DoEase;
 
         private BaseGrid baseGrid;
         private TesselatedGrid tesselatedGrid;
@@ -54,8 +53,8 @@ namespace GridMaking
             if(DoEase)
             {
                 easedGrid.DoEase(easingWeight, easingBorderWeight, gridSize, targetCellLength);
+                //DisplayEasedConnections();
             }
-            DisplayEasedConnections();
         }
 
         private void DisplayEasedConnections()
