@@ -11,6 +11,10 @@ namespace Interaction
         private float minZoom;
         [SerializeField]
         private float maxZoom;
+        [SerializeField]
+        private float orbitSpeed;
+        [SerializeField]
+        private float panSpeed;
 
         private static readonly Plane orbitPlane = new Plane(Vector3.up, 0);
         private static readonly Vector3 screenCenter = new Vector3(.5f, .5f, 0);
@@ -18,22 +22,23 @@ namespace Interaction
         private Vector3 orbitStartAngle;
         private Transform orbitPoint;
 
-        private Transform panPoint;
+        private Vector3 panScreenStart;
+        private Vector3 panCameraStart;
 
         private void Start()
         {
             orbitPoint = new GameObject("Camera Orbit").transform;
-            panPoint = new GameObject("Camera Pan").transform;
-            //orbitPoint.parent = panPoint;
             StartOrbit();
         }
 
         public void HandleMouseScrollwheel()
         {
+            Vector3 oldPos = Camera.main.transform.localPosition;
             float scaleFactor = 1f - (Input.mouseScrollDelta.y * scrollSpeed);
-            float newPos = Camera.main.transform.localPosition.z * scaleFactor;
+            float newPos = oldPos.z * scaleFactor;
             newPos = Mathf.Clamp(newPos, minZoom, maxZoom);
-            Camera.main.transform.localPosition = new Vector3(0, 0, newPos);
+
+            Camera.main.transform.localPosition = new Vector3(oldPos.x, oldPos.y, newPos);
         }
 
         public void StartOrbit()
@@ -51,22 +56,22 @@ namespace Interaction
 
         internal void ContinuePan()
         {
-            Vector3 cursorPoint = GetPlanePositionAtScreenpoint(Input.mousePosition);
-            orbitPoint.localPosition = cursorPoint - panPoint.position;
+            Vector3 offset = Input.mousePosition - panScreenStart;
+            offset *= new Vector2(panSpeed, -panSpeed);
+            Camera.main.transform.localPosition = panCameraStart + offset;
         }
 
         internal void StartPan()
         {
-            orbitPoint.SetParent(null, true);
-            panPoint.position = orbitPoint.position;
-            orbitPoint.SetParent(panPoint, true);
+            panScreenStart = Input.mousePosition;
+            panCameraStart = Camera.main.transform.localPosition;
         }
 
         public void ContinueOrbit()
         {
             Vector3 screenDelta = orbitScreenStart - Input.mousePosition;
-            float xAngle = screenDelta.x * -.5f + orbitStartAngle.y;
-            float yAngle = (screenDelta.y * -.5f) + orbitStartAngle.x;
+            float xAngle = -screenDelta.x * orbitSpeed + orbitStartAngle.y;
+            float yAngle = -screenDelta.y * orbitSpeed + orbitStartAngle.x;
             yAngle = Mathf.Clamp(yAngle, 280, 340);
             orbitPoint.rotation = Quaternion.Euler(yAngle, xAngle, 0);
         }

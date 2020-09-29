@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 [RequireComponent(typeof(MeshInteraction))]
@@ -14,6 +15,11 @@ public class InteractionManager : MonoBehaviour
     private MeshInteraction meshInteraction;
     private CameraInteraction cameraInteraction;
 
+
+    private Vector3 leftMouseDownPosition;
+    private bool isDragging;
+    private bool isPanning;
+
     private void Start()
     {
         meshInteraction = GetComponent<MeshInteraction>();
@@ -23,9 +29,22 @@ public class InteractionManager : MonoBehaviour
     private void Update()
     {
         UpdateCursorHighlight();
-        HandleLeftMouse();
+        HandleOrbit();
+        HandlePan();
+        HandleShowSelection();
         cameraInteraction.HandleMouseScrollwheel();
-        HandleRightMouse();
+    }
+
+    private void HandleShowSelection()
+    {
+        if(isDragging || isPanning)
+        {
+            meshInteraction.HideSelectionMesh();
+        }
+        else
+        {
+            meshInteraction.ShowSelectionMesh();
+        }
     }
 
     private void UpdateCursorHighlight()
@@ -34,7 +53,7 @@ public class InteractionManager : MonoBehaviour
         Shader.SetGlobalVector("_DistToCursor", cursorPos);
     }
 
-    private void HandleRightMouse()
+    private void HandlePan()
     {
         if(Input.GetMouseButton(1))
         {
@@ -44,12 +63,10 @@ public class InteractionManager : MonoBehaviour
             }
             cameraInteraction.ContinuePan();
         }
+        isPanning = Input.GetMouseButton(1);
     }
 
-    private Vector3 leftMouseDownPosition;
-    private bool isDragging;
-
-    private void HandleLeftMouse()
+    private void HandleOrbit()
     {
         if (Input.GetMouseButton(0))
         {
@@ -73,7 +90,7 @@ public class InteractionManager : MonoBehaviour
         }
         else
         {
-            if (Input.GetMouseButtonUp(0) && !isDragging)
+            if (Input.GetMouseButtonUp(0) &&  !isDragging)
             {
                 meshInteraction.PlaceMesh();
             }
