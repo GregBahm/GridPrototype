@@ -7,26 +7,24 @@ using UnityEngine.UIElements;
 
 namespace Interaction
 {
-    [RequireComponent(typeof(MeshBuilder))]
     public class MeshInteraction : MonoBehaviour
     {
-        private MeshBuilderAnchorPoint[] polyTable;
+        [SerializeField]
         private MeshBuilder meshBuilder;
 
+        [SerializeField]
+        private Transform SelectionCursor;
+
+        private MeshBuilderAnchorPoint[] polyTable;
         private Mesh selectionMesh;
         private MeshFilter selectionMeshFilter;
-
-        [SerializeField]
-        private Transform Selection;
-
         private MeshBuilderAnchorPoint selectedAnchor;
 
         private void Start()
         {
             selectionMesh = new Mesh();
-            selectionMeshFilter = Selection.GetComponent<MeshFilter>();
+            selectionMeshFilter = SelectionCursor.GetComponent<MeshFilter>();
             selectionMeshFilter.sharedMesh = selectionMesh;
-            meshBuilder = GetComponent<MeshBuilder>();
             polyTable = GetPolyTable();
         }
 
@@ -42,21 +40,21 @@ namespace Interaction
             }
             return ret;
         }
-
-        private void Update()
+        public void HideSelectionMesh()
         {
-            PlaceDebugCube();
-            if (selectedAnchor != null && Input.GetMouseButtonDown(0))
-            {
-                GameObject newBox = Instantiate(Selection.gameObject);
-                SelectionMeshMaker selectionMeshMaker = new SelectionMeshMaker(selectedAnchor);
-                Mesh meshClone = new Mesh();
-                selectionMeshMaker.SetMesh(meshClone);
-                newBox.GetComponent<MeshFilter>().mesh = meshClone;
-            }
+            SelectionCursor.gameObject.SetActive(false);
         }
 
-        private void PlaceDebugCube()
+        public void PlaceMesh()
+        {
+            GameObject newMesh = Instantiate(SelectionCursor.gameObject);
+            SelectionMeshMaker selectionMeshMaker = new SelectionMeshMaker(selectedAnchor);
+            Mesh meshClone = new Mesh();
+            selectionMeshMaker.SetMesh(meshClone);
+            newMesh.GetComponent<MeshFilter>().mesh = meshClone;
+        }
+
+        public void ShowSelectionMesh()
         {
             RaycastHit hit;
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -64,9 +62,10 @@ namespace Interaction
             {
                 if (selectedAnchor != polyTable[hit.triangleIndex])
                 {
+                    SelectionCursor.gameObject.SetActive(true);
                     selectedAnchor = polyTable[hit.triangleIndex];
                     Shader.SetGlobalVector("_DistToCursor", selectedAnchor.VertPos);
-                    Selection.position = selectedAnchor.VertPos;
+                    SelectionCursor.position = selectedAnchor.VertPos;
                     UpdateCubeMesh();
                 }
             }
@@ -76,26 +75,6 @@ namespace Interaction
         {
             SelectionMeshMaker selectionMeshMaker = new SelectionMeshMaker(selectedAnchor);
             selectionMeshMaker.SetMesh(selectionMesh);
-        }
-    }
-
-    public class CameraInteraction : MonoBehaviour
-    {
-        private Transform orbitPoint;
-
-        private void Start()
-        {
-            orbitPoint = new GameObject("Camera Orbit").transform;
-        }
-
-        public void StartOrbit()
-        {
-            Plane plane;
-        }
-
-        public void ContinueOrbit()
-        {
-
         }
     }
 }
