@@ -14,6 +14,7 @@ namespace MeshBuilding
         public Vector2[] Uvs { get; }
 
         public IEnumerable<MeshBuilderPoly> Polys { get; }
+        public IEnumerable<MeshBuilderAnchorPoint> Points { get; }
 
         public IEnumerable<Vector3> Vertices
         {
@@ -34,17 +35,17 @@ namespace MeshBuilding
             verticesSource = GetVertSources(anchorTable.Values, edgeTable.Values);
             Triangles = GetTriangles();
             Uvs = verticesSource.Select(item => item.Uvs).ToArray();
-
+            Points = anchorTable.Values.ToArray();
         }
 
         private void PopulateVertConnections()
         {
             foreach (MeshBuilderPoly poly in Polys)
             {
-                poly.BasePointA.Connections.Add(poly);
-                poly.BasePointB.Connections.Add(poly);
-                poly.BasePointC.Connections.Add(poly);
-                poly.BasePointD.Connections.Add(poly);
+                foreach (MeshBuilderAnchorPoint point in poly.BasePoints)
+                {
+                    point.AddPolyConnection(poly);
+                }
             }
         }
 

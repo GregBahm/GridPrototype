@@ -44,7 +44,7 @@ public class SelectionMeshMaker
 
     private Vector3[] GetSurroundingAnchorVerts()
     {
-        List<Vector3> baseSurround = basePoint.Connections.Select(item => item.VertPos - basePoint.VertPos).ToList();
+        List<Vector3> baseSurround = basePoint.PolyConnections.Select(item => item.VertPos - basePoint.VertPos).ToList();
         return baseSurround.OrderByDescending(item => Vector3.SignedAngle(item, Vector3.forward, Vector3.up)).ToArray();
     }
 

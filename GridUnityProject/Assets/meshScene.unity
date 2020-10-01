@@ -279,6 +279,8 @@ MonoBehaviour:
   scrollSpeed: 0.1
   minZoom: 10
   maxZoom: 100
+  orbitSpeed: 0.5
+  panSpeed: 0.1
 --- !u!114 &187140231
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -19,6 +19,7 @@ namespace MeshBuilding
         private Mesh mesh;
 
         public IEnumerable<MeshBuilderPoly> Polys { get { return meshBuildeGrid.Polys; } }
+        public IEnumerable<MeshBuilderAnchorPoint> Points { get { return meshBuildeGrid.Points; } }
         public int TriangleCount { get; private set; }
 
         private void Start()

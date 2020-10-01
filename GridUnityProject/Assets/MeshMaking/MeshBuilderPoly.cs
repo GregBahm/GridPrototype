@@ -11,6 +11,17 @@ namespace MeshBuilding
         public MeshBuilderAnchorPoint BasePointC { get; }
         public MeshBuilderAnchorPoint BasePointD { get; }
 
+        public IEnumerable<MeshBuilderAnchorPoint> BasePoints
+        {
+            get
+            {
+                yield return BasePointA;
+                yield return BasePointB;
+                yield return BasePointC;
+                yield return BasePointD;
+            } 
+        }
+
         public MeshBuilderEdge EdgeAB { get; }
         public MeshBuilderEdge EdgeBC { get; }
         public MeshBuilderEdge EdgeCD { get; }
