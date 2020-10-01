@@ -11,6 +11,7 @@ public class GameMain : MonoBehaviour
     private void Start()
     {
         masterGrid = GridLoader.LoadGrid();
+        //masterGrid = GridLoader.LoadDefaultGrid();
     }
 
     private void Update()
@@ -23,10 +24,13 @@ public class GameMain : MonoBehaviour
         {
             TestSave = false;
             GridLoader.SaveGrid(masterGrid);
+            Debug.Log("Grid Saved");
         }
         if(TestLoad)
         {
+            TestLoad = false;
             masterGrid = GridLoader.LoadGrid();
+            Debug.Log("Grid Loaded");
         }
     }
 
