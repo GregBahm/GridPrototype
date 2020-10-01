@@ -65,7 +65,7 @@
 
                 float grid = pow(pow(i.uv.x, _TuneA) + pow(i.uv.y, _TuneA), _TuneB);
                 grid = saturate(grid - _TuneC) * 1;
-                grid = grid * alpha;
+                //grid = grid * alpha;
 
 				float3 ret = _Color * shadowness;
 				ret = lerp(ret, 1, grid);
