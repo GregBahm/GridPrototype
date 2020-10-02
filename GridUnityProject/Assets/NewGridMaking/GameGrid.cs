@@ -78,6 +78,11 @@ namespace GameGrid
         {
             MasterGrid ret = new MasterGrid();
             string data = PlayerPrefs.GetString(SaveFilePath);
+            if(string.IsNullOrWhiteSpace(data))
+            {
+                Debug.Log("No save data found. Loading default grid");
+                return LoadDefaultGrid();
+            }
             GridLoader gridLoader = JsonUtility.FromJson<GridLoader>(data);
             Dictionary<int, GridPoint> lookupTable = gridLoader.Points.ToDictionary(item => item.Id, item => new GridPoint(ret, item.Id, item.Pos));
             IEnumerable<GridEdge> edges = gridLoader.Edges.Select(item => new GridEdge(ret, lookupTable[item.PointAId], lookupTable[item.PointBIds])).ToArray();
