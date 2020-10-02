@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEditor;
 using UnityEngine;
 
@@ -134,12 +135,12 @@ namespace GameGrid
         private List<GridEdge> edges = new List<GridEdge>();
         public IEnumerable<GridEdge> Edges { get { return edges; } }
 
-        private List<GridPoly> polys = new List<GridPoly>();
-        public IEnumerable<GridPoly> Polys { get { return polys; } }
+        private List<GridQuad> polys = new List<GridQuad>();
+        public IEnumerable<GridQuad> Polys { get { return polys; } }
 
         private readonly Dictionary<GridPoint, List<GridEdge>> edgesTable = new Dictionary<GridPoint, List<GridEdge>>();
-        private readonly Dictionary<GridPoint, List<GridPoly>> polyTable = new Dictionary<GridPoint, List<GridPoly>>();
-        private readonly Dictionary<GridEdge, List<GridPoly>> bordersTable = new Dictionary<GridEdge, List<GridPoly>>();
+        private readonly Dictionary<GridPoint, List<GridQuad>> polyTable = new Dictionary<GridPoint, List<GridQuad>>();
+        private readonly Dictionary<GridEdge, List<GridQuad>> bordersTable = new Dictionary<GridEdge, List<GridQuad>>();
 
         public void AddToMesh(IEnumerable<GridPoint> newPoints, IEnumerable<GridEdge> newEdges)
         {
@@ -153,7 +154,7 @@ namespace GameGrid
             foreach (GridPoint point in newPoints)
             {
                 edgesTable.Add(point, new List<GridEdge>());
-                polyTable.Add(point, new List<GridPoly>());
+                polyTable.Add(point, new List<GridQuad>());
             }
         }
 
@@ -167,23 +168,30 @@ namespace GameGrid
                 edgesTable[edge.PointB].Add(edge);
                 edgesToSort.Add(edge.PointA);
                 edgesToSort.Add(edge.PointB);
-                bordersTable.Add(edge, new List<GridPoly>());
+                bordersTable.Add(edge, new List<GridQuad>());
             }
             foreach (GridPoint point in edgesToSort)
             {
                 List<GridEdge> edges = edgesTable[point];
-                List<GridEdge> sortedList = edges.OrderByDescending(item => GetAngle(item, point)).ToList();
+                List<GridEdge> sortedList = edges.OrderByDescending(item => GetSignedAngle(item, point)).ToList();
                 edgesTable[point] = sortedList;
             }
 
-
-            // Update Diagonal connections
+            QuadFinder quadFinder = new QuadFinder(this, edges.Where(item => item.IsBorder).ToArray());
+            polys.AddRange(quadFinder.Quads);
+            foreach (GridQuad quad in quadFinder.Quads)
+            {
+                foreach (GridEdge edge in quad.Edges)
+                {
+                    bordersTable[edge].Add(quad);
+                }
+            }
         }
 
-        private float GetAngle(GridEdge item, GridPoint point)
+        private float GetSignedAngle(GridEdge item, GridPoint point)
         {
             GridPoint otherPoint = item.GetOtherPoint(point);
-            return Vector2.Angle(Vector2.up, otherPoint.Position - point.Position);
+            return Vector2.SignedAngle(Vector2.up, otherPoint.Position - point.Position);
         }
 
         internal IEnumerable<GridEdge> GetEdges(GridPoint gridPoint)
@@ -191,7 +199,7 @@ namespace GameGrid
             return edgesTable[gridPoint];
         }
 
-        internal IEnumerable<GridPoly> GetConnectedQuads(GridPoint gridPoint)
+        internal IEnumerable<GridQuad> GetConnectedQuads(GridPoint gridPoint)
         {
             return polyTable[gridPoint];
         }
@@ -201,27 +209,78 @@ namespace GameGrid
             return bordersTable[gridEdge].Count < 2;
         }
 
-        internal IEnumerable<GridPoly> GetConnectedQuads(GridEdge gridEdge)
+        internal IEnumerable<GridQuad> GetConnectedQuads(GridEdge gridEdge)
         {
             return bordersTable[gridEdge];
         }
 
-        private class TwinnerTable
+        private IEnumerable<PotentialDiagonal> GetPotentialDiagonals(GridEdge edge)
         {
-            // I will need to form these rings of twinners around each point connected to a border edge
-            // 
+            List<PotentialDiagonal> ret = new List<PotentialDiagonal>();
+            ret.AddRange(GetPotentialDiagonals(edge.PointA));
+            ret.AddRange(GetPotentialDiagonals(edge.PointB));
+            return ret;
+        }
+        private IEnumerable<PotentialDiagonal> GetPotentialDiagonals(GridPoint point)
+        {
+            List<GridEdge> edgeList = edgesTable[point];
+            for (int i = 0; i < edgeList.Count; i++)
+            {
+                int nextIndex = (i + 1) % edgeList.Count;
+                yield return new PotentialDiagonal(edgeList[i], edgeList[nextIndex], point);
+            }
         }
 
-        private class Twinner
+        private class QuadFinder
+        {
+            private readonly MasterGrid grid;
+            private readonly Dictionary<string, PotentialDiagonal> availableDiagonals = new Dictionary<string, PotentialDiagonal>();
+            private List<GridQuad> quads = new List<GridQuad>();
+            public IEnumerable<GridQuad> Quads { get { return quads; } }
+
+            public QuadFinder(MasterGrid grid, IEnumerable<GridEdge> borderEdges)
+            {
+                this.grid = grid;
+                foreach (GridEdge edge in borderEdges)
+                {
+                    ProcessEdge(edge);
+                }
+            }
+
+            private void ProcessEdge(GridEdge edge)
+            {
+                IEnumerable<PotentialDiagonal> potentialDiagonals = grid.GetPotentialDiagonals(edge);
+                foreach (PotentialDiagonal potentialDiagonal in potentialDiagonals)
+                {
+                    if (availableDiagonals.ContainsKey(potentialDiagonal.Key))
+                    {
+                        PotentialDiagonal otherHalf = availableDiagonals[potentialDiagonal.Key];
+                        if(potentialDiagonal.SharedPoint != otherHalf.SharedPoint)
+                        {
+                            availableDiagonals.Remove(potentialDiagonal.Key);
+                            quads.Add(new GridQuad(potentialDiagonal.EdgeA, potentialDiagonal.EdgeB, otherHalf.EdgeA, otherHalf.EdgeB));
+                        }
+                    }
+                    else
+                    {
+                        availableDiagonals.Add(potentialDiagonal.Key, potentialDiagonal);
+                    }
+                }
+            }
+        }
+
+        private class PotentialDiagonal
         {
             public string Key { get; }
             public GridEdge EdgeA { get; }
             public GridEdge EdgeB { get; }
+            public GridPoint SharedPoint { get; }
 
-            public Twinner(GridEdge edgeA, GridEdge edgeB, GridPoint sharedPoint)
+            public PotentialDiagonal(GridEdge edgeA, GridEdge edgeB, GridPoint sharedPoint)
             {
                 EdgeA = edgeA;
                 EdgeB = edgeB;
+                SharedPoint = sharedPoint;
                 GridPoint otherPointA = edgeA.GetOtherPoint(sharedPoint);
                 GridPoint otherPointB = edgeB.GetOtherPoint(sharedPoint);
                 Key = GetKey(otherPointA.Id, otherPointB.Id);
@@ -235,6 +294,11 @@ namespace GameGrid
                 }
                 return id2 + " to " + id1;
             }
+
+            public override string ToString()
+            {
+                return "[" + Key + "] for " + SharedPoint.ToString();
+            }
         }
     }
 
@@ -247,7 +311,8 @@ namespace GameGrid
 
         public Vector2 MidPoint { get { return (PointA.Position + PointB.Position) / 2; } }
 
-        public IEnumerable<GridPoly> Quads { get { return grid.GetConnectedQuads(this); } }
+        public IEnumerable<GridQuad> Quads { get { return grid.GetConnectedQuads(this); } }
+
         public bool IsBorder { get { return grid.GetIsBorder(this); } }
 
         public GridEdge(MasterGrid grid, GridPoint pointA, GridPoint pointB)
@@ -265,6 +330,11 @@ namespace GameGrid
         {
             return PointA == point ? PointB : PointA;
         }
+
+        public override string ToString()
+        {
+            return PointA.ToString() + " -> " + PointB.ToString();
+        }
     }
 
     public class GridPoint
@@ -276,7 +346,7 @@ namespace GameGrid
         public IEnumerable<GridEdge> Edges { get { return grid.GetEdges(this); } }
         public IEnumerable<GridPoint> DirectConnections { get { return Edges.Select(item => item.GetOtherPoint(this)); } }
         public IEnumerable<GridPoint> DiagonalConnections { get { return PolyConnections.Select(item => item.GetDiagonalPoint(this)); } }
-        public IEnumerable<GridPoly> PolyConnections { get { return grid.GetConnectedQuads(this); } }
+        public IEnumerable<GridQuad> PolyConnections { get { return grid.GetConnectedQuads(this); } }
 
         public GridPoint(MasterGrid grid, int id, Vector2 initialPosition)
         {
@@ -284,26 +354,53 @@ namespace GameGrid
             Id = id;
             Position = initialPosition;
         }
+
+        public override string ToString()
+        {
+            return Id + ":(" + Position.x + "," + Position.y + ")";
+        }
     }
 
-    public class GridPoly
+    public class GridQuad
     {
         private readonly Dictionary<GridPoint, GridPoint> diagonalsTable;
 
         private readonly GridPoint[] points;
         public IEnumerable<GridPoint> Points { get { return points; } }
+        private readonly GridEdge[] edges;
+        public IEnumerable<GridEdge> Edges { get { return edges; } }
 
         public Vector2 Center { get { return GetCenter(points); } }
 
-        public GridPoly(IEnumerable<GridPoint> points)
+        public GridQuad(params GridEdge[] edges)
         {
-            this.points = points.ToArray();
-            if (this.points.Length != 4)
+            if (edges.Length != 4)
             {
-                throw new ArgumentException("Can't create a GridPoly with " + this.points.Length + " points");
+                throw new ArgumentException("Can't create a GridQuad with " + this.edges.Length + " edges");
             }
-            GridPoint[] sortedPoints = GetSortedPoints();
-            diagonalsTable = GetDiagonalsTable(sortedPoints);
+            this.edges = edges;
+            this.points = GetPoints();
+            diagonalsTable = GetDiagonalsTable();
+        }
+
+        private GridPoint[] GetPoints()
+        {
+            HashSet<GridPoint> rawPoints = new HashSet<GridPoint>
+            {
+                edges[0].PointA,
+                edges[0].PointB,
+                edges[1].PointA,
+                edges[1].PointB,
+                edges[2].PointA,
+                edges[2].PointB,
+                edges[3].PointA,
+                edges[3].PointB,
+            };
+            if (rawPoints.Count != 4)
+            {
+                throw new ArgumentException("Can't create a GridQuad with " + rawPoints.Count + " unique points");
+            }
+            return GetSortedPoints(rawPoints.ToArray());
         }
 
         public GridPoint GetDiagonalPoint(GridPoint point)
@@ -311,10 +408,10 @@ namespace GameGrid
             return diagonalsTable[point];
         }
 
-        private GridPoint[] GetSortedPoints()
+        private GridPoint[] GetSortedPoints(GridPoint[] rawPoints)
         {
-            Vector2 center = GetCenter(points);
-            return points.OrderByDescending(item => Vector2.Angle(Vector2.up, item.Position - center)).ToArray();
+            Vector2 center = GetCenter(rawPoints);
+            return rawPoints.OrderByDescending(item => Vector2.SignedAngle(Vector2.up, item.Position - center)).ToArray();
         }
 
         private static Vector2 GetCenter(GridPoint[] points)
@@ -322,15 +419,20 @@ namespace GameGrid
             return (points[0].Position + points[1].Position + points[2].Position + points[3].Position) / 4;
         }
 
-        private Dictionary<GridPoint, GridPoint> GetDiagonalsTable(GridPoint[] sortedPoints)
+        private Dictionary<GridPoint, GridPoint> GetDiagonalsTable()
         {
             Dictionary<GridPoint, GridPoint> ret = new Dictionary<GridPoint, GridPoint>();
             for (int i = 0; i < 4; i++)
             {
                 int opposingIndex = (i + 2) % 4;
-                ret.Add(sortedPoints[i], sortedPoints[opposingIndex]);
+                ret.Add(points[i], points[opposingIndex]);
             }
             return ret;
+        }
+
+        public override string ToString()
+        {
+            return points[0].Id + "," + points[1].Id + "," + points[2].Id + "," + points[3].Id;
         }
     }
 
