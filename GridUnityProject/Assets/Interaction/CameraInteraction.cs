@@ -6,15 +6,15 @@ namespace Interaction
     public class CameraInteraction : MonoBehaviour
     {
         [SerializeField]
-        private float scrollSpeed;
+        private float scrollSpeed = 0.1f;
         [SerializeField]
-        private float minZoom;
+        private float minZoom = 10;
         [SerializeField]
-        private float maxZoom;
+        private float maxZoom = 100;
         [SerializeField]
-        private float orbitSpeed;
+        private float orbitSpeed = 0.5f;
         [SerializeField]
-        private float panSpeed;
+        private float panSpeed = 0.1f;
 
         private static readonly Plane orbitPlane = new Plane(Vector3.up, 0);
         private static readonly Vector3 screenCenter = new Vector3(.5f, .5f, 0);

@@ -5,14 +5,13 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
-[RequireComponent(typeof(MeshInteraction))]
 [RequireComponent(typeof(CameraInteraction))]
 public class InteractionManager : MonoBehaviour
 {
     [SerializeField]
-    private float dragStartDistance;
+    private float dragStartDistance = 2;
 
-    private MeshInteraction meshInteraction;
+    //private MeshInteraction meshInteraction;
     private CameraInteraction cameraInteraction;
 
 
@@ -22,7 +21,7 @@ public class InteractionManager : MonoBehaviour
 
     private void Start()
     {
-        meshInteraction = GetComponent<MeshInteraction>();
+        //meshInteraction = GetComponent<MeshInteraction>();
         cameraInteraction = GetComponent<CameraInteraction>();
     }
 
@@ -39,11 +38,11 @@ public class InteractionManager : MonoBehaviour
     {
         if(isDragging || isPanning)
         {
-            meshInteraction.HideSelectionMesh();
+            //meshInteraction.HideSelectionMesh();
         }
         else
         {
-            meshInteraction.ShowSelectionMesh();
+            //meshInteraction.ShowSelectionMesh();
         }
     }
 
@@ -72,7 +71,7 @@ public class InteractionManager : MonoBehaviour
         {
             if(isDragging)
             {
-                meshInteraction.HideSelectionMesh();
+                //meshInteraction.HideSelectionMesh();
                 cameraInteraction.ContinueOrbit();
             }
             else
@@ -92,10 +91,10 @@ public class InteractionManager : MonoBehaviour
         {
             if (Input.GetMouseButtonUp(0) &&  !isDragging)
             {
-                meshInteraction.PlaceMesh();
+                //meshInteraction.PlaceMesh();
             }
             isDragging = false;
-            meshInteraction.ShowSelectionMesh();
+            //meshInteraction.ShowSelectionMesh();
         }
     }
 
