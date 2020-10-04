@@ -16,7 +16,6 @@ namespace Interaction
         [SerializeField]
         private float panSpeed = 0.1f;
 
-        private static readonly Plane orbitPlane = new Plane(Vector3.up, 0);
         private static readonly Vector3 screenCenter = new Vector3(.5f, .5f, 0);
         private Vector3 orbitScreenStart;
         private Vector3 orbitStartAngle;
@@ -47,7 +46,7 @@ namespace Interaction
 
             Camera.main.transform.SetParent(null, true);
             Vector3 screenPixelCenter = Camera.main.ViewportToScreenPoint(screenCenter);
-            Vector3 centerPos = GetPlanePositionAtScreenpoint(screenPixelCenter);
+            Vector3 centerPos = InteractionManager.GetGroundPositionAtScreenpoint(screenPixelCenter);
             orbitPoint.transform.position = centerPos;
             orbitPoint.LookAt(Camera.main.transform, Vector3.up);
             Camera.main.transform.SetParent(orbitPoint, true);
@@ -74,14 +73,6 @@ namespace Interaction
             float yAngle = -screenDelta.y * orbitSpeed + orbitStartAngle.x;
             yAngle = Mathf.Clamp(yAngle, 280, 340);
             orbitPoint.rotation = Quaternion.Euler(yAngle, xAngle, 0);
-        }
-
-        public static Vector3 GetPlanePositionAtScreenpoint(Vector3 screenPoint)
-        {
-            Ray ray = Camera.main.ScreenPointToRay(screenPoint);
-            float enter;
-            orbitPlane.Raycast(ray, out enter);
-            return ray.GetPoint(enter);
         }
     }
 }

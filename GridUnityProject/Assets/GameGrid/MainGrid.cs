@@ -15,6 +15,8 @@ namespace GameGrid
         private List<GridQuad> polys = new List<GridQuad>();
         public IEnumerable<GridQuad> Polys { get { return polys; } }
 
+        public IEnumerable<GridEdge> BorderEdges { get; private set; }
+
         private readonly Dictionary<GridPoint, List<GridEdge>> edgesTable = new Dictionary<GridPoint, List<GridEdge>>();
         private readonly Dictionary<GridPoint, List<GridQuad>> polyTable = new Dictionary<GridPoint, List<GridQuad>>();
         private readonly Dictionary<GridEdge, List<GridQuad>> bordersTable = new Dictionary<GridEdge, List<GridQuad>>();
@@ -23,6 +25,7 @@ namespace GameGrid
         {
             AddPoints(newPoints);
             AddEdges(newEdges);
+            BorderEdges = Edges.Where(item => item.IsBorder).ToArray();
         }
 
         private void AddPoints(IEnumerable<GridPoint> newPoints)

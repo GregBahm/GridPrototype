@@ -8,6 +8,8 @@ using UnityEngine;
 [RequireComponent(typeof(CameraInteraction))]
 public class InteractionManager : MonoBehaviour
 {
+    private static readonly Plane groundPlane = new Plane(Vector3.up, 0);
+
     [SerializeField]
     private float dragStartDistance = 2;
 
@@ -48,7 +50,7 @@ public class InteractionManager : MonoBehaviour
 
     private void UpdateCursorHighlight()
     {
-        Vector3 cursorPos = CameraInteraction.GetPlanePositionAtScreenpoint(Input.mousePosition);
+        Vector3 cursorPos = GetGroundPositionAtScreenpoint(Input.mousePosition);
         Shader.SetGlobalVector("_DistToCursor", cursorPos);
     }
 
@@ -101,5 +103,13 @@ public class InteractionManager : MonoBehaviour
     private bool GetIsDragging()
     {
         return (leftMouseDownPosition - Input.mousePosition).magnitude > dragStartDistance; 
+    }
+
+    public static Vector3 GetGroundPositionAtScreenpoint(Vector3 screenPoint)
+    {
+        Ray ray = Camera.main.ScreenPointToRay(screenPoint);
+        float enter;
+        groundPlane.Raycast(ray, out enter);
+        return ray.GetPoint(enter);
     }
 }
