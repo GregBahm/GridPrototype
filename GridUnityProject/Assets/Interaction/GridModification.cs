@@ -9,7 +9,7 @@ using UnityEngine;
 public class GridModification : MonoBehaviour
 {
     [SerializeField]
-    private int expansionChainLength;
+    private int expansionChainLength = 2;
     [SerializeField]
     private int expansionDistance = 1;
 

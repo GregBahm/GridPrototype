@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -38,6 +39,28 @@ namespace GameGrid
             }
         }
 
+        internal void DoEase()
+        {
+            foreach (GridPoint point in Points)
+            {
+                DoEasePoint(point, 1);
+            }
+        }
+        private void DoEasePoint(GridPoint point, float targetCellLength)
+        {
+            Vector2 normalAverage = Vector2.zero;
+            GridPoint[] allConnections = point.DirectConnections.Concat(point.DiagonalConnections).ToArray();
+            foreach (GridPoint connection in allConnections)
+            {
+                Vector2 diff = point.Position - connection.Position;
+                Vector2 diffNormal = diff.normalized * targetCellLength;
+                Vector2 targetPos = connection.Position + diffNormal;
+                normalAverage += targetPos;
+            }
+            normalAverage /= allConnections.Length;
+            point.Position = normalAverage;
+        }
+
         private void AddEdges(IEnumerable<GridEdge> newEdges)
         {
             HashSet<GridPoint> edgesToSort = new HashSet<GridPoint>();
@@ -64,6 +87,10 @@ namespace GameGrid
                 foreach (GridEdge edge in quad.Edges)
                 {
                     bordersTable[edge].Add(quad);
+                }
+                foreach (GridPoint point in quad.Points)
+                {
+                    polyTable[point].Add(quad);
                 }
             }
         }

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
+[RequireComponent(typeof(GameMain))]
 [RequireComponent(typeof(GridModification))]
 [RequireComponent(typeof(CameraInteraction))]
 public class InteractionManager : MonoBehaviour
@@ -17,6 +18,7 @@ public class InteractionManager : MonoBehaviour
 
     //private MeshInteraction meshInteraction;
     private CameraInteraction cameraInteraction;
+    private GameMain gameMain;
 
 
     private Vector3 leftMouseDownPosition;
@@ -25,6 +27,7 @@ public class InteractionManager : MonoBehaviour
 
     private void Start()
     {
+        gameMain = GetComponent<GameMain>();
         //meshInteraction = GetComponent<MeshInteraction>();
         gridModification = GetComponent<GridModification>();
         cameraInteraction = GetComponent<CameraInteraction>();
@@ -32,12 +35,21 @@ public class InteractionManager : MonoBehaviour
 
     private void Update()
     {
+        DoEasing();
         gridModification.DoGridModification();
         UpdateCursorHighlight();
         HandleOrbit();
         HandlePan();
         HandleShowSelection();
         cameraInteraction.HandleMouseScrollwheel();
+    }
+
+    private void DoEasing()
+    {
+        if(Input.GetMouseButton(1))
+        {
+            gameMain.MainGrid.DoEase();
+        }
     }
 
     private void HandleShowSelection()
