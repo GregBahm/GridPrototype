@@ -5,9 +5,11 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
+[RequireComponent(typeof(GridModification))]
 [RequireComponent(typeof(CameraInteraction))]
 public class InteractionManager : MonoBehaviour
 {
+    private GridModification gridModification;
     private static readonly Plane groundPlane = new Plane(Vector3.up, 0);
 
     [SerializeField]
@@ -24,11 +26,13 @@ public class InteractionManager : MonoBehaviour
     private void Start()
     {
         //meshInteraction = GetComponent<MeshInteraction>();
+        gridModification = GetComponent<GridModification>();
         cameraInteraction = GetComponent<CameraInteraction>();
     }
 
     private void Update()
     {
+        gridModification.DoGridModification();
         UpdateCursorHighlight();
         HandleOrbit();
         HandlePan();

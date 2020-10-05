@@ -197,8 +197,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 313656609}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: -10}
+  m_LocalRotation: {x: -0.4446411, y: -0.24116522, z: 0.12564953, w: -0.8534318}
+  m_LocalPosition: {x: -2.914295, y: 7.964036, z: -4.74479}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -214,6 +214,9 @@ GameObject:
   m_Component:
   - component: {fileID: 536624979}
   - component: {fileID: 536624978}
+  - component: {fileID: 536624981}
+  - component: {fileID: 536624980}
+  - component: {fileID: 536624982}
   m_Layer: 0
   m_Name: MainScript
   m_TagString: Untagged
@@ -250,6 +253,50 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &536624980
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 536624977}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c036891a672efca42904c335c998f5b9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dragStartDistance: 2
+--- !u!114 &536624981
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 536624977}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f940aab8388f4994888e3397f13e268c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  scrollSpeed: 0.1
+  minZoom: 10
+  maxZoom: 100
+  orbitSpeed: 0.5
+  panSpeed: 0.1
+--- !u!114 &536624982
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 536624977}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8c167ebede0821b41a944fb18b3c136d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  expansionChainLength: 2
+  expansionDistance: 1
 --- !u!1 &581741545
 GameObject:
   m_ObjectHideFlags: 0

@@ -7,7 +7,7 @@ namespace GameGrid
     public class MainGrid
     {
         private List<GridPoint> points = new List<GridPoint>();
-        public IEnumerable<GridPoint> Points { get { return points; } }
+        public IReadOnlyList<GridPoint> Points { get { return points; } }
 
         private List<GridEdge> edges = new List<GridEdge>();
         public IEnumerable<GridEdge> Edges { get { return edges; } }
