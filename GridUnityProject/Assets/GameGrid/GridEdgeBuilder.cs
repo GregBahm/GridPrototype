@@ -1,23 +1,22 @@
 ﻿using System;
+using UnityEngine;
 
 namespace GameGrid
 {
     [Serializable]
     public class GridEdgeBuilder
     {
-        public int PointAId;
-        public int PointBId;
+        public int PointAIndex;
+        public int PointBIndex;
 
         public GridEdgeBuilder(GridEdge edge)
-        {
-            PointAId = edge.PointA.Id;
-            PointBId = edge.PointB.Id;
-        }
+            :this(edge.PointA.Index, edge.PointB.Index)
+        { }
 
-        public GridEdgeBuilder(int pointAId, int pointBId)
+        public GridEdgeBuilder(int pointAIndex, int pointBIndex)
         {
-            PointAId = pointAId;
-            PointBId = pointBId;
+            PointAIndex = pointAIndex;
+            PointBIndex = pointBIndex;
         }
     }
 

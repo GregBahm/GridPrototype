@@ -8,23 +8,23 @@ namespace GameGrid
     {
         private readonly MainGrid grid;
 
-        public int Id { get; }
+        public int Index { get; }
         public Vector2 Position { get; set; }
         public IEnumerable<GridEdge> Edges { get { return grid.GetEdges(this); } }
         public IEnumerable<GridPoint> DirectConnections { get { return Edges.Select(item => item.GetOtherPoint(this)); } }
         public IEnumerable<GridPoint> DiagonalConnections { get { return PolyConnections.Select(item => item.GetDiagonalPoint(this)); } }
         public IEnumerable<GridQuad> PolyConnections { get { return grid.GetConnectedQuads(this); } }
 
-        public GridPoint(MainGrid grid, int id, Vector2 initialPosition)
+        public GridPoint(MainGrid grid, int index, Vector2 initialPosition)
         {
             this.grid = grid;
-            Id = id;
+            Index = index;
             Position = initialPosition;
         }
 
         public override string ToString()
         {
-            return Id + ":(" + Position.x + "," + Position.y + ")";
+            return Index + ":(" + Position.x + "," + Position.y + ")";
         }
     }
 

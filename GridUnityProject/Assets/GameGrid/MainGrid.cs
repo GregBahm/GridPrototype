@@ -29,9 +29,9 @@ namespace GameGrid
 
         public void AddToMesh(IEnumerable<GridPointBuilder> newPoints, IEnumerable<GridEdgeBuilder> newEdges)
         {
-            IEnumerable<GridPoint> points = newPoints.Select(item => new GridPoint(this, item.Id, item.Pos)).ToArray();
+            IEnumerable<GridPoint> points = newPoints.Select(item => new GridPoint(this, item.Index, item.Position)).ToArray();
             AddPoints(points);
-            IEnumerable<GridEdge> edges = newEdges.Select(item => new GridEdge(this, Points[item.PointAId], Points[item.PointBId])).ToArray();
+            IEnumerable<GridEdge> edges = newEdges.Select(item => new GridEdge(this, Points[item.PointAIndex], Points[item.PointBIndex])).ToArray();
             AddEdges(edges);
             BorderEdges = Edges.Where(item => item.IsBorder).ToArray();
         }
@@ -216,8 +216,8 @@ namespace GameGrid
 
             private IEnumerable<string> GetKeysFor(GridQuad quad)
             {
-                yield return PotentialDiagonal.GetKey(quad.Points[0].Id, quad.Points[2].Id);
-                yield return PotentialDiagonal.GetKey(quad.Points[1].Id, quad.Points[3].Id);
+                yield return PotentialDiagonal.GetKey(quad.Points[0].Index, quad.Points[2].Index);
+                yield return PotentialDiagonal.GetKey(quad.Points[1].Index, quad.Points[3].Index);
             }
         }
 
@@ -235,7 +235,7 @@ namespace GameGrid
                 SharedPoint = sharedPoint;
                 GridPoint otherPointA = edgeA.GetOtherPoint(sharedPoint);
                 GridPoint otherPointB = edgeB.GetOtherPoint(sharedPoint);
-                Key = GetKey(otherPointA.Id, otherPointB.Id);
+                Key = GetKey(otherPointA.Index, otherPointB.Index);
             }
 
             public static string GetKey(int id1, int id2)

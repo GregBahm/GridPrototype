@@ -13,24 +13,24 @@ public class GridModification : MonoBehaviour
     [SerializeField]
     private int expansionDistance = 1;
 
-    private MainGrid mainGrid;
+    private GameMain gameMain;
 
     private void Start()
     {
-        mainGrid = GetComponent<GameMain>().MainGrid;
+        gameMain = GetComponent<GameMain>();
     }
 
     public void DoGridModification()
     {
         Vector3 mouseGroundPos = InteractionManager.GetGroundPositionAtScreenpoint(Input.mousePosition);
-        GridEdge closestEdge = GetClosestEdge(mainGrid.BorderEdges, mouseGroundPos);
+        GridEdge closestEdge = GetClosestEdge(gameMain.MainGrid.BorderEdges, mouseGroundPos);
         if (closestEdge != null)
         {
             GridExpansion expansion = new GridExpansion(closestEdge, expansionChainLength, expansionDistance);
             PreviewExpansion(expansion);
             if(Input.GetMouseButtonUp(0))
             {
-                expansion.ApplyToGrid(mainGrid);
+                expansion.ApplyToGrid(gameMain.MainGrid);
             }
         }
     }
@@ -100,11 +100,11 @@ public class GridModification : MonoBehaviour
 
         private IEnumerable<GridEdgeBuilder> GetGridEdges(MainGrid mainGrid, GridPointBuilder[] points)
         {
-            yield return new GridEdgeBuilder(ExpansionPoints[0].BasePoint.Id, points[0].Id);
+            yield return new GridEdgeBuilder(ExpansionPoints[0].BasePoint.Index, points[0].Index);
             for (int i = 1; i < ExpansionPoints.Count; i++)
             {
-                yield return new GridEdgeBuilder(ExpansionPoints[i].BasePoint.Id, points[i].Id);
-                yield return new GridEdgeBuilder(points[i - 1].Id, points[i].Id);
+                yield return new GridEdgeBuilder(ExpansionPoints[i].BasePoint.Index, points[i].Index);
+                yield return new GridEdgeBuilder(points[i - 1].Index, points[i].Index);
             }
         }
 

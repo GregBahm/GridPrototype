@@ -6,18 +6,16 @@ namespace GameGrid
     [Serializable]
     public class GridPointBuilder
     {
-        public int Id;
-        public Vector2 Pos;
+        public int Index;
+        public Vector2 Position;
 
         public GridPointBuilder(GridPoint point)
+            :this(point.Index, point.Position)
+        { }
+        public GridPointBuilder(int index, Vector2 position)
         {
-            Id = point.Id;
-            Pos = point.Position;
-        }
-        public GridPointBuilder(int id, Vector2 position)
-        {
-            Id = id;
-            Pos = position;
+            Index = index;
+            Position = position;
         }
     }
 

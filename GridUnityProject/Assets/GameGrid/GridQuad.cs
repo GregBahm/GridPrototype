@@ -76,7 +76,7 @@ namespace GameGrid
 
         public override string ToString()
         {
-            return Points[0].Id + "," + Points[1].Id + "," + Points[2].Id + "," + Points[3].Id;
+            return Points[0].Index + "," + Points[1].Index + "," + Points[2].Index + "," + Points[3].Index;
         }
     }
 

@@ -24,7 +24,7 @@ namespace GameGrid
                 Vector2 pos = new Vector2(Mathf.Cos(theta), Mathf.Sin(theta));
                 GridPointBuilder newPoint = new GridPointBuilder( i + 1, pos);
                 points.Add(newPoint);
-                edges.Add(new GridEdgeBuilder(newPoint.Id, origin.Id));
+                edges.Add(new GridEdgeBuilder(newPoint.Index, origin.Index));
             }
             for (int i = 0; i < 6; i++)
             {
@@ -49,10 +49,10 @@ namespace GameGrid
                 int outerStart = i + 13;
                 int outerEnd = ((i + 1) % 6) + 13;
 
-                GridEdgeBuilder edgeA = new GridEdgeBuilder(points[startIndex].Id, points[mid].Id);
-                GridEdgeBuilder edgeB = new GridEdgeBuilder(points[mid].Id, points[endIndex].Id);
-                GridEdgeBuilder edgeC = new GridEdgeBuilder(points[outerStart].Id, points[mid].Id);
-                GridEdgeBuilder edgeD = new GridEdgeBuilder(points[mid].Id, points[outerEnd].Id);
+                GridEdgeBuilder edgeA = new GridEdgeBuilder(points[startIndex].Index, points[mid].Index);
+                GridEdgeBuilder edgeB = new GridEdgeBuilder(points[mid].Index, points[endIndex].Index);
+                GridEdgeBuilder edgeC = new GridEdgeBuilder(points[outerStart].Index, points[mid].Index);
+                GridEdgeBuilder edgeD = new GridEdgeBuilder(points[mid].Index, points[outerEnd].Index);
                 edges.Add(edgeA);
                 edges.Add(edgeB);
                 edges.Add(edgeC);
@@ -71,7 +71,6 @@ namespace GameGrid
 
         public static MainGrid LoadGrid()
         {
-            return LoadDefaultGrid();
             string data = PlayerPrefs.GetString(SaveFilePath);
             if(string.IsNullOrWhiteSpace(data))
             {

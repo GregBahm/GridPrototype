@@ -20,12 +20,12 @@ namespace GameGrid
         public GridEdge(MainGrid grid, GridPoint pointA, GridPoint pointB)
         {
             this.grid = grid;
-            if(pointA.Id == pointB.Id)
+            if(pointA.Index == pointB.Index)
             {
                 throw new ArgumentException("Can't make an edge out of two points with the same ID");
             }
-            PointA = pointA.Id < pointB.Id ? pointA : pointB;
-            PointB = pointA.Id < pointB.Id ? pointB : pointA;
+            PointA = pointA.Index < pointB.Index ? pointA : pointB;
+            PointB = pointA.Index < pointB.Index ? pointB : pointA;
         }
 
         public GridPoint GetOtherPoint(GridPoint point)
