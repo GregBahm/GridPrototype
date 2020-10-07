@@ -22,10 +22,17 @@ namespace GameGrid
         private readonly Dictionary<GridPoint, List<GridQuad>> polyTable = new Dictionary<GridPoint, List<GridQuad>>();
         private readonly Dictionary<GridEdge, List<GridQuad>> bordersTable = new Dictionary<GridEdge, List<GridQuad>>();
 
-        public void AddToMesh(IEnumerable<GridPoint> newPoints, IEnumerable<GridEdge> newEdges)
+        public MainGrid(IEnumerable<GridPointBuilder> points, IEnumerable<GridEdgeBuilder> edges)
         {
-            AddPoints(newPoints);
-            AddEdges(newEdges);
+            AddToMesh(points, edges);
+        }
+
+        public void AddToMesh(IEnumerable<GridPointBuilder> newPoints, IEnumerable<GridEdgeBuilder> newEdges)
+        {
+            IEnumerable<GridPoint> points = newPoints.Select(item => new GridPoint(this, item.Id, item.Pos)).ToArray();
+            AddPoints(points);
+            IEnumerable<GridEdge> edges = newEdges.Select(item => new GridEdge(this, Points[item.PointAId], Points[item.PointBId])).ToArray();
+            AddEdges(edges);
             BorderEdges = Edges.Where(item => item.IsBorder).ToArray();
         }
 

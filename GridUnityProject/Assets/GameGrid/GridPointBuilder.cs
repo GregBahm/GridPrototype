@@ -4,20 +4,20 @@ using UnityEngine;
 namespace GameGrid
 {
     [Serializable]
-    public class GridPointLoader
+    public class GridPointBuilder
     {
         public int Id;
         public Vector2 Pos;
 
-        public GridPointLoader(GridPoint point)
+        public GridPointBuilder(GridPoint point)
         {
             Id = point.Id;
             Pos = point.Position;
         }
-
-        public GridPoint ToPoint(MainGrid grid)
+        public GridPointBuilder(int id, Vector2 position)
         {
-            return new GridPoint(grid, Id, Pos);
+            Id = id;
+            Pos = position;
         }
     }
 

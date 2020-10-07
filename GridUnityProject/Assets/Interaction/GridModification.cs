@@ -93,27 +93,27 @@ public class GridModification : MonoBehaviour
 
         internal void ApplyToGrid(MainGrid mainGrid)
         {
-            GridPoint[] points = GetGridPoints(mainGrid).ToArray();
-            GridEdge[] edges = GetGridEdges(mainGrid, points).ToArray();
+            GridPointBuilder[] points = GetGridPoints(mainGrid).ToArray();
+            GridEdgeBuilder[] edges = GetGridEdges(mainGrid, points).ToArray();
             mainGrid.AddToMesh(points, edges);
         }
 
-        private IEnumerable<GridEdge> GetGridEdges(MainGrid mainGrid, GridPoint[] points)
+        private IEnumerable<GridEdgeBuilder> GetGridEdges(MainGrid mainGrid, GridPointBuilder[] points)
         {
-            yield return new GridEdge(mainGrid, ExpansionPoints[0].BasePoint, points[0]);
+            yield return new GridEdgeBuilder(ExpansionPoints[0].BasePoint.Id, points[0].Id);
             for (int i = 1; i < ExpansionPoints.Count; i++)
             {
-                yield return new GridEdge(mainGrid, ExpansionPoints[i].BasePoint, points[i]);
-                yield return new GridEdge(mainGrid, points[i - 1], points[i]);
+                yield return new GridEdgeBuilder(ExpansionPoints[i].BasePoint.Id, points[i].Id);
+                yield return new GridEdgeBuilder(points[i - 1].Id, points[i].Id);
             }
         }
 
-        private IEnumerable<GridPoint> GetGridPoints(MainGrid mainGrid)
+        private IEnumerable<GridPointBuilder> GetGridPoints(MainGrid mainGrid)
         {
             int i = mainGrid.Points.Count;
             foreach (GridExpansionPoint expansion in ExpansionPoints)
             {
-                yield return new GridPoint(mainGrid, i, expansion.ExpandedPos);
+                yield return new GridPointBuilder(i, expansion.ExpandedPos);
                 i++;
             }
         }
