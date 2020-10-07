@@ -4,15 +4,15 @@ using UnityEngine;
 namespace GameGrid
 {
     [Serializable]
-    public class GridPointBuilder
+    public class GroundPointBuilder
     {
         public int Index;
         public Vector2 Position;
 
-        public GridPointBuilder(GridPoint point)
+        public GroundPointBuilder(GroundPoint point)
             :this(point.Index, point.Position)
         { }
-        public GridPointBuilder(int index, Vector2 position)
+        public GroundPointBuilder(int index, Vector2 position)
         {
             Index = index;
             Position = position;

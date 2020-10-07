@@ -6,38 +6,38 @@ using UnityEngine;
 namespace GameGrid
 {
     [Serializable]
-    public class GridLoader
+    public class GroundLoader
     {
         private const string SaveFilePath = "TheSaveFile";
 
-        public GridPointBuilder[] Points;
+        public GroundPointBuilder[] Points;
 
-        internal static MainGrid LoadDefaultGrid()
+        internal static MainGrid LoadDefault()
         {
-            GridPointBuilder origin = new GridPointBuilder(0, Vector2.zero);
-            List<GridPointBuilder> points = new List<GridPointBuilder>() { origin };
-            List<GridEdgeBuilder> edges = new List<GridEdgeBuilder>();
+            GroundPointBuilder origin = new GroundPointBuilder(0, Vector2.zero);
+            List<GroundPointBuilder> points = new List<GroundPointBuilder>() { origin };
+            List<GroundEdgeBuilder> edges = new List<GroundEdgeBuilder>();
 
             for (int i = 0; i < 6; i++)
             {
                 float theta = 60 * i * Mathf.Deg2Rad;
                 Vector2 pos = new Vector2(Mathf.Cos(theta), Mathf.Sin(theta));
-                GridPointBuilder newPoint = new GridPointBuilder( i + 1, pos);
+                GroundPointBuilder newPoint = new GroundPointBuilder( i + 1, pos);
                 points.Add(newPoint);
-                edges.Add(new GridEdgeBuilder(newPoint.Index, origin.Index));
+                edges.Add(new GroundEdgeBuilder(newPoint.Index, origin.Index));
             }
             for (int i = 0; i < 6; i++)
             {
                 float theta = (60 * i + 30) * Mathf.Deg2Rad;
                 Vector2 pos = new Vector2(Mathf.Cos(theta) * 1.5f, Mathf.Sin(theta) * 1.5f);
-                GridPointBuilder newPoint = new GridPointBuilder(i + 7, pos);
+                GroundPointBuilder newPoint = new GroundPointBuilder(i + 7, pos);
                 points.Add(newPoint);
             }
             for (int i = 0; i < 6; i++)
             {
                 float theta = 60 * i * Mathf.Deg2Rad;
                 Vector2 pos = new Vector2(Mathf.Cos(theta) * 2f, Mathf.Sin(theta) * 2);
-                GridPointBuilder newPoint = new GridPointBuilder(i + 13, pos);
+                GroundPointBuilder newPoint = new GroundPointBuilder(i + 13, pos);
                 points.Add(newPoint);
             }
             for (int i = 0; i < 6; i++)
@@ -49,10 +49,10 @@ namespace GameGrid
                 int outerStart = i + 13;
                 int outerEnd = ((i + 1) % 6) + 13;
 
-                GridEdgeBuilder edgeA = new GridEdgeBuilder(points[startIndex].Index, points[mid].Index);
-                GridEdgeBuilder edgeB = new GridEdgeBuilder(points[mid].Index, points[endIndex].Index);
-                GridEdgeBuilder edgeC = new GridEdgeBuilder(points[outerStart].Index, points[mid].Index);
-                GridEdgeBuilder edgeD = new GridEdgeBuilder(points[mid].Index, points[outerEnd].Index);
+                GroundEdgeBuilder edgeA = new GroundEdgeBuilder(points[startIndex].Index, points[mid].Index);
+                GroundEdgeBuilder edgeB = new GroundEdgeBuilder(points[mid].Index, points[endIndex].Index);
+                GroundEdgeBuilder edgeC = new GroundEdgeBuilder(points[outerStart].Index, points[mid].Index);
+                GroundEdgeBuilder edgeD = new GroundEdgeBuilder(points[mid].Index, points[outerEnd].Index);
                 edges.Add(edgeA);
                 edges.Add(edgeB);
                 edges.Add(edgeC);
@@ -61,30 +61,30 @@ namespace GameGrid
             return new MainGrid(points, edges);
         }
 
-        public GridEdgeBuilder[] Edges;
+        public GroundEdgeBuilder[] Edges;
 
-        public GridLoader(IEnumerable<GridPointBuilder> points, IEnumerable<GridEdgeBuilder> edges)
+        public GroundLoader(IEnumerable<GroundPointBuilder> points, IEnumerable<GroundEdgeBuilder> edges)
         {
             Points = points.ToArray();
             Edges = edges.ToArray();
         }
 
-        public static MainGrid LoadGrid()
+        public static MainGrid Load()
         {
             string data = PlayerPrefs.GetString(SaveFilePath);
             if(string.IsNullOrWhiteSpace(data))
             {
                 Debug.Log("No save data found. Loading default grid");
-                return LoadDefaultGrid();
+                return LoadDefault();
             }
-            GridLoader gridLoader = JsonUtility.FromJson<GridLoader>(data);
+            GroundLoader gridLoader = JsonUtility.FromJson<GroundLoader>(data);
             return new MainGrid(gridLoader.Points, gridLoader.Edges);
         }
-        public static void SaveGrid(MainGrid grid)
+        public static void Save(MainGrid grid)
         {
-            GridPointBuilder[] points = grid.Points.Select(item => new GridPointBuilder(item)).ToArray();
-            GridEdgeBuilder[] edges = grid.Edges.Select(item => new GridEdgeBuilder(item)).ToArray();
-            GridLoader loader = new GridLoader(points, edges);
+            GroundPointBuilder[] points = grid.Points.Select(item => new GroundPointBuilder(item)).ToArray();
+            GroundEdgeBuilder[] edges = grid.Edges.Select(item => new GroundEdgeBuilder(item)).ToArray();
+            GroundLoader loader = new GroundLoader(points, edges);
             string asJson = JsonUtility.ToJson(loader);
             PlayerPrefs.SetString(SaveFilePath, asJson);
             PlayerPrefs.Save();

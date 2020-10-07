@@ -7,57 +7,57 @@ namespace GameGrid
 {
     public class MainGrid
     {
-        private List<GridPoint> points = new List<GridPoint>();
-        public IReadOnlyList<GridPoint> Points { get { return points; } }
+        private List<GroundPoint> points = new List<GroundPoint>();
+        public IReadOnlyList<GroundPoint> Points { get { return points; } }
 
-        private List<GridEdge> edges = new List<GridEdge>();
-        public IEnumerable<GridEdge> Edges { get { return edges; } }
+        private List<GroundEdge> edges = new List<GroundEdge>();
+        public IEnumerable<GroundEdge> Edges { get { return edges; } }
 
-        private List<GridQuad> polys = new List<GridQuad>();
-        public IEnumerable<GridQuad> Polys { get { return polys; } }
+        private List<GroundQuad> polys = new List<GroundQuad>();
+        public IEnumerable<GroundQuad> Polys { get { return polys; } }
 
-        public IEnumerable<GridEdge> BorderEdges { get; private set; }
+        public IEnumerable<GroundEdge> BorderEdges { get; private set; }
 
-        private readonly Dictionary<GridPoint, List<GridEdge>> edgesTable = new Dictionary<GridPoint, List<GridEdge>>();
-        private readonly Dictionary<GridPoint, List<GridQuad>> polyTable = new Dictionary<GridPoint, List<GridQuad>>();
-        private readonly Dictionary<GridEdge, List<GridQuad>> bordersTable = new Dictionary<GridEdge, List<GridQuad>>();
+        private readonly Dictionary<GroundPoint, List<GroundEdge>> edgesTable = new Dictionary<GroundPoint, List<GroundEdge>>();
+        private readonly Dictionary<GroundPoint, List<GroundQuad>> polyTable = new Dictionary<GroundPoint, List<GroundQuad>>();
+        private readonly Dictionary<GroundEdge, List<GroundQuad>> bordersTable = new Dictionary<GroundEdge, List<GroundQuad>>();
 
-        public MainGrid(IEnumerable<GridPointBuilder> points, IEnumerable<GridEdgeBuilder> edges)
+        public MainGrid(IEnumerable<GroundPointBuilder> points, IEnumerable<GroundEdgeBuilder> edges)
         {
             AddToMesh(points, edges);
         }
 
-        public void AddToMesh(IEnumerable<GridPointBuilder> newPoints, IEnumerable<GridEdgeBuilder> newEdges)
+        public void AddToMesh(IEnumerable<GroundPointBuilder> newPoints, IEnumerable<GroundEdgeBuilder> newEdges)
         {
-            IEnumerable<GridPoint> points = newPoints.Select(item => new GridPoint(this, item.Index, item.Position)).ToArray();
+            IEnumerable<GroundPoint> points = newPoints.Select(item => new GroundPoint(this, item.Index, item.Position)).ToArray();
             AddPoints(points);
-            IEnumerable<GridEdge> edges = newEdges.Select(item => new GridEdge(this, Points[item.PointAIndex], Points[item.PointBIndex])).ToArray();
+            IEnumerable<GroundEdge> edges = newEdges.Select(item => new GroundEdge(this, Points[item.PointAIndex], Points[item.PointBIndex])).ToArray();
             AddEdges(edges);
             BorderEdges = Edges.Where(item => item.IsBorder).ToArray();
         }
 
-        private void AddPoints(IEnumerable<GridPoint> newPoints)
+        private void AddPoints(IEnumerable<GroundPoint> newPoints)
         {
             points.AddRange(newPoints);
-            foreach (GridPoint point in newPoints)
+            foreach (GroundPoint point in newPoints)
             {
-                edgesTable.Add(point, new List<GridEdge>());
-                polyTable.Add(point, new List<GridQuad>());
+                edgesTable.Add(point, new List<GroundEdge>());
+                polyTable.Add(point, new List<GroundQuad>());
             }
         }
 
         internal void DoEase()
         {
-            foreach (GridPoint point in Points)
+            foreach (GroundPoint point in Points)
             {
                 DoEasePoint(point, 1);
             }
         }
-        private void DoEasePoint(GridPoint point, float targetCellLength)
+        private void DoEasePoint(GroundPoint point, float targetCellLength)
         {
             Vector2 normalAverage = Vector2.zero;
-            GridPoint[] allConnections = point.DirectConnections.Concat(point.DiagonalConnections).ToArray();
-            foreach (GridPoint connection in allConnections)
+            GroundPoint[] allConnections = point.DirectConnections.Concat(point.DiagonalConnections).ToArray();
+            foreach (GroundPoint connection in allConnections)
             {
                 Vector2 diff = point.Position - connection.Position;
                 Vector2 diffNormal = diff.normalized * targetCellLength;
@@ -68,76 +68,76 @@ namespace GameGrid
             point.Position = normalAverage;
         }
 
-        private void AddEdges(IEnumerable<GridEdge> newEdges)
+        private void AddEdges(IEnumerable<GroundEdge> newEdges)
         {
-            HashSet<GridPoint> edgesToSort = new HashSet<GridPoint>();
+            HashSet<GroundPoint> edgesToSort = new HashSet<GroundPoint>();
             edges.AddRange(newEdges);
-            foreach (GridEdge edge in newEdges)
+            foreach (GroundEdge edge in newEdges)
             {
                 edgesTable[edge.PointA].Add(edge);
                 edgesTable[edge.PointB].Add(edge);
                 edgesToSort.Add(edge.PointA);
                 edgesToSort.Add(edge.PointB);
-                bordersTable.Add(edge, new List<GridQuad>());
+                bordersTable.Add(edge, new List<GroundQuad>());
             }
-            foreach (GridPoint point in edgesToSort)
+            foreach (GroundPoint point in edgesToSort)
             {
-                List<GridEdge> edges = edgesTable[point];
-                List<GridEdge> sortedList = edges.OrderByDescending(item => GetSignedAngle(item, point)).ToList();
+                List<GroundEdge> edges = edgesTable[point];
+                List<GroundEdge> sortedList = edges.OrderByDescending(item => GetSignedAngle(item, point)).ToList();
                 edgesTable[point] = sortedList;
             }
 
             QuadFinder quadFinder = new QuadFinder(this, edges.Where(item => item.IsBorder).ToArray());
             polys.AddRange(quadFinder.Quads);
-            foreach (GridQuad quad in quadFinder.Quads)
+            foreach (GroundQuad quad in quadFinder.Quads)
             {
-                foreach (GridEdge edge in quad.Edges)
+                foreach (GroundEdge edge in quad.Edges)
                 {
                     bordersTable[edge].Add(quad);
                 }
-                foreach (GridPoint point in quad.Points)
+                foreach (GroundPoint point in quad.Points)
                 {
                     polyTable[point].Add(quad);
                 }
             }
         }
 
-        private float GetSignedAngle(GridEdge item, GridPoint point)
+        private float GetSignedAngle(GroundEdge item, GroundPoint point)
         {
-            GridPoint otherPoint = item.GetOtherPoint(point);
+            GroundPoint otherPoint = item.GetOtherPoint(point);
             return Vector2.SignedAngle(Vector2.up, otherPoint.Position - point.Position);
         }
 
-        internal IEnumerable<GridEdge> GetEdges(GridPoint gridPoint)
+        internal IEnumerable<GroundEdge> GetEdges(GroundPoint gridPoint)
         {
             return edgesTable[gridPoint];
         }
 
-        internal IEnumerable<GridQuad> GetConnectedQuads(GridPoint gridPoint)
+        internal IEnumerable<GroundQuad> GetConnectedQuads(GroundPoint gridPoint)
         {
             return polyTable[gridPoint];
         }
 
-        internal bool GetIsBorder(GridEdge gridEdge)
+        internal bool GetIsBorder(GroundEdge gridEdge)
         {
             return bordersTable[gridEdge].Count < 2;
         }
 
-        internal IEnumerable<GridQuad> GetConnectedQuads(GridEdge gridEdge)
+        internal IEnumerable<GroundQuad> GetConnectedQuads(GroundEdge gridEdge)
         {
             return bordersTable[gridEdge];
         }
 
-        private IEnumerable<PotentialDiagonal> GetPotentialDiagonals(GridEdge edge)
+        private IEnumerable<PotentialDiagonal> GetPotentialDiagonals(GroundEdge edge)
         {
             List<PotentialDiagonal> ret = new List<PotentialDiagonal>();
             ret.AddRange(GetPotentialDiagonals(edge.PointA));
             ret.AddRange(GetPotentialDiagonals(edge.PointB));
             return ret;
         }
-        private IEnumerable<PotentialDiagonal> GetPotentialDiagonals(GridPoint point)
+        private IEnumerable<PotentialDiagonal> GetPotentialDiagonals(GroundPoint point)
         {
-            List<GridEdge> edgeList = edgesTable[point];
+            List<GroundEdge> edgeList = edgesTable[point];
             for (int i = 0; i < edgeList.Count; i++)
             {
                 int nextIndex = (i + 1) % edgeList.Count;
@@ -150,23 +150,23 @@ namespace GameGrid
             private readonly MainGrid grid;
             private readonly HashSet<string> unavailableDiagonals;
             private readonly Dictionary<string, PotentialDiagonal> availableDiagonals = new Dictionary<string, PotentialDiagonal>();
-            private List<GridQuad> quads = new List<GridQuad>();
-            public IEnumerable<GridQuad> Quads { get { return quads; } }
+            private List<GroundQuad> quads = new List<GroundQuad>();
+            public IEnumerable<GroundQuad> Quads { get { return quads; } }
 
-            public QuadFinder(MainGrid grid, IEnumerable<GridEdge> borderEdges)
+            public QuadFinder(MainGrid grid, IEnumerable<GroundEdge> borderEdges)
             {
                 this.grid = grid;
                 unavailableDiagonals = GetUnavailableDiagonals(grid.Polys);
-                foreach (GridEdge edge in borderEdges)
+                foreach (GroundEdge edge in borderEdges)
                 {
                     ProcessEdge(edge);
                 }
             }
 
-            private HashSet<string> GetUnavailableDiagonals(IEnumerable<GridQuad> polys)
+            private HashSet<string> GetUnavailableDiagonals(IEnumerable<GroundQuad> polys)
             {
                 HashSet<string> ret = new HashSet<string>();
-                foreach (GridQuad quad in polys)
+                foreach (GroundQuad quad in polys)
                 {
                     foreach (string key in GetKeysFor(quad))
                     {
@@ -176,7 +176,7 @@ namespace GameGrid
                 return ret;
             }
 
-            private void ProcessEdge(GridEdge edge)
+            private void ProcessEdge(GroundEdge edge)
             {
                 IEnumerable<PotentialDiagonal> potentialDiagonals = grid.GetPotentialDiagonals(edge);
                 foreach (PotentialDiagonal potentialDiagonal in potentialDiagonals)
@@ -189,7 +189,7 @@ namespace GameGrid
                             PotentialDiagonal otherHalf = availableDiagonals[potentialDiagonal.Key];
                             if (potentialDiagonal.SharedPoint != otherHalf.SharedPoint)
                             {
-                                GridQuad newQuad = new GridQuad(potentialDiagonal.EdgeA, potentialDiagonal.EdgeB, otherHalf.EdgeA, otherHalf.EdgeB);
+                                GroundQuad newQuad = new GroundQuad(potentialDiagonal.EdgeA, potentialDiagonal.EdgeB, otherHalf.EdgeA, otherHalf.EdgeB);
                                 RegisterNewQuad(newQuad);
                                 quads.Add(newQuad);
                             }
@@ -202,7 +202,7 @@ namespace GameGrid
                 }
             }
 
-            private void RegisterNewQuad(GridQuad newQuad)
+            private void RegisterNewQuad(GroundQuad newQuad)
             {
                 foreach (string key in GetKeysFor(newQuad))
                 {
@@ -214,7 +214,7 @@ namespace GameGrid
                 }
             }
 
-            private IEnumerable<string> GetKeysFor(GridQuad quad)
+            private IEnumerable<string> GetKeysFor(GroundQuad quad)
             {
                 yield return PotentialDiagonal.GetKey(quad.Points[0].Index, quad.Points[2].Index);
                 yield return PotentialDiagonal.GetKey(quad.Points[1].Index, quad.Points[3].Index);
@@ -224,17 +224,17 @@ namespace GameGrid
         private class PotentialDiagonal
         {
             public string Key { get; }
-            public GridEdge EdgeA { get; }
-            public GridEdge EdgeB { get; }
-            public GridPoint SharedPoint { get; }
+            public GroundEdge EdgeA { get; }
+            public GroundEdge EdgeB { get; }
+            public GroundPoint SharedPoint { get; }
 
-            public PotentialDiagonal(GridEdge edgeA, GridEdge edgeB, GridPoint sharedPoint)
+            public PotentialDiagonal(GroundEdge edgeA, GroundEdge edgeB, GroundPoint sharedPoint)
             {
                 EdgeA = edgeA;
                 EdgeB = edgeB;
                 SharedPoint = sharedPoint;
-                GridPoint otherPointA = edgeA.GetOtherPoint(sharedPoint);
-                GridPoint otherPointB = edgeB.GetOtherPoint(sharedPoint);
+                GroundPoint otherPointA = edgeA.GetOtherPoint(sharedPoint);
+                GroundPoint otherPointB = edgeB.GetOtherPoint(sharedPoint);
                 Key = GetKey(otherPointA.Index, otherPointB.Index);
             }
 

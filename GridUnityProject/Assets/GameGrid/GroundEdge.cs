@@ -4,20 +4,20 @@ using UnityEngine;
 
 namespace GameGrid
 {
-    public class GridEdge
+    public class GroundEdge
     {
         private readonly MainGrid grid;
 
-        public GridPoint PointA { get; }
-        public GridPoint PointB { get; }
+        public GroundPoint PointA { get; }
+        public GroundPoint PointB { get; }
 
         public Vector2 MidPoint { get { return (PointA.Position + PointB.Position) / 2; } }
 
-        public IEnumerable<GridQuad> Quads { get { return grid.GetConnectedQuads(this); } }
+        public IEnumerable<GroundQuad> Quads { get { return grid.GetConnectedQuads(this); } }
 
         public bool IsBorder { get { return grid.GetIsBorder(this); } }
 
-        public GridEdge(MainGrid grid, GridPoint pointA, GridPoint pointB)
+        public GroundEdge(MainGrid grid, GroundPoint pointA, GroundPoint pointB)
         {
             this.grid = grid;
             if(pointA.Index == pointB.Index)
@@ -28,7 +28,7 @@ namespace GameGrid
             PointB = pointA.Index < pointB.Index ? pointB : pointA;
         }
 
-        public GridPoint GetOtherPoint(GridPoint point)
+        public GroundPoint GetOtherPoint(GroundPoint point)
         {
             return PointA == point ? PointB : PointA;
         }

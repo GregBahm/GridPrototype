@@ -23,7 +23,7 @@ public class GridModification : MonoBehaviour
     public void DoGridModification()
     {
         Vector3 mouseGroundPos = InteractionManager.GetGroundPositionAtScreenpoint(Input.mousePosition);
-        GridEdge closestEdge = GetClosestEdge(gameMain.MainGrid.BorderEdges, mouseGroundPos);
+        GroundEdge closestEdge = GetClosestEdge(gameMain.MainGrid.BorderEdges, mouseGroundPos);
         if (closestEdge != null)
         {
             GridExpansion expansion = new GridExpansion(closestEdge, expansionChainLength, expansionDistance);
@@ -54,7 +54,7 @@ public class GridModification : MonoBehaviour
         Debug.DrawLine(pointAPos, pointBPos, color);
     }
 
-    private void DrawEdge(GridEdge edge)
+    private void DrawEdge(GroundEdge edge)
     {
         Vector3 pointAPos = new Vector3(edge.PointA.Position.x, 0, edge.PointA.Position.y);
         Vector3 pointBPos = new Vector3(edge.PointB.Position.x, 0, edge.PointB.Position.y);
@@ -63,12 +63,12 @@ public class GridModification : MonoBehaviour
 
     private class GridExpansion
     {
-        private readonly GridEdge mainEdge;
+        private readonly GroundEdge mainEdge;
         private readonly float expansionDistance;
         private readonly float expansionChainLength;
         public IReadOnlyList<GridExpansionPoint> ExpansionPoints { get; }
         
-        public GridExpansion(GridEdge mainEdge, int expansionChainLength, float expansionDistance)
+        public GridExpansion(GroundEdge mainEdge, int expansionChainLength, float expansionDistance)
         {
             this.mainEdge = mainEdge;
             this.expansionChainLength = expansionChainLength;
@@ -93,27 +93,27 @@ public class GridModification : MonoBehaviour
 
         internal void ApplyToGrid(MainGrid mainGrid)
         {
-            GridPointBuilder[] points = GetGridPoints(mainGrid).ToArray();
-            GridEdgeBuilder[] edges = GetGridEdges(mainGrid, points).ToArray();
+            GroundPointBuilder[] points = GetGridPoints(mainGrid).ToArray();
+            GroundEdgeBuilder[] edges = GetGridEdges(mainGrid, points).ToArray();
             mainGrid.AddToMesh(points, edges);
         }
 
-        private IEnumerable<GridEdgeBuilder> GetGridEdges(MainGrid mainGrid, GridPointBuilder[] points)
+        private IEnumerable<GroundEdgeBuilder> GetGridEdges(MainGrid mainGrid, GroundPointBuilder[] points)
         {
-            yield return new GridEdgeBuilder(ExpansionPoints[0].BasePoint.Index, points[0].Index);
+            yield return new GroundEdgeBuilder(ExpansionPoints[0].BasePoint.Index, points[0].Index);
             for (int i = 1; i < ExpansionPoints.Count; i++)
             {
-                yield return new GridEdgeBuilder(ExpansionPoints[i].BasePoint.Index, points[i].Index);
-                yield return new GridEdgeBuilder(points[i - 1].Index, points[i].Index);
+                yield return new GroundEdgeBuilder(ExpansionPoints[i].BasePoint.Index, points[i].Index);
+                yield return new GroundEdgeBuilder(points[i - 1].Index, points[i].Index);
             }
         }
 
-        private IEnumerable<GridPointBuilder> GetGridPoints(MainGrid mainGrid)
+        private IEnumerable<GroundPointBuilder> GetGridPoints(MainGrid mainGrid)
         {
             int i = mainGrid.Points.Count;
             foreach (GridExpansionPoint expansion in ExpansionPoints)
             {
-                yield return new GridPointBuilder(i, expansion.ExpandedPos);
+                yield return new GroundPointBuilder(i, expansion.ExpandedPos);
                 i++;
             }
         }
@@ -122,13 +122,13 @@ public class GridModification : MonoBehaviour
     private class GridExpansionPoint
     {
         private readonly float expansionDistance;
-        private readonly GridEdge baseEdge;
-        private readonly GridEdge adjacentEdge;
+        private readonly GroundEdge baseEdge;
+        private readonly GroundEdge adjacentEdge;
 
-        public GridPoint BasePoint { get; }
+        public GroundPoint BasePoint { get; }
         public Vector2 ExpandedPos { get; }
 
-        public GridExpansionPoint(GridEdge baseEdge, GridPoint basePoint, float expansionDistance)
+        public GridExpansionPoint(GroundEdge baseEdge, GroundPoint basePoint, float expansionDistance)
         {
             this.baseEdge = baseEdge;
             BasePoint = basePoint;
@@ -150,18 +150,18 @@ public class GridModification : MonoBehaviour
             return new GridExpansionPoint(adjacentEdge, adjacentEdge.GetOtherPoint(BasePoint), expansionDistance);
         }
 
-        private GridEdge GetAdjacentBorder()
+        private GroundEdge GetAdjacentBorder()
         {
             return BasePoint.Edges.First(pointEdge => pointEdge != baseEdge && pointEdge.IsBorder);
         }
     }
 
-    private GridEdge GetClosestEdge(IEnumerable<GridEdge> borderEdges, Vector3 mouseGroundPos)
+    private GroundEdge GetClosestEdge(IEnumerable<GroundEdge> borderEdges, Vector3 mouseGroundPos)
     {
         Vector2 gridSpacePos = new Vector2(mouseGroundPos.x, mouseGroundPos.z);
         float closests = float.PositiveInfinity;
-        GridEdge ret = null;
-        foreach (GridEdge edge in borderEdges)
+        GroundEdge ret = null;
+        foreach (GroundEdge edge in borderEdges)
         {
             float? dist = GetDistance(edge, gridSpacePos);
             if (dist.HasValue && dist.Value < closests)
@@ -173,7 +173,7 @@ public class GridModification : MonoBehaviour
         return ret;
     }
 
-    private float? GetDistance(GridEdge edge, Vector2 gridSpacePos)
+    private float? GetDistance(GroundEdge edge, Vector2 gridSpacePos)
     {
         Vector2 edgeLine = (edge.PointA.Position - edge.PointB.Position).normalized;
         Vector2 toMouse = (edge.PointA.Position - gridSpacePos).normalized;

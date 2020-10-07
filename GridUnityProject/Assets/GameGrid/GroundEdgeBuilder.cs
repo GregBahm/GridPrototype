@@ -4,16 +4,16 @@ using UnityEngine;
 namespace GameGrid
 {
     [Serializable]
-    public class GridEdgeBuilder
+    public class GroundEdgeBuilder
     {
         public int PointAIndex;
         public int PointBIndex;
 
-        public GridEdgeBuilder(GridEdge edge)
+        public GroundEdgeBuilder(GroundEdge edge)
             :this(edge.PointA.Index, edge.PointB.Index)
         { }
 
-        public GridEdgeBuilder(int pointAIndex, int pointBIndex)
+        public GroundEdgeBuilder(int pointAIndex, int pointBIndex)
         {
             PointAIndex = pointAIndex;
             PointBIndex = pointBIndex;
