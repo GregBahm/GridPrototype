@@ -26,39 +26,23 @@ public class GridModification : MonoBehaviour
         GridEdge closestEdge = GetClosestEdge(mainGrid.BorderEdges, mouseGroundPos);
         if (closestEdge != null)
         {
-            GridExpansion expansion = new GridExpansion(closestEdge, expansionChainLength, expansionDistance);
+            GridExpansion expansion = new GridExpansion(mainGrid, closestEdge, expansionChainLength, expansionDistance);
             PreviewExpansion(expansion);
             if(Input.GetMouseButtonUp(0))
             {
-                expansion.ApplyToGrid(mainGrid);
+                mainGrid.AddToMesh(expansion.PotentialPoints, expansion.PotentialEdges);
             }
         }
     }
 
     private void PreviewExpansion(GridExpansion expansion)
     {
-        DrawEdge(expansion.ExpansionPoints[0].ExpandedPos, expansion.ExpansionPoints[0].BasePoint.Position, 0);
-        for (int i = 1; i < expansion.ExpansionPoints.Count; i++)
+        foreach (GridEdge edge in expansion.PotentialEdges)
         {
-            float param = (float)i / expansion.ExpansionPoints.Count;
-            DrawEdge(expansion.ExpansionPoints[i].ExpandedPos, expansion.ExpansionPoints[i].BasePoint.Position, param);
-            DrawEdge(expansion.ExpansionPoints[i].ExpandedPos, expansion.ExpansionPoints[i - 1].ExpandedPos, param);
+            Vector3 pointAPos = new Vector3(edge.PointA.Position.x, 0, edge.PointA.Position.y);
+            Vector3 pointBPos = new Vector3(edge.PointB.Position.x, 0, edge.PointB.Position.y);
+            Debug.DrawLine(pointAPos, pointBPos, Color.cyan);
         }
-    }
-
-    private void DrawEdge(Vector2 pointA, Vector2 pointB, float param)
-    {
-        Color color = Color.Lerp(Color.cyan, Color.magenta, param);
-        Vector3 pointAPos = new Vector3(pointA.x, 0, pointA.y);
-        Vector3 pointBPos = new Vector3(pointB.x, 0, pointB.y);
-        Debug.DrawLine(pointAPos, pointBPos, color);
-    }
-
-    private void DrawEdge(GridEdge edge)
-    {
-        Vector3 pointAPos = new Vector3(edge.PointA.Position.x, 0, edge.PointA.Position.y);
-        Vector3 pointBPos = new Vector3(edge.PointB.Position.x, 0, edge.PointB.Position.y);
-        Debug.DrawLine(pointAPos, pointBPos, Color.cyan);
     }
 
     private class GridExpansion
@@ -67,13 +51,20 @@ public class GridModification : MonoBehaviour
         private readonly float expansionDistance;
         private readonly float expansionChainLength;
         public IReadOnlyList<GridExpansionPoint> ExpansionPoints { get; }
+
+        public IEnumerable<GridPoint> PotentialPoints { get; }
+        public IEnumerable<GridEdge> PotentialEdges { get; }
         
-        public GridExpansion(GridEdge mainEdge, int expansionChainLength, float expansionDistance)
+        public GridExpansion(MainGrid mainGrid, GridEdge mainEdge, int expansionChainLength, float expansionDistance)
         {
             this.mainEdge = mainEdge;
             this.expansionChainLength = expansionChainLength;
             this.expansionDistance = expansionDistance;
             ExpansionPoints = GetExpansionChain().ToList();
+
+            GridPoint[] points = GetGridPoints(mainGrid).ToArray();
+            PotentialPoints = points;
+            PotentialEdges = GetGridEdges(mainGrid, points).ToArray();
         }
 
         private IEnumerable<GridExpansionPoint> GetExpansionChain()
@@ -91,20 +82,18 @@ public class GridModification : MonoBehaviour
             return chain;
         }
 
-        internal void ApplyToGrid(MainGrid mainGrid)
+        private IEnumerable<GridEdge> GetGridEdges(MainGrid mainGrid, GridPoint[] spokePoints)
         {
-            GridPoint[] points = GetGridPoints(mainGrid).ToArray();
-            GridEdge[] edges = GetGridEdges(mainGrid, points).ToArray();
-            mainGrid.AddToMesh(points, edges);
-        }
-
-        private IEnumerable<GridEdge> GetGridEdges(MainGrid mainGrid, GridPoint[] points)
-        {
-            yield return new GridEdge(mainGrid, ExpansionPoints[0].BasePoint, points[0]);
-            for (int i = 1; i < ExpansionPoints.Count; i++)
+            for (int i = 0; i < ExpansionPoints.Count; i++)
             {
-                yield return new GridEdge(mainGrid, ExpansionPoints[i].BasePoint, points[i]);
-                yield return new GridEdge(mainGrid, points[i - 1], points[i]);
+                foreach (GridEdge edge in ExpansionPoints[i].CreateSpokeEdges(mainGrid, spokePoints[i]))
+                {
+                    yield return edge;
+                }
+                if(i != 0)
+                {
+                    yield return new GridEdge(mainGrid, spokePoints[i - 1], spokePoints[i]);
+                }
             }
         }
 
@@ -124,6 +113,7 @@ public class GridModification : MonoBehaviour
         private readonly float expansionDistance;
         private readonly GridEdge baseEdge;
         private readonly GridEdge adjacentEdge;
+        public bool IsConvex { get; }
 
         public GridPoint BasePoint { get; }
         public Vector2 ExpandedPos { get; }
@@ -134,10 +124,32 @@ public class GridModification : MonoBehaviour
             BasePoint = basePoint;
             this.expansionDistance = expansionDistance;
             adjacentEdge = GetAdjacentBorder();
-            ExpandedPos = GetExpandedPos();
+            IsConvex = GetIsConvex();
+            ExpandedPos = IsConvex ? GetConvexExpandedPos() : GetNonConvexExpandedPos();
         }
 
-        private Vector2 GetExpandedPos()
+        private bool GetIsConvex()
+        {
+            return false;
+            Vector2 basePos = BasePoint.Position;
+            Vector2 adjacentA = baseEdge.GetOtherPoint(BasePoint).Position;
+            Vector2 adjacentB = adjacentEdge.GetOtherPoint(BasePoint).Position;
+
+            Vector2 toA = (basePos - adjacentA).normalized;
+            Vector2 toB = (basePos - adjacentB).normalized;
+            return Vector2.Dot(toA, toB) > .0f;
+        }
+
+        private Vector2 GetConvexExpandedPos()
+        {
+            Vector2 adjacentA = baseEdge.GetOtherPoint(BasePoint).Position;
+            Vector2 adjacentB = adjacentEdge.GetOtherPoint(BasePoint).Position;
+            Vector2 mid = (adjacentA + adjacentB) / 2;
+            Vector2 offset = (mid - BasePoint.Position).normalized * 1.5f;
+            return BasePoint.Position + offset;
+        }
+
+        private Vector2 GetNonConvexExpandedPos()
         {
             Vector2 toQuadA = (baseEdge.MidPoint - baseEdge.Quads.First().Center).normalized;
             Vector2 toQuadB = (adjacentEdge.MidPoint - adjacentEdge.Quads.First().Center).normalized;
@@ -153,6 +165,21 @@ public class GridModification : MonoBehaviour
         private GridEdge GetAdjacentBorder()
         {
             return BasePoint.Edges.First(pointEdge => pointEdge != baseEdge && pointEdge.IsBorder);
+        }
+
+        public IEnumerable<GridEdge> CreateSpokeEdges(MainGrid mainGrid, GridPoint mySpokePoint)
+        {
+            if(IsConvex)
+            {
+                GridPoint startA = baseEdge.GetOtherPoint(BasePoint);
+                GridPoint startB = adjacentEdge.GetOtherPoint(BasePoint);
+                yield return new GridEdge(mainGrid, startA, mySpokePoint);
+                yield return new GridEdge(mainGrid, startB, mySpokePoint);
+            }
+            else
+            {
+                yield return new GridEdge(mainGrid, BasePoint, mySpokePoint);
+            }
         }
     }
 
