@@ -13,17 +13,17 @@ public class GridModification : MonoBehaviour
     [SerializeField]
     private int expansionDistance = 1;
 
-    private MainGrid mainGrid;
+    private GameMain gameMain;
 
     private void Start()
     {
-        mainGrid = GetComponent<GameMain>().MainGrid;
+        gameMain = GetComponent<GameMain>();
     }
 
     public void DoGridModification()
     {
         Vector3 mouseGroundPos = InteractionManager.GetGroundPositionAtScreenpoint(Input.mousePosition);
-        GridEdge closestEdge = GetClosestEdge(mainGrid.BorderEdges, mouseGroundPos);
+        GroundEdge closestEdge = GetClosestEdge(gameMain.MainGrid.BorderEdges, mouseGroundPos);
         if (closestEdge != null)
         {
             GridExpansion expansion = new GridExpansion(mainGrid, closestEdge, expansionChainLength, expansionDistance);
@@ -47,7 +47,7 @@ public class GridModification : MonoBehaviour
 
     private class GridExpansion
     {
-        private readonly GridEdge mainEdge;
+        private readonly GroundEdge mainEdge;
         private readonly float expansionDistance;
         private readonly float expansionChainLength;
         public IReadOnlyList<GridExpansionPoint> ExpansionPoints { get; }
@@ -97,12 +97,12 @@ public class GridModification : MonoBehaviour
             }
         }
 
-        private IEnumerable<GridPoint> GetGridPoints(MainGrid mainGrid)
+        private IEnumerable<GroundPointBuilder> GetGridPoints(MainGrid mainGrid)
         {
             int i = mainGrid.Points.Count;
             foreach (GridExpansionPoint expansion in ExpansionPoints)
             {
-                yield return new GridPoint(mainGrid, i, expansion.ExpandedPos);
+                yield return new GroundPointBuilder(i, expansion.ExpandedPos);
                 i++;
             }
         }
@@ -111,14 +111,13 @@ public class GridModification : MonoBehaviour
     private class GridExpansionPoint
     {
         private readonly float expansionDistance;
-        private readonly GridEdge baseEdge;
-        private readonly GridEdge adjacentEdge;
-        public bool IsConvex { get; }
+        private readonly GroundEdge baseEdge;
+        private readonly GroundEdge adjacentEdge;
 
-        public GridPoint BasePoint { get; }
+        public GroundPoint BasePoint { get; }
         public Vector2 ExpandedPos { get; }
 
-        public GridExpansionPoint(GridEdge baseEdge, GridPoint basePoint, float expansionDistance)
+        public GridExpansionPoint(GroundEdge baseEdge, GroundPoint basePoint, float expansionDistance)
         {
             this.baseEdge = baseEdge;
             BasePoint = basePoint;
@@ -162,7 +161,7 @@ public class GridModification : MonoBehaviour
             return new GridExpansionPoint(adjacentEdge, adjacentEdge.GetOtherPoint(BasePoint), expansionDistance);
         }
 
-        private GridEdge GetAdjacentBorder()
+        private GroundEdge GetAdjacentBorder()
         {
             return BasePoint.Edges.First(pointEdge => pointEdge != baseEdge && pointEdge.IsBorder);
         }
@@ -183,12 +182,12 @@ public class GridModification : MonoBehaviour
         }
     }
 
-    private GridEdge GetClosestEdge(IEnumerable<GridEdge> borderEdges, Vector3 mouseGroundPos)
+    private GroundEdge GetClosestEdge(IEnumerable<GroundEdge> borderEdges, Vector3 mouseGroundPos)
     {
         Vector2 gridSpacePos = new Vector2(mouseGroundPos.x, mouseGroundPos.z);
         float closests = float.PositiveInfinity;
-        GridEdge ret = null;
-        foreach (GridEdge edge in borderEdges)
+        GroundEdge ret = null;
+        foreach (GroundEdge edge in borderEdges)
         {
             float? dist = GetDistance(edge, gridSpacePos);
             if (dist.HasValue && dist.Value < closests)
@@ -200,7 +199,7 @@ public class GridModification : MonoBehaviour
         return ret;
     }
 
-    private float? GetDistance(GridEdge edge, Vector2 gridSpacePos)
+    private float? GetDistance(GroundEdge edge, Vector2 gridSpacePos)
     {
         Vector2 edgeLine = (edge.PointA.Position - edge.PointB.Position).normalized;
         Vector2 toMouse = (edge.PointA.Position - gridSpacePos).normalized;

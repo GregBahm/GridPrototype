@@ -11,17 +11,17 @@ using UnityEngine;
 namespace GameGrid
 {
 
-    public class GridQuad
+    public class GroundQuad
     {
-        private readonly Dictionary<GridPoint, GridPoint> diagonalsTable;
+        private readonly Dictionary<GroundPoint, GroundPoint> diagonalsTable;
         
-        public ReadOnlyCollection<GridPoint> Points { get; }
+        public ReadOnlyCollection<GroundPoint> Points { get; }
         
-        public ReadOnlyCollection<GridEdge> Edges { get; }
+        public ReadOnlyCollection<GroundEdge> Edges { get; }
 
         public Vector2 Center { get { return (Points[0].Position + Points[1].Position + Points[2].Position + Points[3].Position) / 4; } }
 
-        public GridQuad(params GridEdge[] edges)
+        public GroundQuad(params GroundEdge[] edges)
         {
             if (edges.Length != 4)
             {
@@ -32,9 +32,9 @@ namespace GameGrid
             diagonalsTable = GetDiagonalsTable();
         }
 
-        private ReadOnlyCollection<GridPoint> GetPoints()
+        private ReadOnlyCollection<GroundPoint> GetPoints()
         {
-            HashSet<GridPoint> rawPoints = new HashSet<GridPoint>
+            HashSet<GroundPoint> rawPoints = new HashSet<GroundPoint>
             {
                 Edges[0].PointA,
                 Edges[0].PointB,
@@ -52,20 +52,20 @@ namespace GameGrid
             return GetSortedPoints(rawPoints.ToArray()).ToList().AsReadOnly();
         }
 
-        public GridPoint GetDiagonalPoint(GridPoint point)
+        public GroundPoint GetDiagonalPoint(GroundPoint point)
         {
             return diagonalsTable[point];
         }
 
-        private IEnumerable<GridPoint> GetSortedPoints(GridPoint[] rawPoints)
+        private IEnumerable<GroundPoint> GetSortedPoints(GroundPoint[] rawPoints)
         {
             Vector2 center = (rawPoints[0].Position + rawPoints[1].Position + rawPoints[2].Position + rawPoints[3].Position) / 4;
             return rawPoints.OrderByDescending(item => Vector2.SignedAngle(Vector2.up, item.Position - center));
         }
 
-        private Dictionary<GridPoint, GridPoint> GetDiagonalsTable()
+        private Dictionary<GroundPoint, GroundPoint> GetDiagonalsTable()
         {
-            Dictionary<GridPoint, GridPoint> ret = new Dictionary<GridPoint, GridPoint>();
+            Dictionary<GroundPoint, GroundPoint> ret = new Dictionary<GroundPoint, GroundPoint>();
             for (int i = 0; i < 4; i++)
             {
                 int opposingIndex = (i + 2) % 4;
@@ -76,7 +76,7 @@ namespace GameGrid
 
         public override string ToString()
         {
-            return Points[0].Id + "," + Points[1].Id + "," + Points[2].Id + "," + Points[3].Id;
+            return Points[0].Index + "," + Points[1].Index + "," + Points[2].Index + "," + Points[3].Index;
         }
     }
 

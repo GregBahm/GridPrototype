@@ -4,7 +4,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
-using Voxels;
 
 namespace Interaction
 {
@@ -21,15 +20,12 @@ namespace Interaction
         private MeshFilter selectionMeshFilter;
         private MeshBuilderAnchorPoint selectedAnchor;
 
-        private VoxelSpace voxelSpace;
-
         private void Start()
         {
             selectionMesh = new Mesh();
             selectionMeshFilter = SelectionCursor.GetComponent<MeshFilter>();
             selectionMeshFilter.sharedMesh = selectionMesh;
             polyTable = GetPolyTable();
-            voxelSpace = new VoxelSpace(meshBuilder.Points, 40);
         }
 
         private MeshBuilderAnchorPoint[] GetPolyTable()

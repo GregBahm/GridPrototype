@@ -5,13 +5,14 @@ using UnityEngine;
 public class GameMain : MonoBehaviour
 {
     public bool ShowGrid;
+    public bool LoadLastSave;
     public bool TestSave;
     public bool TestLoad;
     public MainGrid MainGrid { get; private set; }
 
     private void Start()
     {
-        MainGrid = GridLoader.LoadGrid();
+        MainGrid = LoadLastSave ? GroundLoader.Load() : GroundLoader.LoadDefault();
     }
 
     private void Update()
@@ -23,20 +24,20 @@ public class GameMain : MonoBehaviour
         if(TestSave)
         {
             TestSave = false;
-            GridLoader.SaveGrid(MainGrid);
+            GroundLoader.Save(MainGrid);
             Debug.Log("Grid Saved");
         }
         if(TestLoad)
         {
             TestLoad = false;
-            MainGrid = GridLoader.LoadGrid();
+            MainGrid = GroundLoader.Load();
             Debug.Log("Grid Loaded");
         }
     }
 
     private void DoShowGrid()
     {
-        foreach (GridEdge edge in MainGrid.Edges)
+        foreach (GroundEdge edge in MainGrid.Edges)
         {
             Vector3 pointA = new Vector3(edge.PointA.Position.x, 0, edge.PointA.Position.y);
             Vector3 pointB = new Vector3(edge.PointB.Position.x, 0, edge.PointB.Position.y);
