@@ -1,6 +1,8 @@
 ﻿using GameGrid;
+using System;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class GameMain : MonoBehaviour
 {
@@ -9,18 +11,22 @@ public class GameMain : MonoBehaviour
     public bool TestSave;
     public bool TestLoad;
 
+    private InteractionMesh interactionMesh;
+
     [SerializeField]
-    private MeshFilter InteractionMesh;
+    private GameObject InteractionMeshObject;
+
+    [SerializeField]
+    private Transform debugCube;
 
     public MainGrid MainGrid { get; private set; }
 
     private void Start()
     {
         MainGrid = LoadLastSave ? GroundLoader.Load() : GroundLoader.LoadDefault();
-        Mesh mesh = new Mesh();
-        HittestMesh hittestMesh = new HittestMesh(mesh);
-        hittestMesh.UpdateMesh(MainGrid);
-        InteractionMesh.sharedMesh = mesh;
+        interactionMesh = new InteractionMesh(new Mesh());
+        UpdateInteractionGrid();
+        InteractionMeshObject.GetComponent<MeshFilter>().sharedMesh = interactionMesh.Mesh;
     }
 
     private void Update()
@@ -40,6 +46,30 @@ public class GameMain : MonoBehaviour
             TestLoad = false;
             MainGrid = GroundLoader.Load();
             Debug.Log("Grid Loaded");
+        }
+        TestCollisionMesh();
+    }
+
+    public void UpdateInteractionGrid()
+    {
+        interactionMesh.UpdateMesh(MainGrid);
+        InteractionMeshObject.GetComponent<MeshCollider>().sharedMesh = null;
+        InteractionMeshObject.GetComponent<MeshCollider>().sharedMesh = interactionMesh.Mesh;
+    }
+
+    private void TestCollisionMesh()
+    {
+        RaycastHit hit;
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        if (Physics.Raycast(ray, out hit))
+        {
+            IHitTarget hitInfo = interactionMesh.GetHitTarget(hit.triangleIndex);
+            debugCube.position = hitInfo.TargetCell.CellPosition;
+            if(Input.GetMouseButtonDown(0))
+            {
+                hitInfo.TargetCell.Filled = !hitInfo.TargetCell.Filled;
+                UpdateInteractionGrid();
+            }
         }
     }
 

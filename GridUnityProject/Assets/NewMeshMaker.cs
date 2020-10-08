@@ -7,13 +7,13 @@ using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public class HittestMesh
+public class InteractionMesh
 {
     private readonly List<IHitTarget> hitTable = new List<IHitTarget>();
 
     public Mesh Mesh { get; }
 
-    public HittestMesh(Mesh mesh)
+    public InteractionMesh(Mesh mesh)
     {
         Mesh = mesh;
     }
@@ -64,7 +64,7 @@ public class HittestMesh
 
         public MeshBuilderTriangle(VoxelCell targetCell, VoxelCell sourceCell, IMeshBuilderPoint pointA, IMeshBuilderPoint pointB, IMeshBuilderPoint pointC)
         {
-            TargetCell = TargetCell;
+            TargetCell = targetCell;
             SourceCell = sourceCell;
             PointA = pointA;
             bool reorderVerts = GetShouldReorderVerts(sourceCell, pointA.Position, pointB.Position, pointC.Position);
@@ -79,7 +79,8 @@ public class HittestMesh
             {
                 return crossVector.y > 0;
             }
-            return Vector3.Dot(sourceCell.CellPosition, crossVector) > 0; // TODO: Test this
+            Vector3 toSource = pointA - sourceCell.CellPosition;
+            return Vector3.Dot(toSource, crossVector) > 0; // TODO: Test this
         }
     }
 
@@ -161,24 +162,82 @@ public class HittestMesh
     {
         private readonly VoxelCell cell;
         public IEnumerable<IMeshBuilderPoint> Points { get; }
-
         public IEnumerable<MeshBuilderTriangle> Triangles { get; }
 
         public CellMeshContributor(VoxelCell cell)
         {
             this.cell = cell;
-            Points = GetPoints();
-            Triangles = GetTriangles();
+
+            List<IMeshContributor> subContributors = new List<IMeshContributor>();
+            if(GetDoesHaveBottom())
+            {
+                // TODO: Add bottom cap to subContributors
+            }
+            if (GetDoesHaveTop())
+            {
+                // TODO: Add top cap to subContributors
+            }
+            SideToFill[] sidesToFill = GetSidesToFill().ToArray();
+            subContributors.AddRange(sidesToFill);
+            Points = subContributors.SelectMany(item => item.Points).ToArray();
+            Triangles = subContributors.SelectMany(item => item.Triangles).ToArray();
         }
 
-        private IEnumerable<MeshBuilderTriangle> GetTriangles()
+        private IEnumerable<SideToFill> GetSidesToFill()
         {
-            return new MeshBuilderTriangle[0]; // TODO: This
+            foreach (GroundEdge edge in cell.GroundPoint.Edges)
+            {
+                VoxelCell connectedCell = edge.GetOtherPoint(cell.GroundPoint).Voxels[cell.Height];
+                if(!connectedCell.Filled)
+                {
+                    yield return new SideToFill(cell, edge, connectedCell);
+                }
+            }
         }
 
-        private IEnumerable<IMeshBuilderPoint> GetPoints()
+        private bool GetDoesHaveTop()
         {
-            return new IMeshBuilderPoint[0]; // TODO: This
+            return (cell.Height == MainGrid.VoxelHeight - 1) || !cell.GroundPoint.Voxels[cell.Height + 1].Filled;
+        }
+
+        private bool GetDoesHaveBottom()
+        {
+            return cell.Height != 0 && !cell.GroundPoint.Voxels[cell.Height - 1].Filled;
+        }
+
+        private class SideToFill : IMeshContributor
+        {
+            private readonly List<MeshBuilderSubPoint> points = new List<MeshBuilderSubPoint>();
+            public IEnumerable<IMeshBuilderPoint> Points { get { return points; } }
+            private readonly List<MeshBuilderTriangle> triangles = new List<MeshBuilderTriangle>();
+            public IEnumerable<MeshBuilderTriangle> Triangles { get { return triangles; } } 
+            
+            public SideToFill(VoxelCell sourceCell, GroundEdge edge, VoxelCell connectedCell)
+            {
+                foreach (GroundQuad quad in edge.Quads)
+                {
+                    Vector3 quadPos = new Vector3(quad.Center.x, sourceCell.Height, quad.Center.y);
+                    MeshBuilderSubPoint edgePoint = new MeshBuilderSubPoint(sourceCell, connectedCell);
+                    VoxelCell diagonalCell = quad.GetDiagonalPoint(sourceCell.GroundPoint).Voxels[sourceCell.Height];
+                    MeshBuilderSubPoint diagonalPoint = new MeshBuilderSubPoint(diagonalCell, sourceCell, quadPos);
+                    VoxelCell baseAbove = sourceCell.CellAbove;
+                    VoxelCell connectedAbove = connectedCell.CellAbove;
+                    VoxelCell diagonalAbove = diagonalCell.CellAbove;
+                    Vector3 quadAbove = new Vector3(quad.Center.x, sourceCell.Height + 1, quad.Center.y);
+                    MeshBuilderSubPoint edgeAbovePoint = new MeshBuilderSubPoint(baseAbove, connectedAbove);
+                    MeshBuilderSubPoint diagonalAbovePoint = new MeshBuilderSubPoint(diagonalAbove, baseAbove, quadAbove);
+
+                    points.Add(edgePoint);
+                    points.Add(diagonalPoint);
+                    points.Add(edgeAbovePoint);
+                    points.Add(diagonalAbovePoint);
+
+                    MeshBuilderTriangle triA = new MeshBuilderTriangle(connectedCell, sourceCell, edgePoint, diagonalPoint, diagonalAbovePoint);
+                    MeshBuilderTriangle triB = new MeshBuilderTriangle(connectedCell, sourceCell, edgePoint, diagonalAbovePoint, edgeAbovePoint);
+                    triangles.Add(triA);
+                    triangles.Add(triB);
+                }
+            }
         }
     }
 

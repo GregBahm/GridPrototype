@@ -36,7 +36,7 @@ public class InteractionManager : MonoBehaviour
     private void Update()
     {
         DoEasing();
-        gridModification.DoGridModification();
+        //gridModification.DoGridModification();
         UpdateCursorHighlight();
         HandleOrbit();
         HandlePan();

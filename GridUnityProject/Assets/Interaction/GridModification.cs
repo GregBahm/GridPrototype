@@ -31,6 +31,7 @@ public class GridModification : MonoBehaviour
             if(Input.GetMouseButtonUp(0))
             {
                 gameMain.MainGrid.AddToMesh(expansion.PotentialPoints, expansion.PotentialEdges);
+                gameMain.UpdateInteractionGrid();
             }
         }
     }

@@ -23,6 +23,24 @@ namespace GameGrid
             }
         }
 
+        public VoxelCell CellBelow
+        {
+            get
+            {
+                if (Height == 0) return null;
+                return GroundPoint.Voxels[Height - 1];
+            }
+        }
+
+        public VoxelCell CellAbove
+        {
+            get
+            {
+                if (Height == MainGrid.VoxelHeight - 1) return null;
+                return GroundPoint.Voxels[Height + 1];
+            }
+        }
+
         public VoxelCell(MainGrid grid, GroundPoint groundPoint, int height)
         {
             this.grid = grid;

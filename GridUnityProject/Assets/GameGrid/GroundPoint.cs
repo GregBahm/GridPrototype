@@ -28,8 +28,8 @@ namespace GameGrid
 
         private VoxelCell[] GetVoxels()
         {
-            VoxelCell[] ret = new VoxelCell[grid.VoxelHeight];
-            for (int i = 0; i < grid.VoxelHeight; i++)
+            VoxelCell[] ret = new VoxelCell[MainGrid.VoxelHeight];
+            for (int i = 0; i < MainGrid.VoxelHeight; i++)
             {
                 ret[i] = new VoxelCell(grid, this, i);
             }
