@@ -16,7 +16,7 @@ namespace GameGrid
         public IEnumerable<GroundPoint> DiagonalConnections { get { return PolyConnections.Select(item => item.GetDiagonalPoint(this)); } }
         public IEnumerable<GroundQuad> PolyConnections { get { return grid.GetConnectedQuads(this); } }
         private readonly VoxelCell[] voxels;
-        public IReadOnlyList<VoxelCell> Voxels { get { return Voxels; } }
+        public IReadOnlyList<VoxelCell> Voxels { get { return voxels; } }
 
         public GroundPoint(MainGrid grid, int index, Vector2 initialPosition)
         {

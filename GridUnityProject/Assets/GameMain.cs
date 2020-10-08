@@ -8,11 +8,19 @@ public class GameMain : MonoBehaviour
     public bool LoadLastSave;
     public bool TestSave;
     public bool TestLoad;
+
+    [SerializeField]
+    private MeshFilter InteractionMesh;
+
     public MainGrid MainGrid { get; private set; }
 
     private void Start()
     {
         MainGrid = LoadLastSave ? GroundLoader.Load() : GroundLoader.LoadDefault();
+        Mesh mesh = new Mesh();
+        HittestMesh hittestMesh = new HittestMesh(mesh);
+        hittestMesh.UpdateMesh(MainGrid);
+        InteractionMesh.sharedMesh = mesh;
     }
 
     private void Update()

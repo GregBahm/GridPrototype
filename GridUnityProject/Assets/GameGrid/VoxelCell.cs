@@ -1,13 +1,16 @@
 ﻿using GameGrid;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 namespace GameGrid
 {
     public class VoxelCell
     {
         private readonly MainGrid grid;
-        public GroundPoint Column { get; }
+        public GroundPoint GroundPoint { get; }
+
+        public Vector3 CellPosition { get { return new Vector3(GroundPoint.Position.x, Height, GroundPoint.Position.y); } }
 
         public int Height { get; }
 
@@ -20,11 +23,16 @@ namespace GameGrid
             }
         }
 
-        public VoxelCell(MainGrid grid, GroundPoint column, int height)
+        public VoxelCell(MainGrid grid, GroundPoint groundPoint, int height)
         {
             this.grid = grid;
-            Column = column;
+            GroundPoint = groundPoint;
             Height = height;
+        }
+
+        public override string ToString()
+        {
+            return "(" + GroundPoint.Index + ", " + Height + ")";
         }
     }
 }
