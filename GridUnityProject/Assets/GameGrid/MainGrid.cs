@@ -7,10 +7,13 @@ namespace GameGrid
 {
     public class MainGrid
     {
+        public int VoxelHeight { get; } = 40;
+
         private List<GroundPoint> points = new List<GroundPoint>();
         public IReadOnlyList<GroundPoint> Points { get { return points; } }
 
         private List<GroundEdge> edges = new List<GroundEdge>();
+
         public IEnumerable<GroundEdge> Edges { get { return edges; } }
 
         private List<GroundQuad> polys = new List<GroundQuad>();
@@ -22,9 +25,29 @@ namespace GameGrid
         private readonly Dictionary<GroundPoint, List<GroundQuad>> polyTable = new Dictionary<GroundPoint, List<GroundQuad>>();
         private readonly Dictionary<GroundEdge, List<GroundQuad>> bordersTable = new Dictionary<GroundEdge, List<GroundQuad>>();
 
+        private readonly HashSet<VoxelCell> filledCells = new HashSet<VoxelCell>();
+        public IEnumerable<VoxelCell> FilledCells { get { return filledCells; } }
+
         public MainGrid(IEnumerable<GroundPointBuilder> points, IEnumerable<GroundEdgeBuilder> edges)
         {
             AddToMesh(points, edges);
+        }
+
+        internal void SetCellFilled(VoxelCell voxelCell, bool value)
+        {
+            if(value)
+            {
+                filledCells.Add(voxelCell);
+            }
+            else
+            {
+                filledCells.Remove(voxelCell);
+            }
+        }
+
+        public bool IsFilled(VoxelCell cell)
+        {
+            return filledCells.Contains(cell);
         }
 
         public void AddToMesh(IEnumerable<GroundPointBuilder> newPoints, IEnumerable<GroundEdgeBuilder> newEdges)

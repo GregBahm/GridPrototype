@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using System;
 
 namespace GameGrid
 {
@@ -14,12 +15,25 @@ namespace GameGrid
         public IEnumerable<GroundPoint> DirectConnections { get { return Edges.Select(item => item.GetOtherPoint(this)); } }
         public IEnumerable<GroundPoint> DiagonalConnections { get { return PolyConnections.Select(item => item.GetDiagonalPoint(this)); } }
         public IEnumerable<GroundQuad> PolyConnections { get { return grid.GetConnectedQuads(this); } }
+        private readonly VoxelCell[] voxels;
+        public IReadOnlyList<VoxelCell> Voxels { get { return Voxels; } }
 
         public GroundPoint(MainGrid grid, int index, Vector2 initialPosition)
         {
             this.grid = grid;
             Index = index;
             Position = initialPosition;
+            voxels = GetVoxels();
+        }
+
+        private VoxelCell[] GetVoxels()
+        {
+            VoxelCell[] ret = new VoxelCell[grid.VoxelHeight];
+            for (int i = 0; i < grid.VoxelHeight; i++)
+            {
+                ret[i] = new VoxelCell(grid, this, i);
+            }
+            return ret;
         }
 
         public override string ToString()
