@@ -1,4 +1,5 @@
 ﻿using GameGrid;
+using MeshMaking;
 using System;
 using System.Linq;
 using UnityEngine;
@@ -64,11 +65,14 @@ public class GameMain : MonoBehaviour
         if (Physics.Raycast(ray, out hit))
         {
             IHitTarget hitInfo = interactionMesh.GetHitTarget(hit.triangleIndex);
-            debugCube.position = hitInfo.TargetCell.CellPosition;
-            if(Input.GetMouseButtonDown(0))
+            if(hitInfo.TargetCell != null)
             {
-                hitInfo.TargetCell.Filled = !hitInfo.TargetCell.Filled;
-                UpdateInteractionGrid();
+                debugCube.position = hitInfo.TargetCell.CellPosition;
+                if (Input.GetMouseButtonDown(0))
+                {
+                    hitInfo.TargetCell.Filled = !hitInfo.TargetCell.Filled;
+                    UpdateInteractionGrid();
+                }
             }
         }
     }
