@@ -1,6 +1,8 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Linq;
 using System.Net.Http.Headers;
+using System.Runtime.InteropServices.ComTypes;
 using UnityEngine;
 
 public class MainScript : MonoBehaviour
@@ -16,26 +18,41 @@ public class MainScript : MonoBehaviour
 
     private Material[,] displayGrid;
 
+    private const int loopLimit = 10000;
+
     private void Start()
     {
         theGrid = new Grid(OutputWidth, OutputHeight, Blueprints);
         displayGrid = CreateDisplayGrid(BaseMaterial);
         theGrid.FillRandomly();
     }
-
+    
     private void Update()
     {
         if(theGrid.EmptyCells.Any())
         {
-            while(theGrid.DirtyCells.Any())
+            if(theGrid.DirtyCells.Any())
             {
-                theGrid.DirtyCells.First().UpdateOptions();
+                UpdateOptions();
             }
-
-            theGrid.FillLowestEntropy();
-            UpdateDisplay();
+            else
+            {
+                theGrid.FillLowestEntropy();
+                UpdateDisplay();
+            }
         }
     }
+
+    private void UpdateOptions()
+    {
+        int updateCount = 0;
+        while(theGrid.DirtyCells.Any() && updateCount < loopLimit)
+        {
+            theGrid.DirtyCells.First().UpdateOptions();
+            updateCount++;
+        }
+    }
+
     private Material[,] CreateDisplayGrid(Material sourceMat)
     {
         Material[,] ret = new Material[OutputWidth, OutputHeight];

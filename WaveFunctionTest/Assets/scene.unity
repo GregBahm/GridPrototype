@@ -246,11 +246,6 @@ MonoBehaviour:
     Down: 1
     Left: 7
     Right: 1
-  - Texture: {fileID: 2800000, guid: 5e8648549d2b5fb458d25c9f15a2876a, type: 3}
-    Up: 3
-    Down: 1
-    Left: 7
-    Right: 1
   - Texture: {fileID: 2800000, guid: e978d6920e7052941936b35a30b82ae5, type: 3}
     Up: 1
     Down: 1
