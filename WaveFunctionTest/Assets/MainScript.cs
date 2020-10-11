@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Headers;
 using UnityEngine;
 
 public enum ConnectionType
@@ -10,7 +11,10 @@ public enum ConnectionType
     White,
     Border,
     Tree,
-    Circle
+    Circle,
+    WhiteTree,
+    LeftTree,
+    RightTree
 }
 
 [Serializable]
@@ -21,111 +25,56 @@ public class ItemBlueprint
     public ConnectionType Down;
     public ConnectionType Left;
     public ConnectionType Right;
+
+    public override string ToString()
+    {
+        return Texture.name;
+    }
 }
 
 public class MainScript : MonoBehaviour
 {
     public ItemBlueprint[] Blueprints;
-    public int SourceWidth = 4;
-    public int SourceHeight = 4;
 
     public int OutputWidth;
     public int OutputHeight;
 
     public Material BaseMaterial;
 
-    private CurrentGrid grid;
+    private Grid theGrid;
+
+    private Material[,] displayGrid;
 
     private void Start()
     {
-        GridItem[] items = GetItems();
-        grid = new CurrentGrid(OutputWidth, OutputHeight, BaseMaterial);
-        grid.SetFirstCell(items);
-        grid.UpdateDisplay();
+        theGrid = new Grid(OutputWidth, OutputHeight, Blueprints);
+        displayGrid = CreateDisplayGrid(BaseMaterial);
+
+        theGrid.Cells[0, 0].FilledWith = Blueprints[0];
     }
 
     private void Update()
     {
-        GridPoint[] points = grid.GetAvailablePoints().ToArray();
-        if (points.Any())
+        if(theGrid.EmptyCells.Any())
         {
-            grid.FillNextPointTarget(points);
-            grid.UpdateDisplay();
+            while(theGrid.DirtyCells.Any())
+            {
+                theGrid.DirtyCells.First().UpdateOptions();
+            }
+
+            theGrid.FillLowestEntropy();
+            UpdateDisplay();
         }
     }
-
-    private GridItem[] GetItems()
-    {
-        GridItem[] ret = new GridItem[Blueprints.Length];
-        for (int i = 0; i < Blueprints.Length; i++)
-        {
-            ret[i] = new GridItem(Blueprints[i].Texture);
-        }
-        for (int i = 0; i < Blueprints.Length; i++)
-        {
-            GridItem toFill = ret[i];
-            FillItem(toFill, Blueprints[i], ret);
-        }
-        return ret;
-    }
-
-    private void FillItem(GridItem toFill, ItemBlueprint toFillBlueprint, GridItem[] ret)
-    {
-        for (int i = 0; i < Blueprints.Length; i++)
-        {
-            GridItem otherItem = ret[i];
-            ItemBlueprint bluePrint = Blueprints[i];
-            FillItem(toFill, toFillBlueprint, otherItem, bluePrint);
-        }
-    }
-
-    private void FillItem(GridItem itemA, ItemBlueprint blueprintA, GridItem itemB, ItemBlueprint blueprintB)
-    {
-        if (blueprintA.Left == blueprintB.Right)
-        {
-            itemA.LeftOptions.Add(itemB);
-        }
-        if (blueprintA.Right == blueprintB.Left)
-        {
-            itemA.RightOptions.Add(itemB);
-        }
-        if (blueprintA.Up == blueprintB.Down)
-        {
-            itemA.UpOptions.Add(itemB);
-        }
-        if (blueprintA.Down == blueprintB.Up)
-        {
-            itemA.DownOptions.Add(itemB);
-        }
-    }
-}
-
-public class CurrentGrid
-{
-    private readonly int width;
-    private readonly int height;
-    public GridItem[,] Grid { get; }
-    public Material[,] DisplayGrid { get; }
-
-    public bool[,] AvailabilityGrid { get; }
-
-    public CurrentGrid(int width, int height, Material sourceMat)
-    {
-        this.width = width;
-        this.height = height;
-        Grid = new GridItem[width, height];
-        AvailabilityGrid = new bool[width, height];
-        DisplayGrid = CreateDisplayGrid(sourceMat);
-    }
-
     private Material[,] CreateDisplayGrid(Material sourceMat)
     {
-        Material[,] ret = new Material[width, height];
-        for (int x = 0; x < width; x++)
+        Material[,] ret = new Material[OutputWidth, OutputHeight];
+        for (int x = 0; x < OutputWidth; x++)
         {
-            for (int y = 0; y < height; y++)
+            for (int y = 0; y < OutputHeight; y++)
             {
                 GameObject newObj = GameObject.CreatePrimitive(PrimitiveType.Quad);
+                newObj.name = x + " " + y;
                 newObj.transform.position = new Vector3(x, y, 0);
                 Material mat = new Material(sourceMat);
                 newObj.GetComponent<MeshRenderer>().material = mat;
@@ -134,174 +83,265 @@ public class CurrentGrid
         }
         return ret;
     }
-
-    public void SetCell(int x, int y, GridItem item)
-    {
-        Grid[x, y] = item;
-        AvailabilityGrid[x, y] = false;
-        if (x < width - 1)
-            AvailabilityGrid[x + 1, y] = Grid[x + 1, y] == null;
-        if (y < height - 1)
-            AvailabilityGrid[x, y + 1] = Grid[x, y + 1] == null;
-        if (x > 0)
-            AvailabilityGrid[x - 1, y] = Grid[x - 1, y] == null;
-        if (y > 0)
-            AvailabilityGrid[x, y - 1] = Grid[x, y - 1] == null;
-    }
-
-    public void FillNextPointTarget(GridPoint[] availablePoints)
-    {
-        int randomIndex = UnityEngine.Random.Range(0, availablePoints.Length - 1);
-        GridPoint toDo = availablePoints[randomIndex];
-        DoCell(toDo.X, toDo.Y);
-    }
-
-    private void DoCell(int x, int y)
-    {
-        CellFiller cellFiller = GetCellFiller(x, y);
-        GridItem item = cellFiller.GetSolution();
-        SetCell(x, y, item);
-    }
-
-    private CellFiller GetCellFiller(int x, int y)
-    {
-        GridItem up = null;
-        GridItem left = null;
-        GridItem down = null;
-        GridItem right = null;
-        if (y < height - 1)
-            up = Grid[x, y + 1];
-        if (x > 0)
-            left = Grid[x - 1, y];
-        if (y > 0)
-            down = Grid[x, y - 1];
-        if (x < width - 1)
-            right = Grid[x + 1, y];
-        return new CellFiller(up, left, down, right);
-    }
-
-    public IEnumerable<GridPoint> GetAvailablePoints()
-    {
-        for (int x = 0; x < width; x++)
-        {
-            for (int y = 0; y < height; y++)
-            {
-                if (AvailabilityGrid[x, y])
-                    yield return new GridPoint(x, y);
-            }
-        }
-    }
-
     internal void UpdateDisplay()
     {
-        for (int x = 0; x < width; x++)
+        for (int x = 0; x < OutputWidth; x++)
         {
-            for (int y = 0; y < height; y++)
+            for (int y = 0; y < OutputHeight; y++)
             {
-                if (Grid[x, y] != null)
+                GridCell cell = theGrid.Cells[x, y];
+                if (cell.FilledWith != null)
                 {
-                    DisplayGrid[x, y].SetTexture("_MainTex", Grid[x, y].Texture);
+                    displayGrid[x, y].SetTexture("_MainTex", cell.FilledWith.Texture);
+                    displayGrid[x, y].SetColor("_Color", Color.white);
                 }
-                Color color = AvailabilityGrid[x, y] ? Color.red : Color.white;
-                DisplayGrid[x, y].SetColor("_Color", color);
+                else
+                {
+                    displayGrid[x, y].SetColor("_Color", Color.cyan);
+                }
             }
         }
     }
+}
+public interface IGridCell
+{
+    bool IsDirty { get; set; }
+    bool DoesLeftConnectTo(ConnectionType type);
+    bool DoesRightConnectTo(ConnectionType type);
+    bool DoesUpConnectTo(ConnectionType type);
+    bool DoesDownConnectTo(ConnectionType type);
+}
 
-    internal void SetFirstCell(GridItem[] items)
+public class PsuedoCell : IGridCell
+{
+    public bool IsDirty
     {
-        int randomIndex = UnityEngine.Random.Range(0, items.Length);
-        int randomX = UnityEngine.Random.Range(0, width);
-        int randomY = UnityEngine.Random.Range(0, height);
-        SetCell(randomX, randomY, items[randomIndex]);
+        get { return false; }
+        set { }
+    }
+
+    public static IGridCell Instance { get; } = new PsuedoCell();
+
+    public bool DoesDownConnectTo(ConnectionType type)
+    {
+        return true;
+    }
+
+    public bool DoesLeftConnectTo(ConnectionType type)
+    {
+        return true;
+    }
+
+    public bool DoesRightConnectTo(ConnectionType type)
+    {
+        return true;
+    }
+
+    public bool DoesUpConnectTo(ConnectionType type)
+    {
+        return true;
     }
 }
 
-public struct GridPoint
+public class GridCell : IGridCell
 {
+    private readonly Grid grid;
+
     public int X { get; }
     public int Y { get; }
 
-    public GridPoint(int x, int y)
+    public bool IsDirty
     {
+        get 
+        {
+            if (FilledWith != null)
+                return false;
+            return grid.DirtyCells.Contains(this); 
+        }
+        set
+        {
+            if(FilledWith == null)
+            {
+                if (value)
+                {
+                    grid.DirtyCells.Add(this);
+                }
+                else
+                {
+                    grid.DirtyCells.Remove(this);
+                }
+            }
+        }
+    }
+
+    private ItemBlueprint filledWIth;
+    public ItemBlueprint FilledWith
+    {
+        get { return filledWIth; }
+        set
+        {
+            filledWIth = value;
+            if(value != null)
+            {
+                Options = new ItemBlueprint[] { value };
+                grid.EmptyCells.Remove(this);
+                grid.DirtyCells.Remove(this);
+            }
+            DirtyNeighbors();
+        }
+    }
+
+    public IReadOnlyList<ItemBlueprint> Options { get; private set; }
+
+    public IGridCell LeftNeighbor { get; private set; }
+    public IGridCell RightNeighbor { get; private set; }
+    public IGridCell UpNeighbor { get; private set; }
+    public IGridCell DownNeighbor { get; private set; }
+
+    public GridCell(Grid grid, int x, int y, IEnumerable<ItemBlueprint> options)
+    {
+        this.grid = grid;
         X = x;
         Y = y;
+        Options = options.ToList();
+    }
+
+    public void SetNeighbors(int gridWidth, int gridHeight, GridCell[,] cells)
+    {
+        LeftNeighbor = X > 0 ? cells[X - 1, Y] : PsuedoCell.Instance;
+        RightNeighbor = X < gridWidth -1 ? cells[X + 1, Y] : PsuedoCell.Instance;
+        DownNeighbor = Y > 0 ? cells[X, Y - 1] : PsuedoCell.Instance;
+        UpNeighbor = Y < gridHeight -1 ? cells[X, Y + 1] : PsuedoCell.Instance;
+    }
+
+    public void UpdateOptions()
+    {
+        if(!IsDirty)
+        {
+            throw new Exception("I shouldn't be updating. I'm already clean.");
+        }
+        List<ItemBlueprint> validOptions = new List<ItemBlueprint>();
+        foreach (ItemBlueprint option in Options)
+        {
+            bool isValid = GetIsOptionValid(option);
+            if(isValid)
+            {
+                validOptions.Add(option);
+            }
+            else
+            {
+                DirtyNeighbors();
+            }
+        }
+        if(!validOptions.Any())
+        {
+            throw new Exception("I don't have any valid options!");
+        }
+        Options = validOptions;
+        IsDirty = false;
+    }
+
+    private void DirtyNeighbors()
+    {
+        LeftNeighbor.IsDirty = true;
+        RightNeighbor.IsDirty = true;
+        UpNeighbor.IsDirty = true;
+        DownNeighbor.IsDirty = true;
+    }
+
+    private bool GetIsOptionValid(ItemBlueprint item)
+    {
+        return UpNeighbor.DoesDownConnectTo(item.Up)
+            && DownNeighbor.DoesUpConnectTo(item.Down)
+            && LeftNeighbor.DoesRightConnectTo(item.Left)
+            && RightNeighbor.DoesLeftConnectTo(item.Right);
+    }
+
+    public bool DoesLeftConnectTo(ConnectionType type)
+    {
+        return Options.Any(item => item.Left == type);
+    }
+
+    public bool DoesRightConnectTo(ConnectionType type)
+    {
+        return Options.Any(item => item.Right == type);
+    }
+
+    public bool DoesUpConnectTo(ConnectionType type)
+    {
+        return Options.Any(item => item.Up == type);
+    }
+
+    public bool DoesDownConnectTo(ConnectionType type)
+    {
+        return Options.Any(item => item.Down == type);
+    }
+    internal void FillSelfWithRandomOption()
+    {
+        ItemBlueprint[] optionsArray = Options.ToArray();
+        int rand = UnityEngine.Random.Range(0, optionsArray.Length);
+        FilledWith = optionsArray[rand];
     }
 }
 
-public class CellFiller
+public class Grid
 {
-    public GridItem Up { get; }
-    public GridItem Left { get; }
-    public GridItem Right { get; }
-    public GridItem Down { get; }
+    public HashSet<GridCell> DirtyCells { get; }
 
-    public CellFiller(GridItem up, GridItem left, GridItem down, GridItem right)
+    public int Width { get; }
+    public int Height { get; }
+
+    public HashSet<GridCell> EmptyCells { get; } = new HashSet<GridCell>();
+    public GridCell[,] Cells { get; }
+    public Grid(int width, int height, IEnumerable<ItemBlueprint> blueprints)
     {
-        if (up == null && left == null && right == null && down == null)
-        {
-            throw new Exception("Trying to make a cell filler surrounded by nulls");
-        }
-        Up = up;
-        Left = left;
-        Down = down;
-        Right = right;
+        Width = width;
+        Height = height;
+        Cells = GetCells(blueprints);
+        EmptyCells = GetAllCells();
+        DirtyCells = GetAllCells();
     }
 
-    public GridItem[] GetAvailableOptions()
+    private HashSet<GridCell> GetAllCells()
     {
-        List<HashSet<GridItem>> optionSets = new List<HashSet<GridItem>>();
-        if (Up != null)
+        HashSet<GridCell> ret = new HashSet<GridCell>();
+        for (int x = 0; x < Width; x++)
         {
-            optionSets.Add(Up.DownOptions);
-        }
-        if (Left != null)
-        {
-            optionSets.Add(Left.RightOptions);
-        }
-        if (Right != null)
-        {
-            optionSets.Add(Right.LeftOptions);
-        }
-        if (Down != null)
-        {
-            optionSets.Add(Down.UpOptions);
-        }
-
-        GridItem[] ret = optionSets[0].ToArray();
-        if (optionSets.Count > 1)
-        {
-            foreach (HashSet<GridItem> item in optionSets.Skip(1))
+            for (int y = 0; y < Height; y++)
             {
-                ret = ret.Intersect(item).ToArray();
+                ret.Add(Cells[x, y]);
             }
         }
         return ret;
     }
 
-    public GridItem GetSolution()
+    public void FillLowestEntropy()
     {
-        GridItem[] availableOptions = GetAvailableOptions();
-        if (availableOptions.Any())
-        {
-            int randomIndex = UnityEngine.Random.Range(0, availableOptions.Length - 1);
-            return availableOptions[randomIndex];
-        }
-        return null;
+        GridCell cellWithLeastOptions = EmptyCells.OrderBy(item => item.Options.Count).First();
+        cellWithLeastOptions.FillSelfWithRandomOption();
     }
-}
 
-
-public class GridItem
-{
-    public Texture2D Texture { get; }
-    public HashSet<GridItem> RightOptions { get; } = new HashSet<GridItem>();
-    public HashSet<GridItem> LeftOptions { get; } = new HashSet<GridItem>();
-    public HashSet<GridItem> UpOptions { get; } = new HashSet<GridItem>();
-    public HashSet<GridItem> DownOptions { get; } = new HashSet<GridItem>();
-
-    public GridItem(Texture2D texture)
+    public void FillRandomly()
     {
-        Texture = texture;
+        int randomIndex = UnityEngine.Random.Range(0, EmptyCells.Count);
+        GridCell cell = EmptyCells.ElementAt(randomIndex);
+        cell.FillSelfWithRandomOption();
+    }
+
+    private GridCell[,] GetCells(IEnumerable<ItemBlueprint> options)
+    {
+        GridCell[,] ret = new GridCell[Width, Height];
+        for (int x = 0; x < Width; x++)
+        {
+            for (int y = 0; y < Height; y++)
+            {
+                ret[x, y] = new GridCell(this, x, y, options);
+            }
+        }
+        foreach (GridCell item in ret)
+        {
+            item.SetNeighbors(Width, Height, ret);
+        }
+        return ret;
     }
 }

@@ -231,8 +231,26 @@ MonoBehaviour:
     Down: 2
     Left: 0
     Right: 0
-  SourceWidth: 4
-  SourceHeight: 4
+  - Texture: {fileID: 2800000, guid: cf7cf147fa44311428b336ecb8f19061, type: 3}
+    Up: 3
+    Down: 3
+    Left: 6
+    Right: 7
+  - Texture: {fileID: 2800000, guid: 62d9b282e35f44d4781c16ef5aa18ed7, type: 3}
+    Up: 1
+    Down: 1
+    Left: 1
+    Right: 6
+  - Texture: {fileID: 2800000, guid: 2b40896e390e1b640acc247323e49e4c, type: 3}
+    Up: 1
+    Down: 1
+    Left: 7
+    Right: 1
+  - Texture: {fileID: 2800000, guid: 5e8648549d2b5fb458d25c9f15a2876a, type: 3}
+    Up: 3
+    Down: 1
+    Left: 7
+    Right: 1
   OutputWidth: 20
   OutputHeight: 20
   BaseMaterial: {fileID: 2100000, guid: 1da1a3e0c29bbda4391f04c53b7f2a31, type: 2}
