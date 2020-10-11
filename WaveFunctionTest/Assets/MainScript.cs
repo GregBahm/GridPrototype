@@ -20,8 +20,7 @@ public class MainScript : MonoBehaviour
     {
         theGrid = new Grid(OutputWidth, OutputHeight, Blueprints);
         displayGrid = CreateDisplayGrid(BaseMaterial);
-
-        theGrid.Cells[0, 0].FilledWith = Blueprints[0];
+        theGrid.FillRandomly();
     }
 
     private void Update()

@@ -27,4 +27,6 @@
     {
         return true;
     }
+
+    public void ResetOptions() { }
 }

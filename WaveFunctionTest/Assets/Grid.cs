@@ -1,8 +1,11 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 
 public class Grid
 {
+    public IReadOnlyList<ItemBlueprint> AllOptions { get; }
+
     public HashSet<GridCell> DirtyCells { get; }
 
     public int Width { get; }
@@ -12,9 +15,10 @@ public class Grid
     public GridCell[,] Cells { get; }
     public Grid(int width, int height, IEnumerable<ItemBlueprint> blueprints)
     {
+        AllOptions = blueprints.ToList();
         Width = width;
         Height = height;
-        Cells = GetCells(blueprints);
+        Cells = GetCells();
         EmptyCells = GetAllCells();
         DirtyCells = GetAllCells();
     }
@@ -45,14 +49,14 @@ public class Grid
         cell.FillSelfWithRandomOption();
     }
 
-    private GridCell[,] GetCells(IEnumerable<ItemBlueprint> options)
+    private GridCell[,] GetCells()
     {
         GridCell[,] ret = new GridCell[Width, Height];
         for (int x = 0; x < Width; x++)
         {
             for (int y = 0; y < Height; y++)
             {
-                ret[x, y] = new GridCell(this, x, y, options);
+                ret[x, y] = new GridCell(this, x, y, AllOptions);
             }
         }
         foreach (GridCell item in ret)

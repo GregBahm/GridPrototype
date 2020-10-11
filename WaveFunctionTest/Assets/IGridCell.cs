@@ -5,4 +5,5 @@
     bool DoesRightConnectTo(ConnectionType type);
     bool DoesUpConnectTo(ConnectionType type);
     bool DoesDownConnectTo(ConnectionType type);
+    void ResetOptions();
 }

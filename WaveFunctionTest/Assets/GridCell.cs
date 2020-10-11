@@ -82,7 +82,7 @@ public class GridCell : IGridCell
         List<ItemBlueprint> validOptions = new List<ItemBlueprint>();
         foreach (ItemBlueprint option in Options)
         {
-            bool isValid = GetIsOptionValid(option);
+            bool isValid = GetIsValidByPlacement(option);
             if(isValid)
             {
                 validOptions.Add(option);
@@ -94,10 +94,29 @@ public class GridCell : IGridCell
         }
         if(!validOptions.Any())
         {
-            throw new Exception("I don't have any valid options!");
+            HandleContradiction();
         }
-        Options = validOptions;
-        IsDirty = false;
+        else
+        {
+            Options = validOptions;
+            IsDirty = false;
+        }
+    }
+
+    public void ResetOptions()
+    {
+        Options = grid.AllOptions;
+        IsDirty = true;
+        FilledWith = null;
+    }
+
+    private void HandleContradiction()
+    {
+        ResetOptions();
+        LeftNeighbor.ResetOptions();
+        RightNeighbor.ResetOptions();
+        UpNeighbor.ResetOptions();
+        DownNeighbor.ResetOptions();
     }
 
     private void DirtyNeighbors()
@@ -108,12 +127,15 @@ public class GridCell : IGridCell
         DownNeighbor.IsDirty = true;
     }
 
-    private bool GetIsOptionValid(ItemBlueprint item)
+    /// <summary>
+    /// Checks that the neighbors of the cell allow this option
+    /// </summary>
+    private bool GetIsValidByPlacement(ItemBlueprint item)
     {
         return UpNeighbor.DoesDownConnectTo(item.Up)
-            && DownNeighbor.DoesUpConnectTo(item.Down)
-            && LeftNeighbor.DoesRightConnectTo(item.Left)
-            && RightNeighbor.DoesLeftConnectTo(item.Right);
+               && DownNeighbor.DoesUpConnectTo(item.Down)
+               && LeftNeighbor.DoesRightConnectTo(item.Left)
+               && RightNeighbor.DoesLeftConnectTo(item.Right);
     }
 
     public bool DoesLeftConnectTo(ConnectionType type)
@@ -135,6 +157,7 @@ public class GridCell : IGridCell
     {
         return Options.Any(item => item.Down == type);
     }
+
     internal void FillSelfWithRandomOption()
     {
         ItemBlueprint[] optionsArray = Options.ToArray();
