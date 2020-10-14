@@ -1,4 +1,5 @@
 ﻿using GameGrid;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +9,6 @@ using UnityEngine.UIElements;
 
 namespace MeshMaking
 {
-
     public class InteractionMesh
     {
         private readonly List<IHitTarget> hitTable = new List<IHitTarget>();
@@ -45,12 +45,15 @@ namespace MeshMaking
                     hitTable.Add(triangle);
                 }
             }
+            Mesh.uv = vertTable.GetUvs();
             Mesh.triangles = triangles.ToArray();
+            Mesh.RecalculateBounds();
         }
 
         private class VertTable
         {
             private readonly List<Vector3> pointPositions = new List<Vector3>();
+            private readonly List<Vector2> uvs = new List<Vector2>();
             private readonly Dictionary<string, int> indexTable = new Dictionary<string, int>();
 
             public VertTable(IEnumerable<IMeshContributor> meshContributors)
@@ -61,6 +64,7 @@ namespace MeshMaking
                     {
                         indexTable.Add(point.Key, pointPositions.Count);
                         pointPositions.Add(point.Position);
+                        uvs.Add(point.Uv);
                     }
                 }
             }
@@ -73,6 +77,11 @@ namespace MeshMaking
             public int GetVertIndex(IMeshBuilderPoint point)
             {
                 return indexTable[point.Key];
+            }
+
+            internal Vector2[] GetUvs()
+            {
+                return uvs.ToArray();
             }
         }
 

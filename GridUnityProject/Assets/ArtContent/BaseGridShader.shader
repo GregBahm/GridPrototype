@@ -12,9 +12,9 @@
 		UsePass "Legacy Shaders/VertexLit/SHADOWCASTER"
         Tags { "RenderType"="Opaque" }
         LOD 100
-
         Pass
         {
+            Tags {"LightMode" = "ForwardBase"}
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
@@ -66,7 +66,7 @@
                 float grid = pow(pow(i.uv.x, _TuneA) + pow(i.uv.y, _TuneA), _TuneB);
                 grid = saturate(grid - _TuneC) * 1;
                 //grid = grid * alpha;
-
+                
 				float3 ret = _Color * shadowness;
 				ret = lerp(ret, 1, grid);
 

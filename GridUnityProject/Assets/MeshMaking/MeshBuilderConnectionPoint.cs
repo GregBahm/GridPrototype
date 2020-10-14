@@ -11,6 +11,9 @@ namespace MeshMaking
         public string Key { get; }
 
         public Vector3 Position { get; }
+
+        public Vector2 Uv { get; } = Vector2.zero;
+
         public MeshBuilderConnectionPoint(VoxelCell cellA, VoxelCell cellB)
             : this(cellA, cellB, (cellA.CellPosition + cellB.CellPosition) / 2)
         { }

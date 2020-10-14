@@ -171,8 +171,8 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 0.3
-  far clip plane: 1000
+  near clip plane: 0.1
+  far clip plane: 150
   field of view: 60
   orthographic: 0
   orthographic size: 5
@@ -297,7 +297,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f587faec0a76214b93e49c82cd457d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ShowGrid: 1
+  ShowGrid: 0
   LoadLastSave: 1
   TestSave: 0
   TestLoad: 0
@@ -343,7 +343,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   scrollSpeed: 0.1
-  minZoom: 10
+  minZoom: 1
   maxZoom: 100
   orbitSpeed: 0.5
   panSpeed: 0.1
@@ -612,7 +612,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!23 &1547559394
 MeshRenderer:
   m_ObjectHideFlags: 0

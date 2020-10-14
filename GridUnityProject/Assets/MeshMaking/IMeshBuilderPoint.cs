@@ -6,5 +6,6 @@ namespace MeshMaking
     {
         string Key { get; }
         Vector3 Position { get; }
+        Vector2 Uv { get; }
     }
 }

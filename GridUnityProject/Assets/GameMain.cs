@@ -12,7 +12,7 @@ public class GameMain : MonoBehaviour
     public bool TestSave;
     public bool TestLoad;
 
-    private InteractionMesh interactionMesh;
+    public InteractionMesh InteractionMesh { get; private set; }
 
     [SerializeField]
     private GameObject InteractionMeshObject;
@@ -25,9 +25,9 @@ public class GameMain : MonoBehaviour
     private void Start()
     {
         MainGrid = LoadLastSave ? GroundLoader.Load() : GroundLoader.LoadDefault();
-        interactionMesh = new InteractionMesh(new Mesh());
+        InteractionMesh = new InteractionMesh(new Mesh());
         UpdateInteractionGrid();
-        InteractionMeshObject.GetComponent<MeshFilter>().sharedMesh = interactionMesh.Mesh;
+        InteractionMeshObject.GetComponent<MeshFilter>().sharedMesh = InteractionMesh.Mesh;
     }
 
     private void Update()
@@ -48,33 +48,13 @@ public class GameMain : MonoBehaviour
             MainGrid = GroundLoader.Load();
             Debug.Log("Grid Loaded");
         }
-        TestCollisionMesh();
     }
 
     public void UpdateInteractionGrid()
     {
-        interactionMesh.UpdateMesh(MainGrid);
-        InteractionMeshObject.GetComponent<MeshCollider>().sharedMesh = null;
-        InteractionMeshObject.GetComponent<MeshCollider>().sharedMesh = interactionMesh.Mesh;
-    }
-
-    private void TestCollisionMesh()
-    {
-        RaycastHit hit;
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(ray, out hit))
-        {
-            IHitTarget hitInfo = interactionMesh.GetHitTarget(hit.triangleIndex);
-            if(hitInfo.TargetCell != null)
-            {
-                debugCube.position = hitInfo.TargetCell.CellPosition;
-                if (Input.GetMouseButtonDown(0))
-                {
-                    hitInfo.TargetCell.Filled = !hitInfo.TargetCell.Filled;
-                    UpdateInteractionGrid();
-                }
-            }
-        }
+        InteractionMesh.UpdateMesh(MainGrid);
+        InteractionMeshObject.GetComponent<MeshCollider>().sharedMesh = null; // Hack to force update
+        InteractionMeshObject.GetComponent<MeshCollider>().sharedMesh = InteractionMesh.Mesh;
     }
 
     private void DoShowGrid()

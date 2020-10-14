@@ -1,4 +1,5 @@
 ﻿using Interaction;
+using MeshMaking;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -16,31 +17,29 @@ public class InteractionManager : MonoBehaviour
     [SerializeField]
     private float dragStartDistance = 2;
 
-    //private MeshInteraction meshInteraction;
     private CameraInteraction cameraInteraction;
     private GameMain gameMain;
 
-
-    private Vector3 leftMouseDownPosition;
-    private bool isDragging;
-    private bool isPanning;
+    private DragDetector leftDragDetector;
+    private DragDetector rightDragDetector;
 
     private void Start()
     {
         gameMain = GetComponent<GameMain>();
-        //meshInteraction = GetComponent<MeshInteraction>();
         gridModification = GetComponent<GridModification>();
         cameraInteraction = GetComponent<CameraInteraction>();
+        leftDragDetector = new DragDetector(dragStartDistance);
+        rightDragDetector = new DragDetector(dragStartDistance);
     }
 
     private void Update()
     {
-        DoEasing();
+        //DoEasing();
         //gridModification.DoGridModification();
+        IHitTarget potentialMeshInteraction = GetPotentialMeshInteraction();
         UpdateCursorHighlight();
-        HandleOrbit();
-        HandlePan();
-        HandleShowSelection();
+        HandleOrbit(potentialMeshInteraction);
+        HandlePan(potentialMeshInteraction);
         cameraInteraction.HandleMouseScrollwheel();
     }
 
@@ -52,73 +51,95 @@ public class InteractionManager : MonoBehaviour
         }
     }
 
-    private void HandleShowSelection()
-    {
-        if(isDragging || isPanning)
-        {
-            //meshInteraction.HideSelectionMesh();
-        }
-        else
-        {
-            //meshInteraction.ShowSelectionMesh();
-        }
-    }
-
     private void UpdateCursorHighlight()
     {
         Vector3 cursorPos = GetGroundPositionAtScreenpoint(Input.mousePosition);
         Shader.SetGlobalVector("_DistToCursor", cursorPos);
     }
 
-    private void HandlePan()
+    private void HandlePan(IHitTarget potentialMeshInteraction)
     {
-        if(Input.GetMouseButton(1))
+        if (Input.GetMouseButton(1))
         {
-            if(Input.GetMouseButtonDown(1))
+            if (rightDragDetector.IsDragging)
             {
-                cameraInteraction.StartPan();
+                cameraInteraction.ContinuePan();
             }
-            cameraInteraction.ContinuePan();
+            else
+            {
+                if (Input.GetMouseButtonDown(1))
+                {
+                    rightDragDetector.DragStartPos = Input.mousePosition;
+                    cameraInteraction.StartPan();
+                }
+                else
+                {
+                    rightDragDetector.UpdateIsDragging();
+                }
+            }
         }
-        isPanning = Input.GetMouseButton(1);
+        else
+        {
+            HandleRightMeshClicks(potentialMeshInteraction);
+            rightDragDetector.IsDragging = false;
+        }
     }
 
-    private void HandleOrbit()
+    private void HandleOrbit(IHitTarget potentialMeshInteraction)
     {
         if (Input.GetMouseButton(0))
         {
-            if(isDragging)
+            if(leftDragDetector.IsDragging)
             {
-                //meshInteraction.HideSelectionMesh();
                 cameraInteraction.ContinueOrbit();
             }
             else
             {
                 if (Input.GetMouseButtonDown(0))
                 {
-                    leftMouseDownPosition = Input.mousePosition;
+                    leftDragDetector.DragStartPos = Input.mousePosition;
                     cameraInteraction.StartOrbit();
                 }
                 else
                 {
-                    isDragging = GetIsDragging();
+                    leftDragDetector.UpdateIsDragging();
                 }
             }
         }
         else
         {
-            if (Input.GetMouseButtonUp(0) &&  !isDragging)
-            {
-                //meshInteraction.PlaceMesh();
-            }
-            isDragging = false;
-            //meshInteraction.ShowSelectionMesh();
+            HandleLeftMeshClicks(potentialMeshInteraction);
+            leftDragDetector.IsDragging = false;
         }
     }
 
-    private bool GetIsDragging()
+    private IHitTarget GetPotentialMeshInteraction()
     {
-        return (leftMouseDownPosition - Input.mousePosition).magnitude > dragStartDistance; 
+        RaycastHit hit;
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        if (Physics.Raycast(ray, out hit))
+        {
+            return gameMain.InteractionMesh.GetHitTarget(hit.triangleIndex);
+        }
+        return null;
+    }
+
+    private void HandleRightMeshClicks(IHitTarget hitInfo)
+    {
+        if (Input.GetMouseButtonUp(1) && !rightDragDetector.IsDragging && hitInfo != null && hitInfo.SourceCell != null)
+        {
+            hitInfo.SourceCell.Filled = false;
+            gameMain.UpdateInteractionGrid();
+        }
+    }
+
+    private void HandleLeftMeshClicks(IHitTarget hitInfo)
+    {
+        if (Input.GetMouseButtonUp(0) && !leftDragDetector.IsDragging && hitInfo != null && hitInfo.TargetCell != null)
+        {
+            hitInfo.TargetCell.Filled = true;
+            gameMain.UpdateInteractionGrid();
+        }
     }
 
     public static Vector3 GetGroundPositionAtScreenpoint(Vector3 screenPoint)
@@ -127,5 +148,22 @@ public class InteractionManager : MonoBehaviour
         float enter;
         groundPlane.Raycast(ray, out enter);
         return ray.GetPoint(enter);
+    }
+
+    private class DragDetector
+    {
+        public Vector3 DragStartPos { get; set; }
+        public bool IsDragging { get; set; }
+        private readonly float dragStartDistance;
+
+        public DragDetector(float dragStartDistance)
+        {
+            this.dragStartDistance = dragStartDistance;
+        }
+
+        public void UpdateIsDragging()
+        {
+            IsDragging = (DragStartPos - Input.mousePosition).magnitude > dragStartDistance;
+        }
     }
 }
