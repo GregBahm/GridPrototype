@@ -57,6 +57,11 @@ namespace GameGrid
             IEnumerable<GroundEdge> edges = newEdges.Select(item => new GroundEdge(this, Points[item.PointAIndex], Points[item.PointBIndex])).ToArray();
             AddEdges(edges);
             BorderEdges = Edges.Where(item => item.IsBorder).ToArray();
+
+            if(Edges.Any(edge => edge.Quads.Count() == 0 || edge.Quads.Count() > 2))
+            {
+                throw new Exception("Malformed data.");
+            }
         }
 
         private void AddPoints(IEnumerable<GroundPoint> newPoints)

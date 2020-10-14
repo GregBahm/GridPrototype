@@ -1,17 +1,17 @@
-﻿using Interaction;
+﻿using Assets.GameGrid;
+using Interaction;
 using MeshMaking;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 [RequireComponent(typeof(GameMain))]
-[RequireComponent(typeof(GridModification))]
 [RequireComponent(typeof(CameraInteraction))]
 public class InteractionManager : MonoBehaviour
 {
-    private GridModification gridModification;
     private static readonly Plane groundPlane = new Plane(Vector3.up, 0);
 
     [SerializeField]
@@ -23,10 +23,17 @@ public class InteractionManager : MonoBehaviour
     private DragDetector leftDragDetector;
     private DragDetector rightDragDetector;
 
+    public bool GroundModificationMode;
+
+    [Range(-1, 1)]
+    public float ExpansionAngleThreshold;
+
+    [Range(0, 1)]
+    public float Debug;
+
     private void Start()
     {
         gameMain = GetComponent<GameMain>();
-        gridModification = GetComponent<GridModification>();
         cameraInteraction = GetComponent<CameraInteraction>();
         leftDragDetector = new DragDetector(dragStartDistance);
         rightDragDetector = new DragDetector(dragStartDistance);
@@ -34,12 +41,26 @@ public class InteractionManager : MonoBehaviour
 
     private void Update()
     {
-        //DoEasing();
-        //gridModification.DoGridModification();
-        IHitTarget potentialMeshInteraction = GetPotentialMeshInteraction();
+        if(GroundModificationMode)
+        {
+            DoEasing();
+            GridExpander expander = new GridExpander(gameMain.MainGrid, ExpansionAngleThreshold, Debug);
+            expander.PreviewExpansion(gameMain.MainGrid);
+            if(Input.GetMouseButtonUp(0))
+            {
+                gameMain.MainGrid.AddToMesh(expander.Points, expander.Edges);
+                gameMain.UpdateInteractionGrid();
+            }
+        }
+        else
+        {
+            IHitTarget potentialMeshInteraction = GetPotentialMeshInteraction();
+            HandleRightMeshClicks(potentialMeshInteraction);
+            HandleLeftMeshClicks(potentialMeshInteraction);
+        }
         UpdateCursorHighlight();
-        HandleOrbit(potentialMeshInteraction);
-        HandlePan(potentialMeshInteraction);
+        HandleOrbit();
+        HandlePan();
         cameraInteraction.HandleMouseScrollwheel();
     }
 
@@ -49,6 +70,10 @@ public class InteractionManager : MonoBehaviour
         {
             gameMain.MainGrid.DoEase();
         }
+        if(Input.GetMouseButtonUp(1))
+        {
+            gameMain.UpdateInteractionGrid();
+        }
     }
 
     private void UpdateCursorHighlight()
@@ -57,7 +82,7 @@ public class InteractionManager : MonoBehaviour
         Shader.SetGlobalVector("_DistToCursor", cursorPos);
     }
 
-    private void HandlePan(IHitTarget potentialMeshInteraction)
+    private void HandlePan()
     {
         if (Input.GetMouseButton(1))
         {
@@ -80,12 +105,11 @@ public class InteractionManager : MonoBehaviour
         }
         else
         {
-            HandleRightMeshClicks(potentialMeshInteraction);
             rightDragDetector.IsDragging = false;
         }
     }
 
-    private void HandleOrbit(IHitTarget potentialMeshInteraction)
+    private void HandleOrbit()
     {
         if (Input.GetMouseButton(0))
         {
@@ -108,7 +132,6 @@ public class InteractionManager : MonoBehaviour
         }
         else
         {
-            HandleLeftMeshClicks(potentialMeshInteraction);
             leftDragDetector.IsDragging = false;
         }
     }
