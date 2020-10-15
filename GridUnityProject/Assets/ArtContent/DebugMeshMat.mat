@@ -70,11 +70,11 @@ Material:
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
-    - _TuneA: 8
-    - _TuneB: 0.3
-    - _TuneC: 0.9
+    - _TuneA: 0.28
+    - _TuneB: 7.45
+    - _TuneC: 0
     - _UVSec: 0
     - _ZWrite: 1
     m_Colors:
-    - _Color: {r: 0.4433962, g: 0.4433962, b: 0.4433962, a: 1}
+    - _Color: {r: 0.4503382, g: 0.66807675, b: 0.8301887, a: 1}
     - _EmissionColor: {r: 0.5283019, g: 0.5283019, b: 0.5283019, a: 1}

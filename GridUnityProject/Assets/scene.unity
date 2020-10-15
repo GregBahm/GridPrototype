@@ -26,7 +26,7 @@ RenderSettings:
   m_AmbientIntensity: 1
   m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
-  m_SkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
+  m_SkyboxMaterial: {fileID: 2100000, guid: 449e6c437f764744099a4f60828168f3, type: 2}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
@@ -277,7 +277,6 @@ GameObject:
   - component: {fileID: 536624978}
   - component: {fileID: 536624981}
   - component: {fileID: 536624980}
-  - component: {fileID: 536624982}
   m_Layer: 0
   m_Name: MainScript
   m_TagString: Untagged
@@ -330,6 +329,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   dragStartDistance: 2
+  GroundModificationMode: 0
+  ExpansionAngleThreshold: -0.83
 --- !u!114 &536624981
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -347,20 +348,6 @@ MonoBehaviour:
   maxZoom: 100
   orbitSpeed: 0.5
   panSpeed: 0.1
---- !u!114 &536624982
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 536624977}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8c167ebede0821b41a944fb18b3c136d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  expansionChainLength: 2
-  expansionDistance: 1
 --- !u!1 &581741545
 GameObject:
   m_ObjectHideFlags: 0
@@ -389,7 +376,7 @@ Light:
   serializedVersion: 10
   m_Type: 1
   m_Shape: 0
-  m_Color: {r: 1, g: 0.95686275, b: 0.8392157, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Intensity: 1
   m_Range: 10
   m_SpotAngle: 30
@@ -400,7 +387,7 @@ Light:
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
-    m_Bias: 0.05
+    m_Bias: 0.1
     m_NormalBias: 0.4
     m_NearPlane: 0.2
     m_CullingMatrixOverride:
