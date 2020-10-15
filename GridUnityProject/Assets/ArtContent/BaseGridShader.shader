@@ -4,8 +4,8 @@
     {
 		_Color("Color", Color) = (1,1,1,1)
         _TuneA("Tune A", Float) = 8
-        _TuneB("Tune B", Range(0, 1)) = .3
-        _TuneC("Tune C", Range(0, 1)) = .9 
+        _TuneB("Tune B", Range(0, 10)) = .3
+        _TuneC("Tune C", Range(0, 100)) = .9 
     }
     SubShader
     { 
@@ -43,6 +43,7 @@
                 float4 vertex : SV_POSITION;
                 float distToCursor : TEXCOORD1;
 				float4 _ShadowCoord : TEXCOORD2;
+                float3 worldPos : TEXCOORD3;
             };
 
             v2f vert (appdata v)
@@ -53,6 +54,7 @@
                 float3 worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
                 o.distToCursor = length(worldPos - _DistToCursor);
 				o._ShadowCoord = ComputeScreenPos(o.vertex);
+                o.worldPos = worldPos;
                 return o;
             }
 
@@ -68,7 +70,10 @@
                 //grid = grid * alpha;
                 
 				float3 ret = _Color * shadowness;
-				ret = lerp(ret, 1, grid);
+                ret += i.worldPos.y * .1;
+                float height = saturate(1 - i.worldPos.y * 10);
+                float3 lineVal = lerp(ret, 1, alpha * .2 * height);
+				ret = lerp(ret, lineVal, grid);
 
                 return float4(ret, 1);
             }

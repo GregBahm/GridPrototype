@@ -28,9 +28,6 @@ public class InteractionManager : MonoBehaviour
     [Range(-1, 1)]
     public float ExpansionAngleThreshold;
 
-    [Range(0, 1)]
-    public float Debug;
-
     private void Start()
     {
         gameMain = GetComponent<GameMain>();
@@ -44,7 +41,7 @@ public class InteractionManager : MonoBehaviour
         if(GroundModificationMode)
         {
             DoEasing();
-            GridExpander expander = new GridExpander(gameMain.MainGrid, ExpansionAngleThreshold, Debug);
+            GridExpander expander = new GridExpander(gameMain.MainGrid, ExpansionAngleThreshold);
             expander.PreviewExpansion(gameMain.MainGrid);
             if(Input.GetMouseButtonUp(0))
             {

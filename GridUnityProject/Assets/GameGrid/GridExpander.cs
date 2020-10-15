@@ -16,9 +16,9 @@ namespace Assets.GameGrid
         public IEnumerable<GroundPointBuilder> Points { get; }
         public IEnumerable<GroundEdgeBuilder> Edges { get; }
 
-        public GridExpander(MainGrid grid, float angleThreshold, float debug)
+        public GridExpander(MainGrid grid, float angleThreshold)
         {
-            ExpanderPoint[] expanderPoints = GetExpanderPoints(grid, angleThreshold, debug).ToArray();
+            ExpanderPoint[] expanderPoints = GetExpanderPoints(grid, angleThreshold).ToArray();
 
             List<GroundPointBuilder> points = new List<GroundPointBuilder>();
             List<GroundEdgeBuilder> edges = new List<GroundEdgeBuilder>();
@@ -52,21 +52,21 @@ namespace Assets.GameGrid
             }
         }
 
-        private IEnumerable<ExpanderPoint> GetExpanderPoints(MainGrid grid, float angleThreshold, float debug)
+        private IEnumerable<ExpanderPoint> GetExpanderPoints(MainGrid grid, float angleThreshold)
         {
             GroundEdge[] borderEdges = grid.BorderEdges.ToArray();
             
             GroundEdge currentEdge = borderEdges.First();
             GroundPoint currentPoint = currentEdge.PointA;
             int pointIndex = grid.Points.Count;
-            ExpanderPoint newPoint = new ExpanderPoint(currentEdge, currentPoint, 1, angleThreshold, grid.Points.Count, debug);
+            ExpanderPoint newPoint = new ExpanderPoint(currentEdge, currentPoint, 1, angleThreshold, grid.Points.Count);
             yield return newPoint;
             for (int i = 1; i < borderEdges.Length; i++)
             {
                 pointIndex += newPoint.Points.Count;
                 currentEdge = GetOtherBorderEdge(currentEdge, currentPoint);
                 currentPoint = currentEdge.GetOtherPoint(currentPoint);
-                newPoint = new ExpanderPoint(currentEdge, currentPoint, 1, angleThreshold, pointIndex, debug);
+                newPoint = new ExpanderPoint(currentEdge, currentPoint, 1, angleThreshold, pointIndex);
                 yield return newPoint;
             }
         }
@@ -94,7 +94,7 @@ namespace Assets.GameGrid
             public ReadOnlyCollection<GroundPointBuilder> Points { get; }
             public ReadOnlyCollection<GroundEdgeBuilder> SpokeEdges { get; }
 
-            public ExpanderPoint(GroundEdge baseEdge, GroundPoint basePoint, float expansionDistance, float angleThreshold, int vertStartIndex, float debug)
+            public ExpanderPoint(GroundEdge baseEdge, GroundPoint basePoint, float expansionDistance, float angleThreshold, int vertStartIndex)
             {
                 BasePoint = basePoint;
                 this.angleThreshold = angleThreshold;
@@ -131,7 +131,12 @@ namespace Assets.GameGrid
                 public ExpansionComponet(GroundEdge edge, GroundPoint basePoint)
                 {
                     Vector2 quadCenter = edge.Quads.First().Center;
-                    Offset = (edge.MidPoint - quadCenter).normalized;
+                    Vector2 edgeSlope = (edge.GetOtherPoint(basePoint).Position - basePoint.Position).normalized;
+                    Vector2 perpendicular = new Vector2(-edgeSlope.y, edgeSlope.x);
+                    Vector2 toCenter = (basePoint.Position - quadCenter).normalized;
+                    float dotToCenter = Vector2.Dot(perpendicular, toCenter);
+
+                    Offset = dotToCenter > 0 ? perpendicular : -perpendicular;
                     PointPos = basePoint.Position + Offset;
                 }
             }

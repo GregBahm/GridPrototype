@@ -12,11 +12,13 @@ namespace MeshMaking
 
         public Vector3 Position { get; }
 
-        public Vector2 Uv { get; } = Vector2.zero;
+        public Vector2 Uv { get; }
 
         public MeshBuilderConnectionPoint(VoxelCell cellA, VoxelCell cellB)
             : this(cellA, cellB, (cellA.CellPosition + cellB.CellPosition) / 2)
-        { }
+        {
+            Uv = Vector2.zero;
+        }
         public MeshBuilderConnectionPoint(VoxelCell cellA, VoxelCell cellB, Vector3 position)
         {
             bool cellAFirst = GetIsCellAFirst(cellA, cellB);
@@ -24,6 +26,7 @@ namespace MeshMaking
             CellB = cellAFirst ? cellB : cellA;
             Key = GetKey();
             Position = position;
+            Uv = Vector2.one;
         }
 
         private bool GetIsCellAFirst(VoxelCell cellA, VoxelCell cellB)
