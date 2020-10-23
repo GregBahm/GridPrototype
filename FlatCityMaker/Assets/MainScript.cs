@@ -194,6 +194,10 @@ public class GridCellBehavior : MonoBehaviour
             {
                 mat.SetTexture("_MainTex", Model.FilledWith.Texture);
             }
+            else
+            {
+                mat.SetTexture("_MainTex", null);
+            }
         }
     }
 }
@@ -271,7 +275,7 @@ public class GridCell
 
     public IReadOnlyList<CellVisualBlueprint> Options { get; private set; }
     public CellVisualBlueprint FilledWith { get; private set; }
-
+    
     private IReadOnlyCollection<Neighbor> neighbors;
 
     public GridCell(MainGrid main, int x, int y)
@@ -283,17 +287,18 @@ public class GridCell
 
     public void EstablishNeighbors(GridCell[,] cells)
     {
-        neighbors = new Neighbor[]
+        Neighbor[] neighbors = new Neighbor[]
         {
-            new Neighbor(this, cells, -1, 0, item => item.Left, item => item.Right),
-            new Neighbor(this, cells, 1, 0, item => item.Right, item => item.Left),
-            new Neighbor(this, cells, 0, 1, item => item.Up, item => item.Down),
-            new Neighbor(this, cells, 0, -1, item => item.Down, item => item.Up),
-            new Neighbor(this, cells, -1, 1, item => item.UpLeft, item => item.DownRight),
-            new Neighbor(this, cells, 1, 1, item => item.UpRight, item => item.DownLeft),
-            new Neighbor(this, cells, -1, -1, item => item.DownLeft, item => item.UpRight),
-            new Neighbor(this, cells, 1, -1, item => item.DownRight, item => item.UpLeft)
-        }.Where(item => item.Cell != null).ToList();
+            new Neighbor(this, cells, 1, 0, item => item.Left, item => item.Right),
+            new Neighbor(this, cells, -1, 0, item => item.Right, item => item.Left),
+            new Neighbor(this, cells, 0, -1, item => item.Up, item => item.Down),
+            new Neighbor(this, cells, 0, 1, item => item.Down, item => item.Up),
+            new Neighbor(this, cells, 1, -1, item => item.UpLeft, item => item.DownRight),
+            new Neighbor(this, cells, -1, -1, item => item.UpRight, item => item.DownLeft),
+            new Neighbor(this, cells, 1, 1, item => item.DownLeft, item => item.UpRight),
+            new Neighbor(this, cells, -1, 1, item => item.DownRight, item => item.UpLeft)
+        };
+        this.neighbors = neighbors.Where(item => item.Cell != null).ToList();
     }
 
     public void Reset()
@@ -306,8 +311,24 @@ public class GridCell
 
     public void UpdateOptions()
     {
-        Options = main.AllOptions.Where(OptionIsValid).ToArray();
+        int optionsCount = Options.Count;
+        Options = Options.Where(OptionIsValid).ToArray();
         main.DirtyCells.Remove(this);
+        if(Options.Count != optionsCount)
+        {
+            foreach (Neighbor neighbor in neighbors)
+            {
+                neighbor.Cell.SetDirty();
+            }
+        }
+    }
+
+    private void SetDirty()
+    {
+        if(FilledWith == null)
+        {
+            main.DirtyCells.Add(this);
+        }
     }
 
     private bool OptionIsValid(CellVisualBlueprint blueprint)
@@ -322,9 +343,10 @@ public class GridCell
         int rand = UnityEngine.Random.Range(0, optionsArray.Length);
         FilledWith = optionsArray[rand];
         main.EmptyCells.Remove(this);
-        foreach (Neighbor neighbor in neighbors.Where(item => item.Cell.FilledWith == null))
+        main.DirtyCells.Remove(this);
+        foreach (Neighbor neighbor in neighbors)
         {
-            main.DirtyCells.Add(neighbor.Cell);
+            neighbor.Cell.SetDirty();
         }
     }
 
@@ -350,10 +372,10 @@ public class GridCell
             int width = cells.GetLength(0);
             int height = cells.GetLength(1);
 
-            bool spaceLeft = xIndex > 0;
-            bool spaceRight = xIndex < width - 1;
-            bool spaceDown = yIndex > 0;
-            bool spaceUp = yIndex < height - 1;
+            bool spaceLeft = xIndex >= 0;
+            bool spaceRight = xIndex < width;
+            bool spaceDown = yIndex >= 0;
+            bool spaceUp = yIndex < height;
             if(spaceLeft && spaceRight && spaceDown && spaceUp)
             {
                 Cell = cells[xIndex, yIndex];
@@ -362,6 +384,10 @@ public class GridCell
 
         public bool DoesConnectTo(CellVisualBlueprint blueprint)
         {
+            if(Cell.FilledWith != null)
+            {
+                return selfSelector(Cell.FilledWith) == neighborSelector(blueprint);
+            }
             return Cell.Options.Any(item => selfSelector(item) == neighborSelector(blueprint));
         }
     }
