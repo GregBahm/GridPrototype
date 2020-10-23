@@ -78,6 +78,7 @@ public class MainScript : MonoBehaviour
     }
 }
 
+[Serializable]
 public class CellVisualBlueprint
 {
     public Texture2D Texture => texture;
@@ -107,14 +108,12 @@ public class GridCellBehavior : MonoBehaviour
     {
         {CellDesignation.Empty, Color.white },
         {CellDesignation.Filled, Color.grey },
-        {CellDesignation.Ground, Color.black },
-        {CellDesignation.Walkway, Color.green }
     };
 
-    private static CellDesignation[] DesignationCycle = new CellDesignation[] { CellDesignation.Empty, CellDesignation.Filled, CellDesignation.Walkway };
+    private static CellDesignation[] DesignationCycle = new CellDesignation[] { CellDesignation.Empty, CellDesignation.Filled };
     private Material mat;
 
-    public GridCell Model { get; set; }
+    public IGridCell Model { get; set; }
 
     internal void CycleDesignation(int by)
     {
@@ -142,45 +141,21 @@ public class MainGrid
     private readonly int width;
     private readonly int height;
 
-    private readonly IReadOnlyDictionary<CellDesignation, List<CellVisualBlueprint>> baseOptions;
+    public IEnumerable<CellVisualBlueprint> AllOptions { get; }
 
-    public GridCell[,] Cells { get; private set; }
-
-    public HashSet<GridCell> DirtyCells { get; } = new HashSet<GridCell>();
+    public IGridCell[,] Cells { get; private set; }
 
     public MainGrid(int width, int height, IEnumerable<CellVisualBlueprint> allOptions)
     {
-        baseOptions = GetBaseOptions(allOptions);
+        AllOptions = allOptions;
         this.width = width;
         this.height = height;
         Cells = CreateCells();
     }
 
-    public IEnumerable<CellVisualBlueprint> GetBaseOptions(CellDesignation designation)
+    private IGridCell[,] CreateCells()
     {
-        return baseOptions[designation];
-    }
-
-    private IReadOnlyDictionary<CellDesignation, List<CellVisualBlueprint>> GetBaseOptions(IEnumerable<CellVisualBlueprint> allOptions)
-    {
-        Dictionary<CellDesignation, List<CellVisualBlueprint>> ret = new Dictionary<CellDesignation, List<CellVisualBlueprint>>();
-        foreach (CellVisualBlueprint item in allOptions)
-        {
-            if(ret.ContainsKey(item.CoreDesignatin))
-            {
-                ret[item.CoreDesignatin].Add(item);
-            }
-            else
-            {
-                ret.Add(item.CoreDesignatin, new List<CellVisualBlueprint>() { item });
-            }
-        }
-        return ret;
-    }
-
-    private GridCell[,] CreateCells()
-    {
-        GridCell[,] ret = new GridCell[width, height];
+        IGridCell[,] ret = new IGridCell[width, height];
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
@@ -188,24 +163,85 @@ public class MainGrid
                 ret[x, y] = new GridCell(x, y);
             }
         }
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                ret[x, y].SetNeighbors(ret);
+            }
+        }
         return ret;
     }
 }
 
-public class GridCell
+public interface IGridCell
 {
-    public int X { get; }
-    public int Y { get; }
+    CellDesignation Designation { get; set; }
+
+    void SetNeighbors(IGridCell[,] grid);
+}
+
+public class OffGridCell : IGridCell
+{
+    public static OffGridCell GroundCell = new OffGridCell(CellDesignation.Ground);
+    public static OffGridCell SkyCell = new OffGridCell(CellDesignation.Empty);
+
     public CellDesignation Designation { get; set; }
 
-    public IEnumerable<CellVisualBlueprint> Blueprints { get; private set; }
-
-    public bool IsDirty { get; private set; }
-
-    public GridCell(int x, int y)
+    public OffGridCell(CellDesignation designation)
     {
+        Designation = designation;
+    }
+
+    public void SetNeighbors(IGridCell[,] grid)
+    { }
+}
+
+public class GridCell : IGridCell
+{
+    private readonly MainGrid main;
+
+    public int X { get; }
+    public int Y { get; }
+
+    public IGridCell LeftNeighbor { get; private set; }
+    public IGridCell RightNeighbor { get; private set; }
+    public IGridCell UpNeighbor { get; private set; }
+    public IGridCell DownNeighbor { get; private set; }
+
+    public CellDesignation Designation { get; set; }
+
+    private IEnumerable<CellVisualBlueprint> options;
+
+    public GridCell(MainGrid main, int x, int y)
+    {
+        this.main = main;
         X = x;
         Y = y;
+    }
+
+    public void SetNeighbors(IGridCell[,] cells)
+    {
+        int width = cells.GetLength(0);
+        int height = cells.GetLength(1);
+        LeftNeighbor = X > 0 ? cells[X - 1, Y] : OffGridCell.SkyCell;
+        RightNeighbor = X < width - 1 ? cells[X + 1, Y] : OffGridCell.SkyCell;
+        DownNeighbor = Y > 0 ? cells[X, Y - 1] : OffGridCell.GroundCell;
+        UpNeighbor = Y < height - 1 ? cells[X, Y + 1] : OffGridCell.SkyCell;
+    }
+
+    public void UpdateOptions()
+    {
+        options = main.AllOptions.Where(OptionIsValid).ToArray();
+    }
+
+    private bool OptionIsValid(CellVisualBlueprint blueprint)
+    {
+        return Designation == blueprint.CoreDesignatin
+            && UpNeighbor.Designation == blueprint.UpConnection
+            && DownNeighbor.Designation == blueprint.DownConnection
+            && LeftNeighbor.Designation == blueprint.LeftConnection
+            && RightNeighbor.Designation == blueprint.RightConnection;
     }
 }
 
@@ -214,6 +250,6 @@ public enum CellDesignation
     Empty,
     Filled,
     Ground,
-    Walkway
+    SupportPillar
 }
 
