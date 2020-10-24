@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using Unity.Mathematics;
 using UnityEngine;
 
 public class MainScript : MonoBehaviour
@@ -19,10 +20,37 @@ public class MainScript : MonoBehaviour
     void Start()
     {
         IEnumerable<CellVisualBlueprint> allOptions = GetSymmetricalOptions();
-        mainGrid = new MainGrid(Width, Height, options);
+        mainGrid = new MainGrid(Width, Height, allOptions);
         
         CreateDisplayTiles();
+        CreateInteractionTiles();
         ResetGridFills();
+    }
+
+    private void CreateInteractionTiles()
+    {
+        GameObject tiles = new GameObject("InteractionTiles");
+        for (int x = 0; x < Width - 1; x++)
+        {
+            for (int y = 0; y < Height - 1; y++)
+            {
+                GameObject obj = CreateInteractionTile(x, y);
+                obj.transform.parent = tiles.transform;
+            }
+        }
+        tiles.transform.position = new Vector3(-(float)Width / 2, -(float)Height / 2);
+    }
+
+    private GameObject CreateInteractionTile(int x, int y)
+    {
+        GameObject obj = GameObject.CreatePrimitive(PrimitiveType.Quad);
+        obj.name = x + " " + y;
+        obj.transform.position = new Vector3(x + 1, y + 1, 0);
+        Destroy(obj.GetComponent<MeshRenderer>());
+        TileInteractionBehavior behavior = obj.AddComponent<TileInteractionBehavior>();
+        behavior.X = x;
+        behavior.Y = y;
+        return obj;
     }
 
     private void ResetGridFills()
@@ -67,36 +95,20 @@ public class MainScript : MonoBehaviour
     {
         if (Input.GetMouseButtonUp(0))
         {
-            HandleClick(true);
-        }
-        if (Input.GetMouseButtonUp(1))
-        {
-            HandleClick(false);
-        }
-    }
-
-    private void HandleClick(bool leftClick)
-    {
-        Ray mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
-        RaycastHit hitInfo;
-        if (Physics.Raycast(mouseRay, out hitInfo))
-        {
-            GridCellBehavior cell = hitInfo.collider.gameObject.GetComponent<GridCellBehavior>();
-            if(leftClick)
+            Ray mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hitInfo;
+            if (Physics.Raycast(mouseRay, out hitInfo))
             {
-                cell.CycleDesignation(1);
+                TileInteractionBehavior cell = hitInfo.collider.gameObject.GetComponent<TileInteractionBehavior>();
+                mainGrid.Designations.ToggleGridpoint(cell.X, cell.Y);
+                ResetGridFills();
             }
-            else
-            {
-                cell.CycleDesignation(-1);
-            }
-            ResetGridFills();
         }
     }
 
     private void CreateDisplayTiles()
     {
-        GameObject tiles = new GameObject("Tiles");
+        GameObject tiles = new GameObject("DisplayTiles");
         for (int x = 0; x < Width; x++)
         {
             for (int y = 0; y < Height; y++)
@@ -114,7 +126,8 @@ public class MainScript : MonoBehaviour
         obj.name = x + " " + y;
         obj.transform.position = new Vector3(x + .5f, y + .5f, 0);
         obj.GetComponent<MeshRenderer>().material = new Material(BaseMat);
-        GridCellBehavior behavior = obj.AddComponent<GridCellBehavior>();
+        Destroy(obj.GetComponent<MeshCollider>());
+        TileVisualBehavior behavior = obj.AddComponent<TileVisualBehavior>();
         behavior.Model = mainGrid.Cells[x, y];
         return obj;
     }
@@ -124,7 +137,6 @@ public class MainScript : MonoBehaviour
 public class CellVisualBlueprint
 {
     public Texture2D Texture;
-    public CoreDesignation Core;
     public ConnectionType Left;
     public ConnectionType Right;
     public ConnectionType Up;
@@ -145,7 +157,6 @@ public class CellVisualBlueprint
     {
         CellVisualBlueprint ret = new CellVisualBlueprint();
         ret.Texture = Texture;
-        ret.Core = Core;
         ret.Up = Up;
         ret.Down = Down;
 
@@ -159,25 +170,17 @@ public class CellVisualBlueprint
     }
 }
 
-public class GridCellBehavior : MonoBehaviour
+public class TileInteractionBehavior : MonoBehaviour
 {
-    private int designationCycleIndex;
-    private static Dictionary<CoreDesignation, Color> debugColors = new Dictionary<CoreDesignation, Color>()
-    {
-        {CoreDesignation.Empty, Color.white },
-        {CoreDesignation.Filled, Color.grey },
-    };
+    public int X { get; set; }
+    public int Y { get; set; }
+}
 
-    private static CoreDesignation[] DesignationCycle = new CoreDesignation[] { CoreDesignation.Empty, CoreDesignation.Filled };
+public class TileVisualBehavior : MonoBehaviour
+{
     private Material mat;
 
     public GridCell Model { get; set; }
-
-    internal void CycleDesignation(int by)
-    {
-        designationCycleIndex = (designationCycleIndex + DesignationCycle.Length + by) % DesignationCycle.Length;
-        Model.Designation = DesignationCycle[designationCycleIndex];
-    }
 
     private void Start()
     {
@@ -188,8 +191,6 @@ public class GridCellBehavior : MonoBehaviour
     {
         if(Model != null)
         {
-            //Color designationColor = debugColors[Model.Designation];
-            //mat.SetColor("_Color", designationColor);
             if(Model.FilledWith != null)
             {
                 mat.SetTexture("_MainTex", Model.FilledWith.Texture);
@@ -202,10 +203,48 @@ public class GridCellBehavior : MonoBehaviour
     }
 }
 
+public class DesignationsGrid
+{
+    private readonly int width;
+    private readonly int height;
+    public ConnectionType[,] Grid;
+
+    public DesignationsGrid(int width, int height)
+    {
+        this.width = width;
+        this.height = height;
+        Grid = new ConnectionType[width, height];
+    }
+
+    public void ToggleGridpoint(int x, int y)
+    {
+        Grid[x, y] = Grid[x, y] == ConnectionType.Empty ? ConnectionType.Filled : ConnectionType.Empty;
+    }
+
+    public bool IsOptionAllowed(int x, int y, CellVisualBlueprint option)
+    {
+        return Check(x, y, option.UpLeft)
+            && Check(x + 1, y, option.UpRight)
+            && Check(x, y + 1, option.DownLeft)
+            && Check(x + 1, y + 1, option.DownRight);
+    }
+
+    private bool Check(int x, int y, ConnectionType connectionType)
+    {
+        if (x >= width || y >= height)
+        {
+            return true;
+        }
+        return connectionType == Grid[x, y];
+    }
+}
+
 public class MainGrid
 {
     private readonly int width;
     private readonly int height;
+
+    public DesignationsGrid Designations { get; }
 
     public IEnumerable<CellVisualBlueprint> AllOptions { get; }
 
@@ -216,6 +255,7 @@ public class MainGrid
 
     public MainGrid(int width, int height, IEnumerable<CellVisualBlueprint> allOptions)
     {
+        Designations = new DesignationsGrid(width, height);
         AllOptions = allOptions;
         this.width = width;
         this.height = height;
@@ -271,8 +311,6 @@ public class GridCell
     public int X { get; }
     public int Y { get; }
 
-    public CoreDesignation Designation { get; set; }
-
     public IReadOnlyList<CellVisualBlueprint> Options { get; private set; }
     public CellVisualBlueprint FilledWith { get; private set; }
     
@@ -304,7 +342,11 @@ public class GridCell
     public void Reset()
     {
         FilledWith = null;
-        Options = main.AllOptions.Where(item => item.Core == Designation).ToArray();
+        Options = main.AllOptions.Where(DesignationsAllowOption).ToArray();
+        if (Options.Count == 0)
+        {
+            throw new Exception("Impossible from the drop!");
+        }
         main.DirtyCells.Add(this);
         main.EmptyCells.Add(this);
     }
@@ -321,6 +363,15 @@ public class GridCell
                 neighbor.Cell.SetDirty();
             }
         }
+        if(Options.Count == 0)
+        {
+            throw new Exception("Impossible!");
+        }
+    }
+
+    private bool DesignationsAllowOption(CellVisualBlueprint option)
+    {
+        return main.Designations.IsOptionAllowed(X, Y, option);
     }
 
     private void SetDirty()
@@ -333,8 +384,7 @@ public class GridCell
 
     private bool OptionIsValid(CellVisualBlueprint blueprint)
     {
-        return Designation == blueprint.Core
-            && neighbors.All(item => item.DoesConnectTo(blueprint));
+        return neighbors.All(item => item.DoesConnectTo(blueprint));
     }
 
     internal void FillSelfWithRandomOption()
@@ -393,14 +443,9 @@ public class GridCell
     }
 }
 
-public enum CoreDesignation
-{
-    Empty,
-    Filled,
-}
 public enum ConnectionType
 {
-    Empty,
+    Empty = 0,
     Filled,
     Struct
 }
