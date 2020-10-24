@@ -150,12 +150,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 96f59d4e60be65a429d724f1a141f93e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Width: 4
-  Height: 4
+  Width: 1
+  Height: 1
   BaseMat: {fileID: 2100000, guid: 47cb8eaeed168a644922b95609f37815, type: 2}
   options:
   - Texture: {fileID: 2800000, guid: a168bfc37f01f9c4599c627019df0f92, type: 3}
-    Core: 1
     Left: 0
     Right: 1
     Up: 0
@@ -165,7 +164,6 @@ MonoBehaviour:
     DownLeft: 0
     DownRight: 1
   - Texture: {fileID: 2800000, guid: 590dfdedd9460b14a999d147928770d5, type: 3}
-    Core: 1
     Left: 0
     Right: 1
     Up: 1
@@ -175,7 +173,6 @@ MonoBehaviour:
     DownLeft: 0
     DownRight: 0
   - Texture: {fileID: 2800000, guid: 23a6cf17e3bb44c4a915892e0e509e64, type: 3}
-    Core: 1
     Left: 0
     Right: 1
     Up: 2
@@ -185,7 +182,6 @@ MonoBehaviour:
     DownLeft: 0
     DownRight: 1
   - Texture: {fileID: 2800000, guid: 80f112c32257cf6489f28e59dc3ab425, type: 3}
-    Core: 1
     Left: 1
     Right: 1
     Up: 1
@@ -195,7 +191,6 @@ MonoBehaviour:
     DownLeft: 1
     DownRight: 1
   - Texture: {fileID: 2800000, guid: bf30d96ba07555642aa9d4cd964d89fa, type: 3}
-    Core: 0
     Left: 0
     Right: 0
     Up: 0
@@ -205,7 +200,6 @@ MonoBehaviour:
     DownLeft: 0
     DownRight: 0
   - Texture: {fileID: 2800000, guid: 50eaa368cb416ea4988157d52e7f697a, type: 3}
-    Core: 0
     Left: 0
     Right: 0
     Up: 2
@@ -214,188 +208,16 @@ MonoBehaviour:
     UpRight: 0
     DownLeft: 0
     DownRight: 0
-  - Texture: {fileID: 2800000, guid: 87afd8249594d6040865fbc1d6d2e27e, type: 3}
-    Core: 1
+  - Texture: {fileID: 2800000, guid: 44c5ac98a8c51fb40babd432c9bedd8c, type: 3}
     Left: 1
     Right: 1
     Up: 1
     Down: 1
-    UpLeft: 0
+    UpLeft: 1
     UpRight: 0
     DownLeft: 0
-    DownRight: 0
-  - Texture: {fileID: 2800000, guid: f1c017ab7ed8912418be1f84b3f9f44f, type: 3}
-    Core: 1
-    Left: 0
-    Right: 0
-    Up: 0
-    Down: 1
-    UpLeft: 0
-    UpRight: 0
-    DownLeft: 0
-    DownRight: 0
-  - Texture: {fileID: 2800000, guid: b9b1de69e6846564aaeaedd36bb9e06c, type: 3}
-    Core: 1
-    Left: 0
-    Right: 1
-    Up: 0
-    Down: 1
-    UpLeft: 0
-    UpRight: 0
-    DownLeft: 0
-    DownRight: 0
-  - Texture: {fileID: 2800000, guid: 45bced7c902eae149acb26e5bd703610, type: 3}
-    Core: 1
-    Left: 0
-    Right: 1
-    Up: 2
-    Down: 1
-    UpLeft: 0
-    UpRight: 0
-    DownLeft: 0
-    DownRight: 0
-  - Texture: {fileID: 2800000, guid: 6a68bc787d42de8419084afcdb9d8340, type: 3}
-    Core: 1
-    Left: 0
-    Right: 0
-    Up: 2
-    Down: 2
-    UpLeft: 0
-    UpRight: 0
-    DownLeft: 0
-    DownRight: 0
-  - Texture: {fileID: 2800000, guid: 1edb07a2289782e4b80d977354145671, type: 3}
-    Core: 1
-    Left: 1
-    Right: 1
-    Up: 0
-    Down: 0
-    UpLeft: 0
-    UpRight: 0
-    DownLeft: 0
-    DownRight: 0
-  - Texture: {fileID: 2800000, guid: c8cf0b32283c3874bbc2311faf025e92, type: 3}
-    Core: 1
-    Left: 1
-    Right: 1
-    Up: 2
-    Down: 0
-    UpLeft: 0
-    UpRight: 0
-    DownLeft: 0
-    DownRight: 0
-  - Texture: {fileID: 2800000, guid: dd900d2fdb74e8d41b62403e42e04c47, type: 3}
-    Core: 1
-    Left: 0
-    Right: 0
-    Up: 0
-    Down: 2
-    UpLeft: 0
-    UpRight: 0
-    DownLeft: 0
-    DownRight: 0
-  - Texture: {fileID: 2800000, guid: e6f044d59d5ba2b4592f2862d23a030e, type: 3}
-    Core: 1
-    Left: 0
-    Right: 0
-    Up: 2
-    Down: 2
-    UpLeft: 0
-    UpRight: 0
-    DownLeft: 0
-    DownRight: 0
-  - Texture: {fileID: 2800000, guid: b348ee1513f80ad448e0a62b85598f0b, type: 3}
-    Core: 1
-    Left: 0
-    Right: 1
-    Up: 0
-    Down: 2
-    UpLeft: 0
-    UpRight: 0
-    DownLeft: 0
-    DownRight: 0
-  - Texture: {fileID: 2800000, guid: c1e88ce8d944207449d2625e7dde1738, type: 3}
-    Core: 1
-    Left: 0
-    Right: 1
-    Up: 2
-    Down: 2
-    UpLeft: 0
-    UpRight: 0
-    DownLeft: 0
-    DownRight: 0
-  - Texture: {fileID: 2800000, guid: dada849f660b83e48a434373cfd3e89e, type: 3}
-    Core: 1
-    Left: 0
-    Right: 1
-    Up: 1
-    Down: 1
-    UpLeft: 0
-    UpRight: 0
-    DownLeft: 0
-    DownRight: 0
-  - Texture: {fileID: 2800000, guid: 810115c4e02736340b35ed6c25cf9df8, type: 3}
-    Core: 1
-    Left: 1
-    Right: 1
-    Up: 0
-    Down: 1
-    UpLeft: 0
-    UpRight: 0
-    DownLeft: 0
-    DownRight: 0
-  - Texture: {fileID: 2800000, guid: 88ac82ee78c1b274fad914ce2547f0a9, type: 3}
-    Core: 1
-    Left: 1
-    Right: 1
-    Up: 2
-    Down: 1
-    UpLeft: 0
-    UpRight: 0
-    DownLeft: 0
-    DownRight: 0
-  - Texture: {fileID: 2800000, guid: a4a86de390a78714fb6f651649919d6a, type: 3}
-    Core: 1
-    Left: 0
-    Right: 0
-    Up: 1
-    Down: 2
-    UpLeft: 0
-    UpRight: 0
-    DownLeft: 0
-    DownRight: 0
-  - Texture: {fileID: 2800000, guid: a104d6c82d17d7f4fbee6adbd1d14234, type: 3}
-    Core: 1
-    Left: 0
-    Right: 1
-    Up: 1
-    Down: 2
-    UpLeft: 0
-    UpRight: 0
-    DownLeft: 0
-    DownRight: 0
-  - Texture: {fileID: 2800000, guid: 7e1ceb2ecb05b2e40befef5e3a022368, type: 3}
-    Core: 1
-    Left: 1
-    Right: 1
-    Up: 1
-    Down: 0
-    UpLeft: 0
-    UpRight: 0
-    DownLeft: 0
-    DownRight: 0
-  - Texture: {fileID: 2800000, guid: e333306cd9f873d47b86278357166424, type: 3}
-    Core: 1
-    Left: 0
-    Right: 0
-    Up: 1
-    Down: 1
-    UpLeft: 0
-    UpRight: 0
-    DownLeft: 0
-    DownRight: 0
+    DownRight: 1
   - Texture: {fileID: 2800000, guid: 48d42a06dcdf8aa4cab768ed4f516989, type: 3}
-    Core: 1
     Left: 1
     Right: 1
     Up: 1
@@ -405,7 +227,6 @@ MonoBehaviour:
     DownLeft: 1
     DownRight: 1
   - Texture: {fileID: 2800000, guid: 75f78db91fc9f8a41bdcd7c9b36a3b67, type: 3}
-    Core: 1
     Left: 1
     Right: 1
     Up: 1
@@ -415,7 +236,6 @@ MonoBehaviour:
     DownLeft: 1
     DownRight: 0
   - Texture: {fileID: 2800000, guid: e7980b653db64d944bfeb518d4dd568f, type: 3}
-    Core: 1
     Left: 1
     Right: 1
     Up: 0
@@ -425,7 +245,6 @@ MonoBehaviour:
     DownLeft: 1
     DownRight: 1
   - Texture: {fileID: 2800000, guid: 9310c8b29bbf615408d54f28623485fa, type: 3}
-    Core: 1
     Left: 1
     Right: 1
     Up: 2
@@ -435,7 +254,6 @@ MonoBehaviour:
     DownLeft: 1
     DownRight: 1
   - Texture: {fileID: 2800000, guid: 424b768f04fbd044c8125d310bb351de, type: 3}
-    Core: 1
     Left: 1
     Right: 1
     Up: 1
@@ -445,7 +263,6 @@ MonoBehaviour:
     DownLeft: 0
     DownRight: 0
   - Texture: {fileID: 2800000, guid: 52567d9b31722324b81857d518377770, type: 3}
-    Core: 1
     Left: 0
     Right: 1
     Up: 1

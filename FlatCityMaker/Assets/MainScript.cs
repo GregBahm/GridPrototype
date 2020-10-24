@@ -30,9 +30,9 @@ public class MainScript : MonoBehaviour
     private void CreateInteractionTiles()
     {
         GameObject tiles = new GameObject("InteractionTiles");
-        for (int x = 0; x < Width - 1; x++)
+        for (int x = 0; x < Width + 1; x++)
         {
-            for (int y = 0; y < Height - 1; y++)
+            for (int y = 0; y < Height + 1; y++)
             {
                 GameObject obj = CreateInteractionTile(x, y);
                 obj.transform.parent = tiles.transform;
@@ -45,7 +45,7 @@ public class MainScript : MonoBehaviour
     {
         GameObject obj = GameObject.CreatePrimitive(PrimitiveType.Quad);
         obj.name = x + " " + y;
-        obj.transform.position = new Vector3(x + 1, y + 1, 0);
+        obj.transform.position = new Vector3(x, y, 0);
         Destroy(obj.GetComponent<MeshRenderer>());
         TileInteractionBehavior behavior = obj.AddComponent<TileInteractionBehavior>();
         behavior.X = x;
@@ -146,6 +146,8 @@ public class CellVisualBlueprint
     public ConnectionType DownLeft;
     public ConnectionType DownRight;
 
+    public bool HorizontallyFlipped { get; set; }
+
     public bool GetIsAsymmetrical()
     {
         return Left != Right
@@ -166,7 +168,13 @@ public class CellVisualBlueprint
         ret.UpRight = UpLeft;
         ret.DownLeft = DownRight;
         ret.DownRight = DownLeft;
+        ret.HorizontallyFlipped = true;
         return ret;
+    }
+
+    public override string ToString()
+    {
+        return Texture.name;
     }
 }
 
@@ -179,6 +187,7 @@ public class TileInteractionBehavior : MonoBehaviour
 public class TileVisualBehavior : MonoBehaviour
 {
     private Material mat;
+    private static Vector2 FlippedCoords { get; } = new Vector2(-1, 1); 
 
     public GridCell Model { get; set; }
 
@@ -194,6 +203,8 @@ public class TileVisualBehavior : MonoBehaviour
             if(Model.FilledWith != null)
             {
                 mat.SetTexture("_MainTex", Model.FilledWith.Texture);
+                mat.SetTextureScale("_MainTex", Model.FilledWith.HorizontallyFlipped ? Vector2.one : FlippedCoords);
+                mat.SetTextureOffset("_MainTex", Model.FilledWith.HorizontallyFlipped ? Vector2.zero : Vector2.right);
             }
             else
             {
@@ -205,14 +216,10 @@ public class TileVisualBehavior : MonoBehaviour
 
 public class DesignationsGrid
 {
-    private readonly int width;
-    private readonly int height;
     public ConnectionType[,] Grid;
 
     public DesignationsGrid(int width, int height)
     {
-        this.width = width;
-        this.height = height;
         Grid = new ConnectionType[width, height];
     }
 
@@ -223,18 +230,14 @@ public class DesignationsGrid
 
     public bool IsOptionAllowed(int x, int y, CellVisualBlueprint option)
     {
-        return Check(x, y, option.UpLeft)
-            && Check(x + 1, y, option.UpRight)
-            && Check(x, y + 1, option.DownLeft)
-            && Check(x + 1, y + 1, option.DownRight);
+        return Check(x, y, option.DownRight)
+            && Check(x + 1, y, option.DownLeft)
+            && Check(x, y + 1, option.UpRight)
+            && Check(x + 1, y + 1, option.UpLeft);
     }
 
     private bool Check(int x, int y, ConnectionType connectionType)
     {
-        if (x >= width || y >= height)
-        {
-            return true;
-        }
         return connectionType == Grid[x, y];
     }
 }
@@ -255,7 +258,7 @@ public class MainGrid
 
     public MainGrid(int width, int height, IEnumerable<CellVisualBlueprint> allOptions)
     {
-        Designations = new DesignationsGrid(width, height);
+        Designations = new DesignationsGrid(width + 1, height + 1);
         AllOptions = allOptions;
         this.width = width;
         this.height = height;
@@ -354,18 +357,19 @@ public class GridCell
     public void UpdateOptions()
     {
         int optionsCount = Options.Count;
-        Options = Options.Where(OptionIsValid).ToArray();
+        CellVisualBlueprint[] newOptions = Options.Where(OptionIsValid).ToArray();
+        if (newOptions.Length == 0)
+        {
+            throw new Exception("Impossible!");
+        }
+        Options = newOptions;
         main.DirtyCells.Remove(this);
-        if(Options.Count != optionsCount)
+        if(newOptions.Length != optionsCount)
         {
             foreach (Neighbor neighbor in neighbors)
             {
                 neighbor.Cell.SetDirty();
             }
-        }
-        if(Options.Count == 0)
-        {
-            throw new Exception("Impossible!");
         }
     }
 
