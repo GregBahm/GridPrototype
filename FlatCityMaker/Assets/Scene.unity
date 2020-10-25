@@ -150,8 +150,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 96f59d4e60be65a429d724f1a141f93e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Width: 1
-  Height: 1
+  Width: 20
+  Height: 20
   BaseMat: {fileID: 2100000, guid: 47cb8eaeed168a644922b95609f37815, type: 2}
   options:
   - Texture: {fileID: 2800000, guid: a168bfc37f01f9c4599c627019df0f92, type: 3}

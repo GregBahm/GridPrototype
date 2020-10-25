@@ -77,7 +77,23 @@ public class MainScript : MonoBehaviour
     private void Update()
     {
         HandleInteraction();
+        UpdateEverything();
+    }
 
+    private void UpdateEverything()
+    {
+        while(mainGrid.EmptyCells.Any())
+        {
+            while(mainGrid.DirtyCells.Any())
+            {
+                mainGrid.DirtyCells.First().UpdateOptions();
+            }
+            mainGrid.FillLowestEntropy();
+        }
+    }
+
+    private void UpdateProgressively()
+    {
         if (mainGrid.EmptyCells.Any())
         {
             if (mainGrid.DirtyCells.Any())
@@ -417,7 +433,7 @@ public class GridCell
             Func<CellVisualBlueprint, ConnectionType> selfSelector,
             Func<CellVisualBlueprint, ConnectionType> neighborSelector)
         {
-            int xIndex = source.X + xOffset;
+            int xIndex = source.X - xOffset;
             int yIndex = source.Y + yOffset;
 
             this.selfSelector = selfSelector;
