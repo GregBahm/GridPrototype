@@ -16,9 +16,11 @@ public class MainGrid
 
     public GridCell[,] Cells { get; private set; }
 
-    public MainGrid(int width, int height, IEnumerable<Tile> allOptions, TileConnectionType filled, TileConnectionType sky)
+    public MainGrid(int width, int height, 
+        IEnumerable<Tile> allOptions,
+        DesignationsGrid designations)
     {
-        Designations = new DesignationsGrid(width + 1, height + 1, filled, sky);
+        Designations = designations;
         AllOptions = allOptions;
         this.width = width;
         this.height = height;

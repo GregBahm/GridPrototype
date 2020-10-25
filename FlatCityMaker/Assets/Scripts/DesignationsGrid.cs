@@ -1,22 +1,23 @@
-﻿using TileDefinition;
+﻿using System.Collections.Generic;
+using TileDefinition;
+
 
 public class DesignationsGrid
 {
     private readonly int height;
-    private readonly TileConnectionType filled;
-    private readonly TileConnectionType sky;
-    public TileConnectionType[,] Grid;
+    private readonly bool[,] fillGrid;
 
-    public DesignationsGrid(int width, int height, TileConnectionType filled, TileConnectionType sky)
+    private readonly HashSet<TileConnectionType> filledConnectionTypes;
+
+    public DesignationsGrid(int width, 
+        int height, 
+        IEnumerable<TileConnectionType> setTypes)
     {
+        width++;
+        height++;
         this.height = height;
-        this.filled = filled;
-        this.sky = sky;
-        Grid = new TileConnectionType[width, height];
-        for (int x = 0; x < width; x++)
-        {
-            Grid[x, height - 1] = sky;
-        }
+        this.filledConnectionTypes = new HashSet<TileConnectionType>(setTypes);
+        fillGrid = new bool[width, height];
     }
 
     public void ToggleGridpoint(int x, int y)
@@ -25,7 +26,7 @@ public class DesignationsGrid
         {
             return;
         }
-        Grid[x, y] = Grid[x, y] == null ? filled : null;
+        fillGrid[x, y] = !fillGrid[x, y];
     }
 
     public bool IsOptionAllowed(int x, int y, Tile option)
@@ -38,11 +39,7 @@ public class DesignationsGrid
 
     private bool Check(int x, int y, TileConnectionType connectionType)
     {
-        if(Grid[x,y] == null)
-        {
-            return connectionType != filled;
-        }
-        return Grid[x, y] == connectionType;
+        return fillGrid[x, y] == filledConnectionTypes.Contains(connectionType);
     }
 }
 

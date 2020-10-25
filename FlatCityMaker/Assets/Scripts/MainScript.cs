@@ -4,6 +4,8 @@ using System.Linq;
 using TileDefinition;
 using UnityEngine;
 
+
+
 public class MainScript : MonoBehaviour
 {
     public int Width;
@@ -12,18 +14,19 @@ public class MainScript : MonoBehaviour
     public Canvas MainCanvas;
 
     public Tile SkyTile;
-    public TileConnectionType Sky;
-    public TileConnectionType Filled;
 
     [SerializeField]
     private Tile[] options;
+
+    public TileConnectionType[] FilledConnectionTypes;
 
     private MainGrid mainGrid;
 
     void Start()
     {
         IEnumerable<Tile> allOptions = GetSymmetricalOptions();
-        mainGrid = new MainGrid(Width, Height, allOptions, Filled, Sky);
+        DesignationsGrid designations = new DesignationsGrid(Width, Height, FilledConnectionTypes);
+        mainGrid = new MainGrid(Width, Height, allOptions, designations);
         
         CreateDisplayTiles();
         CreateInteractionTiles();
