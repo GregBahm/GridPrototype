@@ -5,20 +5,27 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class MainScript : MonoBehaviour
 {
     public int Width;
     public int Height;
-    public Material BaseMat;
+    public GameObject DisplayTilePrefab;
+    public Canvas MainCanvas;
+
+    public int SkyIndex;
 
     [SerializeField]
     private CellVisualBlueprint[] options;
 
     private MainGrid mainGrid;
 
+    private CellVisualBlueprint sky;
+
     void Start()
     {
+        sky = options[SkyIndex];
         IEnumerable<CellVisualBlueprint> allOptions = GetSymmetricalOptions();
         mainGrid = new MainGrid(Width, Height, allOptions);
         
@@ -58,6 +65,10 @@ public class MainScript : MonoBehaviour
         foreach (var item in mainGrid.Cells)
         {
             item.Reset();
+        }
+        for (int x = 0; x < Width; x++)
+        {
+            mainGrid.Cells[x, Height - 1].FilledWith = sky;
         }
     }
 
@@ -125,12 +136,13 @@ public class MainScript : MonoBehaviour
     private void CreateDisplayTiles()
     {
         GameObject tiles = new GameObject("DisplayTiles");
+        tiles.transform.SetParent(MainCanvas.transform, false);
         for (int x = 0; x < Width; x++)
         {
             for (int y = 0; y < Height; y++)
             {
-                GameObject obj =CreateDisplayTile(x, y);
-                obj.transform.parent = tiles.transform;
+                GameObject obj = CreateDisplayTile(x, y);
+                obj.transform.SetParent(tiles.transform, false);
             }
         }
         tiles.transform.position = new Vector3(-(float)Width / 2, -(float)Height / 2);
@@ -138,11 +150,9 @@ public class MainScript : MonoBehaviour
 
     private GameObject CreateDisplayTile(int x, int y)
     {
-        GameObject obj = GameObject.CreatePrimitive(PrimitiveType.Quad);
+        GameObject obj = Instantiate(DisplayTilePrefab);
         obj.name = x + " " + y;
         obj.transform.position = new Vector3(x + .5f, y + .5f, 0);
-        obj.GetComponent<MeshRenderer>().material = new Material(BaseMat);
-        Destroy(obj.GetComponent<MeshCollider>());
         TileVisualBehavior behavior = obj.AddComponent<TileVisualBehavior>();
         behavior.Model = mainGrid.Cells[x, y];
         return obj;
@@ -152,7 +162,7 @@ public class MainScript : MonoBehaviour
 [Serializable]
 public class CellVisualBlueprint
 {
-    public Texture2D Texture;
+    public Sprite Texture;
     public ConnectionType Left;
     public ConnectionType Right;
     public ConnectionType Up;
@@ -202,14 +212,14 @@ public class TileInteractionBehavior : MonoBehaviour
 
 public class TileVisualBehavior : MonoBehaviour
 {
-    private Material mat;
-    private static Vector2 FlippedCoords { get; } = new Vector2(-1, 1); 
+    private Image image;
+    private static Vector3 FlippedCoords { get; } = new Vector3(-1, 1, 1); 
 
     public GridCell Model { get; set; }
 
     private void Start()
     {
-        mat = GetComponent<MeshRenderer>().material;
+        image = GetComponent<Image>();
     }
 
     private void Update()
@@ -218,13 +228,14 @@ public class TileVisualBehavior : MonoBehaviour
         {
             if(Model.FilledWith != null)
             {
-                mat.SetTexture("_MainTex", Model.FilledWith.Texture);
-                mat.SetTextureScale("_MainTex", Model.FilledWith.HorizontallyFlipped ? Vector2.one : FlippedCoords);
-                mat.SetTextureOffset("_MainTex", Model.FilledWith.HorizontallyFlipped ? Vector2.zero : Vector2.right);
+                image.sprite = Model.FilledWith.Texture;
+                image.transform.localScale = Model.FilledWith.HorizontallyFlipped ? Vector3.one : FlippedCoords;
+                //image.material.SetTextureScale("_MainTex", Model.FilledWith.HorizontallyFlipped ? Vector2.one : FlippedCoords);
+                //image.material.SetTextureOffset("_MainTex", Model.FilledWith.HorizontallyFlipped ? Vector2.zero : Vector2.right);
             }
             else
             {
-                mat.SetTexture("_MainTex", null);
+                image.sprite = null;
             }
         }
     }
@@ -232,15 +243,21 @@ public class TileVisualBehavior : MonoBehaviour
 
 public class DesignationsGrid
 {
+    private readonly int height;
     public ConnectionType[,] Grid;
 
     public DesignationsGrid(int width, int height)
     {
+        this.height = height;
         Grid = new ConnectionType[width, height];
     }
 
     public void ToggleGridpoint(int x, int y)
     {
+        if(y >= height - 2) // Can't toggle the sky
+        {
+            return;
+        }
         Grid[x, y] = Grid[x, y] == ConnectionType.Empty ? ConnectionType.Filled : ConnectionType.Empty;
     }
 
@@ -331,7 +348,7 @@ public class GridCell
     public int Y { get; }
 
     public IReadOnlyList<CellVisualBlueprint> Options { get; private set; }
-    public CellVisualBlueprint FilledWith { get; private set; }
+    public CellVisualBlueprint FilledWith { get; set; }
     
     private IReadOnlyCollection<Neighbor> neighbors;
 
