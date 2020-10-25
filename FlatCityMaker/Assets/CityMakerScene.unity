@@ -343,125 +343,23 @@ MonoBehaviour:
   DisplayTilePrefab: {fileID: 1048891552112466070, guid: a03d61fd2caad2d47825cab22853fa3c,
     type: 3}
   MainCanvas: {fileID: 340444663}
-  SkyIndex: 4
+  SkyTile: {fileID: 11400000, guid: eb40a7101c17d0644a1a7b7760e3235e, type: 2}
+  Sky: {fileID: 11400000, guid: 253146f09abd37346a749236617de7e2, type: 2}
+  Filled: {fileID: 11400000, guid: c5e6f881562d7764b9c984fe355bc617, type: 2}
   options:
-  - Texture: {fileID: 21300000, guid: a168bfc37f01f9c4599c627019df0f92, type: 3}
-    Left: 0
-    Right: 1
-    Up: 0
-    Down: 1
-    UpLeft: 0
-    UpRight: 0
-    DownLeft: 0
-    DownRight: 1
-  - Texture: {fileID: 21300000, guid: 590dfdedd9460b14a999d147928770d5, type: 3}
-    Left: 0
-    Right: 1
-    Up: 1
-    Down: 2
-    UpLeft: 0
-    UpRight: 1
-    DownLeft: 0
-    DownRight: 0
-  - Texture: {fileID: 21300000, guid: 23a6cf17e3bb44c4a915892e0e509e64, type: 3}
-    Left: 0
-    Right: 1
-    Up: 2
-    Down: 1
-    UpLeft: 0
-    UpRight: 0
-    DownLeft: 0
-    DownRight: 1
-  - Texture: {fileID: 21300000, guid: 80f112c32257cf6489f28e59dc3ab425, type: 3}
-    Left: 1
-    Right: 1
-    Up: 1
-    Down: 1
-    UpLeft: 1
-    UpRight: 1
-    DownLeft: 1
-    DownRight: 1
-  - Texture: {fileID: 21300000, guid: bf30d96ba07555642aa9d4cd964d89fa, type: 3}
-    Left: 0
-    Right: 0
-    Up: 0
-    Down: 0
-    UpLeft: 0
-    UpRight: 0
-    DownLeft: 0
-    DownRight: 0
-  - Texture: {fileID: 21300000, guid: 50eaa368cb416ea4988157d52e7f697a, type: 3}
-    Left: 0
-    Right: 0
-    Up: 2
-    Down: 2
-    UpLeft: 0
-    UpRight: 0
-    DownLeft: 0
-    DownRight: 0
-  - Texture: {fileID: 21300000, guid: 44c5ac98a8c51fb40babd432c9bedd8c, type: 3}
-    Left: 1
-    Right: 1
-    Up: 1
-    Down: 1
-    UpLeft: 1
-    UpRight: 0
-    DownLeft: 0
-    DownRight: 1
-  - Texture: {fileID: 21300000, guid: 48d42a06dcdf8aa4cab768ed4f516989, type: 3}
-    Left: 1
-    Right: 1
-    Up: 1
-    Down: 1
-    UpLeft: 1
-    UpRight: 0
-    DownLeft: 1
-    DownRight: 1
-  - Texture: {fileID: 21300000, guid: 75f78db91fc9f8a41bdcd7c9b36a3b67, type: 3}
-    Left: 1
-    Right: 1
-    Up: 1
-    Down: 1
-    UpLeft: 1
-    UpRight: 1
-    DownLeft: 1
-    DownRight: 0
-  - Texture: {fileID: 21300000, guid: e7980b653db64d944bfeb518d4dd568f, type: 3}
-    Left: 1
-    Right: 1
-    Up: 0
-    Down: 1
-    UpLeft: 0
-    UpRight: 0
-    DownLeft: 1
-    DownRight: 1
-  - Texture: {fileID: 21300000, guid: 9310c8b29bbf615408d54f28623485fa, type: 3}
-    Left: 1
-    Right: 1
-    Up: 2
-    Down: 1
-    UpLeft: 0
-    UpRight: 0
-    DownLeft: 1
-    DownRight: 1
-  - Texture: {fileID: 21300000, guid: 424b768f04fbd044c8125d310bb351de, type: 3}
-    Left: 1
-    Right: 1
-    Up: 1
-    Down: 0
-    UpLeft: 1
-    UpRight: 1
-    DownLeft: 0
-    DownRight: 0
-  - Texture: {fileID: 21300000, guid: 52567d9b31722324b81857d518377770, type: 3}
-    Left: 0
-    Right: 1
-    Up: 1
-    Down: 1
-    UpLeft: 0
-    UpRight: 1
-    DownLeft: 0
-    DownRight: 1
+  - {fileID: 11400000, guid: 8160200bfe8e8894c96cc038e432d638, type: 2}
+  - {fileID: 11400000, guid: 6d46eeffe7ae0794a85c64dd6e96bc07, type: 2}
+  - {fileID: 11400000, guid: c9d30ccf0c7785848bfc9d4d9b67cb50, type: 2}
+  - {fileID: 11400000, guid: 81d192c5f5530b9478e5713f5f2b317a, type: 2}
+  - {fileID: 11400000, guid: 97917d97faa898e46bd4e8bf1927347f, type: 2}
+  - {fileID: 11400000, guid: 3a12d9fccf9b8bb429d1cc0072b36d1d, type: 2}
+  - {fileID: 11400000, guid: 130ed307ef9cd814a9c921bb024f2233, type: 2}
+  - {fileID: 11400000, guid: cbf8ce23044deea40be42d642fd953a3, type: 2}
+  - {fileID: 11400000, guid: eb40a7101c17d0644a1a7b7760e3235e, type: 2}
+  - {fileID: 11400000, guid: 3dae72f6c4489024693aa7616deb54c3, type: 2}
+  - {fileID: 11400000, guid: 7f3d0bf9272e72e489fdf1145f1e3432, type: 2}
+  - {fileID: 11400000, guid: a09dca1284ad91d4b833c9d23c4f68bb, type: 2}
+  - {fileID: 11400000, guid: 20ba09fd5d1f95b479962b205c1b83e5, type: 2}
 --- !u!4 &360831928
 Transform:
   m_ObjectHideFlags: 0
@@ -609,7 +507,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.5283019, g: 0.5283019, b: 0.5283019, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 0
   m_Maskable: 1
   m_OnCullStateChanged:
