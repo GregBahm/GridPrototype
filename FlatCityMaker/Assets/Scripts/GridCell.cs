@@ -1,4 +1,5 @@
-﻿using System;
+﻿using JetBrains.Annotations;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using TileDefinition;
@@ -26,10 +27,18 @@ public class GridCell
     {
         Neighbor[] neighbors = new Neighbor[]
         {
-            new Neighbor(this, cells, 1, 0, item => item.Left, item => item.Right),
-            new Neighbor(this, cells, -1, 0, item => item.Right, item => item.Left),
-            new Neighbor(this, cells, 0, -1, item => item.Up, item => item.Down),
-            new Neighbor(this, cells, 0, 1, item => item.Down, item => item.Up),
+            //new Neighbor(this, cells, 1, 0, item => item.Left, item => item.Right),
+            //new Neighbor(this, cells, -1, 0, item => item.Right, item => item.Left),
+            //new Neighbor(this, cells, 0, -1, item => item.Up, item => item.Down),
+            //new Neighbor(this, cells, 0, 1, item => item.Down, item => item.Up),
+            new OrthagonalNeighbor(this, cells, 1, 0, item => item.Left, item => item.Right,
+                                                      item => item.UpLeft, item => item.UpRight, item => item.DownLeft, item => item.DownRight),
+            new OrthagonalNeighbor(this, cells, -1, 0,item => item.Right, item => item.Left,
+                                                      item => item.UpRight, item => item.UpLeft, item => item.DownRight, item => item.DownLeft),
+            new OrthagonalNeighbor(this, cells, 0, -1,item => item.Up, item => item.Down,
+                                                      item => item.UpLeft, item => item.DownLeft, item => item.UpRight, item => item.DownRight),
+            new OrthagonalNeighbor(this, cells, 0, 1, item => item.Down, item => item.Up,
+                                                      item => item.DownLeft, item => item.UpLeft, item => item.DownRight, item => item.UpRight),
             new Neighbor(this, cells, 1, -1, item => item.UpLeft, item => item.DownRight),
             new Neighbor(this, cells, -1, -1, item => item.UpRight, item => item.DownLeft),
             new Neighbor(this, cells, 1, 1, item => item.DownLeft, item => item.UpRight),
@@ -87,6 +96,17 @@ public class GridCell
         return neighbors.All(item => item.DoesConnectTo(blueprint));
     }
 
+    internal void FillSelfWithFirstOption()
+    {
+        FilledWith = Options.First();
+        main.EmptyCells.Remove(this);
+        main.DirtyCells.Remove(this);
+        foreach (Neighbor neighbor in neighbors)
+        {
+            neighbor.Cell.SetDirty();
+        }
+    }
+
     internal void FillSelfWithRandomOption()
     {
         Tile[] optionsArray = Options.ToArray();
@@ -97,6 +117,43 @@ public class GridCell
         foreach (Neighbor neighbor in neighbors)
         {
             neighbor.Cell.SetDirty();
+        }
+    }
+
+    private class OrthagonalNeighbor : Neighbor
+    {
+        private readonly Func<Tile, TileConnectionType> selfCornerASelector;
+        private readonly Func<Tile, TileConnectionType> neighborCornerASelector;
+
+        private readonly Func<Tile, TileConnectionType> selfCornerBSelector;
+        private readonly Func<Tile, TileConnectionType> neighborCornerBSelector;
+
+        public OrthagonalNeighbor(GridCell source,
+            GridCell[,] cells,
+            int xOffset,
+            int yOffset,
+            Func<Tile, TileConnectionType> selfSelector,
+            Func<Tile, TileConnectionType> neighborSelector,
+            Func<Tile, TileConnectionType> selfCornerASelector, 
+            Func<Tile, TileConnectionType> neighborCornerASelector, 
+            Func<Tile, TileConnectionType> selfCornerBSelector, 
+            Func<Tile, TileConnectionType> neighborCornerBSelector)
+            :base(source, cells, xOffset, yOffset, selfSelector, neighborSelector)
+        {
+            this.selfCornerASelector = selfCornerASelector;
+            this.neighborCornerASelector = neighborCornerASelector;
+            this.selfCornerBSelector = selfCornerBSelector;
+            this.neighborCornerBSelector = neighborCornerBSelector;
+        }
+
+        public override bool DoesConnectTo(Tile tile)
+        {
+            if(base.DoesConnectTo(tile))
+            {
+                return DoesConnectTo(tile, selfCornerASelector, neighborCornerASelector)
+                    && DoesConnectTo(tile, selfCornerBSelector, neighborCornerBSelector);
+            }
+            return false;
         }
     }
 
@@ -132,13 +189,18 @@ public class GridCell
             }
         }
 
-        public bool DoesConnectTo(Tile blueprint)
+        protected bool DoesConnectTo(Tile tile, Func<Tile, TileConnectionType> sectorForSelf, Func<Tile, TileConnectionType> selectorForNeighbor)
         {
-            if(Cell.FilledWith != null)
+            if (Cell.FilledWith != null)
             {
-                return selfSelector(Cell.FilledWith) == neighborSelector(blueprint);
+                return sectorForSelf(Cell.FilledWith) == selectorForNeighbor(tile);
             }
-            return Cell.Options.Any(item => selfSelector(item) == neighborSelector(blueprint));
+            return Cell.Options.Any(item => sectorForSelf(item) == selectorForNeighbor(tile));
+        }
+
+        public virtual bool DoesConnectTo(Tile tile)
+        {
+            return DoesConnectTo(tile, selfSelector, neighborSelector);
         }
     }
 }

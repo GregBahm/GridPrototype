@@ -43,7 +43,7 @@ public class MainGrid
     public void FillLowestEntropy()
     {
         GridCell cellWithLeastOptions = EmptyCells.OrderBy(item => item.Options.Count).First();
-        cellWithLeastOptions.FillSelfWithRandomOption();
+        cellWithLeastOptions.FillSelfWithFirstOption();
     }
 
     private GridCell[,] CreateCells()

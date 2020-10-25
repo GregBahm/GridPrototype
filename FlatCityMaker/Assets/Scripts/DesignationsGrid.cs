@@ -15,10 +15,7 @@ public class DesignationsGrid
         Grid = new TileConnectionType[width, height];
         for (int x = 0; x < width; x++)
         {
-            for (int y = 0; y < height; y++)
-            {
-                Grid[x, y] = sky;
-            }
+            Grid[x, height - 1] = sky;
         }
     }
 
@@ -28,7 +25,7 @@ public class DesignationsGrid
         {
             return;
         }
-        Grid[x, y] = Grid[x, y] == sky ? filled : sky;
+        Grid[x, y] = Grid[x, y] == null ? filled : null;
     }
 
     public bool IsOptionAllowed(int x, int y, Tile option)
@@ -41,7 +38,11 @@ public class DesignationsGrid
 
     private bool Check(int x, int y, TileConnectionType connectionType)
     {
-        return connectionType == Grid[x, y];
+        if(Grid[x,y] == null)
+        {
+            return connectionType != filled;
+        }
+        return Grid[x, y] == connectionType;
     }
 }
 

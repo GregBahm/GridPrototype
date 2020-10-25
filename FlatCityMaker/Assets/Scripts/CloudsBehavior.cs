@@ -11,7 +11,9 @@ public class CloudsBehavior : MonoBehaviour
 
     private void Start()
     {
-        cloudsMat = GetComponent<Image>().material;
+        Image image = GetComponent<Image>();
+        image.material = new Material(image.material);
+        cloudsMat = image.material; // Don't want the cloud .mat file to change every time the thing runs
     }
     void Update()
     {
