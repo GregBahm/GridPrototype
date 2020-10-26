@@ -70,13 +70,13 @@ public class MainScript : MonoBehaviour
             mainGrid.Cells[x, Height - 1].FilledWith = SkyTile;
         }
     }
-
     private IEnumerable<Tile> GetSymmetricalOptions()
     {
-        List<Tile> ret = new List<Tile>(options);
+        List<Tile> ret = new List<Tile>();
         foreach (Tile option in options)
         {
-            if(option.GetIsAsymmetrical())
+            ret.Add(option);
+            if (option.GetIsAsymmetrical())
             {
                 ret.Add(option.GetHorizontallyFlipped());
             }
