@@ -345,7 +345,12 @@ MonoBehaviour:
   MainCanvas: {fileID: 340444663}
   SkyTile: {fileID: 11400000, guid: eb40a7101c17d0644a1a7b7760e3235e, type: 2}
   options:
+  - {fileID: 11400000, guid: eb40a7101c17d0644a1a7b7760e3235e, type: 2}
   - {fileID: 11400000, guid: 247808866dcd6dd43911be37af4d0f86, type: 2}
+  - {fileID: 11400000, guid: bcbe46b839c1b0a47bcef5e959503e56, type: 2}
+  - {fileID: 11400000, guid: 04123a6b6ce1b1e47b33d7116582da41, type: 2}
+  - {fileID: 11400000, guid: 677cb0a78806d6b4c8aa0e7aab24e5e1, type: 2}
+  - {fileID: 11400000, guid: 25225d716e9cfe645a1c9c7952a7f1d6, type: 2}
   - {fileID: 11400000, guid: 22f7aa031d2266a409b27b43d4c7ec6c, type: 2}
   - {fileID: 11400000, guid: 16171d824743e5942b80157619a30c2b, type: 2}
   - {fileID: 11400000, guid: 62987438d6393684b821f0b3e0d99512, type: 2}
@@ -365,7 +370,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: a09dca1284ad91d4b833c9d23c4f68bb, type: 2}
   - {fileID: 11400000, guid: 7f3d0bf9272e72e489fdf1145f1e3432, type: 2}
   - {fileID: 11400000, guid: 3dae72f6c4489024693aa7616deb54c3, type: 2}
-  - {fileID: 11400000, guid: eb40a7101c17d0644a1a7b7760e3235e, type: 2}
+  - {fileID: 11400000, guid: fbaaec19878a7cb49acee21db4695892, type: 2}
+  - {fileID: 11400000, guid: 09a21e20e54432a48883b1e6dd1ecac5, type: 2}
   - {fileID: 11400000, guid: cbf8ce23044deea40be42d642fd953a3, type: 2}
   - {fileID: 11400000, guid: 130ed307ef9cd814a9c921bb024f2233, type: 2}
   - {fileID: 11400000, guid: 3a12d9fccf9b8bb429d1cc0072b36d1d, type: 2}
@@ -377,7 +383,6 @@ MonoBehaviour:
   FilledConnectionTypes:
   - {fileID: 11400000, guid: c5e6f881562d7764b9c984fe355bc617, type: 2}
   - {fileID: 11400000, guid: f7a4158ad290b3c4e85f2b295b9d63f4, type: 2}
-  - {fileID: 11400000, guid: 844f5590c6718e74c92f0574f2cdc5ed, type: 2}
 --- !u!4 &360831928
 Transform:
   m_ObjectHideFlags: 0

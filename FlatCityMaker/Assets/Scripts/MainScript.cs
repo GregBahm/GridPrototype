@@ -73,9 +73,10 @@ public class MainScript : MonoBehaviour
 
     private IEnumerable<Tile> GetSymmetricalOptions()
     {
-        List<Tile> ret = new List<Tile>(options);
+        List<Tile> ret = new List<Tile>();
         foreach (Tile option in options)
         {
+            ret.Add(option);
             if(option.GetIsAsymmetrical())
             {
                 ret.Add(option.GetHorizontallyFlipped());
