@@ -1,17 +1,17 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TileDefinition;
 using UnityEngine;
-
-
+using UnityEngine.UI;
 
 public class MainScript : MonoBehaviour
 {
     public int Width;
     public int Height;
     public GameObject DisplayTilePrefab;
-    public Canvas MainCanvas;
+    public RectTransform DisplayTilesTransform;
 
     public Tile SkyTile;
 
@@ -134,17 +134,15 @@ public class MainScript : MonoBehaviour
 
     private void CreateDisplayTiles()
     {
-        GameObject tiles = new GameObject("DisplayTiles");
-        tiles.transform.SetParent(MainCanvas.transform, false);
         for (int x = 0; x < Width; x++)
         {
             for (int y = 0; y < Height; y++)
             {
                 GameObject obj = CreateDisplayTile(x, y);
-                obj.transform.SetParent(tiles.transform, false);
+                obj.transform.SetParent(DisplayTilesTransform, false);
             }
         }
-        tiles.transform.position = new Vector3(-(float)Width / 2, -(float)Height / 2);
+        DisplayTilesTransform.position = new Vector3(-(float)Width / 2, -(float)Height / 2);
     }
 
     private GameObject CreateDisplayTile(int x, int y)
