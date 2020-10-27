@@ -17,7 +17,7 @@ public class CloudsBehavior : MonoBehaviour
     }
     void Update()
     {
-        cloudOffset = (cloudOffset + CloudSpeed) % 1;
+        cloudOffset = (cloudOffset + CloudSpeed * Time.deltaTime) % 1;
         cloudsMat.SetTextureOffset("_MainTex", new Vector2(cloudOffset, 0));
     }
 }

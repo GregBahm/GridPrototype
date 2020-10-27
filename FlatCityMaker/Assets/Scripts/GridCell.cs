@@ -1,5 +1,4 @@
-﻿using JetBrains.Annotations;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using TileDefinition;
@@ -27,10 +26,6 @@ public class GridCell
     {
         Neighbor[] neighbors = new Neighbor[]
         {
-            //new Neighbor(this, cells, 1, 0, item => item.Left, item => item.Right),
-            //new Neighbor(this, cells, -1, 0, item => item.Right, item => item.Left),
-            //new Neighbor(this, cells, 0, -1, item => item.Up, item => item.Down),
-            //new Neighbor(this, cells, 0, 1, item => item.Down, item => item.Up),
             new OrthagonalNeighbor(this, cells, 1, 0, item => item.Left, item => item.Right,
                                                       item => item.UpLeft, item => item.UpRight, item => item.DownLeft, item => item.DownRight),
             new OrthagonalNeighbor(this, cells, -1, 0,item => item.Right, item => item.Left,
