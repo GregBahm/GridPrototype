@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace TileDefinition
 {
@@ -8,40 +6,45 @@ namespace TileDefinition
     public class Tile : ScriptableObject
     {
         public Sprite Sprite;
-        public TileConnectionType Up;
-        public TileConnectionType Down;
-        public TileConnectionType Left;
-        public TileConnectionType Right;
-        public TileConnectionType UpLeft;
-        public TileConnectionType UpRight;
-        public TileConnectionType DownLeft;
-        public TileConnectionType DownRight;
+        public TileConnectionPoint TopSideLeft;
+        public TileConnectionPoint TopSideRight;
+        public TileConnectionPoint LeftSideUpper;
+        public TileConnectionPoint LeftSideLower;
+        public TileConnectionPoint RightSideUpper;
+        public TileConnectionPoint RightSideLower;
+        public TileConnectionPoint BottomSideLeft;
+        public TileConnectionPoint BottomSideRight;
 
         public bool HorizontallyFlipped { get; set; }
 
         public bool GetIsAsymmetrical()
         {
-            return Left != Right
-                || UpLeft != UpRight
-                || DownLeft != DownRight;
+            return TopSideLeft.Type != TopSideRight.Type
+                || LeftSideUpper.Type != RightSideUpper.Type
+                || LeftSideLower.Type != RightSideLower.Type
+                || BottomSideLeft.Type != BottomSideRight.Type;
         }
 
         public Tile GetHorizontallyFlipped()
         {
             Tile ret = Instantiate(this);
-            ret.Left = Right;
-            ret.Right = Left;
-            ret.UpLeft = UpRight;
-            ret.UpRight = UpLeft;
-            ret.DownLeft = DownRight;
-            ret.DownRight = DownLeft;
+            ret.TopSideLeft = TopSideRight;
+            ret.LeftSideUpper = RightSideUpper;
+            ret.LeftSideLower = RightSideLower;
+            ret.BottomSideLeft = BottomSideRight;
+
+            ret.TopSideRight = TopSideLeft;
+            ret.RightSideUpper = LeftSideUpper;
+            ret.RightSideLower = LeftSideLower;
+            ret.BottomSideRight = BottomSideLeft;
+
             ret.HorizontallyFlipped = true;
             return ret;
         }
 
         public override string ToString()
         {
-            return Sprite.name;
+            return Sprite.name + (HorizontallyFlipped ? " (flipped)" : "");
         }
     }
 }

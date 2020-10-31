@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using TileDefinition;
 
@@ -11,7 +12,6 @@ public class GridCell
     public int Y { get; }
 
     public IReadOnlyList<Tile> OptionsFromDesignation { get; private set; }
-    public IReadOnlyList<Tile> Options { get; private set; }
     public Tile FilledWith { get; set; }
     
     private IReadOnlyCollection<Neighbor> neighbors;
@@ -27,34 +27,45 @@ public class GridCell
     {
         Neighbor[] neighbors = new Neighbor[]
         {
-            new OrthagonalNeighbor(this, cells, 1, 0, item => item.Left, item => item.Right,
-                                                      item => item.UpLeft, item => item.UpRight, item => item.DownLeft, item => item.DownRight),
-            new OrthagonalNeighbor(this, cells, -1, 0,item => item.Right, item => item.Left,
-                                                      item => item.UpRight, item => item.UpLeft, item => item.DownRight, item => item.DownLeft),
-            new OrthagonalNeighbor(this, cells, 0, -1,item => item.Up, item => item.Down,
-                                                      item => item.UpLeft, item => item.DownLeft, item => item.UpRight, item => item.DownRight),
-            new OrthagonalNeighbor(this, cells, 0, 1, item => item.Down, item => item.Up,
-                                                      item => item.DownLeft, item => item.UpLeft, item => item.DownRight, item => item.UpRight),
-            new Neighbor(this, cells, 1, -1, item => item.UpLeft, item => item.DownRight),
-            new Neighbor(this, cells, -1, -1, item => item.UpRight, item => item.DownLeft),
-            new Neighbor(this, cells, 1, 1, item => item.DownLeft, item => item.UpRight),
-            new Neighbor(this, cells, -1, 1, item => item.DownRight, item => item.UpLeft)
+            new Neighbor(this, cells, 0, -1, 
+                item => item.BottomSideRight, item => item.TopSideRight,
+                item => item.BottomSideLeft, item => item.TopSideLeft),  // down neighbor
+            new Neighbor(this, cells, 0, 1,
+                item => item.TopSideRight, item => item.BottomSideRight,
+                item => item.TopSideLeft, item => item.BottomSideLeft),   // up neighbor
+            new Neighbor(this, cells, 1, 0,
+                item => item.RightSideUpper, item => item.LeftSideUpper,
+                item => item.RightSideLower, item => item.LeftSideLower),  // right neighbor
+            new Neighbor(this, cells, -1, 0,
+                item => item.LeftSideUpper, item => item.RightSideUpper,
+                item => item.LeftSideLower, item => item.RightSideLower)    // left neighbor
         };
         this.neighbors = neighbors.Where(item => item.Cell != null).ToList();
     }
 
-    internal void FillSelf()
+    internal void UpdateContents()
     {
-        Tile[] baseOptions = Options.Where(OptionIsValid).ToArray();
-        if (!baseOptions.Any())
+        Tile[] baseOptions = OptionsFromDesignation.Where(OptionIsValid).ToArray();
+        if(!baseOptions.Any())
         {
-            PropogateReset();
+            FilledWith = OptionsFromDesignation[0];
+            Debug.WriteLine("Skipped. Hope somebody comes back to me later!");
+            return;
+            //throw new Exception("Got no options!");
         }
-        else
+        Tile oldFill = FilledWith;
+        FilledWith = baseOptions[0];
+        if(FilledWith != oldFill)
         {
-            FilledWith = Options[0];
-            main.EmptyCells.Remove(this);
-            main.SolvedCells.Add(this);
+            UpdateNeighbors();
+        }
+    }
+
+    private void UpdateNeighbors()
+    {
+        foreach (Neighbor neighbor in neighbors)
+        {
+            neighbor.Cell.UpdateContents();
         }
     }
 
@@ -62,42 +73,9 @@ public class GridCell
     {
         // TODO: It should be possible to precompute these into a hash
         OptionsFromDesignation = main.AllOptions.Where(DesignationsAllowOption).ToArray();
-    }
-
-    public void Reset()
-    {
-        FilledWith = null;
-        main.EmptyCells.Add(this);
-        Options = OptionsFromDesignation.Where(OptionIsValid).ToArray();
-        if (Options.Count == 0)
+        if(!OptionsFromDesignation.Any())
         {
-            Options = baseOptions;
-            PropogateReset();
-        }
-    }
-
-    public void PropogateReset()
-    {
-        foreach (GridCell cell in neighbors.Select(item => item.Cell))
-        {
-            if(!main.EmptyCells.Contains(cell))
-            {
-                cell.Reset();
-            }
-        }
-    }
-
-    public void UpdateEmptyCell()
-    {
-        Options = Options.Where(OptionIsValid).ToArray();
-        if (Options.Count == 0)
-        {
-            Options = main.AllOptions.Where(DesignationsAllowOption).ToArray();
-            PropogateReset();
-        }
-        if (Options.Count == 1)
-        {
-            FillSelf();
+            throw new Exception("Zero options from designation table");
         }
     }
 
@@ -108,64 +86,35 @@ public class GridCell
 
     private bool OptionIsValid(Tile blueprint)
     {
-        return neighbors.All(item => item.DoesConnectTo(blueprint));
-    }
-
-    private class OrthagonalNeighbor : Neighbor
-    {
-        private readonly Func<Tile, TileConnectionType> selfCornerASelector;
-        private readonly Func<Tile, TileConnectionType> neighborCornerASelector;
-
-        private readonly Func<Tile, TileConnectionType> selfCornerBSelector;
-        private readonly Func<Tile, TileConnectionType> neighborCornerBSelector;
-
-        public OrthagonalNeighbor(GridCell source,
-            GridCell[,] cells,
-            int xOffset,
-            int yOffset,
-            Func<Tile, TileConnectionType> selfSelector,
-            Func<Tile, TileConnectionType> neighborSelector,
-            Func<Tile, TileConnectionType> selfCornerASelector, 
-            Func<Tile, TileConnectionType> neighborCornerASelector, 
-            Func<Tile, TileConnectionType> selfCornerBSelector, 
-            Func<Tile, TileConnectionType> neighborCornerBSelector)
-            :base(source, cells, xOffset, yOffset, selfSelector, neighborSelector)
-        {
-            this.selfCornerASelector = selfCornerASelector;
-            this.neighborCornerASelector = neighborCornerASelector;
-            this.selfCornerBSelector = selfCornerBSelector;
-            this.neighborCornerBSelector = neighborCornerBSelector;
-        }
-
-        public override bool DoesConnectTo(Tile tile)
-        {
-            if(base.DoesConnectTo(tile))
-            {
-                return DoesConnectTo(tile, selfCornerASelector, neighborCornerASelector)
-                    && DoesConnectTo(tile, selfCornerBSelector, neighborCornerBSelector);
-            }
-            return false;
-        }
+        return neighbors.All(item => item.CanConnectTo(blueprint));
     }
 
     private class Neighbor
     {
         public GridCell Cell { get; }
-        private readonly Func<Tile, TileConnectionType> selfSelector;
-        private readonly Func<Tile, TileConnectionType> neighborSelector;
+
+        private readonly Func<Tile, TileConnectionPoint> selfCornerASelector;
+        private readonly Func<Tile, TileConnectionPoint> neighborCornerASelector;
+
+        private readonly Func<Tile, TileConnectionPoint> selfCornerBSelector;
+        private readonly Func<Tile, TileConnectionPoint> neighborCornerBSelector;
 
         public Neighbor(GridCell source,
             GridCell[,] cells, 
             int xOffset, 
             int yOffset,
-            Func<Tile, TileConnectionType> selfSelector,
-            Func<Tile, TileConnectionType> neighborSelector)
+            Func<Tile, TileConnectionPoint> selfCornerASelector,
+            Func<Tile, TileConnectionPoint> neighborCornerASelector,
+            Func<Tile, TileConnectionPoint> selfCornerBSelector,
+            Func<Tile, TileConnectionPoint> neighborCornerBSelector)
         {
             int xIndex = source.X - xOffset;
             int yIndex = source.Y + yOffset;
 
-            this.selfSelector = selfSelector;
-            this.neighborSelector = neighborSelector;
+            this.selfCornerASelector = selfCornerASelector;
+            this.neighborCornerASelector = neighborCornerASelector;
+            this.selfCornerBSelector = selfCornerBSelector;
+            this.neighborCornerBSelector = neighborCornerBSelector;
 
             int width = cells.GetLength(0);
             int height = cells.GetLength(1);
@@ -180,18 +129,21 @@ public class GridCell
             }
         }
 
-        protected bool DoesConnectTo(Tile tile, Func<Tile, TileConnectionType> sectorForSelf, Func<Tile, TileConnectionType> selectorForNeighbor)
+        protected bool CanConnectTo(Tile tile, Func<Tile, TileConnectionPoint> sectorForSelf, Func<Tile, TileConnectionPoint> selectorForNeighbor)
         {
-            if (Cell.FilledWith != null)
+            TileConnectionPoint neighborPoint = selectorForNeighbor(Cell.FilledWith);
+            if(neighborPoint.ImposesConnection)
             {
-                return sectorForSelf(Cell.FilledWith) == selectorForNeighbor(tile);
+                TileConnectionPoint selfPoint = sectorForSelf(tile);
+                return selfPoint.Type == neighborPoint.Type;
             }
-            return Cell.Options.Any(item => sectorForSelf(item) == selectorForNeighbor(tile));
+            return true;
         }
 
-        public virtual bool DoesConnectTo(Tile tile)
+        public virtual bool CanConnectTo(Tile tile)
         {
-            return DoesConnectTo(tile, selfSelector, neighborSelector);
+            return CanConnectTo(tile, selfCornerASelector, neighborCornerASelector)
+                && CanConnectTo(tile, selfCornerBSelector, neighborCornerBSelector);
         }
     }
 
@@ -203,7 +155,7 @@ public class GridCell
             return ret + "filled with " + FilledWith.name;
         }
         ret += " Options: ";
-        foreach (var option in Options)
+        foreach (var option in OptionsFromDesignation)
         {
             ret += option.Sprite.name + " ";
         }

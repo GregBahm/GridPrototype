@@ -54,29 +54,8 @@ public class MainScript : MonoBehaviour
         TileInteractionBehavior behavior = obj.AddComponent<TileInteractionBehavior>();
         behavior.X = x;
         behavior.Y = y;
-        behavior.ConnectedCells = GetConnectedCells(x, y).ToArray();
+        behavior.ConnectedCells = mainGrid.GetCellsConnectedToDesignationPoint(x, y).ToArray();
         return obj;
-    }
-
-    private IEnumerable<GridCell> GetConnectedCells(int x, int y)
-    {
-        x--;
-        y--;
-        if (x > 0 && y > 0)
-            yield return mainGrid.Cells[x, y];
-        if(x < Width - 2 && y > 0)
-            yield return mainGrid.Cells[x + 1, y];
-        if(x > 0 && y < Height - 1)
-            yield return mainGrid.Cells[x, y + 1];
-        if(x < Width - 1 && y < Height - 1)
-            yield return mainGrid.Cells[x + 1, y + 1];
-    }
-    private void ResetAffectedCells(IEnumerable<GridCell> cells)
-    {
-        foreach (GridCell cell in cells)
-        {
-            cell.Reset();
-        }
     }
 
     private void FillAllWithSky()
@@ -84,8 +63,10 @@ public class MainScript : MonoBehaviour
         foreach (var item in mainGrid.Cells)
         {
             item.FilledWith = SkyTile;
+            item.UpdateDesignationOptions();
         }
     }
+
     private IEnumerable<Tile> GetSymmetricalOptions()
     {
         List<Tile> ret = new List<Tile>();
@@ -103,23 +84,6 @@ public class MainScript : MonoBehaviour
     private void Update()
     {
         HandleInteraction();
-        UpdateProgressively();
-    }
-
-    private void UpdateEverything()
-    {
-        while(mainGrid.EmptyCells.Any())
-        {
-            mainGrid.TryFillLowestEntropy();
-        }
-    }
-
-    private void UpdateProgressively()
-    {
-        if (mainGrid.EmptyCells.Any())
-        {
-            mainGrid.TryFillLowestEntropy();
-        }
     }
 
     private void HandleInteraction()
@@ -132,8 +96,7 @@ public class MainScript : MonoBehaviour
             {
                 TileInteractionBehavior cell = hitInfo.collider.gameObject.GetComponent<TileInteractionBehavior>();
                 mainGrid.Designations.ToggleGridpoint(cell.X, cell.Y);
-                mainGrid.StartNewSolve();
-                ResetAffectedCells(cell.ConnectedCells);
+                mainGrid.StartNewSolve(cell.ConnectedCells);
             }
         }
     }

@@ -13,11 +13,27 @@ MonoBehaviour:
   m_Name: WallHorizontal
   m_EditorClassIdentifier: 
   Sprite: {fileID: 21300000, guid: e7980b653db64d944bfeb518d4dd568f, type: 3}
-  Up: {fileID: 11400000, guid: 253146f09abd37346a749236617de7e2, type: 2}
-  Down: {fileID: 11400000, guid: c5e6f881562d7764b9c984fe355bc617, type: 2}
-  Left: {fileID: 11400000, guid: c5e6f881562d7764b9c984fe355bc617, type: 2}
-  Right: {fileID: 11400000, guid: c5e6f881562d7764b9c984fe355bc617, type: 2}
-  UpLeft: {fileID: 11400000, guid: 253146f09abd37346a749236617de7e2, type: 2}
-  UpRight: {fileID: 11400000, guid: 253146f09abd37346a749236617de7e2, type: 2}
-  DownLeft: {fileID: 11400000, guid: c5e6f881562d7764b9c984fe355bc617, type: 2}
-  DownRight: {fileID: 11400000, guid: c5e6f881562d7764b9c984fe355bc617, type: 2}
+  TopSideLeft:
+    Type: {fileID: 11400000, guid: 253146f09abd37346a749236617de7e2, type: 2}
+    ImposesConnection: 0
+  TopSideRight:
+    Type: {fileID: 11400000, guid: 253146f09abd37346a749236617de7e2, type: 2}
+    ImposesConnection: 0
+  LeftSideUpper:
+    Type: {fileID: 11400000, guid: 253146f09abd37346a749236617de7e2, type: 2}
+    ImposesConnection: 1
+  LeftSideLower:
+    Type: {fileID: 11400000, guid: c5e6f881562d7764b9c984fe355bc617, type: 2}
+    ImposesConnection: 0
+  RightSideUpper:
+    Type: {fileID: 11400000, guid: 253146f09abd37346a749236617de7e2, type: 2}
+    ImposesConnection: 1
+  RightSideLower:
+    Type: {fileID: 11400000, guid: c5e6f881562d7764b9c984fe355bc617, type: 2}
+    ImposesConnection: 0
+  BottomSideLeft:
+    Type: {fileID: 11400000, guid: c5e6f881562d7764b9c984fe355bc617, type: 2}
+    ImposesConnection: 0
+  BottomSideRight:
+    Type: {fileID: 11400000, guid: c5e6f881562d7764b9c984fe355bc617, type: 2}
+    ImposesConnection: 0

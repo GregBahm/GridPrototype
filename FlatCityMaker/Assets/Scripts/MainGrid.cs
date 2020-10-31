@@ -13,9 +13,6 @@ public class MainGrid
 
     public IEnumerable<Tile> AllOptions { get; }
 
-    public HashSet<GridCell> SolvedCells { get; } = new HashSet<GridCell>();
-    public HashSet<GridCell> EmptyCells { get; } = new HashSet<GridCell>();
-
     public GridCell[,] Cells { get; private set; }
 
     public MainGrid(int width, int height, 
@@ -29,13 +26,16 @@ public class MainGrid
         Cells = CreateCells();
     }
 
-    public void StartNewSolve()
+    public void StartNewSolve(IEnumerable<GridCell> cellsToReset)
     {
-        if(EmptyCells.Any())
+        foreach (GridCell cell in cellsToReset)
         {
-            throw new Exception("Can't start new solve when a solve is already in progress");
+            cell.UpdateDesignationOptions();
         }
-        SolvedCells.Clear();
+        foreach (GridCell cell in cellsToReset)
+        {
+            cell.UpdateContents();
+        }
     }
 
     private HashSet<GridCell> GetAllCells()
@@ -51,18 +51,18 @@ public class MainGrid
         return ret;
     }
 
-    public void TryFillLowestEntropy()
+    public IEnumerable<GridCell> GetCellsConnectedToDesignationPoint(int x, int y)
     {
-        IEnumerable<GridCell> emptyCells = EmptyCells.ToArray();
-        foreach (GridCell cell in emptyCells)
-        {
-            cell.UpdateEmptyCell();
-        }
-        if(EmptyCells.Any())
-        {
-            GridCell cellWithLeastOptions = EmptyCells.OrderBy(item => item.Options.Count).First();
-            cellWithLeastOptions.FillSelf();
-        }
+        x--;
+        y--;
+        if (x > 0 && y > 0)
+            yield return Cells[x, y];
+        if (x < width - 2 && y > 0)
+            yield return Cells[x + 1, y];
+        if (x > 0 && y < height - 1)
+            yield return Cells[x, y + 1];
+        if (x < width - 1 && y < height - 1)
+            yield return Cells[x + 1, y + 1];
     }
 
     private GridCell[,] CreateCells()

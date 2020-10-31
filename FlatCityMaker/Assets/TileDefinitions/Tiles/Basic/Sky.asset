@@ -13,11 +13,27 @@ MonoBehaviour:
   m_Name: Sky
   m_EditorClassIdentifier: 
   Sprite: {fileID: 21300000, guid: bf30d96ba07555642aa9d4cd964d89fa, type: 3}
-  Up: {fileID: 11400000, guid: 253146f09abd37346a749236617de7e2, type: 2}
-  Down: {fileID: 11400000, guid: 253146f09abd37346a749236617de7e2, type: 2}
-  Left: {fileID: 11400000, guid: 253146f09abd37346a749236617de7e2, type: 2}
-  Right: {fileID: 11400000, guid: 253146f09abd37346a749236617de7e2, type: 2}
-  UpLeft: {fileID: 11400000, guid: 253146f09abd37346a749236617de7e2, type: 2}
-  UpRight: {fileID: 11400000, guid: 253146f09abd37346a749236617de7e2, type: 2}
-  DownLeft: {fileID: 11400000, guid: 253146f09abd37346a749236617de7e2, type: 2}
-  DownRight: {fileID: 11400000, guid: 253146f09abd37346a749236617de7e2, type: 2}
+  TopSideLeft:
+    Type: {fileID: 11400000, guid: 253146f09abd37346a749236617de7e2, type: 2}
+    ImposesConnection: 0
+  TopSideRight:
+    Type: {fileID: 11400000, guid: 253146f09abd37346a749236617de7e2, type: 2}
+    ImposesConnection: 0
+  LeftSideUpper:
+    Type: {fileID: 11400000, guid: 253146f09abd37346a749236617de7e2, type: 2}
+    ImposesConnection: 0
+  LeftSideLower:
+    Type: {fileID: 11400000, guid: 253146f09abd37346a749236617de7e2, type: 2}
+    ImposesConnection: 0
+  RightSideUpper:
+    Type: {fileID: 11400000, guid: 253146f09abd37346a749236617de7e2, type: 2}
+    ImposesConnection: 0
+  RightSideLower:
+    Type: {fileID: 11400000, guid: 253146f09abd37346a749236617de7e2, type: 2}
+    ImposesConnection: 0
+  BottomSideLeft:
+    Type: {fileID: 11400000, guid: 253146f09abd37346a749236617de7e2, type: 2}
+    ImposesConnection: 0
+  BottomSideRight:
+    Type: {fileID: 11400000, guid: 253146f09abd37346a749236617de7e2, type: 2}
+    ImposesConnection: 0
