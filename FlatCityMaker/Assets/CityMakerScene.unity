@@ -382,6 +382,10 @@ MonoBehaviour:
   DisplayTilesTransform: {fileID: 143143806}
   SkyTile: {fileID: 11400000, guid: eb40a7101c17d0644a1a7b7760e3235e, type: 2}
   options:
+  - {fileID: 11400000, guid: 3401428745f52df47ad0ca71261439f7, type: 2}
+  - {fileID: 11400000, guid: 8bd226bd36f22074abbd28b948ba71d4, type: 2}
+  - {fileID: 11400000, guid: 62987438d6393684b821f0b3e0d99512, type: 2}
+  - {fileID: 11400000, guid: c5413c53938d59b4b91dd832cb4d17c2, type: 2}
   - {fileID: 11400000, guid: 247808866dcd6dd43911be37af4d0f86, type: 2}
   - {fileID: 11400000, guid: 25225d716e9cfe645a1c9c7952a7f1d6, type: 2}
   - {fileID: 11400000, guid: 331df081a667a474694b94fc9e54e6d3, type: 2}

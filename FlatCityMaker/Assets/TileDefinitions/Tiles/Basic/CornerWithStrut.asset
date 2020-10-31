@@ -27,13 +27,13 @@ MonoBehaviour:
     ImposesConnection: 0
   RightSideUpper:
     Type: {fileID: 11400000, guid: 253146f09abd37346a749236617de7e2, type: 2}
-    ImposesConnection: 0
+    ImposesConnection: 1
   RightSideLower:
     Type: {fileID: 11400000, guid: c5e6f881562d7764b9c984fe355bc617, type: 2}
     ImposesConnection: 0
   BottomSideLeft:
     Type: {fileID: 11400000, guid: 253146f09abd37346a749236617de7e2, type: 2}
-    ImposesConnection: 0
+    ImposesConnection: 1
   BottomSideRight:
     Type: {fileID: 11400000, guid: c5e6f881562d7764b9c984fe355bc617, type: 2}
     ImposesConnection: 0
