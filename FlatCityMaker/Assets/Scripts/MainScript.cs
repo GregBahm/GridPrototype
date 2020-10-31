@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using TileDefinition;
 using UnityEngine;
@@ -27,7 +28,7 @@ public class MainScript : MonoBehaviour
         
         CreateDisplayTiles();
         CreateInteractionTiles();
-        ResetGridFills();
+        FillAllWithSky();
     }
 
     private void CreateInteractionTiles()
@@ -53,18 +54,36 @@ public class MainScript : MonoBehaviour
         TileInteractionBehavior behavior = obj.AddComponent<TileInteractionBehavior>();
         behavior.X = x;
         behavior.Y = y;
+        behavior.ConnectedCells = GetConnectedCells(x, y).ToArray();
         return obj;
     }
 
-    private void ResetGridFills()
+    private IEnumerable<GridCell> GetConnectedCells(int x, int y)
+    {
+        x--;
+        y--;
+        if (x > 0 && y > 0)
+            yield return mainGrid.Cells[x, y];
+        if(x < Width - 2 && y > 0)
+            yield return mainGrid.Cells[x + 1, y];
+        if(x > 0 && y < Height - 1)
+            yield return mainGrid.Cells[x, y + 1];
+        if(x < Width - 1 && y < Height - 1)
+            yield return mainGrid.Cells[x + 1, y + 1];
+    }
+    private void ResetAffectedCells(IEnumerable<GridCell> cells)
+    {
+        foreach (GridCell cell in cells)
+        {
+            cell.Reset();
+        }
+    }
+
+    private void FillAllWithSky()
     {
         foreach (var item in mainGrid.Cells)
         {
-            item.Reset();
-        }
-        for (int x = 0; x < Width; x++)
-        {
-            mainGrid.Cells[x, Height - 1].FilledWith = SkyTile;
+            item.FilledWith = SkyTile;
         }
     }
     private IEnumerable<Tile> GetSymmetricalOptions()
@@ -84,18 +103,14 @@ public class MainScript : MonoBehaviour
     private void Update()
     {
         HandleInteraction();
-        UpdateEverything();
+        UpdateProgressively();
     }
 
     private void UpdateEverything()
     {
         while(mainGrid.EmptyCells.Any())
         {
-            while(mainGrid.DirtyCells.Any())
-            {
-                mainGrid.DirtyCells.First().UpdateOptions();
-            }
-            mainGrid.FillLowestEntropy();
+            mainGrid.TryFillLowestEntropy();
         }
     }
 
@@ -103,14 +118,7 @@ public class MainScript : MonoBehaviour
     {
         if (mainGrid.EmptyCells.Any())
         {
-            if (mainGrid.DirtyCells.Any())
-            {
-                mainGrid.DirtyCells.First().UpdateOptions();
-            }
-            else
-            {
-                mainGrid.FillLowestEntropy();
-            }
+            mainGrid.TryFillLowestEntropy();
         }
     }
 
@@ -124,7 +132,8 @@ public class MainScript : MonoBehaviour
             {
                 TileInteractionBehavior cell = hitInfo.collider.gameObject.GetComponent<TileInteractionBehavior>();
                 mainGrid.Designations.ToggleGridpoint(cell.X, cell.Y);
-                ResetGridFills();
+                mainGrid.StartNewSolve();
+                ResetAffectedCells(cell.ConnectedCells);
             }
         }
     }

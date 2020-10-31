@@ -10,6 +10,7 @@ public class GridCell
     public int X { get; }
     public int Y { get; }
 
+    public IReadOnlyList<Tile> OptionsFromDesignation { get; private set; }
     public IReadOnlyList<Tile> Options { get; private set; }
     public Tile FilledWith { get; set; }
     
@@ -42,34 +43,61 @@ public class GridCell
         this.neighbors = neighbors.Where(item => item.Cell != null).ToList();
     }
 
+    internal void FillSelf()
+    {
+        Tile[] baseOptions = Options.Where(OptionIsValid).ToArray();
+        if (!baseOptions.Any())
+        {
+            PropogateReset();
+        }
+        else
+        {
+            FilledWith = Options[0];
+            main.EmptyCells.Remove(this);
+            main.SolvedCells.Add(this);
+        }
+    }
+
+    public void UpdateDesignationOptions()
+    {
+        // TODO: It should be possible to precompute these into a hash
+        OptionsFromDesignation = main.AllOptions.Where(DesignationsAllowOption).ToArray();
+    }
+
     public void Reset()
     {
         FilledWith = null;
-        Options = main.AllOptions.Where(DesignationsAllowOption).ToArray();
+        main.EmptyCells.Add(this);
+        Options = OptionsFromDesignation.Where(OptionIsValid).ToArray();
         if (Options.Count == 0)
         {
-            throw new Exception("Impossible from the drop!");
+            Options = baseOptions;
+            PropogateReset();
         }
-        main.DirtyCells.Add(this);
-        main.EmptyCells.Add(this);
     }
 
-    public void UpdateOptions()
+    public void PropogateReset()
     {
-        int optionsCount = Options.Count;
-        Tile[] newOptions = Options.Where(OptionIsValid).ToArray();
-        if (newOptions.Length == 0)
+        foreach (GridCell cell in neighbors.Select(item => item.Cell))
         {
-            throw new Exception("Impossible!");
-        }
-        Options = newOptions;
-        main.DirtyCells.Remove(this);
-        if(newOptions.Length != optionsCount)
-        {
-            foreach (Neighbor neighbor in neighbors)
+            if(!main.EmptyCells.Contains(cell))
             {
-                neighbor.Cell.SetDirty();
+                cell.Reset();
             }
+        }
+    }
+
+    public void UpdateEmptyCell()
+    {
+        Options = Options.Where(OptionIsValid).ToArray();
+        if (Options.Count == 0)
+        {
+            Options = main.AllOptions.Where(DesignationsAllowOption).ToArray();
+            PropogateReset();
+        }
+        if (Options.Count == 1)
+        {
+            FillSelf();
         }
     }
 
@@ -78,41 +106,9 @@ public class GridCell
         return main.Designations.IsOptionAllowed(X, Y, option);
     }
 
-    private void SetDirty()
-    {
-        if(FilledWith == null)
-        {
-            main.DirtyCells.Add(this);
-        }
-    }
-
     private bool OptionIsValid(Tile blueprint)
     {
         return neighbors.All(item => item.DoesConnectTo(blueprint));
-    }
-
-    internal void FillSelfWithFirstOption()
-    {
-        FilledWith = Options.First();
-        main.EmptyCells.Remove(this);
-        main.DirtyCells.Remove(this);
-        foreach (Neighbor neighbor in neighbors)
-        {
-            neighbor.Cell.SetDirty();
-        }
-    }
-
-    internal void FillSelfWithRandomOption()
-    {
-        Tile[] optionsArray = Options.ToArray();
-        int rand = UnityEngine.Random.Range(0, optionsArray.Length);
-        FilledWith = optionsArray[rand];
-        main.EmptyCells.Remove(this);
-        main.DirtyCells.Remove(this);
-        foreach (Neighbor neighbor in neighbors)
-        {
-            neighbor.Cell.SetDirty();
-        }
     }
 
     private class OrthagonalNeighbor : Neighbor
@@ -197,6 +193,21 @@ public class GridCell
         {
             return DoesConnectTo(tile, selfSelector, neighborSelector);
         }
+    }
+
+    public override string ToString()
+    {
+        string ret = "(" + X + "," + Y + ")";
+        if(FilledWith != null)
+        {
+            return ret + "filled with " + FilledWith.name;
+        }
+        ret += " Options: ";
+        foreach (var option in Options)
+        {
+            ret += option.Sprite.name + " ";
+        }
+        return ret;
     }
 }
 

@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using TileDefinition;
+using UnityEditor.PackageManager.Requests;
 
 public class MainGrid
 {
@@ -11,8 +13,8 @@ public class MainGrid
 
     public IEnumerable<Tile> AllOptions { get; }
 
+    public HashSet<GridCell> SolvedCells { get; } = new HashSet<GridCell>();
     public HashSet<GridCell> EmptyCells { get; } = new HashSet<GridCell>();
-    public HashSet<GridCell> DirtyCells { get; } = new HashSet<GridCell>();
 
     public GridCell[,] Cells { get; private set; }
 
@@ -25,8 +27,15 @@ public class MainGrid
         this.width = width;
         this.height = height;
         Cells = CreateCells();
-        EmptyCells = GetAllCells();
-        DirtyCells = GetAllCells();
+    }
+
+    public void StartNewSolve()
+    {
+        if(EmptyCells.Any())
+        {
+            throw new Exception("Can't start new solve when a solve is already in progress");
+        }
+        SolvedCells.Clear();
     }
 
     private HashSet<GridCell> GetAllCells()
@@ -42,10 +51,18 @@ public class MainGrid
         return ret;
     }
 
-    public void FillLowestEntropy()
+    public void TryFillLowestEntropy()
     {
-        GridCell cellWithLeastOptions = EmptyCells.OrderBy(item => item.Options.Count).First();
-        cellWithLeastOptions.FillSelfWithFirstOption();
+        IEnumerable<GridCell> emptyCells = EmptyCells.ToArray();
+        foreach (GridCell cell in emptyCells)
+        {
+            cell.UpdateEmptyCell();
+        }
+        if(EmptyCells.Any())
+        {
+            GridCell cellWithLeastOptions = EmptyCells.OrderBy(item => item.Options.Count).First();
+            cellWithLeastOptions.FillSelf();
+        }
     }
 
     private GridCell[,] CreateCells()
