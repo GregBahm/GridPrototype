@@ -20,6 +20,11 @@ public class DesignationsGrid
         fillGrid = new bool[width, height];
     }
 
+    public bool GetPointState(int x, int y)
+    {
+        return fillGrid[x, y];
+    }
+
     public void ToggleGridpoint(int x, int y)
     {
         if (y >= height - 2) // No toggling the sky

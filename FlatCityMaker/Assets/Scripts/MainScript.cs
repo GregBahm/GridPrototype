@@ -18,34 +18,39 @@ public class MainScript : MonoBehaviour
 
     public TileConnectionType[] FilledConnectionTypes;
 
-    private MainGrid mainGrid;
+    public MainGrid MainGrid { get; private set; }
+    public IEnumerable<TileInteractionBehavior> InteractionTiles { get; private set; }
+    public IEnumerable<TileVisualBehavior> VisualTiles { get; private set; }
 
     void Start()
     {
         IEnumerable<Tile> allOptions = GetSymmetricalOptions();
         DesignationsGrid designations = new DesignationsGrid(Width, Height, FilledConnectionTypes);
-        mainGrid = new MainGrid(Width, Height, allOptions, designations);
+        MainGrid = new MainGrid(Width, Height, allOptions, designations);
         
-        CreateDisplayTiles();
-        CreateInteractionTiles();
+        VisualTiles = CreateDisplayTiles();
+        InteractionTiles = CreateInteractionTiles();
         FillAllWithSky();
     }
 
-    private void CreateInteractionTiles()
+    private IEnumerable<TileInteractionBehavior> CreateInteractionTiles()
     {
+        List<TileInteractionBehavior> ret = new List<TileInteractionBehavior>();
         GameObject tiles = new GameObject("InteractionTiles");
         for (int x = 0; x < Width + 1; x++)
         {
             for (int y = 0; y < Height + 1; y++)
             {
-                GameObject obj = CreateInteractionTile(x, y);
-                obj.transform.parent = tiles.transform;
+                TileInteractionBehavior behavior = CreateInteractionTile(x, y);
+                behavior.gameObject.transform.parent = tiles.transform;
+                ret.Add(behavior);
             }
         }
         tiles.transform.position = new Vector3(-(float)Width / 2, -(float)Height / 2);
+        return ret;
     }
 
-    private GameObject CreateInteractionTile(int x, int y)
+    private TileInteractionBehavior CreateInteractionTile(int x, int y)
     {
         GameObject obj = GameObject.CreatePrimitive(PrimitiveType.Quad);
         obj.name = x + " " + y;
@@ -54,13 +59,13 @@ public class MainScript : MonoBehaviour
         TileInteractionBehavior behavior = obj.AddComponent<TileInteractionBehavior>();
         behavior.X = x;
         behavior.Y = y;
-        behavior.ConnectedCells = mainGrid.GetCellsConnectedToDesignationPoint(x, y).ToArray();
-        return obj;
+        behavior.ConnectedCells = MainGrid.GetCellsConnectedToDesignationPoint(x, y).ToArray();
+        return behavior;
     }
 
     private void FillAllWithSky()
     {
-        foreach (var item in mainGrid.Cells)
+        foreach (var item in MainGrid.Cells)
         {
             item.FilledWith = SkyTile;
             item.UpdateDesignationOptions();
@@ -95,33 +100,36 @@ public class MainScript : MonoBehaviour
             if (Physics.Raycast(mouseRay, out hitInfo))
             {
                 TileInteractionBehavior cell = hitInfo.collider.gameObject.GetComponent<TileInteractionBehavior>();
-                mainGrid.Designations.ToggleGridpoint(cell.X, cell.Y);
-                mainGrid.StartNewSolve(cell.ConnectedCells);
+                MainGrid.Designations.ToggleGridpoint(cell.X, cell.Y);
+                MainGrid.StartNewSolve(cell.ConnectedCells);
             }
         }
     }
 
-    private void CreateDisplayTiles()
+    private IEnumerable<TileVisualBehavior> CreateDisplayTiles()
     {
+        List<TileVisualBehavior> ret = new List<TileVisualBehavior>();
         for (int x = 0; x < Width; x++)
         {
             for (int y = 0; y < Height; y++)
             {
-                GameObject obj = CreateDisplayTile(x, y);
-                obj.transform.SetParent(DisplayTilesTransform, false);
+                TileVisualBehavior behavior = CreateDisplayTile(x, y);
+                behavior.transform.SetParent(DisplayTilesTransform, false);
+                ret.Add(behavior);
             }
         }
         DisplayTilesTransform.position = new Vector3(-(float)Width / 2, -(float)Height / 2);
+        return ret;
     }
 
-    private GameObject CreateDisplayTile(int x, int y)
+    private TileVisualBehavior CreateDisplayTile(int x, int y)
     {
         GameObject obj = Instantiate(DisplayTilePrefab);
         obj.name = x + " " + y;
         obj.transform.position = new Vector3(x + .5f, y + .5f, 0);
         TileVisualBehavior behavior = obj.AddComponent<TileVisualBehavior>();
-        behavior.Model = mainGrid.Cells[x, y];
-        return obj;
+        behavior.Model = MainGrid.Cells[x, y];
+        return behavior;
     }
 }
 

@@ -356,6 +356,8 @@ GameObject:
   m_Component:
   - component: {fileID: 360831928}
   - component: {fileID: 360831927}
+  - component: {fileID: 360831929}
+  - component: {fileID: 360831930}
   m_Layer: 0
   m_Name: MainScript
   m_TagString: Untagged
@@ -421,6 +423,33 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &360831929
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 360831926}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6e2ed431e1c8e14fa35cf91ca03a3c4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  DisplayMat: {fileID: 2100000, guid: f62010be37b42854f98b2caa20f054a3, type: 2}
+  ToggledColor: {r: 1, g: 0.31804758, b: 0, a: 1}
+  SkyColor: {r: 0.2688679, g: 0.94225174, b: 1, a: 1}
+--- !u!114 &360831930
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 360831926}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 565c13c121036bc44b7cda8ba3ef114f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
