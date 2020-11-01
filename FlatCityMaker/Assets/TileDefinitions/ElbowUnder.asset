@@ -12,14 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 74dd92c13d6fcce4a823f32fe0eb475a, type: 3}
   m_Name: ElbowUnder
   m_EditorClassIdentifier: 
-  TopLeftFilled: 1
-  TopRightFilled: 1
-  BottomLeftFilled: 1
-  BottomRightFilled: 0
+  TopLeft: 1
+  TopRight: 1
+  BottomLeft: 1
+  BottomRight: 0
   DropsStrut: 0
-  Default: {fileID: 21300000, guid: 75f78db91fc9f8a41bdcd7c9b36a3b67, type: 3}
-  DefaultReceivingStrut: {fileID: 0}
-  SlantedVariant: {fileID: 0}
-  SlantedReceivingStrut: {fileID: 0}
-  RoundedVariant: {fileID: 0}
-  RoundedReceivingStrut: {fileID: 0}
+  Sprite: {fileID: 21300000, guid: 75f78db91fc9f8a41bdcd7c9b36a3b67, type: 3}
+  SpriteReceivingStrut: {fileID: 0}

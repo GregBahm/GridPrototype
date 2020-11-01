@@ -12,14 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 74dd92c13d6fcce4a823f32fe0eb475a, type: 3}
   m_Name: Diagonal
   m_EditorClassIdentifier: 
-  TopLeftFilled: 1
-  TopRightFilled: 0
-  BottomLeftFilled: 0
-  BottomRightFilled: 1
+  TopLeft: 1
+  TopRight: 0
+  BottomLeft: 0
+  BottomRight: 1
   DropsStrut: 0
-  Default: {fileID: 21300000, guid: 44c5ac98a8c51fb40babd432c9bedd8c, type: 3}
-  DefaultReceivingStrut: {fileID: 0}
-  SlantedVariant: {fileID: 0}
-  SlantedReceivingStrut: {fileID: 0}
-  RoundedVariant: {fileID: 0}
-  RoundedReceivingStrut: {fileID: 0}
+  Sprite: {fileID: 21300000, guid: 44c5ac98a8c51fb40babd432c9bedd8c, type: 3}
+  SpriteReceivingStrut: {fileID: 0}

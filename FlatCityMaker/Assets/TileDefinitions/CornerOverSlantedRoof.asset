@@ -10,13 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 74dd92c13d6fcce4a823f32fe0eb475a, type: 3}
-  m_Name: Empty
+  m_Name: CornerOverSlantedRoof
   m_EditorClassIdentifier: 
   TopLeft: 0
   TopRight: 0
   BottomLeft: 0
-  BottomRight: 0
+  BottomRight: 2
   DropsStrut: 0
-  Sprite: {fileID: 21300000, guid: bf30d96ba07555642aa9d4cd964d89fa, type: 3}
-  SpriteReceivingStrut: {fileID: 21300000, guid: 50eaa368cb416ea4988157d52e7f697a,
-    type: 3}
+  Sprite: {fileID: 21300000, guid: a3dfe77c35f2173499eb75ef710574d6, type: 3}
+  SpriteReceivingStrut: {fileID: 0}

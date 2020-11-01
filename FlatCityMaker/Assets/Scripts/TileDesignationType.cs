@@ -1,7 +1,7 @@
 ﻿public enum TileDesignationType
 {
     Empty,
-    Filled,
-    Slanted,
-    Rounded
+    DefaultFill,
+    Slant,
+    Round
 }

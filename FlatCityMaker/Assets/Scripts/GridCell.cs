@@ -8,7 +8,7 @@ public class GridCell
     public int X { get; }
     public int Y { get; }
 
-    public TileFill FilledWith { get; set; }
+    public NewTile FilledWith { get; set; }
     
     public GridCell(MainGrid main, int x, int y)
     {
@@ -19,20 +19,24 @@ public class GridCell
 
     public void UpdateFill()
     {
-        NewTile tile = main.AllOptions.FirstOrDefault(DesignationsAllowOption);
+        NewTile tile = main.AllOptions.FirstOrDefault(OptionAllowed);
         if(tile == null)
         {
-            throw new Exception("Zero options from designation table");
+            tile = main.AllOptions.FirstOrDefault(FallbackAllowed);
+            if(tile == null)
+            {
+                throw new Exception("Zero options from designation table");
+            }
         }
-        FilledWith = GetTileFill(tile);
+        FilledWith = tile;
     }
 
-    private TileFill GetTileFill(NewTile tile)
+    private bool FallbackAllowed(NewTile option)
     {
-        return new TileFill(tile.Default, tile.HorizontallyFlipped);
+        return main.Designations.IsOptionAllowedAsFallback(X, Y, option);
     }
 
-    private bool DesignationsAllowOption(NewTile option)
+    private bool OptionAllowed(NewTile option)
     {
         return main.Designations.IsOptionAllowed(X, Y, option);
     }

@@ -12,15 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 74dd92c13d6fcce4a823f32fe0eb475a, type: 3}
   m_Name: CornerUnder
   m_EditorClassIdentifier: 
-  TopLeftFilled: 0
-  TopRightFilled: 1
-  BottomLeftFilled: 0
-  BottomRightFilled: 0
+  TopLeft: 0
+  TopRight: 1
+  BottomLeft: 0
+  BottomRight: 0
   DropsStrut: 0
-  Default: {fileID: 21300000, guid: 590dfdedd9460b14a999d147928770d5, type: 3}
-  DefaultReceivingStrut: {fileID: 21300000, guid: 23a6cf17e3bb44c4a915892e0e509e64,
+  Sprite: {fileID: 21300000, guid: 590dfdedd9460b14a999d147928770d5, type: 3}
+  SpriteReceivingStrut: {fileID: 21300000, guid: 23a6cf17e3bb44c4a915892e0e509e64,
     type: 3}
-  SlantedVariant: {fileID: 0}
-  SlantedReceivingStrut: {fileID: 0}
-  RoundedVariant: {fileID: 0}
-  RoundedReceivingStrut: {fileID: 0}

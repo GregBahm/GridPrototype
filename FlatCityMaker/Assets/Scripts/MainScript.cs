@@ -12,8 +12,7 @@ public class MainScript : MonoBehaviour
 
     public TileDesignationType CurrentDesignationType;
 
-    public Sprite SkySprite;
-    public TileFill SkyTile { get; private set; }
+    public NewTile Sky;
 
     [SerializeField]
     private NewTile[] options;
@@ -24,7 +23,6 @@ public class MainScript : MonoBehaviour
 
     void Start()
     {
-        SkyTile = new TileFill(SkySprite, false);
         IEnumerable<NewTile> allOptions = GetSymmetricalOptions();
         DesignationsGrid designations = new DesignationsGrid(Width, Height);
         MainGrid = new MainGrid(Width, Height, allOptions, designations);
@@ -68,7 +66,7 @@ public class MainScript : MonoBehaviour
     {
         foreach (var item in MainGrid.Cells)
         {
-            item.FilledWith = SkyTile;
+            item.FilledWith = Sky;
         }
     }
 

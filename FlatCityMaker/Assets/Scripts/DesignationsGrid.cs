@@ -27,15 +27,32 @@
 
     public bool IsOptionAllowed(int x, int y, NewTile option)
     {
-        return Check(x, y, option.BottomRightFilled)
-            && Check(x + 1, y, option.BottomLeftFilled)
-            && Check(x, y + 1, option.TopRightFilled)
-            && Check(x + 1, y + 1, option.TopLeftFilled);
+        return Check(x, y, option.BottomRight)
+            && Check(x + 1, y, option.BottomLeft)
+            && Check(x, y + 1, option.TopRight)
+            && Check(x + 1, y + 1, option.TopLeft);
     }
 
-    private bool Check(int x, int y, bool tileRequirement)
+    public bool IsOptionAllowedAsFallback(int x, int y, NewTile option)
     {
-        bool isFilled = fillGrid[x, y] != TileDesignationType.Empty;
-        return isFilled == tileRequirement;
+        return FallbackCheck(x, y, option.BottomRight)
+            && FallbackCheck(x + 1, y, option.BottomLeft)
+            && FallbackCheck(x, y + 1, option.TopRight)
+            && FallbackCheck(x + 1, y + 1, option.TopLeft);
+    }
+    private bool FallbackCheck(int x, int y, TileDesignationType designationType)
+    {
+        bool isEmpty = fillGrid[x, y] == TileDesignationType.Empty;
+        if (isEmpty)
+        {
+            return designationType == TileDesignationType.Empty;
+        }
+        return designationType == TileDesignationType.DefaultFill 
+            || designationType == fillGrid[x,y];
+    }
+
+    private bool Check(int x, int y, TileDesignationType designationType)
+    {
+        return fillGrid[x, y] == designationType;
     }
 }
