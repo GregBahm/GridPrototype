@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using TileDefinition;
 using UnityEngine;
 
 public class MainScript : MonoBehaviour
@@ -11,12 +10,13 @@ public class MainScript : MonoBehaviour
     public GameObject DisplayTilePrefab;
     public RectTransform DisplayTilesTransform;
 
-    public Tile SkyTile;
+    public TileDesignationType CurrentDesignationType;
+
+    public Sprite SkySprite;
+    public TileFill SkyTile { get; private set; }
 
     [SerializeField]
-    private Tile[] options;
-
-    public TileConnectionType[] FilledConnectionTypes;
+    private NewTile[] options;
 
     public MainGrid MainGrid { get; private set; }
     public IEnumerable<TileInteractionBehavior> InteractionTiles { get; private set; }
@@ -24,8 +24,9 @@ public class MainScript : MonoBehaviour
 
     void Start()
     {
-        IEnumerable<Tile> allOptions = GetSymmetricalOptions();
-        DesignationsGrid designations = new DesignationsGrid(Width, Height, FilledConnectionTypes);
+        SkyTile = new TileFill(SkySprite, false);
+        IEnumerable<NewTile> allOptions = GetSymmetricalOptions();
+        DesignationsGrid designations = new DesignationsGrid(Width, Height);
         MainGrid = new MainGrid(Width, Height, allOptions, designations);
         
         VisualTiles = CreateDisplayTiles();
@@ -68,14 +69,13 @@ public class MainScript : MonoBehaviour
         foreach (var item in MainGrid.Cells)
         {
             item.FilledWith = SkyTile;
-            item.UpdateDesignationOptions();
         }
     }
 
-    private IEnumerable<Tile> GetSymmetricalOptions()
+    private IEnumerable<NewTile> GetSymmetricalOptions()
     {
-        List<Tile> ret = new List<Tile>();
-        foreach (Tile option in options)
+        List<NewTile> ret = new List<NewTile>();
+        foreach (NewTile option in options)
         {
             ret.Add(option);
             if (option.GetIsAsymmetrical())
@@ -99,10 +99,18 @@ public class MainScript : MonoBehaviour
             RaycastHit hitInfo;
             if (Physics.Raycast(mouseRay, out hitInfo))
             {
-                TileInteractionBehavior cell = hitInfo.collider.gameObject.GetComponent<TileInteractionBehavior>();
-                MainGrid.Designations.ToggleGridpoint(cell.X, cell.Y);
-                MainGrid.StartNewSolve(cell.ConnectedCells);
+                TileInteractionBehavior interactor = hitInfo.collider.gameObject.GetComponent<TileInteractionBehavior>();
+                ToggleDesignation(interactor);
             }
+        }
+    }
+
+    private void ToggleDesignation(TileInteractionBehavior interactor)
+    {
+        MainGrid.Designations.ToggleGridpoint(interactor.X, interactor.Y, CurrentDesignationType);
+        foreach (GridCell cell in interactor.ConnectedCells)
+        {
+            cell.UpdateFill();
         }
     }
 
