@@ -10,9 +10,21 @@ public class GridCell
     public int X { get; }
     public int Y { get; }
 
+    public Tile FilledWith 
+    { 
+        get 
+        { 
+            if(Options.Any())
+            {
+                return Options[0];
+            }
+            return null;
+        } 
+    }
+
+    public IReadOnlyList<Tile> OptionsFromDesignation { get; private set; }
     public IReadOnlyList<Tile> Options { get; private set; }
-    public Tile FilledWith { get; set; }
-    
+
     private IReadOnlyCollection<Neighbor> neighbors;
 
     public GridCell(MainGrid main, int x, int y)
@@ -42,34 +54,30 @@ public class GridCell
         this.neighbors = neighbors.Where(item => item.Cell != null).ToList();
     }
 
-    public void Reset()
+    public void UpdateDesignationOptions()
     {
-        FilledWith = null;
-        Options = main.AllOptions.Where(DesignationsAllowOption).ToArray();
-        if (Options.Count == 0)
+        // TODO: It should be possible to precompute these into a hash
+        OptionsFromDesignation = main.AllOptions.Where(DesignationsAllowOption).ToArray();
+        if (!OptionsFromDesignation.Any())
         {
-            throw new Exception("Impossible from the drop!");
+            throw new Exception("Zero options from designation table");
         }
-        main.DirtyCells.Add(this);
-        main.EmptyCells.Add(this);
+        Options = OptionsFromDesignation;
     }
 
     public void UpdateOptions()
     {
-        int optionsCount = Options.Count;
-        Tile[] newOptions = Options.Where(OptionIsValid).ToArray();
-        if (newOptions.Length == 0)
+        if(!OptionIsValid(FilledWith))
         {
-            throw new Exception("Impossible!");
-        }
-        Options = newOptions;
-        main.DirtyCells.Remove(this);
-        if(newOptions.Length != optionsCount)
-        {
+            Options = Options.Where(OptionIsValid).ToList();
             foreach (Neighbor neighbor in neighbors)
             {
-                neighbor.Cell.SetDirty();
+                main.DirtyCells.Add(neighbor.Cell);
             }
+        }
+        else
+        {
+            main.DirtyCells.Remove(this);
         }
     }
 
@@ -78,41 +86,9 @@ public class GridCell
         return main.Designations.IsOptionAllowed(X, Y, option);
     }
 
-    private void SetDirty()
-    {
-        if(FilledWith == null)
-        {
-            main.DirtyCells.Add(this);
-        }
-    }
-
     private bool OptionIsValid(Tile blueprint)
     {
         return neighbors.All(item => item.DoesConnectTo(blueprint));
-    }
-
-    internal void FillSelfWithFirstOption()
-    {
-        FilledWith = Options.First();
-        main.EmptyCells.Remove(this);
-        main.DirtyCells.Remove(this);
-        foreach (Neighbor neighbor in neighbors)
-        {
-            neighbor.Cell.SetDirty();
-        }
-    }
-
-    internal void FillSelfWithRandomOption()
-    {
-        Tile[] optionsArray = Options.ToArray();
-        int rand = UnityEngine.Random.Range(0, optionsArray.Length);
-        FilledWith = optionsArray[rand];
-        main.EmptyCells.Remove(this);
-        main.DirtyCells.Remove(this);
-        foreach (Neighbor neighbor in neighbors)
-        {
-            neighbor.Cell.SetDirty();
-        }
     }
 
     private class OrthagonalNeighbor : Neighbor
@@ -186,15 +162,15 @@ public class GridCell
 
         protected bool DoesConnectTo(Tile tile, Func<Tile, TileConnectionType> sectorForSelf, Func<Tile, TileConnectionType> selectorForNeighbor)
         {
-            if (Cell.FilledWith != null)
-            {
-                return sectorForSelf(Cell.FilledWith) == selectorForNeighbor(tile);
-            }
             return Cell.Options.Any(item => sectorForSelf(item) == selectorForNeighbor(tile));
         }
 
         public virtual bool DoesConnectTo(Tile tile)
         {
+            if(tile == null)
+            {
+                throw new Exception("You may ask yourself, how did I get here?");
+            }
             return DoesConnectTo(tile, selfSelector, neighborSelector);
         }
     }

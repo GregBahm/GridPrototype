@@ -11,7 +11,6 @@ public class MainGrid
 
     public IEnumerable<Tile> AllOptions { get; }
 
-    public HashSet<GridCell> EmptyCells { get; } = new HashSet<GridCell>();
     public HashSet<GridCell> DirtyCells { get; } = new HashSet<GridCell>();
 
     public GridCell[,] Cells { get; private set; }
@@ -25,8 +24,10 @@ public class MainGrid
         this.width = width;
         this.height = height;
         Cells = CreateCells();
-        EmptyCells = GetAllCells();
-        DirtyCells = GetAllCells();
+        foreach (GridCell cell in Cells)
+        {
+            cell.UpdateDesignationOptions();
+        }
     }
 
     private HashSet<GridCell> GetAllCells()
@@ -40,12 +41,6 @@ public class MainGrid
             }
         }
         return ret;
-    }
-
-    public void FillLowestEntropy()
-    {
-        GridCell cellWithLeastOptions = EmptyCells.OrderBy(item => item.Options.Count).First();
-        cellWithLeastOptions.FillSelfWithFirstOption();
     }
 
     private GridCell[,] CreateCells()

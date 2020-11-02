@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Linq;
+using TileDefinition;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class TileVisualBehavior : MonoBehaviour
@@ -7,6 +9,8 @@ public class TileVisualBehavior : MonoBehaviour
     private static Vector3 FlippedCoords { get; } = new Vector3(-1, 1, 1); 
 
     public GridCell Model { get; set; }
+
+    public Tile[] Options;
 
     private void Start()
     {

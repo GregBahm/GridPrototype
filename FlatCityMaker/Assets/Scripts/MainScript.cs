@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using TileDefinition;
 using UnityEngine;
@@ -27,7 +28,6 @@ public class MainScript : MonoBehaviour
         
         CreateDisplayTiles();
         CreateInteractionTiles();
-        ResetGridFills();
     }
 
     private void CreateInteractionTiles()
@@ -44,6 +44,20 @@ public class MainScript : MonoBehaviour
         tiles.transform.position = new Vector3(-(float)Width / 2, -(float)Height / 2);
     }
 
+    private IEnumerable<GridCell> GetConnectedCells(int x, int y)
+    {
+        x--;
+        y--;
+        if (x > 0 && y > 0)
+            yield return mainGrid.Cells[x, y];
+        if (x < Width - 2 && y > 0)
+            yield return mainGrid.Cells[x + 1, y];
+        if (x > 0 && y < Height - 1)
+            yield return mainGrid.Cells[x, y + 1];
+        if (x < Width - 1 && y < Height - 1)
+            yield return mainGrid.Cells[x + 1, y + 1];
+    }
+
     private GameObject CreateInteractionTile(int x, int y)
     {
         GameObject obj = GameObject.CreatePrimitive(PrimitiveType.Quad);
@@ -53,20 +67,10 @@ public class MainScript : MonoBehaviour
         TileInteractionBehavior behavior = obj.AddComponent<TileInteractionBehavior>();
         behavior.X = x;
         behavior.Y = y;
+        behavior.ConnectedCells = GetConnectedCells(x, y).ToArray();
         return obj;
     }
 
-    private void ResetGridFills()
-    {
-        foreach (var item in mainGrid.Cells)
-        {
-            item.Reset();
-        }
-        for (int x = 0; x < Width; x++)
-        {
-            mainGrid.Cells[x, Height - 1].FilledWith = SkyTile;
-        }
-    }
     private IEnumerable<Tile> GetSymmetricalOptions()
     {
         List<Tile> ret = new List<Tile>();
@@ -84,33 +88,15 @@ public class MainScript : MonoBehaviour
     private void Update()
     {
         HandleInteraction();
-        UpdateEverything();
+        UpdateProgressive();
     }
 
-    private void UpdateEverything()
+    private void UpdateProgressive()
     {
-        while(mainGrid.EmptyCells.Any())
+        if(mainGrid.DirtyCells.Any())
         {
-            while(mainGrid.DirtyCells.Any())
-            {
-                mainGrid.DirtyCells.First().UpdateOptions();
-            }
-            mainGrid.FillLowestEntropy();
-        }
-    }
-
-    private void UpdateProgressively()
-    {
-        if (mainGrid.EmptyCells.Any())
-        {
-            if (mainGrid.DirtyCells.Any())
-            {
-                mainGrid.DirtyCells.First().UpdateOptions();
-            }
-            else
-            {
-                mainGrid.FillLowestEntropy();
-            }
+            mainGrid.DirtyCells.OrderByDescending(item => item.Options.Count).First().UpdateOptions();
+            //mainGrid.DirtyCells.First().UpdateOptions();
         }
     }
 
@@ -124,9 +110,22 @@ public class MainScript : MonoBehaviour
             {
                 TileInteractionBehavior cell = hitInfo.collider.gameObject.GetComponent<TileInteractionBehavior>();
                 mainGrid.Designations.ToggleGridpoint(cell.X, cell.Y);
-                ResetGridFills();
+                UpdateCells(cell.ConnectedCells);
             }
         }
+    }
+
+    private void UpdateCells(IEnumerable<GridCell> connectedCells)
+    {
+        foreach (GridCell cell in connectedCells)
+        {
+            cell.UpdateDesignationOptions();
+            mainGrid.DirtyCells.Add(cell);
+        }
+        //while(mainGrid.DirtyCells.Any())
+        //{
+        //    mainGrid.DirtyCells.First().UpdateOptions();
+        //}
     }
 
     private void CreateDisplayTiles()
@@ -152,4 +151,3 @@ public class MainScript : MonoBehaviour
         return obj;
     }
 }
-
