@@ -22,6 +22,8 @@ public class GridCell
         } 
     }
 
+    public bool IsDirty { get { return main.DirtyCells.Contains(this); } }
+
     public IReadOnlyList<Tile> OptionsFromDesignation { get; private set; }
     public IReadOnlyList<Tile> Options { get; private set; }
 
@@ -54,26 +56,52 @@ public class GridCell
         this.neighbors = neighbors.Where(item => item.Cell != null).ToList();
     }
 
-    public void UpdateDesignationOptions()
+    public void ResetDesignationOptions()
     {
         // TODO: It should be possible to precompute these into a hash
         OptionsFromDesignation = main.AllOptions.Where(DesignationsAllowOption).ToArray();
+        Options = OptionsFromDesignation;
         if (!OptionsFromDesignation.Any())
         {
             throw new Exception("Zero options from designation table");
         }
-        Options = OptionsFromDesignation;
+        SetAsDirty();
+        DirtyNeighbors();
+    }
+
+    private void DirtyNeighbors()
+    {
+        foreach (Neighbor neighbor in neighbors)
+        {
+            neighbor.Cell.SetAsDirty();
+        }
+    }
+
+    private void SetAsDirty()
+    {
+        main.DirtyCells.Add(this);
+        if(!main.RefreshedCells.Contains(this))
+        {
+            Options = OptionsFromDesignation;
+            main.RefreshedCells.Add(this);
+        }
     }
 
     public void UpdateOptions()
     {
         if(!OptionIsValid(FilledWith))
         {
-            Options = Options.Where(OptionIsValid).ToList();
-            foreach (Neighbor neighbor in neighbors)
+            List<Tile> newOptions = Options.Where(OptionIsValid).ToList();
+            if(!newOptions.Any())
             {
-                main.DirtyCells.Add(neighbor.Cell);
+                Options = new List<Tile>() { FilledWith };
+                main.DirtyCells.Remove(this);
             }
+            else
+            {
+                Options = newOptions;
+            }
+            DirtyNeighbors();
         }
         else
         {

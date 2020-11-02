@@ -11,6 +11,8 @@ public class MainGrid
 
     public IEnumerable<Tile> AllOptions { get; }
 
+    public HashSet<GridCell> RefreshedCells { get; } = new HashSet<GridCell>();
+
     public HashSet<GridCell> DirtyCells { get; } = new HashSet<GridCell>();
 
     public GridCell[,] Cells { get; private set; }
@@ -26,21 +28,9 @@ public class MainGrid
         Cells = CreateCells();
         foreach (GridCell cell in Cells)
         {
-            cell.UpdateDesignationOptions();
+            cell.ResetDesignationOptions();
         }
-    }
-
-    private HashSet<GridCell> GetAllCells()
-    {
-        HashSet<GridCell> ret = new HashSet<GridCell>();
-        for (int x = 0; x < width; x++)
-        {
-            for (int y = 0; y < height; y++)
-            {
-                ret.Add(Cells[x, y]);
-            }
-        }
-        return ret;
+        DirtyCells.Clear();
     }
 
     private GridCell[,] CreateCells()

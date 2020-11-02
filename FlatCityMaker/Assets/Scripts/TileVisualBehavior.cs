@@ -25,6 +25,8 @@ public class TileVisualBehavior : MonoBehaviour
             {
                 image.sprite = Model.FilledWith.Sprite;
                 image.transform.localScale = Model.FilledWith.HorizontallyFlipped ? Vector3.one : FlippedCoords;
+
+                image.color = Model.IsDirty ? Color.red : Color.white;
             }
             else
             {
