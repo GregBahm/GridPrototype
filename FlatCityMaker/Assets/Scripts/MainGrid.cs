@@ -13,6 +13,8 @@ public class MainGrid
 
     public HashSet<GridCell> RefreshedCells { get; } = new HashSet<GridCell>();
 
+    public HashSet<GridCell> UnsolvedCells { get; } = new HashSet<GridCell>();
+
     public HashSet<GridCell> DirtyCells { get; } = new HashSet<GridCell>();
 
     public GridCell[,] Cells { get; private set; }

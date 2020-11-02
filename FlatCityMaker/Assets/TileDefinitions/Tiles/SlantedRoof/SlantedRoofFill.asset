@@ -17,7 +17,7 @@ MonoBehaviour:
   Down: {fileID: 11400000, guid: c5e6f881562d7764b9c984fe355bc617, type: 2}
   Left: {fileID: 11400000, guid: 844f5590c6718e74c92f0574f2cdc5ed, type: 2}
   Right: {fileID: 11400000, guid: c5e6f881562d7764b9c984fe355bc617, type: 2}
-  UpLeft: {fileID: 11400000, guid: 844f5590c6718e74c92f0574f2cdc5ed, type: 2}
+  UpLeft: {fileID: 11400000, guid: 253146f09abd37346a749236617de7e2, type: 2}
   UpRight: {fileID: 11400000, guid: c5e6f881562d7764b9c984fe355bc617, type: 2}
   DownLeft: {fileID: 11400000, guid: c5e6f881562d7764b9c984fe355bc617, type: 2}
   DownRight: {fileID: 11400000, guid: c5e6f881562d7764b9c984fe355bc617, type: 2}

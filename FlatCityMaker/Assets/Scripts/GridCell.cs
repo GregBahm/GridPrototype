@@ -80,6 +80,7 @@ public class GridCell
     private void SetAsDirty()
     {
         main.DirtyCells.Add(this);
+        main.UnsolvedCells.Add(this);
         if(!main.RefreshedCells.Contains(this))
         {
             Options = OptionsFromDesignation;
@@ -89,8 +90,9 @@ public class GridCell
 
     public void UpdateOptions()
     {
-        if(!OptionIsValid(FilledWith))
+        if(Options.Count > 1)
         {
+            int oldOptionsCount = Options.Count;
             List<Tile> newOptions = Options.Where(OptionIsValid).ToList();
             if(!newOptions.Any())
             {
@@ -101,11 +103,23 @@ public class GridCell
             {
                 Options = newOptions;
             }
-            DirtyNeighbors();
+            if(Options.Count != oldOptionsCount)
+            {
+                DirtyNeighbors();
+            }
+        }
+        main.DirtyCells.Remove(this);
+    }
+
+    public void UpdateUnsolvedCell()
+    {
+        if(Options.Count == 1 || FillIsValid())
+        {
+            main.UnsolvedCells.Remove(this);
         }
         else
         {
-            main.DirtyCells.Remove(this);
+            Options = Options.Skip(1).ToList();
         }
     }
 
@@ -114,9 +128,14 @@ public class GridCell
         return main.Designations.IsOptionAllowed(X, Y, option);
     }
 
+    private bool FillIsValid()
+    {
+        return neighbors.All(item => item.DoesConnectTo(FilledWith));
+    }
+
     private bool OptionIsValid(Tile blueprint)
     {
-        return neighbors.All(item => item.DoesConnectTo(blueprint));
+        return neighbors.All(item => item.CanConnectTo(blueprint));
     }
 
     private class OrthagonalNeighbor : Neighbor
@@ -145,12 +164,12 @@ public class GridCell
             this.neighborCornerBSelector = neighborCornerBSelector;
         }
 
-        public override bool DoesConnectTo(Tile tile)
+        public override bool CanConnectTo(Tile tile)
         {
-            if(base.DoesConnectTo(tile))
+            if(base.CanConnectTo(tile))
             {
-                return DoesConnectTo(tile, selfCornerASelector, neighborCornerASelector)
-                    && DoesConnectTo(tile, selfCornerBSelector, neighborCornerBSelector);
+                return CanConnectTo(tile, selfCornerASelector, neighborCornerASelector)
+                    && CanConnectTo(tile, selfCornerBSelector, neighborCornerBSelector);
             }
             return false;
         }
@@ -188,18 +207,23 @@ public class GridCell
             }
         }
 
-        protected bool DoesConnectTo(Tile tile, Func<Tile, TileConnectionType> sectorForSelf, Func<Tile, TileConnectionType> selectorForNeighbor)
+        public bool DoesConnectTo(Tile tile)
+        {
+            return selfSelector(Cell.FilledWith) == neighborSelector(tile);
+        }
+
+        protected bool CanConnectTo(Tile tile, Func<Tile, TileConnectionType> sectorForSelf, Func<Tile, TileConnectionType> selectorForNeighbor)
         {
             return Cell.Options.Any(item => sectorForSelf(item) == selectorForNeighbor(tile));
         }
 
-        public virtual bool DoesConnectTo(Tile tile)
+        public virtual bool CanConnectTo(Tile tile)
         {
             if(tile == null)
             {
                 throw new Exception("You may ask yourself, how did I get here?");
             }
-            return DoesConnectTo(tile, selfSelector, neighborSelector);
+            return CanConnectTo(tile, selfSelector, neighborSelector);
         }
     }
 }

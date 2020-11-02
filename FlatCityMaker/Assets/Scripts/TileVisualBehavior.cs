@@ -10,8 +10,6 @@ public class TileVisualBehavior : MonoBehaviour
 
     public GridCell Model { get; set; }
 
-    public Tile[] Options;
-
     private void Start()
     {
         image = GetComponent<Image>();

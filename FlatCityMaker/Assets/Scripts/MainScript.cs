@@ -107,7 +107,20 @@ public class MainScript : MonoBehaviour
             ToggleCell(InteractionCells[InteractionCells.Count / 2 + 21]);
         }
         HandleInteraction();
+        //FullUpdate();
         UpdateProgressive();
+    }
+
+    private void FullUpdate()
+    {
+        while(MainGrid.DirtyCells.Any())
+        {
+            MainGrid.DirtyCells.OrderByDescending(item => item.Options.Count).First().UpdateOptions();
+        }
+        while(MainGrid.UnsolvedCells.Any())
+        {
+            MainGrid.UnsolvedCells.OrderBy(item => item.Options.Count).First().UpdateUnsolvedCell();
+        }
     }
 
     private void UpdateProgressive()
@@ -115,7 +128,13 @@ public class MainScript : MonoBehaviour
         if(MainGrid.DirtyCells.Any())
         {
             MainGrid.DirtyCells.OrderByDescending(item => item.Options.Count).First().UpdateOptions();
-            //mainGrid.DirtyCells.First().UpdateOptions();
+        }
+        else
+        {
+            if (MainGrid.UnsolvedCells.Any())
+            {
+                MainGrid.UnsolvedCells.OrderByDescending(item => item.Options.Count).First().UpdateUnsolvedCell();
+            }
         }
     }
 
@@ -136,6 +155,7 @@ public class MainScript : MonoBehaviour
     private void ToggleCell(TileInteractionBehavior cell)
     {
         MainGrid.RefreshedCells.Clear();
+        MainGrid.UnsolvedCells.Clear();
         MainGrid.Designations.ToggleGridpoint(cell.X, cell.Y);
         UpdateCells(cell.ConnectedCells);
     }
@@ -146,10 +166,6 @@ public class MainScript : MonoBehaviour
         {
             cell.ResetDesignationOptions();
         }
-        //while(mainGrid.DirtyCells.Any())
-        //{
-        //    mainGrid.DirtyCells.First().UpdateOptions();
-        //}
     }
 
 
