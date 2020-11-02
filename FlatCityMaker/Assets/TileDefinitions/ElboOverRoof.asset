@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 74dd92c13d6fcce4a823f32fe0eb475a, type: 3}
+  m_Name: ElboOverRoof
+  m_EditorClassIdentifier: 
+  TopLeft: 2
+  TopRight: 0
+  BottomLeft: 1
+  BottomRight: 2
+  DropsStrut: 1
+  Sprite: {fileID: 21300000, guid: 0449d5e22a2282e4fb2a6b3c2c53696d, type: 3}
+  SpriteReceivingStrut: {fileID: 0}
