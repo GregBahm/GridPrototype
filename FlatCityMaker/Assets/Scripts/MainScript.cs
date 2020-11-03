@@ -91,51 +91,9 @@ public class MainScript : MonoBehaviour
         return ret;
     }
 
-    public bool Test;
-    public bool TestB;
-
     private void Update()
     {
-        if(Test)
-        {
-            Test = false;
-            ToggleCell(InteractionCells[InteractionCells.Count / 2]);
-        }
-        if (TestB)
-        {
-            TestB = false;
-            ToggleCell(InteractionCells[InteractionCells.Count / 2 + 21]);
-        }
         HandleInteraction();
-        //FullUpdate();
-        UpdateProgressive();
-    }
-
-    private void FullUpdate()
-    {
-        while(MainGrid.DirtyCells.Any())
-        {
-            MainGrid.DirtyCells.OrderByDescending(item => item.Options.Count).First().UpdateOptions();
-        }
-        while(MainGrid.UnsolvedCells.Any())
-        {
-            MainGrid.UnsolvedCells.OrderBy(item => item.Options.Count).First().UpdateUnsolvedCell();
-        }
-    }
-
-    private void UpdateProgressive()
-    {
-        if(MainGrid.DirtyCells.Any())
-        {
-            MainGrid.DirtyCells.OrderByDescending(item => item.Options.Count).First().UpdateOptions();
-        }
-        else
-        {
-            if (MainGrid.UnsolvedCells.Any())
-            {
-                MainGrid.UnsolvedCells.OrderByDescending(item => item.Options.Count).First().UpdateUnsolvedCell();
-            }
-        }
     }
 
     private void HandleInteraction()
@@ -154,20 +112,8 @@ public class MainScript : MonoBehaviour
 
     private void ToggleCell(TileInteractionBehavior cell)
     {
-        MainGrid.RefreshedCells.Clear();
-        MainGrid.UnsolvedCells.Clear();
         MainGrid.Designations.ToggleGridpoint(cell.X, cell.Y);
-        UpdateCells(cell.ConnectedCells);
     }
-
-    private void UpdateCells(IEnumerable<GridCell> connectedCells)
-    {
-        foreach (GridCell cell in connectedCells)
-        {
-            cell.ResetDesignationOptions();
-        }
-    }
-
 
     private IEnumerable<TileVisualBehavior> CreateDisplayTiles()
     {
