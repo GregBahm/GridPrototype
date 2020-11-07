@@ -10,20 +10,9 @@ public class GridCell
     public int X { get; }
     public int Y { get; }
 
-    public Tile FilledWith 
-    { 
-        get 
-        { 
-            if(Options.Any())
-            {
-                return Options[0];
-            }
-            return null;
-        } 
-    }
+    public Tile FilledWith { get; set; }
 
     public IReadOnlyList<Tile> OptionsFromDesignation { get; private set; }
-    public IReadOnlyList<Tile> Options { get; private set; }
 
     private IReadOnlyCollection<Neighbor> neighbors;
 
@@ -117,61 +106,5 @@ public class GridCell
             }
             return CanConnectTo(tile, selfSelector, neighborSelector);
         }
-    }
-}
-
-public class GridSolver
-{
-    // Pick a cell and pick it's first option
-    // Go to neighbor A. Pick first option that connects to solved neighbors. Then march.
-    
-}
-
-public class ResolvingCell
-{
-    public IReadOnlyList<Tile> Options { get; }
-    private IReadOnlyCollection<SolvedNeighbor> solvedNeighbors;
-    private IReadOnlyCollection<ResolvingCell> unsolvedNeighbors;
-
-    public 
-
-    public ResolvingCell(List<Tile> options)
-    {
-        Options = options;
-    }
-
-    public bool Process()
-    {
-        if(FirstOptionIsValid())
-        {
-            return 
-        }
-        else
-        {
-            if(Options.Count > 1) // Try the next option
-            {
-                UnsolvedCell next = new UnsolvedCell(Options.Skip(1).ToList());
-
-            }
-            else
-            {
-                return null; // This cell can't be solved on the current grid
-            }
-        }
-    }
-
-    private bool FirstOptionIsValid()
-    {
-        return solvedNeighbors.All(neighbor => neighbor.ConnectionIsValid(Options[0]));
-    }
-}
-
-public class SolvedNeighbor
-{
-    public Tile Choice;
-
-    public bool ConnectionIsValid(Tile tile)
-    {
-        throw new NotImplementedException();
     }
 }
