@@ -61,11 +61,11 @@ public class MainScript : MonoBehaviour
     {
         x--;
         y--;
-        if (x > 0 && y > 0)
+        if (x >= 0 && y >= 0)
             yield return MainGrid.Cells[x, y];
-        if (x < Width - 2 && y > 0)
+        if (x < Width - 1 && y >= 0)
             yield return MainGrid.Cells[x + 1, y];
-        if (x > 0 && y < Height - 1)
+        if (x >= 0 && y < Height - 1)
             yield return MainGrid.Cells[x, y + 1];
         if (x < Width - 1 && y < Height - 1)
             yield return MainGrid.Cells[x + 1, y + 1];
