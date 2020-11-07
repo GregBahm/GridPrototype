@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using TileDefinition;
+using UnityEngine;
 
 namespace GridSolver
 {
     public class Solver
     {
         private readonly SolverCell[,] cells;
+
+        public List<GridState> SolverHistory { get; } = new List<GridState>();
 
         public Solver(int width, int height)
         {
@@ -35,6 +38,7 @@ namespace GridSolver
 
         public GridState GetSolved(MainGrid mainGrid)
         {
+            SolverHistory.Clear();
             GridState state = CreateInitialState(mainGrid);
             return RecursivelySolve(state);
         }
@@ -59,22 +63,24 @@ namespace GridSolver
             return new GridState(cells, cellsToSolve, this);
         }
 
-        private GridState RecursivelySolve(GridState gridState)
+        private GridState RecursivelySolve(GridState oldState)
         {
-            GridCellState unsolvedCell = gridState.UnsolvedStates.First();
+            GridCellState unsolvedCell = oldState.UnsolvedStates.First();
             foreach (Tile choice in unsolvedCell.AvailableOptions)
             {
-                GridState state = gridState.GetWithChoiceApplied(choice);
-                if(state != null) // A grid cell was left with no valid options
+                GridState newState = oldState.GetWithChoiceApplied(choice);
+                SolverHistory.Add(newState);
+                if(newState != null) // A grid cell was left with no valid options
                 {
-                    if (!state.UnsolvedStates.Any())
+                    if (!newState.UnsolvedStates.Any())
                     {
-                        return gridState;
+                        return newState;
                     }
-                    return RecursivelySolve(state);
+                    return RecursivelySolve(newState);
                 }
             }
-            throw new Exception("This grid appears to be unsolveable");
+            Debug.LogError("Error: Failed to solve the board");
+            return null;
         }
     }
 
@@ -171,24 +177,51 @@ namespace GridSolver
             GridCellState newState = new GridCellState(first.X, first.Y, choice);
             newGrid[newState.X, newState.Y] = newState;
 
-            List<GridCellState> newUnsolved = new List<GridCellState>();
-            foreach (GridCellState unsolvedCell in UnsolvedStates.Skip(1))
+
+            List<GridCellState> cellsToUpdate = GetUnsolvedNeighborsOf(newState, newGrid).ToList();
+            while(cellsToUpdate.Any())
             {
-                // TODO: Optimize to only update neighbors
-                GridCellState updatedCell = GetUpdatedCell(unsolvedCell, newGrid);
-                if(updatedCell.Status == GridCellState.StateStatus.Unsolveable)
+                GridCellState cellToUpdate = cellsToUpdate.First();
+                cellsToUpdate.RemoveAt(0);
+                GridCellState updatedCell = GetUpdatedCell(cellToUpdate, newGrid);
+                if (updatedCell.Status == GridCellState.StateStatus.Unsolveable)
                 {
                     return null;
                 }
-
                 newGrid[updatedCell.X, updatedCell.Y] = updatedCell;
-
-                if(updatedCell.Status == GridCellState.StateStatus.Unsolved)
+                if (updatedCell.Status == GridCellState.StateStatus.Solved)
                 {
-                    newUnsolved.Add(updatedCell);
+                    IEnumerable<GridCellState> newCellsToUpdate = GetUnsolvedNeighborsOf(updatedCell, newGrid);
+                    cellsToUpdate.AddRange(newCellsToUpdate);
                 }
             }
+            List<GridCellState> newUnsolved = GetNewUnsolved(newGrid).ToList();
             return new GridState(newGrid, newUnsolved, solver);
+        }
+
+        private IEnumerable<GridCellState> GetNewUnsolved(GridCellState[,] newGrid)
+        {
+            foreach (GridCellState oldState in UnsolvedStates)
+            {
+                GridCellState newState = newGrid[oldState.X, oldState.Y];
+                if(newState.Status == GridCellState.StateStatus.Unsolved)
+                {
+                    yield return newState;
+                }
+            }
+        }
+
+        private IEnumerable<GridCellState> GetUnsolvedNeighborsOf(GridCellState newState, GridCellState[,] newGrid)
+        {
+            SolverCell cell = solver.GetCell(newState.X, newState.Y);
+            foreach (SolverCellNeighbor neighbor in cell.Neighbors)
+            {
+                GridCellState state = newGrid[neighbor.X, neighbor.Y];
+                if(state.Status == GridCellState.StateStatus.Unsolved)
+                {
+                    yield return state;
+                }
+            }
         }
 
         private GridCellState GetUpdatedCell(GridCellState unsolvedCell, GridCellState[,] newGrid)

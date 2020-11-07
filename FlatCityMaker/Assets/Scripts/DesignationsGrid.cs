@@ -22,10 +22,6 @@ public class DesignationsGrid
 
     public void ToggleGridpoint(int x, int y)
     {
-        if (y >= height - 2) // No toggling the sky
-        {
-            return;
-        }
         fillGrid[x, y] = !fillGrid[x, y];
     }
 
