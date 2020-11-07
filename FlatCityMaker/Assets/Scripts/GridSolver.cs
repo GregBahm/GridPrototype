@@ -179,11 +179,11 @@ namespace GridSolver
             newGrid[newState.X, newState.Y] = newState;
 
 
-            List<GridCellState> cellsToUpdate = GetUnsolvedNeighborsOf(newState, newGrid).ToList();
+            HashSet<GridCellState> cellsToUpdate = new HashSet<GridCellState>(GetUnsolvedNeighborsOf(newState, newGrid));
             while(cellsToUpdate.Any())
             {
                 GridCellState cellToUpdate = cellsToUpdate.First();
-                cellsToUpdate.RemoveAt(0);
+                cellsToUpdate.Remove(cellToUpdate);
                 GridCellState updatedCell = GetUpdatedCell(cellToUpdate, newGrid);
                 if (updatedCell.Status == GridCellState.StateStatus.Unsolveable)
                 {
@@ -193,7 +193,10 @@ namespace GridSolver
                 if (updatedCell.Status == GridCellState.StateStatus.Solved)
                 {
                     IEnumerable<GridCellState> newCellsToUpdate = GetUnsolvedNeighborsOf(updatedCell, newGrid);
-                    cellsToUpdate.AddRange(newCellsToUpdate);
+                    foreach (GridCellState item in newCellsToUpdate)
+                    {
+                        cellsToUpdate.Add(item);
+                    }
                 }
             }
             List<GridCellState> newUnsolved = GetNewUnsolved(newGrid).ToList();
