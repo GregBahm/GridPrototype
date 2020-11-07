@@ -50,7 +50,10 @@ namespace GridSolver
                     IEnumerable<Tile> options = mainGrid.Cells[x, y].OptionsFromDesignation;
                     GridCellState state = new GridCellState(x, y, options);
                     cells[x, y] = state;
-                    cellsToSolve.Add(state);
+                    if(state.Status == GridCellState.StateStatus.Unsolved)
+                    {
+                        cellsToSolve.Add(state);
+                    }
                 }
             }
             return new GridState(cells, cellsToSolve, this);
@@ -83,9 +86,9 @@ namespace GridSolver
         {
             List<SolverCellNeighbor> mappings = new List<SolverCellNeighbor>();
             if (x > 0)
-                mappings.Add(new LeftNeighbor(x - 1, y));
+                mappings.Add(new RightNeighbor(x - 1, y));
             if (x < gridWidth - 1)
-                mappings.Add(new RightNeighbor(x + 1, y));
+                mappings.Add(new LeftNeighbor(x + 1, y));
             if (y > 0)
                 mappings.Add(new DownNeighbor(x, y - 1));
             if (y < gridHeight - 1)
@@ -228,8 +231,16 @@ namespace GridSolver
         {
             X = x;
             Y = y;
-            AvailableOptions = options;
-            Status = AvailableOptions.Any() ? StateStatus.Unsolved : StateStatus.Unsolveable;
+            if(options.Count() == 1)
+            {
+                Choice = options.First();
+                Status = StateStatus.Solved;
+            }
+            else
+            {
+                AvailableOptions = options;
+                Status = AvailableOptions.Any() ? StateStatus.Unsolved : StateStatus.Unsolveable;
+            }
         }
 
         public GridCellState(int x, int y, Tile choice)
@@ -245,6 +256,19 @@ namespace GridSolver
             Solved,
             Unsolved,
             Unsolveable
+        }
+
+        public override string ToString()
+        {
+            if(Status == StateStatus.Solved)
+            {
+                return "Solved: " + Choice.Sprite.name;
+            }
+            if(Status == StateStatus.Unsolved)
+            {
+                return "Unsolved with " + AvailableOptions.Count() + " options";
+            }
+            return "Unsolveable";
         }
     }
 }

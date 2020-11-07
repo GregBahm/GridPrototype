@@ -117,6 +117,10 @@ public class MainScript : MonoBehaviour
     private void ToggleCell(TileInteractionBehavior cell)
     {
         MainGrid.Designations.ToggleGridpoint(cell.X, cell.Y);
+        foreach (GridCell item in cell.ConnectedCells)
+        {
+            item.ResetDesignationOptions();
+        }
         GridSolver.GridState solvedGrid = solver.GetSolved(MainGrid);
         ApplySolvedGrid(solvedGrid);
     }
