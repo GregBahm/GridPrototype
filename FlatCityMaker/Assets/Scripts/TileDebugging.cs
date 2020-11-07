@@ -27,14 +27,9 @@ public class TileDebugger : MonoBehaviour
     public GridCell Model { get; set; }
 
     public string[] DesignationOptions;
-    public string[] Options;
-
-    public bool IsDirty;
 
     private void Update()
     {
         DesignationOptions = Model.OptionsFromDesignation.Select(item => item.ToString()).ToArray();
-        Options = Model.Options.Select(item => item.ToString()).ToArray();
-        IsDirty = Grid.DirtyCells.Contains(Model);
     }
 }

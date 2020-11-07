@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using GridSolver;
 using TileDefinition;
 using UnityEngine;
 
@@ -23,6 +24,8 @@ public class MainScript : MonoBehaviour
 
     public MainGrid MainGrid { get; private set; }
 
+    private GridSolver.Solver solver;
+
     void Start()
     {
         IEnumerable<Tile> allOptions = GetSymmetricalOptions();
@@ -31,6 +34,7 @@ public class MainScript : MonoBehaviour
 
         VisualTiles = CreateDisplayTiles();
         InteractionCells = CreateInteractionTiles().AsReadOnly();
+        solver = new GridSolver.Solver(Width, Height);
     }
 
     private List<TileInteractionBehavior> CreateInteractionTiles()
@@ -113,6 +117,19 @@ public class MainScript : MonoBehaviour
     private void ToggleCell(TileInteractionBehavior cell)
     {
         MainGrid.Designations.ToggleGridpoint(cell.X, cell.Y);
+        GridSolver.GridState solvedGrid = solver.GetSolved(MainGrid);
+        ApplySolvedGrid(solvedGrid);
+    }
+
+    private void ApplySolvedGrid(GridState solvedGrid)
+    {
+        for (int x = 0; x < Width; x++)
+        {
+            for (int y = 0; y < Height; y++)
+            {
+                MainGrid.Cells[x, y].FilledWith = solvedGrid.Cells[x, y].Choice;
+            }
+        }
     }
 
     private IEnumerable<TileVisualBehavior> CreateDisplayTiles()
