@@ -66,7 +66,8 @@ namespace GridSolver
         private GridState RecursivelySolve(GridState oldState)
         {
             GridCellState unsolvedCell = oldState.UnsolvedStates.First();
-            foreach (Tile choice in unsolvedCell.AvailableOptions)
+            foreach (Tile choice in unsolvedCell.AvailableOptions
+                .Where(option => oldState.OptionIsValid(unsolvedCell.X, unsolvedCell.Y, option)))
             {
                 GridState newState = oldState.GetWithChoiceApplied(choice);
                 SolverHistory.Add(newState);
@@ -232,6 +233,22 @@ namespace GridSolver
                 return new GridCellState(unsolvedCell.X, unsolvedCell.Y, newValidOptions[0]);
             }
             return new GridCellState(unsolvedCell.X, unsolvedCell.Y, newValidOptions);
+        }
+        public bool OptionIsValid(int x, int y, Tile option)
+        {
+            SolverCell solverCell = solver.GetCell(x, y);
+            foreach (SolverCellNeighbor neighbor in solverCell.Neighbors)
+            {
+                GridCellState neighborState = Cells[neighbor.X, neighbor.Y];
+                if (neighborState.Status == GridCellState.StateStatus.Solved)
+                {
+                    if (!neighbor.Connects(option, neighborState.Choice))
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
         }
 
         private bool OptionIsValid(int x, int y, Tile option, GridCellState[,] newGrid)
