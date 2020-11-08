@@ -22,12 +22,9 @@ public class MainScript : MonoBehaviour
     public ReadOnlyCollection<TileInteractionBehavior> InteractionCells { get; private set; }
     public IEnumerable<TileVisualBehavior> VisualTiles { get; private set; }
 
-    public MainGrid MainGrid { get; private set; }
-
-    [Range(0, 1)]
-    public float Timeline = 1;
-
     private GridSolver.Solver solver;
+
+    public MainGrid MainGrid { get; private set; }
 
     void Start()
     {
@@ -101,20 +98,6 @@ public class MainScript : MonoBehaviour
     private void Update()
     {
         HandleInteraction();
-        UpdateVisuals();
-    }
-
-    private void UpdateVisuals()
-    {
-        if(solver.SolverHistory.Any())
-        {
-            int solverHistoryIndex = (int)((solver.SolverHistory.Count - 1) * Timeline);
-            GridState state = solver.SolverHistory[solverHistoryIndex];
-            if(state != null)
-            {
-                ApplySolvedGrid(state);
-            }
-        }
     }
 
     private void HandleInteraction()
@@ -139,7 +122,7 @@ public class MainScript : MonoBehaviour
             item.ResetDesignationOptions();
         }
         GridSolver.GridState solvedGrid = solver.GetSolved(MainGrid);
-        //ApplySolvedGrid(solvedGrid);
+        ApplySolvedGrid(solvedGrid);
     }
 
     private void ApplySolvedGrid(GridState solvedGrid)

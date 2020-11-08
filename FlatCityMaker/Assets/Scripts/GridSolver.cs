@@ -65,6 +65,10 @@ namespace GridSolver
 
         private GridState RecursivelySolve(GridState oldState)
         {
+            if(!oldState.UnsolvedStates.Any())
+            {
+                return oldState;
+            }
             GridCellState unsolvedCell = oldState.UnsolvedStates.First();
             foreach (Tile choice in unsolvedCell.AvailableOptions
                 .Where(option => oldState.OptionIsValid(unsolvedCell.X, unsolvedCell.Y, option)))
