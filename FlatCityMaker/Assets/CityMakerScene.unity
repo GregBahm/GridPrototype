@@ -405,7 +405,6 @@ MonoBehaviour:
   FilledConnectionTypes:
   - {fileID: 11400000, guid: c5e6f881562d7764b9c984fe355bc617, type: 2}
   - {fileID: 11400000, guid: f7a4158ad290b3c4e85f2b295b9d63f4, type: 2}
-  Timeline: 1
 --- !u!4 &360831928
 Transform:
   m_ObjectHideFlags: 0
