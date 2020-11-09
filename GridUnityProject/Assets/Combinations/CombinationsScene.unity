@@ -132,7 +132,7 @@ GameObject:
   - component: {fileID: 342623260}
   - component: {fileID: 342623259}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: MainScript
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -150,7 +150,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25c417c89521d734babaa8733af8c762, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  baseBlueprints: []
+  BlueprintDisplayPrefab: {fileID: 4684329618102311029, guid: 5e41e28711615454cbc4530a68cd3d90,
+    type: 3}
 --- !u!4 &342623260
 Transform:
   m_ObjectHideFlags: 0

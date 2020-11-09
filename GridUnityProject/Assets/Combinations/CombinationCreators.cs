@@ -8,33 +8,47 @@ using System;
 
 public class CombinationCreators : MonoBehaviour
 {
-    private List<VoxelBlueprint> baseBlueprints;
-    private List<VoxelBlueprint> invariants;
+    private List<VoxelDesignation> baseBlueprints;
+    private List<VoxelDesignation> invariants;
 
-    public string[] baseNames;
-    public string[] invariantNames;
+    public GameObject BlueprintDisplayPrefab;
 
     private void Start()
     {
         baseBlueprints = GetAllUniqueCombinations().ToList();
         invariants = GetInvariants().ToList();
         VerifyInvariants();
+        CreateDisplayPrefabs();
+    }
 
-        baseNames = baseBlueprints.Select(item => item.ToString()).ToArray();
-        invariantNames = invariants.Select(item => item.ToString()).ToArray();
+    private void CreateDisplayPrefabs()
+    {
+        int index = 0;
+        int rootCount = Mathf.CeilToInt(Mathf.Sqrt(invariants.Count));
+        foreach (VoxelDesignation item in invariants)
+        {
+            GameObject obj = Instantiate(BlueprintDisplayPrefab);
+            VoxelBlueprintDisplay behavior = obj.GetComponent<VoxelBlueprintDisplay>();
+            behavior.SetBlueprint(item);
+            int x = Mathf.FloorToInt(index / rootCount);
+            int y = index % rootCount;
+            obj.transform.position = new Vector3(x * 5, 0, y * 5);
+            obj.name = item.ToString();
+            index++;
+        }
     }
 
     private void VerifyInvariants()
     {
         HashSet<string> invariantsTest = new HashSet<string>();
-        foreach (VoxelBlueprint item in invariants)
+        foreach (VoxelDesignation item in invariants)
         {
             if (!invariantsTest.Add(item.ToString()))
             {
                 throw new Exception("Not Unique");
             }
-            List<VoxelBlueprint> variants = item.GetUniqueVariants().ToList();
-            foreach (VoxelBlueprint variant in variants)
+            List<VoxelDesignation> variants = item.GetUniqueVariants().ToList();
+            foreach (VoxelDesignation variant in variants)
             {
                 if (!invariantsTest.Add(variant.ToString()))
                 {
@@ -48,15 +62,15 @@ public class CombinationCreators : MonoBehaviour
         }
     }
 
-    public IEnumerable<VoxelBlueprint> GetInvariants()
+    public IEnumerable<VoxelDesignation> GetInvariants()
     {
-        Dictionary<string, VoxelBlueprint> invariantsDictionary = baseBlueprints.ToDictionary(item => item.ToString(), item => item);
-        foreach (VoxelBlueprint item in baseBlueprints)
+        Dictionary<string, VoxelDesignation> invariantsDictionary = baseBlueprints.ToDictionary(item => item.ToString(), item => item);
+        foreach (VoxelDesignation item in baseBlueprints)
         {
             if(invariantsDictionary.ContainsKey(item.ToString()))
             {
-                List<VoxelBlueprint> variants = item.GetUniqueVariants().ToList();
-                foreach (VoxelBlueprint variant in variants)
+                List<VoxelDesignation> variants = item.GetUniqueVariants().ToList();
+                foreach (VoxelDesignation variant in variants)
                 {
                     if (invariantsDictionary.ContainsKey(variant.ToString()))
                     {
@@ -68,7 +82,7 @@ public class CombinationCreators : MonoBehaviour
         return invariantsDictionary.Values;
     }
 
-    public static IEnumerable<VoxelBlueprint> GetAllUniqueCombinations() // I know. Silly. But it's one-use code and I don't want to think.
+    public static IEnumerable<VoxelDesignation> GetAllUniqueCombinations() // I know. Silly. But it's one-use code and I don't want to think.
     {
         bool aVal = false;
         bool bVal = false;
@@ -97,7 +111,7 @@ public class CombinationCreators : MonoBehaviour
                                     {
 
                                         bool[] vals = new bool[] { aVal, bVal, cVal, dVal, eVal, fVal, gVal, hVal };
-                                        yield return new VoxelBlueprint(vals);
+                                        yield return new VoxelDesignation(vals);
                                         hVal = !hVal;
                                     }
                                     gVal = !gVal;
@@ -117,13 +131,26 @@ public class CombinationCreators : MonoBehaviour
     }
 }
 
-[Serializable]
-public class VoxelBlueprint
+[CreateAssetMenu(menuName = "VoxelDefinition/Voxel")]
+public class VoxelDefinition : ScriptableObject
+{
+    public Mesh Art { get; }
+    public VoxelDesignation Designation;
+}
+
+[CreateAssetMenu(menuName = "VoxelDefinition/Connection")]
+public class VoxelConnection : ScriptableObject
+{
+
+}
+
+[CreateAssetMenu(menuName = "VoxelDefinition/Designation")]
+public class VoxelDesignation : ScriptableObject
 {
     public bool[,,] Description { get; } = new bool[2, 2, 2];
 
-    public VoxelBlueprint()
-    {
+    public VoxelDesignation()
+    { 
     }
 
     public override string ToString()
@@ -136,7 +163,7 @@ public class VoxelBlueprint
         return ret;
     }
 
-    public VoxelBlueprint(bool[] values)
+    public VoxelDesignation(bool[] values)
     {
         Description[0, 1, 1] = values[0];
         Description[1, 1, 1] = values[1];
@@ -148,25 +175,9 @@ public class VoxelBlueprint
         Description[1, 0, 0] = values[7];
     }
 
-    public bool Matches(VoxelBlueprint blueprint)
+    public VoxelDesignation GetFlipped()
     {
-        for (int x = 0; x < 2; x++)
-        {
-            for (int y = 0; y < 2; y++)
-            {
-                for (int z = 0; z < 2; z++)
-                {
-                    if (Description[x, y, z] != blueprint.Description[x, y, z])
-                        return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    public VoxelBlueprint GetFlipped()
-    {
-        VoxelBlueprint ret = new VoxelBlueprint();
+        VoxelDesignation ret = new VoxelDesignation();
         for (int y = 0; y < 2; y++)
         {
             for (int z = 0; z < 2; z++)
@@ -180,9 +191,9 @@ public class VoxelBlueprint
         return ret;
     }
 
-    public VoxelBlueprint GetRotated()
+    public VoxelDesignation GetRotated()
     {
-        VoxelBlueprint ret = new VoxelBlueprint();
+        VoxelDesignation ret = new VoxelDesignation();
         for (int y = 0; y < 2; y++)
         {
             bool one = Description[0, y, 0];
@@ -198,16 +209,16 @@ public class VoxelBlueprint
         return ret;
     }
 
-    public IEnumerable<VoxelBlueprint> GetUniqueVariants()
+    public IEnumerable<VoxelDesignation> GetUniqueVariants()
     {
-        VoxelBlueprint rotated = GetRotated();
-        VoxelBlueprint rotatedTwice = rotated.GetRotated();
+        VoxelDesignation rotated = GetRotated();
+        VoxelDesignation rotatedTwice = rotated.GetRotated();
 
-        VoxelBlueprint flipped = GetFlipped();
-        VoxelBlueprint flippedRotated = flipped.GetRotated();
-        VoxelBlueprint flippedRotatedTwice = flippedRotated.GetRotated();
+        VoxelDesignation flipped = GetFlipped();
+        VoxelDesignation flippedRotated = flipped.GetRotated();
+        VoxelDesignation flippedRotatedTwice = flippedRotated.GetRotated();
 
-        VoxelBlueprint[] rawVariants = new VoxelBlueprint[]
+        VoxelDesignation[] rawVariants = new VoxelDesignation[]
         {
             rotated,
             rotatedTwice,
@@ -223,7 +234,7 @@ public class VoxelBlueprint
         {
             ToString()
         };
-        foreach (VoxelBlueprint rawVariant in rawVariants)
+        foreach (VoxelDesignation rawVariant in rawVariants)
         {
             if(uniquenessCheck.Add(rawVariant.ToString()))
             {
