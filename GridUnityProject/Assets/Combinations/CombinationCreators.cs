@@ -5,6 +5,7 @@ using System.Linq;
 using JetBrains.Annotations;
 using UnityEngine.UIElements;
 using System;
+using System.IO;
 
 public class CombinationCreators : MonoBehaviour
 {
@@ -13,16 +14,45 @@ public class CombinationCreators : MonoBehaviour
 
     public GameObject BlueprintDisplayPrefab;
 
+    public GameObject[] ArtContent;
+    public VoxelBlueprint[] Blueprints;
+    private VoxelBlueprintDisplay[] displays;
+
     private void Start()
     {
         baseBlueprints = GetAllUniqueCombinations().ToList();
         invariants = GetInvariants().ToList();
         VerifyInvariants();
-        CreateDisplayPrefabs();
+        displays = CreateDisplayPrefabs().ToArray();
+        //SaveMeshes();
+        SetUpBlueprints();
     }
 
-    private void CreateDisplayPrefabs()
+    private void SaveMeshes()
     {
+        string outputFolder = @"C:\Users\grbahm\Documents\GridPrototype\GridUnityProject\Assets\Combinations\Meshes\";
+        for (int i = 0; i < displays.Length; i++)
+        {
+            GameObject obj = displays[i].gameObject;
+            string outputPath = outputFolder + i + ".obj";
+            ObjExporter.GameObjectToFile(obj, outputPath);
+        }
+    }
+
+    private void SetUpBlueprints()
+    {
+        for (int i = 0; i < invariants.Count; i++)
+        {
+            VoxelBlueprint blueprint = Blueprints[i];
+            VoxelDesignation invariant = invariants[i];
+            blueprint.DesignationValues = invariant.GetFlatValues();
+            blueprint.ArtContent = ArtContent[i];
+        }
+    }
+
+    private IEnumerable<VoxelBlueprintDisplay> CreateDisplayPrefabs()
+    {
+        List<VoxelBlueprintDisplay> ret = new List<VoxelBlueprintDisplay>();
         int index = 0;
         int rootCount = Mathf.CeilToInt(Mathf.Sqrt(invariants.Count));
         foreach (VoxelDesignation item in invariants)
@@ -35,7 +65,9 @@ public class CombinationCreators : MonoBehaviour
             obj.transform.position = new Vector3(x * 5, 0, y * 5);
             obj.name = item.ToString();
             index++;
+            ret.Add(behavior);
         }
+        return ret;
     }
 
     private void VerifyInvariants()
@@ -131,36 +163,34 @@ public class CombinationCreators : MonoBehaviour
     }
 }
 
-[CreateAssetMenu(menuName = "VoxelDefinition/Voxel")]
-public class VoxelDefinition : ScriptableObject
-{
-    public Mesh Art { get; }
-    public VoxelDesignation Designation;
-}
-
 [CreateAssetMenu(menuName = "VoxelDefinition/Connection")]
 public class VoxelConnection : ScriptableObject
-{
+{ }
 
-}
-
-[CreateAssetMenu(menuName = "VoxelDefinition/Designation")]
-public class VoxelDesignation : ScriptableObject
+[Serializable]
+public class VoxelDesignation
 {
-    public bool[,,] Description { get; } = new bool[2, 2, 2];
+    [SerializeField]
+    private readonly bool[,,] description = new bool[2, 2, 2];
+    public bool[,,] Description => description;
 
     public VoxelDesignation()
     { 
     }
 
-    public override string ToString()
+    public bool[] GetFlatValues()
     {
-        string ret = "";
-        foreach (bool item in Description)
+        return new bool[8]
         {
-            ret += item.ToString() + " ";
-        }
-        return ret;
+            Description[0, 1, 1],
+            Description[1, 1, 1],
+            Description[0, 0, 1],
+            Description[1, 0, 1],
+            Description[0, 1, 0],
+            Description[1, 1, 0],
+            Description[0, 0, 0],
+            Description[1, 0, 0]
+        };
     }
 
     public VoxelDesignation(bool[] values)
@@ -173,6 +203,16 @@ public class VoxelDesignation : ScriptableObject
         Description[1, 1, 0] = values[5];
         Description[0, 0, 0] = values[6];
         Description[1, 0, 0] = values[7];
+    }
+
+    public override string ToString()
+    {
+        string ret = "";
+        foreach (bool item in Description)
+        {
+            ret += item.ToString() + " ";
+        }
+        return ret;
     }
 
     public VoxelDesignation GetFlipped()
