@@ -18,12 +18,15 @@ public class GameMain : MonoBehaviour
     private GameObject InteractionMeshObject;
 
     [SerializeField]
-    private Transform debugCube;
+    private VoxelBlueprint[] VoxelBlueprints;
 
     public MainGrid MainGrid { get; private set; }
 
+    private VisualsAssembler visualsAssembler;
+
     private void Start()
     {
+        visualsAssembler = new VisualsAssembler(VoxelBlueprints);
         MainGrid = LoadLastSave ? GroundLoader.Load() : GroundLoader.LoadDefault();
         InteractionMesh = new InteractionMesh(new Mesh());
         UpdateInteractionGrid();
@@ -65,5 +68,12 @@ public class GameMain : MonoBehaviour
             Vector3 pointB = new Vector3(edge.PointB.Position.x, 0, edge.PointB.Position.y);
             Debug.DrawLine(pointA, pointB);
         }
+    }
+
+    internal void UpdateVoxelVisuals(VoxelCell targetCell)
+    {
+        // Later we will want to do the whole wave collapse thing.
+        // For now, we just want to tell this cell and all neighboring cells to update their display visuals based on the designation
+        visualsAssembler.UpdateVoxels(targetCell);
     }
 }

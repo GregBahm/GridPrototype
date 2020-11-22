@@ -3,27 +3,27 @@ using System.Collections;
 using System.IO;
 using System.Text;
 using System.Collections.Generic;
+using System;
 
 public class ObjExporter
 {
-    public static void GameObjectToFile(GameObject obj, string path)
+    public static void GameObjectToFile(GameObject obj, int objId, string path)
     {
-        string data = MeshToString(obj);
+        string data = MeshToString(obj, objId);
         File.WriteAllText(path, data);
     }
 
-    public static string MeshToString(GameObject obj)
+    public static string MeshToString(GameObject obj, int objId)
     {
         StringBuilder ret = new StringBuilder();
         IEnumerable<MeshFilter> filters = obj.GetComponentsInChildren<MeshFilter>();
-        //MeshFilter[] filters = new MeshFilter[] { obj.GetComponentInChildren<MeshFilter>() };
-        ret.Append("g ").Append(obj.name).Append("\n");
+        ret.Append("g ").Append("BaseObj" + objId).Append("\n");
         foreach (MeshFilter filter in filters)
         {
             foreach (Vector3 vert in filter.mesh.vertices)
             {
-                Vector3 worldPoint = filter.transform.TransformPoint(vert);
-                ret.Append(string.Format("v {0} {1} {2}\n", worldPoint.x, worldPoint.y, worldPoint.z));
+                Vector3 transformedPoint = GetTransformedPoint(vert, filter.transform, obj.transform.position);
+                ret.Append(string.Format("v {0} {1} {2}\n", transformedPoint.x, transformedPoint.y, transformedPoint.z));
             }
         }
         ret.Append("\n");
@@ -43,5 +43,13 @@ public class ObjExporter
             mainOffset += filter.mesh.vertices.Length;
         }
         return ret.ToString();
+    }
+
+    private static Vector3 GetTransformedPoint(Vector3 vert, Transform objTransform, Vector3 rootOffset)
+    {
+        Vector3 ret = objTransform.TransformPoint(vert);
+        ret -= rootOffset;
+        ret = ret * 2;
+        return ret;
     }
 }

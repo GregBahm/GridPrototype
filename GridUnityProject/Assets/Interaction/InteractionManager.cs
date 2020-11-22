@@ -159,6 +159,7 @@ public class InteractionManager : MonoBehaviour
         {
             hitInfo.TargetCell.Filled = true;
             gameMain.UpdateInteractionGrid();
+            gameMain.UpdateVoxelVisuals(hitInfo.TargetCell);
         }
     }
 

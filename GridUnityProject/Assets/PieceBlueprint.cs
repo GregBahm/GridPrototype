@@ -15,31 +15,10 @@ public class VisualPieceProfile : MonoBehaviour
 
 public class VoxelVisuals
 {
-    public VoxelCell Voxel { get; }
-    private readonly Dictionary<GroundEdge, PieceSlot> lowerPieces = new Dictionary<GroundEdge, PieceSlot>();
-    private readonly Dictionary<GroundEdge, PieceSlot> upperPieces = new Dictionary<GroundEdge, PieceSlot>();
-
+    public VoxelCell Cell { get; }
     public VoxelVisuals(VoxelCell cell)
     {
-        foreach (GroundEdge edge in Voxel.GroundPoint.Edges)
-        {
-            upperPieces.Add(edge, new PieceSlot(this, true, edge));
-            lowerPieces.Add(edge, new PieceSlot(this, false, edge));
-        }
-    }
-}
-
-public class PieceSlot
-{
-    public VoxelVisuals Home { get; }
-    public bool OnUpperHalf { get; }
-    public GroundEdge Edge { get; }
-
-    public PieceSlot(VoxelVisuals home, bool onUpperHalf, GroundEdge edge)
-    {
-        Home = home;
-        OnUpperHalf = onUpperHalf;
-        Edge = edge;
+        Cell = cell;
     }
 }
 
