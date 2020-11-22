@@ -58,6 +58,11 @@
                 return o;
             }
 
+            float AdjustGridLine(float grid)
+            {
+                return saturate(pow(grid, _TuneA) * _TuneB - _TuneC);
+            }
+
             fixed4 frag(v2f i) : SV_Target
             {
 				float shadowness = SHADOW_ATTENUATION(i);
@@ -65,10 +70,12 @@
                 float alpha = (1 - i.distToCursor / 40);
                 alpha = pow(saturate(alpha), 20);
 
-                return i.uv.y;
-                float grid = pow(pow(i.uv.x, _TuneA) + pow(i.uv.y, _TuneA), _TuneB);
-                grid = saturate(grid - _TuneC) * 1;
-                //grid = grid * alpha;
+                float gridAroundCells = i.uv.y;
+                gridAroundCells = AdjustGridLine(gridAroundCells);
+                float gridThroughCells = 1 - i.uv.x; 
+                gridThroughCells = AdjustGridLine(gridThroughCells);
+                float grid = gridAroundCells;
+                //return gridAroundCells;
                 
                 shadowness = lerp(shadowness, 1, .5);
 				float3 ret = _Color * shadowness;
