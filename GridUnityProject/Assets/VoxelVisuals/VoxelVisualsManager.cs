@@ -106,7 +106,7 @@ public class VoxelVisualsManager
             debugMats.Add(new Tuple<Material, VoxelVisualComponent>(mat, component));
 
             filter.mesh = component.Contents.Mesh;
-            obj.transform.position = component.ContentPosition;
+            obj.transform.position = component.ContentPosition + new Vector3(0, .5f, 0);
             debugObjects.Add(component, filter);
         }
     }

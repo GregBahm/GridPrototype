@@ -4,6 +4,7 @@ using MeshMaking;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -150,13 +151,17 @@ public class InteractionManager : MonoBehaviour
         {
             hitInfo.SourceCell.Filled = false;
             gameMain.UpdateInteractionGrid();
-            gameMain.UpdateVoxelVisuals(hitInfo.TargetCell);
+            gameMain.UpdateVoxelVisuals(hitInfo.SourceCell);
         }
     }
 
     private void HandleLeftMeshClicks(IHitTarget hitInfo)
     {
-        if (Input.GetMouseButtonUp(0) && !leftDragDetector.IsDragging && hitInfo != null && hitInfo.TargetCell != null)
+        if (Input.GetMouseButtonUp(0) 
+            && !leftDragDetector.IsDragging 
+            && hitInfo != null 
+            && hitInfo.TargetCell != null
+            && !hitInfo.TargetCell.GroundPoint.Edges.Any(edge => edge.IsBorder))
         {
             hitInfo.TargetCell.Filled = true;
             gameMain.UpdateInteractionGrid();

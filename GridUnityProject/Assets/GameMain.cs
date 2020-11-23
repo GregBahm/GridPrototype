@@ -16,6 +16,8 @@ public class GameMain : MonoBehaviour
 
     [SerializeField]
     private GameObject InteractionMeshObject;
+    [SerializeField]
+    private GameObject BaseGridVisual;
 
     [SerializeField]
     private VoxelBlueprint[] VoxelBlueprints;
@@ -32,8 +34,18 @@ public class GameMain : MonoBehaviour
         MainGrid = LoadLastSave ? GroundLoader.Load() : GroundLoader.LoadDefault();
         InteractionMesh = new InteractionMesh(new Mesh());
         UpdateInteractionGrid();
-        InteractionMeshObject.GetComponent<MeshFilter>().sharedMesh = InteractionMesh.Mesh;
+        InteractionMeshObject.GetComponent<MeshFilter>().mesh = InteractionMesh.Mesh;
+        BaseGridVisual.GetComponent<MeshFilter>().mesh = CloneInteractionMesh();
         visualsAssembler = new VoxelVisualsManager(VoxelBlueprints, MainGrid, VoxelDisplayMat);
+    }
+
+    private Mesh CloneInteractionMesh()
+    {
+        Mesh ret = new Mesh();
+        ret.vertices = InteractionMesh.Mesh.vertices;
+        ret.triangles = InteractionMesh.Mesh.triangles;
+        ret.uv = InteractionMesh.Mesh.uv;
+        return ret;
     }
 
     private void Update()

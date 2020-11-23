@@ -65,7 +65,6 @@
 
             fixed4 frag(v2f i) : SV_Target
             {
-                clip(-i.worldPos.y + .01);
 				float shadowness = SHADOW_ATTENUATION(i);
 
                 float alpha = (1 - i.distToCursor / 40);
