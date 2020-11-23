@@ -13,15 +13,15 @@ public class VoxelBlueprint : ScriptableObject
     public VoxelConnection PositiveZ;
     public VoxelConnection NegativeZ;
 
-    public IEnumerable<VisualVoxelOption> GenerateVisualOptions()
+    public IEnumerable<VoxelVisualOption> GenerateVisualOptions()
     {
         VoxelDesignation baseDesignation = new VoxelDesignation(DesignationValues);
         IEnumerable<GeneratedVoxelDesignation> variants = baseDesignation.GetUniqueVariants();
 
-        yield return new VisualVoxelOption(ArtContent, baseDesignation.Description, false, 0);
+        yield return new VoxelVisualOption(ArtContent, baseDesignation.Description, false, 0);
         foreach (GeneratedVoxelDesignation variant in variants)
         {
-            yield return new VisualVoxelOption(ArtContent, variant.Description, variant.WasFlipped, variant.Rotations);
+            yield return new VoxelVisualOption(ArtContent, variant.Description, variant.WasFlipped, variant.Rotations);
         }
     }
 }

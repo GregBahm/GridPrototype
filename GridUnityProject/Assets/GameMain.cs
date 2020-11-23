@@ -20,17 +20,20 @@ public class GameMain : MonoBehaviour
     [SerializeField]
     private VoxelBlueprint[] VoxelBlueprints;
 
+    [SerializeField]
+    private Material VoxelDisplayMat;
+
     public MainGrid MainGrid { get; private set; }
 
-    private VisualsAssembler visualsAssembler;
+    private VoxelVisualsManager visualsAssembler;
 
     private void Start()
     {
-        visualsAssembler = new VisualsAssembler(VoxelBlueprints);
         MainGrid = LoadLastSave ? GroundLoader.Load() : GroundLoader.LoadDefault();
         InteractionMesh = new InteractionMesh(new Mesh());
         UpdateInteractionGrid();
         InteractionMeshObject.GetComponent<MeshFilter>().sharedMesh = InteractionMesh.Mesh;
+        visualsAssembler = new VoxelVisualsManager(VoxelBlueprints, MainGrid, VoxelDisplayMat);
     }
 
     private void Update()
@@ -51,6 +54,7 @@ public class GameMain : MonoBehaviour
             MainGrid = GroundLoader.Load();
             Debug.Log("Grid Loaded");
         }
+        visualsAssembler.ConstantlyUpdateComponentTransforms();
     }
 
     public void UpdateInteractionGrid()

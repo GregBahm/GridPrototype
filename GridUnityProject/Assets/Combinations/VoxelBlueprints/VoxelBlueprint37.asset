@@ -12,6 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8530589c0825764489ef903943e44ae8, type: 3}
   m_Name: VoxelBlueprint37
   m_EditorClassIdentifier: 
+  ArtContent: {fileID: 2372736377878491167, guid: 1ee60bae97fd449438807a6c72eb197b,
+    type: 3}
   DesignationValues: 0001000101000101
   Up: {fileID: 0}
   Down: {fileID: 0}
