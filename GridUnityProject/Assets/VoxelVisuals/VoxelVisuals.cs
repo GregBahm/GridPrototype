@@ -71,18 +71,22 @@ public class VoxelVisualComponent
     private class VoxelVisualsLayer
     {
         public VoxelCell BasisCell { get; }
+        public GroundQuad BasisQuad { get; }
         public VoxelCell AdjacentCellA { get; }
         public VoxelCell AdjacentCellB { get; }
         public VoxelCell DiagonalCell { get; }
+        public Vector3 Center { get; }
 
-        public VoxelVisualsLayer(VoxelCell basisCell, GroundQuad quad)
+        public VoxelVisualsLayer(VoxelCell basisCell, GroundQuad basisQuad)
         {
             BasisCell = basisCell;
+            BasisQuad = basisQuad;
+            Center = new Vector3(basisQuad.Center.x, basisCell.Height, basisQuad.Center.y);
 
-            GroundPoint diagonalPoint = quad.GetDiagonalPoint(basisCell.GroundPoint);
+            GroundPoint diagonalPoint = basisQuad.GetDiagonalPoint(basisCell.GroundPoint);
             DiagonalCell = diagonalPoint.Voxels[basisCell.Height];
 
-            GroundPoint[] otherPoints = quad.Points.Where(item => item != basisCell.GroundPoint && item != diagonalPoint).ToArray();
+            GroundPoint[] otherPoints = basisQuad.Points.Where(item => item != basisCell.GroundPoint && item != diagonalPoint).ToArray();
             AdjacentCellA = otherPoints[0].Voxels[basisCell.Height];
             AdjacentCellB = otherPoints[1].Voxels[basisCell.Height];
         }
@@ -92,7 +96,7 @@ public class VoxelVisualComponent
     {
         Vector3 anchorA = Vector3.zero;
         Vector3 anchorB = (bottomLayer.AdjacentCellA.CellPosition - bottomLayer.BasisCell.CellPosition) / 2;
-        Vector3 anchorC = (bottomLayer.DiagonalCell.CellPosition - bottomLayer.BasisCell.CellPosition) / 2;
+        Vector3 anchorC = bottomLayer.Center - bottomLayer.BasisCell.CellPosition;
         Vector3 anchorD = (bottomLayer.AdjacentCellB.CellPosition - bottomLayer.BasisCell.CellPosition) / 2;
         Vector3[] baseAnchors = new Vector3[] { anchorA, anchorB, anchorC, anchorD };
         if (Contents != null)

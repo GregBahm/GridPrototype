@@ -87,6 +87,7 @@ public class VoxelVisualsManager
         {
             debugObjects[component].mesh = component.Contents.Mesh;
             debugObjects[component].gameObject.name = GetObjName(component);
+            component.SetComponentTransform(debugObjects[component].GetComponent<MeshRenderer>().material);
         }
         else
         {
