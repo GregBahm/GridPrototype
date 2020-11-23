@@ -29,6 +29,7 @@
 				float3 baseVert : TEXCOORD1;
             };
 
+            float3 _AnchorA;
 			float3 _AnchorB;
 			float3 _AnchorC;
 			float3 _AnchorD;
@@ -37,7 +38,9 @@
 			{
 				vert *= .25;
 				vert += .5;
-				float3 anchorStart = _AnchorB * vert.x;
+                vert.x = 1 - vert.x;
+
+				float3 anchorStart = lerp(_AnchorA, _AnchorB, vert.x);
 				float3 anchorEnd = lerp(_AnchorD, _AnchorC, vert.x);
 				float3 flatPosition = lerp(anchorStart, anchorEnd, vert.z);
 				return float3(flatPosition.x, vert.y, flatPosition.z);

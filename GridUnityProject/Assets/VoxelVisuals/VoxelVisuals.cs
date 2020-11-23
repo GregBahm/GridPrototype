@@ -57,8 +57,14 @@ public class VoxelVisualComponent
         designation.Description[0, 0, 1] = bottomLayer.BasisCell.Filled && bottomLayer.AdjacentCellB.Filled;
         designation.Description[0, 1, 1] = topLayer.BasisCell.Filled && topLayer.AdjacentCellB.Filled;
 
-        designation.Description[1, 0, 1] = bottomLayer.BasisCell.Filled && bottomLayer.DiagonalCell.Filled;
-        designation.Description[1, 1, 1] = topLayer.BasisCell.Filled && topLayer.DiagonalCell.Filled;
+        designation.Description[1, 0, 1] = bottomLayer.BasisCell.Filled 
+            && bottomLayer.DiagonalCell.Filled
+            && bottomLayer.AdjacentCellA.Filled
+            && bottomLayer.AdjacentCellB.Filled;
+        designation.Description[1, 1, 1] = topLayer.BasisCell.Filled 
+            && topLayer.DiagonalCell.Filled
+            && topLayer.AdjacentCellA.Filled
+            && topLayer.AdjacentCellB.Filled;
         return designation;
     }
 
@@ -84,11 +90,42 @@ public class VoxelVisualComponent
 
     internal void SetComponentTransform(Material mat)
     {
+        Vector3 anchorA = Vector3.zero;
         Vector3 anchorB = (bottomLayer.AdjacentCellA.CellPosition - bottomLayer.BasisCell.CellPosition) / 2;
         Vector3 anchorC = (bottomLayer.DiagonalCell.CellPosition - bottomLayer.BasisCell.CellPosition) / 2;
         Vector3 anchorD = (bottomLayer.AdjacentCellB.CellPosition - bottomLayer.BasisCell.CellPosition) / 2;
-        mat.SetVector("_AnchorB", anchorB);
-        mat.SetVector("_AnchorC", anchorC);
-        mat.SetVector("_AnchorD", anchorD);
+        Vector3[] baseAnchors = new Vector3[] { anchorA, anchorB, anchorC, anchorD };
+        if (Contents != null)
+        {
+            Vector3[] rotatedAnchors = new Vector3[4];
+            for (int i = 0; i < 4; i++)
+            {
+                int rotatedIndex = (i + 4 - Contents.Rotations) % 4;
+                rotatedAnchors[i] = baseAnchors[rotatedIndex];
+            }
+            if(Contents.Flipped)
+            {
+                Vector3 anchor0 = rotatedAnchors[0];
+                Vector3 anchor2 = rotatedAnchors[2];
+                rotatedAnchors[0] = rotatedAnchors[1];
+                rotatedAnchors[1] = anchor0;
+                rotatedAnchors[2] = rotatedAnchors[3];
+                rotatedAnchors[3] = anchor2;
+            }
+            SetAnchors(rotatedAnchors, mat);
+        }
+        else
+        {
+            SetAnchors(baseAnchors, mat);
+        }
+    }
+
+    private void SetAnchors(Vector3[] anchors, Material mat)
+    {
+
+        mat.SetVector("_AnchorA", anchors[0]);
+        mat.SetVector("_AnchorB", anchors[1]);
+        mat.SetVector("_AnchorC", anchors[2]);
+        mat.SetVector("_AnchorD", anchors[3]);
     }
 }

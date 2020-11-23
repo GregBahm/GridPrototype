@@ -112,7 +112,20 @@ public class VoxelVisualsManager
 
     private string GetObjName(VoxelVisualComponent component)
     {
-        string mesh = (component.Contents != null && component.Contents.Mesh != null) ? component.Contents.Mesh.name : "empty";
-        return component.Core.ToString() + " filled with " + mesh;
+        string ret = component.Core.ToString();
+        if (component.Contents == null || component.Contents.Mesh == null)
+        {
+            return ret + " (empty)";
+        }
+        ret += component.Contents.Mesh.name;
+        if(component.Contents.Flipped)
+        {
+            ret += " flipped";
+        }
+        if(component.Contents.Rotations > 0)
+        {
+            ret += " " + component.Contents.Rotations.ToString() + " rotations";
+        }
+        return ret;
     }
 }
