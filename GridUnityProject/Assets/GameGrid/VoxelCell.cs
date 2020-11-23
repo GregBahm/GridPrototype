@@ -56,18 +56,18 @@ namespace GameGrid
 
         internal IEnumerable<VoxelCell> GetConnectedCells()
         {
-            foreach(GroundPoint point in GroundPoint.DirectConnections.Concat(GroundPoint.DiagonalConnections))
+            return GetConnectedCellsIncludingNulls().Where(item => item != null);
+        }
+        private IEnumerable<VoxelCell> GetConnectedCellsIncludingNulls()
+        {
+            yield return CellAbove;
+            yield return CellBelow;
+            foreach (GroundPoint point in GroundPoint.DirectConnections.Concat(GroundPoint.DiagonalConnections))
             {
                 VoxelCell cell = point.Voxels[Height];
                 yield return cell;
-                if (cell.CellBelow != null)
-                {
-                    yield return cell.CellBelow;
-                }
-                if(cell.CellAbove != null)
-                {
-                    yield return cell.CellAbove;
-                }
+                yield return cell.CellBelow;
+                yield return cell.CellAbove;
             }
         }
     }

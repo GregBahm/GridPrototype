@@ -65,7 +65,6 @@ public class VoxelVisualsManager
         {
             VoxelDesignation designation = component.GetCurrentDesignation();
             VoxelVisualOption option = optionsByDesignationKey[designation.ToString()];
-
             component.Contents = option;
             UpdateDebugObject(component);   
         }
@@ -87,10 +86,16 @@ public class VoxelVisualsManager
         if(debugObjects.ContainsKey(component))
         {
             debugObjects[component].mesh = component.Contents.Mesh;
+            debugObjects[component].gameObject.name = GetObjName(component);
         }
         else
         {
+            if(component.Contents == null || component.Contents.Mesh == null)
+            {
+                return;
+            }
             GameObject obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            obj.name = GetObjName(component); 
             GameObject.Destroy(obj.GetComponent<BoxCollider>());
             MeshFilter filter = obj.GetComponent<MeshFilter>();
             MeshRenderer renderer = obj.GetComponent<MeshRenderer>();
@@ -103,5 +108,11 @@ public class VoxelVisualsManager
             obj.transform.position = component.ContentPosition;
             debugObjects.Add(component, filter);
         }
+    }
+
+    private string GetObjName(VoxelVisualComponent component)
+    {
+        string mesh = (component.Contents != null && component.Contents.Mesh != null) ? component.Contents.Mesh.name : "empty";
+        return component.Core.ToString() + " filled with " + mesh;
     }
 }

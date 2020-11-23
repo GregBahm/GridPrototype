@@ -28,6 +28,8 @@ public class VoxelVisuals
 
 public class VoxelVisualComponent
 {
+    public VoxelCell Core { get; }
+    public GroundQuad Quad { get; }
     private readonly VoxelVisualsLayer bottomLayer;
     private readonly VoxelVisualsLayer topLayer;
 
@@ -36,6 +38,8 @@ public class VoxelVisualComponent
 
     public VoxelVisualComponent(VoxelCell coreCell, GroundQuad quad)
     {
+        Core = coreCell;
+        Quad = quad;
         bottomLayer = new VoxelVisualsLayer(coreCell, quad);
         topLayer = new VoxelVisualsLayer(coreCell.CellAbove, quad);
         ContentPosition = coreCell.CellPosition;
