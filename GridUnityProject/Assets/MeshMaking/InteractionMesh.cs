@@ -1,4 +1,5 @@
 ﻿using GameGrid;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -7,7 +8,7 @@ namespace MeshMaking
 {
     public class InteractionMesh
     {
-        private readonly List<IHitTarget> hitTable = new List<IHitTarget>();
+        private IReadOnlyList<MeshHitTarget> hitTable;
 
         public Mesh Mesh { get; }
 
@@ -16,7 +17,7 @@ namespace MeshMaking
             Mesh = mesh;
         }
 
-        public IHitTarget GetHitTarget(int hitTringleIndex)
+        public MeshHitTarget GetHitTarget(int hitTringleIndex)
         {
             return hitTable[hitTringleIndex];
         }
@@ -29,7 +30,7 @@ namespace MeshMaking
             Mesh.Clear();
             Mesh.vertices = vertTable.GetPoints();
 
-            hitTable.Clear();
+            List<MeshBuilderTriangle> meshBuidlerTriangles = new List<MeshBuilderTriangle>();
             List<int> triangles = new List<int>();
             foreach (IMeshContributor item in meshContributors)
             {
@@ -38,12 +39,37 @@ namespace MeshMaking
                     triangles.Add(vertTable.GetVertIndex(triangle.PointA));
                     triangles.Add(vertTable.GetVertIndex(triangle.PointB));
                     triangles.Add(vertTable.GetVertIndex(triangle.PointC));
-                    hitTable.Add(triangle);
+                    meshBuidlerTriangles.Add(triangle);
                 }
             }
             Mesh.uv = vertTable.GetUvs();
             Mesh.triangles = triangles.ToArray();
             Mesh.RecalculateBounds();
+            hitTable = CreateHittable(meshBuidlerTriangles);
+        }
+
+        private IReadOnlyList<MeshHitTarget> CreateHittable(List<MeshBuilderTriangle> meshBuidlerTriangles)
+        {
+            MeshHitTarget[] ret = new MeshHitTarget[meshBuidlerTriangles.Count];
+            Dictionary<MeshBuilderTriangle, int> indexTable = new Dictionary<MeshBuilderTriangle, int>();
+            for (int i = 0; i < meshBuidlerTriangles.Count; i++)
+            {
+                indexTable.Add(meshBuidlerTriangles[i], i);
+            }
+            foreach (IGrouping<VoxelCell, MeshBuilderTriangle> item in meshBuidlerTriangles.GroupBy(item => item.SourceCell))
+            {
+                foreach(var subItem in item.GroupBy(subItem => subItem.TargetCell))
+                {
+                    MeshBuilderTriangle firstValue = subItem.First();
+                    MeshHitTarget hitTarget = new MeshHitTarget(firstValue.TargetCell, firstValue.SourceCell, subItem);
+                    foreach (MeshBuilderTriangle bedrock in subItem)
+                    {
+                        int index = indexTable[bedrock];
+                        ret[index] = hitTarget;
+                    }
+                }
+            }
+            return ret.ToList().AsReadOnly();
         }
 
         private class VertTable
@@ -87,11 +113,5 @@ namespace MeshMaking
             IMeshContributor[] contributors = grid.FilledCells.Select(item => new CellMeshContributor(item)).ToArray();
             return groundContributor.Concat(contributors);
         }
-    }
-
-    public interface IHitTarget
-    {
-        VoxelCell TargetCell { get; }
-        VoxelCell SourceCell { get; }
     }
 }

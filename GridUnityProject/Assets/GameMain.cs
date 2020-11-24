@@ -7,10 +7,12 @@ using UnityEngine.UIElements;
 
 public class GameMain : MonoBehaviour
 {
-    public bool ShowGrid;
     public bool LoadLastSave;
     public bool TestSave;
     public bool TestLoad;
+
+    [SerializeField]
+    private TextAsset DefaultGridFile;
 
     public InteractionMesh InteractionMesh { get; private set; }
 
@@ -31,7 +33,7 @@ public class GameMain : MonoBehaviour
 
     private void Start()
     {
-        MainGrid = LoadLastSave ? GroundLoader.Load() : GroundLoader.LoadDefault();
+        MainGrid = LoadLastSave ? GroundLoader.Load() : GroundLoader.Load(DefaultGridFile.text);
         InteractionMesh = new InteractionMesh(new Mesh());
         UpdateInteractionGrid();
         InteractionMeshObject.GetComponent<MeshFilter>().mesh = InteractionMesh.Mesh;
@@ -50,10 +52,6 @@ public class GameMain : MonoBehaviour
 
     private void Update()
     {
-        if(ShowGrid)
-        {
-            DoShowGrid();
-        }
         if(TestSave)
         {
             TestSave = false;
@@ -74,16 +72,6 @@ public class GameMain : MonoBehaviour
         InteractionMesh.UpdateMesh(MainGrid);
         InteractionMeshObject.GetComponent<MeshCollider>().sharedMesh = null; // Hack to force update
         InteractionMeshObject.GetComponent<MeshCollider>().sharedMesh = InteractionMesh.Mesh;
-    }
-
-    private void DoShowGrid()
-    {
-        foreach (GroundEdge edge in MainGrid.Edges)
-        {
-            Vector3 pointA = new Vector3(edge.PointA.Position.x, 0, edge.PointA.Position.y);
-            Vector3 pointB = new Vector3(edge.PointB.Position.x, 0, edge.PointB.Position.y);
-            Debug.DrawLine(pointA, pointB);
-        }
     }
 
     internal void UpdateVoxelVisuals(VoxelCell targetCell)

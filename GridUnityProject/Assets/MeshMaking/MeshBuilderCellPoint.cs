@@ -11,6 +11,8 @@ namespace MeshMaking
 
         public Vector2 Uv { get; } = Vector2.zero;
 
+        public bool IsCellPoint { get; } = true;
+
         public MeshBuilderCellPoint(VoxelCell cell)
         {
             Cell = cell;

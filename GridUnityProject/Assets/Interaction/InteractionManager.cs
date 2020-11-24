@@ -18,6 +18,9 @@ public class InteractionManager : MonoBehaviour
     [SerializeField]
     private float dragStartDistance = 2;
 
+    [SerializeField]
+    private ConstructionCursor cursor;
+
     private CameraInteraction cameraInteraction;
     private GameMain gameMain;
 
@@ -52,7 +55,11 @@ public class InteractionManager : MonoBehaviour
         }
         else
         {
-            IHitTarget potentialMeshInteraction = GetPotentialMeshInteraction();
+            MeshHitTarget potentialMeshInteraction = GetPotentialMeshInteraction();
+            if(potentialMeshInteraction != null)
+            {
+                cursor.PlaceCursor(potentialMeshInteraction);
+            }
             HandleRightMeshClicks(potentialMeshInteraction);
             HandleLeftMeshClicks(potentialMeshInteraction);
         }
@@ -134,7 +141,7 @@ public class InteractionManager : MonoBehaviour
         }
     }
 
-    private IHitTarget GetPotentialMeshInteraction()
+    private MeshHitTarget GetPotentialMeshInteraction()
     {
         RaycastHit hit;
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -145,7 +152,7 @@ public class InteractionManager : MonoBehaviour
         return null;
     }
 
-    private void HandleRightMeshClicks(IHitTarget hitInfo)
+    private void HandleRightMeshClicks(MeshHitTarget hitInfo)
     {
         if (Input.GetMouseButtonUp(1) && !rightDragDetector.IsDragging && hitInfo != null && hitInfo.SourceCell != null)
         {
@@ -155,7 +162,7 @@ public class InteractionManager : MonoBehaviour
         }
     }
 
-    private void HandleLeftMeshClicks(IHitTarget hitInfo)
+    private void HandleLeftMeshClicks(MeshHitTarget hitInfo)
     {
         if (Input.GetMouseButtonUp(0) 
             && !leftDragDetector.IsDragging 

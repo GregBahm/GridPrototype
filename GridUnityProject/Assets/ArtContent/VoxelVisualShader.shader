@@ -37,7 +37,7 @@
             float3 _AnchorA;
 			float3 _AnchorB;
 			float3 _AnchorC;
-			float3 _AnchorD;
+			float3 _AnchorD; 
 
 			float3 GetTransformedBaseVert(float3 vert)
 			{

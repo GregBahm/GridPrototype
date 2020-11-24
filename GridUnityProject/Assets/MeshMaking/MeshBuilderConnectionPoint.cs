@@ -14,6 +14,8 @@ namespace MeshMaking
 
         public Vector2 Uv { get; }
 
+        public bool IsCellPoint { get; } = false;
+
         public MeshBuilderConnectionPoint(VoxelCell cellA, VoxelCell cellB)
             : this(cellA, cellB, (cellA.CellPosition + cellB.CellPosition) / 2)
         {

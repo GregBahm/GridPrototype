@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using UnityEngine;
 
@@ -41,6 +42,12 @@ namespace GameGrid
             return new MainGrid(points, edges);
         }
 
+        public static MainGrid Load(string json)
+        {
+            GroundLoader gridLoader = JsonUtility.FromJson<GroundLoader>(json);
+            return new MainGrid(gridLoader.Points, gridLoader.Edges);
+        }
+
         public GroundLoader(IEnumerable<GroundPointBuilder> points, IEnumerable<GroundEdgeBuilder> edges)
         {
             Points = points.ToArray();
@@ -55,8 +62,7 @@ namespace GameGrid
                 Debug.Log("No save data found. Loading default grid");
                 return LoadDefault();
             }
-            GroundLoader gridLoader = JsonUtility.FromJson<GroundLoader>(data);
-            return new MainGrid(gridLoader.Points, gridLoader.Edges);
+            return Load(data);
         }
         public static void Save(MainGrid grid)
         {
