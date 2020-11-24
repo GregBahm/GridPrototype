@@ -20,7 +20,8 @@ public class VoxelVisuals
     {
         foreach (GroundQuad quad in Cell.GroundPoint.PolyConnections)
         {
-            yield return new VoxelVisualComponent(Cell, quad);
+            yield return new VoxelVisualComponent(Cell, quad, false);
+            yield return new VoxelVisualComponent(Cell, quad, true);
         }
     }
 }
@@ -30,42 +31,70 @@ public class VoxelVisualComponent
 {
     public VoxelCell Core { get; }
     public GroundQuad Quad { get; }
+    public bool TopHalf { get; }
     private readonly VoxelVisualsLayer bottomLayer;
     private readonly VoxelVisualsLayer topLayer;
 
     public VoxelVisualOption Contents { get; set; }
     public Vector3 ContentPosition { get; }
 
-    public VoxelVisualComponent(VoxelCell coreCell, GroundQuad quad)
+    public VoxelVisualComponent(VoxelCell coreCell, GroundQuad quad, bool topHalf)
     {
         Core = coreCell;
         Quad = quad;
-        bottomLayer = new VoxelVisualsLayer(coreCell, quad);
-        topLayer = new VoxelVisualsLayer(coreCell.CellAbove, quad);
-        ContentPosition = coreCell.CellPosition;
+        TopHalf = topHalf;
+        VoxelCell bottomCell = topHalf ? coreCell : (coreCell.CellBelow ?? coreCell);
+        VoxelCell topCell = topHalf ? (coreCell.CellAbove ?? coreCell) : coreCell;
+        bottomLayer = new VoxelVisualsLayer(bottomCell, quad);
+        topLayer = new VoxelVisualsLayer(topCell, quad);
+        ContentPosition = coreCell.CellPosition + (topHalf ? new Vector3(0, .5f, 0) : Vector3.zero);
     }
 
     public VoxelDesignation GetCurrentDesignation()
     {
+        bool[,] bottomDesignationLayer = GetDesignationLayer(bottomLayer);
+        bool[,] topDesignationLayer = GetDesignationLayer(topLayer);
         VoxelDesignation designation = new VoxelDesignation();
-        designation.Description[0, 0, 0] = bottomLayer.BasisCell.Filled;
-        designation.Description[0, 1, 0] = topLayer.BasisCell.Filled;
+        if(TopHalf)
+        {
+            // bottom goes straignt in, top is AND
+            designation.Description[0, 0, 0] = bottomDesignationLayer[0, 0];
+            designation.Description[1, 0, 0] = bottomDesignationLayer[1, 0];
+            designation.Description[0, 0, 1] = bottomDesignationLayer[0, 1];
+            designation.Description[1, 0, 1] = bottomDesignationLayer[1, 1];
 
-        // Adjacent values are only filled if both the core and the adjacent values are filled
-        designation.Description[1, 0, 0] = bottomLayer.BasisCell.Filled && bottomLayer.AdjacentCellA.Filled;
-        designation.Description[1, 1, 0] = topLayer.BasisCell.Filled && topLayer.AdjacentCellA.Filled;
-        designation.Description[0, 0, 1] = bottomLayer.BasisCell.Filled && bottomLayer.AdjacentCellB.Filled;
-        designation.Description[0, 1, 1] = topLayer.BasisCell.Filled && topLayer.AdjacentCellB.Filled;
+            designation.Description[0, 1, 0] = bottomDesignationLayer[0, 0] && topDesignationLayer[0,0];
+            designation.Description[1, 1, 0] = bottomDesignationLayer[1, 0] && topDesignationLayer[1, 0];
+            designation.Description[0, 1, 1] = bottomDesignationLayer[0, 1] && topDesignationLayer[0, 1];
+            designation.Description[1, 1, 1] = bottomDesignationLayer[1, 1] && topDesignationLayer[1, 1];
+        }
+        else
+        {
+            // bottom goes straignt in, top is AND
+            designation.Description[0, 0, 0] = bottomDesignationLayer[0, 0] && topDesignationLayer[0, 0];
+            designation.Description[1, 0, 0] = bottomDesignationLayer[1, 0] && topDesignationLayer[1, 0];
+            designation.Description[0, 0, 1] = bottomDesignationLayer[0, 1] && topDesignationLayer[0, 1];
+            designation.Description[1, 0, 1] = bottomDesignationLayer[1, 1] && topDesignationLayer[1, 1];
 
-        designation.Description[1, 0, 1] = bottomLayer.BasisCell.Filled 
+            designation.Description[0, 1, 0] = topDesignationLayer[0, 0]; 
+            designation.Description[1, 1, 0] = topDesignationLayer[1, 0]; 
+            designation.Description[0, 1, 1] = topDesignationLayer[0, 1];
+            designation.Description[1, 1, 1] = topDesignationLayer[1, 1]; 
+        }
+        return designation;
+    }
+
+    private bool[,] GetDesignationLayer(VoxelVisualsLayer bottomLayer)
+    {
+        bool[,] ret = new bool[2, 2];
+        ret[0,0] = bottomLayer.BasisCell.Filled;
+        ret[1,0] = bottomLayer.BasisCell.Filled && bottomLayer.AdjacentCellA.Filled;
+        ret[0,1] = bottomLayer.BasisCell.Filled && bottomLayer.AdjacentCellB.Filled;
+        ret[1,1] = bottomLayer.BasisCell.Filled
             && bottomLayer.DiagonalCell.Filled
             && bottomLayer.AdjacentCellA.Filled
             && bottomLayer.AdjacentCellB.Filled;
-        designation.Description[1, 1, 1] = topLayer.BasisCell.Filled 
-            && topLayer.DiagonalCell.Filled
-            && topLayer.AdjacentCellA.Filled
-            && topLayer.AdjacentCellB.Filled;
-        return designation;
+        return ret;
     }
 
     private class VoxelVisualsLayer

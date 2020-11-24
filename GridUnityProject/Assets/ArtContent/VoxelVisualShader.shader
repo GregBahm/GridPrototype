@@ -41,7 +41,8 @@
 
 			float3 GetTransformedBaseVert(float3 vert)
 			{
-				vert += .5;
+                vert.y *= .5;
+				vert.xz += .5;
                 //vert.x = 1 - vert.x;
 
 				float3 anchorStart = lerp(_AnchorB, _AnchorA, vert.x);
@@ -94,7 +95,8 @@
 
             float3 GetTransformedBaseVert(float3 vert)
             {
-                vert += .5;
+                vert.y *= .5;
+                vert.xz += .5;
                 vert.x = 1 - vert.x;
 
                 float3 anchorStart = lerp(_AnchorA, _AnchorB, vert.x);

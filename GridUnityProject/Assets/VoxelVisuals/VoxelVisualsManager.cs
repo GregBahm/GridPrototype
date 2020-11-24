@@ -7,6 +7,7 @@ using UnityEngine;
 
 public class VoxelVisualsManager
 {
+    private readonly Transform piecesRoot;
     private readonly Material voxelDisplayMat;
     private readonly VoxelVisualOption[] allOptions;
     private readonly Dictionary<string, VoxelVisualOption> optionsByDesignationKey;
@@ -15,6 +16,7 @@ public class VoxelVisualsManager
 
     public VoxelVisualsManager(VoxelBlueprint[] blueprints, MainGrid grid, Material voxelDisplayMat)
     {
+        piecesRoot = new GameObject("Pieces Root").transform;
         allOptions = GetAllOptions(blueprints).ToArray();
         optionsByDesignationKey = allOptions.ToDictionary(item => item.GetDesignationKey(), item => item);
         visuals = CreateVisuals(grid);
@@ -106,8 +108,9 @@ public class VoxelVisualsManager
             debugMats.Add(new Tuple<Material, VoxelVisualComponent>(mat, component));
 
             filter.mesh = component.Contents.Mesh;
-            obj.transform.position = component.ContentPosition + new Vector3(0, .5f, 0);
+            obj.transform.position = component.ContentPosition;
             debugObjects.Add(component, filter);
+            obj.transform.SetParent(piecesRoot, false);
         }
     }
 
