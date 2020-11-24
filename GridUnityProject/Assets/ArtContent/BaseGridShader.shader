@@ -76,7 +76,6 @@
                 float gridThroughCells = 1 - i.uv.x; 
                 gridThroughCells = AdjustGridLine(gridThroughCells);
                 float grid = gridAroundCells;
-                //return gridAroundCells;
                 
                 shadowness = lerp(shadowness, 1, .5);
 				float3 ret = _Color * shadowness;

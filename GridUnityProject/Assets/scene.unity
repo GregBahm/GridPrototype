@@ -408,7 +408,7 @@ MonoBehaviour:
   minZoom: 1
   maxZoom: 100
   orbitSpeed: 0.5
-  panSpeed: 0.1
+  panSpeed: 0.03
 --- !u!1 &579425808
 GameObject:
   m_ObjectHideFlags: 0
@@ -766,6 +766,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d4256d0cb26a1fb44bd2dc48083532c3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  UpdateSpeed: 0.306
+  LineOffset: 0.1
 --- !u!1 &1879863065
 GameObject:
   m_ObjectHideFlags: 0
