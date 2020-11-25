@@ -56,10 +56,7 @@ public class InteractionManager : MonoBehaviour
         else
         {
             MeshHitTarget potentialMeshInteraction = GetPotentialMeshInteraction();
-            if(potentialMeshInteraction != null)
-            {
-                cursor.PlaceCursor(potentialMeshInteraction);
-            }
+            UpdateCursor(potentialMeshInteraction);
             HandleRightMeshClicks(potentialMeshInteraction);
             HandleLeftMeshClicks(potentialMeshInteraction);
         }
@@ -67,6 +64,14 @@ public class InteractionManager : MonoBehaviour
         HandleOrbit();
         HandlePan();
         cameraInteraction.HandleMouseScrollwheel();
+    }
+
+    private void UpdateCursor(MeshHitTarget potentialMeshInteraction)
+    {
+        ConstructionCursor.MouseState state = Input.GetMouseButton(0) ? ConstructionCursor.MouseState.LeftClickDown
+            : (Input.GetMouseButton(1) ? ConstructionCursor.MouseState.RightClickDown : ConstructionCursor.MouseState.Hovering);
+
+        cursor.UpdateCursor(potentialMeshInteraction, state);
     }
 
     private void DoEasing()
@@ -143,6 +148,12 @@ public class InteractionManager : MonoBehaviour
 
     private MeshHitTarget GetPotentialMeshInteraction()
     {
+        if(rightDragDetector.IsDragging ||
+            leftDragDetector.IsDragging)
+        {
+            return null;
+        }
+
         RaycastHit hit;
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(ray, out hit))
@@ -158,7 +169,7 @@ public class InteractionManager : MonoBehaviour
 
     private void HandleRightMeshClicks(MeshHitTarget hitInfo)
     {
-        if (Input.GetMouseButtonUp(1) && !rightDragDetector.IsDragging && hitInfo != null && hitInfo.SourceCell != null)
+        if (Input.GetMouseButtonUp(1) && hitInfo != null && hitInfo.SourceCell != null)
         {
             hitInfo.SourceCell.Filled = false;
             gameMain.UpdateInteractionGrid();
@@ -169,7 +180,6 @@ public class InteractionManager : MonoBehaviour
     private void HandleLeftMeshClicks(MeshHitTarget hitInfo)
     {
         if (Input.GetMouseButtonUp(0) 
-            && !leftDragDetector.IsDragging 
             && hitInfo != null 
             && hitInfo.TargetCell != null)
         {

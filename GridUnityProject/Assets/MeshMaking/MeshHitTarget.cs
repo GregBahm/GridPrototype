@@ -12,21 +12,34 @@ namespace MeshMaking
         public VoxelCell TargetCell { get; }
         public VoxelCell SourceCell { get; }
         public Vector3[] FaceVerts { get; }
+        public Vector3 Center { get; }
 
         internal MeshHitTarget(VoxelCell targetCell, VoxelCell sourceCell, IEnumerable<MeshBuilderTriangle> tris)
         {
             TargetCell = targetCell;
             SourceCell = sourceCell;
-            FaceVerts = GetSortedFaceVerts(tris).ToArray();
+            Vector3[] unsortedFaceVerts = GetUnsortedFaceVerts(tris).ToArray();
+            Center = Average(unsortedFaceVerts);
+            FaceVerts = GetSortedFaceVerts(tris, unsortedFaceVerts).ToArray();
         }
 
-        private IEnumerable<Vector3> GetSortedFaceVerts(IEnumerable<MeshBuilderTriangle> tris)
+        private IEnumerable<Vector3> GetSortedFaceVerts(IEnumerable<MeshBuilderTriangle> tris, Vector3[] unsortedFaceVerts)
         {
-            Vector3[] unsortedFaceVerts = GetUnsortedFaceVerts(tris).ToArray();
-            Vector3 center = Average(unsortedFaceVerts);
             Vector3 facingAngle = Average(tris.Select(item => item.LookTarget).ToArray()).normalized;
-            Vector3 firstAngle = unsortedFaceVerts.First() - center;
-            return unsortedFaceVerts.OrderBy(item => Vector3.SignedAngle(firstAngle, item - center, facingAngle));
+            Vector3 firstPoint = GetProjectedPoint(facingAngle, unsortedFaceVerts.First());
+            return unsortedFaceVerts.OrderBy(item => GetAngle(item, facingAngle, firstPoint));
+        }
+
+        private object GetAngle(Vector3 pointPos, Vector3 facingAngle, Vector3 firstPoint)
+        {
+            Vector3 projectedPoint = GetProjectedPoint(facingAngle, pointPos);
+            return Vector3.SignedAngle(firstPoint, projectedPoint, facingAngle);
+        }
+
+        private Vector3 GetProjectedPoint(Vector3 facingAngle, Vector3 pointPos)
+        {
+            Vector3 toPoint = pointPos - Center;
+            return Vector3.ProjectOnPlane(toPoint, facingAngle);
         }
 
         private Vector3 Average(Vector3[] vert)

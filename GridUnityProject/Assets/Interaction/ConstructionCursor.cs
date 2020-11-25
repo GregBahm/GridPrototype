@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,18 +10,24 @@ public class ConstructionCursor : MonoBehaviour
 
     public float LineOffset = .1f;
 
+    private float baseLineWidth;
+    private Vector3 targetCenter;
     private Vector3[] targets;
 
     private LineRenderer lineRenderer;
 
+    private bool hideCursor;
+    private MouseState mouseState;
+
     private void Start()
     {
         lineRenderer = GetComponentInChildren<LineRenderer>();
+        baseLineWidth = lineRenderer.widthMultiplier;
     }
 
-    private void Update()
+    private void UpdateCursorVisuals()
     {
-        if(targets == null)
+        if (targets == null)
         {
             lineRenderer.enabled = false;
             return;
@@ -29,15 +36,52 @@ public class ConstructionCursor : MonoBehaviour
         for (int i = 0; i < targets.Length; i++)
         {
             Vector3 currentPos = lineRenderer.GetPosition(i);
-            Vector3 newPos = Vector3.Lerp(currentPos, targets[i] + new Vector3(0, LineOffset, 0), UpdateSpeed * Time.deltaTime * 100);
+            Vector3 posTarget = GetPosTarget(targets[i]);
+            Vector3 newPos = Vector3.Lerp(currentPos, posTarget, UpdateSpeed * Time.deltaTime * 100);
             lineRenderer.SetPosition(i, newPos);
+        }
+        float widthMultiplierTarget = hideCursor ? 0 : baseLineWidth;
+        lineRenderer.widthMultiplier = Mathf.Lerp(lineRenderer.widthMultiplier, widthMultiplierTarget, UpdateSpeed * Time.deltaTime * 100);
+    }
+
+    private Vector3 GetPosTarget(Vector3 rawTarget)
+    {
+        Vector3 ret = GetMouseModifiedPosTarget(rawTarget);
+        float lineOffset = hideCursor ? LineOffset * 3 : LineOffset;
+        ret += new Vector3(0, lineOffset, 0);
+        return ret;
+    }
+
+    private Vector3 GetMouseModifiedPosTarget(Vector3 rawTarget)
+    {
+        switch (mouseState)
+        {
+            case MouseState.LeftClickDown:
+                return rawTarget + (targetCenter - rawTarget) * .1f;
+            case MouseState.RightClickDown:
+                return rawTarget + (rawTarget - targetCenter) * .1f;
+            case MouseState.Hovering:
+            default:
+                return rawTarget;
         }
     }
 
-    public void PlaceCursor(MeshMaking.MeshHitTarget potentialMeshInteraction)
+    public void UpdateCursor(MeshMaking.MeshHitTarget meshHitTarget, MouseState mouseState)
+    {
+        this.mouseState = mouseState;
+        hideCursor = meshHitTarget == null;
+        if(!hideCursor)
+        {
+            PlaceCursor(meshHitTarget);
+        }
+        UpdateCursorVisuals();
+    }
+
+    private void PlaceCursor(MeshMaking.MeshHitTarget meshHitTarget)
     {
         int oldTargetsCount = targets != null ? targets.Length : 0;
-        targets = potentialMeshInteraction.FaceVerts;
+        targetCenter = meshHitTarget.Center;
+        targets = meshHitTarget.FaceVerts;
         lineRenderer.positionCount = targets.Length;
 
         // If new points are added, set their start position to the last position of the targets set
@@ -49,5 +93,12 @@ public class ConstructionCursor : MonoBehaviour
                 lineRenderer.SetPosition(i, lastOldTarget);
             }
         } 
+    }
+
+    public enum MouseState
+    {
+        Hovering,
+        LeftClickDown,
+        RightClickDown,
     }
 }
