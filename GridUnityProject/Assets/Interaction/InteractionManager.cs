@@ -147,7 +147,11 @@ public class InteractionManager : MonoBehaviour
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(ray, out hit))
         {
-            return gameMain.InteractionMesh.GetHitTarget(hit.triangleIndex);
+            MeshHitTarget ret = gameMain.InteractionMesh.GetHitTarget(hit.triangleIndex);
+            if (ret != null && !(ret.TargetCell != null && ret.TargetCell.GroundPoint.IsBorder))
+            {
+                return ret;
+            }
         }
         return null;
     }
@@ -167,8 +171,7 @@ public class InteractionManager : MonoBehaviour
         if (Input.GetMouseButtonUp(0) 
             && !leftDragDetector.IsDragging 
             && hitInfo != null 
-            && hitInfo.TargetCell != null
-            && !hitInfo.TargetCell.GroundPoint.Edges.Any(edge => edge.IsBorder))
+            && hitInfo.TargetCell != null)
         {
             hitInfo.TargetCell.Filled = true;
             gameMain.UpdateInteractionGrid();

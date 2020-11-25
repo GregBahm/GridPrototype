@@ -17,6 +17,7 @@ namespace GameGrid
         public IEnumerable<GroundQuad> PolyConnections { get { return grid.GetConnectedQuads(this); } }
         private readonly VoxelCell[] voxels;
         public IReadOnlyList<VoxelCell> Voxels { get { return voxels; } }
+        public bool IsBorder { get { return Edges.Any(item => item.IsBorder); } }
 
         public GroundPoint(MainGrid grid, int index, Vector2 initialPosition)
         {
