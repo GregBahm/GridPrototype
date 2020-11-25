@@ -306,7 +306,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 44e11c60c57da6949baf9c0d18fcd85c, type: 2}
   - {fileID: 11400000, guid: 7f151efbe4a063c4480f27dae674ed60, type: 2}
   - {fileID: 11400000, guid: 7cd9a5bf92a959f48b36c6ba7a9f6cc5, type: 2}
-  - {fileID: 11400000, guid: ab7ddecc9bea6dd4b8e8861a66ea61b0, type: 2}
   - {fileID: 11400000, guid: d0f868403414b9d4780a33b598f3fde0, type: 2}
   - {fileID: 11400000, guid: 2868dcac1d16e4a41a61c6b1e8aac3d8, type: 2}
   - {fileID: 11400000, guid: d9ac184e4e4645e4ab4bda0a6c9af9f5, type: 2}
@@ -328,6 +327,12 @@ MonoBehaviour:
   - {fileID: 11400000, guid: bba2ca7d70bd2b94e95eb6723ec6f48c, type: 2}
   - {fileID: 11400000, guid: 0877438b5b28a6c4e8de5a8b1ef30dd1, type: 2}
   - {fileID: 11400000, guid: 09bd40fc57cc1e049aad9e1bb454f33b, type: 2}
+  - {fileID: 11400000, guid: af760e51b83cba1478b0c44f7df8e15c, type: 2}
+  - {fileID: 11400000, guid: 20d3f80ae3eab2444956c2c50cf0c11b, type: 2}
+  - {fileID: 11400000, guid: 7ee19315b75f975419f1273584fe781f, type: 2}
+  - {fileID: 11400000, guid: dfb762ff39679d841b1d8ad2d6b4ebc7, type: 2}
+  - {fileID: 11400000, guid: 01470a86525d85a48816aaded1470564, type: 2}
+  - {fileID: 11400000, guid: 12d72a2b70021cd4480761878f95b745, type: 2}
   VoxelDisplayMat: {fileID: 2100000, guid: c92dbb93533e359449fc2dfaf9d41853, type: 2}
 --- !u!4 &536624979
 Transform:

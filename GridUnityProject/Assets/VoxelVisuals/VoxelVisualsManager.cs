@@ -10,7 +10,7 @@ public class VoxelVisualsManager
     private readonly Transform piecesRoot;
     private readonly Material voxelDisplayMat;
     private readonly VoxelVisualOption[] allOptions;
-    private readonly Dictionary<string, VoxelVisualOption> optionsByDesignationKey;
+    private readonly Dictionary<string, IEnumerable<VoxelVisualOption>> optionsByDesignationKey;
     private readonly Dictionary<VoxelCell, VoxelVisuals> visuals;
     private readonly Dictionary<VoxelVisualComponent, MeshFilter> debugObjects = new Dictionary<VoxelVisualComponent, MeshFilter>();
 
@@ -18,9 +18,15 @@ public class VoxelVisualsManager
     {
         piecesRoot = new GameObject("Pieces Root").transform;
         allOptions = GetAllOptions(blueprints).ToArray();
-        optionsByDesignationKey = allOptions.ToDictionary(item => item.GetDesignationKey(), item => item);
+        optionsByDesignationKey = GetOptionsByDesignationKey();
         visuals = CreateVisuals(grid);
         this.voxelDisplayMat = voxelDisplayMat;
+    }
+
+    private Dictionary<string, IEnumerable<VoxelVisualOption>> GetOptionsByDesignationKey()
+    {
+        return allOptions.GroupBy(item => item.GetDesignationKey())
+            .ToDictionary(item => item.Key, item => (IEnumerable<VoxelVisualOption>)item);
     }
 
     private Dictionary<VoxelCell, VoxelVisuals> CreateVisuals(MainGrid grid)
@@ -66,9 +72,9 @@ public class VoxelVisualsManager
         foreach (VoxelVisualComponent component in visual.Components)
         {
             VoxelDesignation designation = component.GetCurrentDesignation();
-            VoxelVisualOption option = optionsByDesignationKey[designation.ToString()];
+            VoxelVisualOption option = optionsByDesignationKey[designation.ToString()].First();
             component.Contents = option;
-            UpdateDebugObject(component);   
+            UpdateDebugObject(component);
         }
     }
 
@@ -85,7 +91,7 @@ public class VoxelVisualsManager
 
     private void UpdateDebugObject(VoxelVisualComponent component)
     {
-        if(debugObjects.ContainsKey(component))
+        if (debugObjects.ContainsKey(component))
         {
             debugObjects[component].mesh = component.Contents.Mesh;
             debugObjects[component].gameObject.name = GetObjName(component);
@@ -93,12 +99,12 @@ public class VoxelVisualsManager
         }
         else
         {
-            if(component.Contents == null || component.Contents.Mesh == null)
+            if (component.Contents == null || component.Contents.Mesh == null)
             {
                 return;
             }
             GameObject obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            obj.name = GetObjName(component); 
+            obj.name = GetObjName(component);
             GameObject.Destroy(obj.GetComponent<BoxCollider>());
             MeshFilter filter = obj.GetComponent<MeshFilter>();
             MeshRenderer renderer = obj.GetComponent<MeshRenderer>();
@@ -122,11 +128,11 @@ public class VoxelVisualsManager
             return ret + " (empty)";
         }
         ret += component.Contents.Mesh.name;
-        if(component.Contents.Flipped)
+        if (component.Contents.Flipped)
         {
             ret += " flipped";
         }
-        if(component.Contents.Rotations > 0)
+        if (component.Contents.Rotations > 0)
         {
             ret += " " + component.Contents.Rotations.ToString() + " rotations";
         }
