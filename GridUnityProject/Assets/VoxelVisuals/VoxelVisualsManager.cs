@@ -10,7 +10,7 @@ public class VoxelVisualsManager
     private readonly Transform piecesRoot;
     private readonly Material voxelDisplayMat;
     private readonly VoxelVisualOption[] allOptions;
-    private readonly Dictionary<string, VoxelVisualOption> optionsByDesignationKey;
+    private readonly Dictionary<string, IEnumerable<VoxelVisualOption>> optionsByDesignationKey;
     private readonly Dictionary<VoxelCell, VoxelVisuals> visuals;
     private readonly Dictionary<VoxelVisualComponent, MeshFilter> debugObjects = new Dictionary<VoxelVisualComponent, MeshFilter>();
 
@@ -18,9 +18,15 @@ public class VoxelVisualsManager
     {
         piecesRoot = new GameObject("Pieces Root").transform;
         allOptions = GetAllOptions(blueprints).ToArray();
-        optionsByDesignationKey = allOptions.ToDictionary(item => item.GetDesignationKey(), item => item);
+        optionsByDesignationKey = GetOptionsByDesignationKey();
         visuals = CreateVisuals(grid);
         this.voxelDisplayMat = voxelDisplayMat;
+    }
+
+    private Dictionary<string, IEnumerable<VoxelVisualOption>> GetOptionsByDesignationKey()
+    {
+        return allOptions.GroupBy(item => item.GetDesignationKey())
+            .ToDictionary(item => item.Key, item => (IEnumerable<VoxelVisualOption>)item);
     }
 
     private Dictionary<VoxelCell, VoxelVisuals> CreateVisuals(MainGrid grid)
@@ -66,7 +72,7 @@ public class VoxelVisualsManager
         foreach (VoxelVisualComponent component in visual.Components)
         {
             VoxelDesignation designation = component.GetCurrentDesignation();
-            VoxelVisualOption option = optionsByDesignationKey[designation.ToString()];
+            VoxelVisualOption option = optionsByDesignationKey[designation.ToString()].First();
             component.Contents = option;
             UpdateDebugObject(component);   
         }
