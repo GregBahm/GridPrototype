@@ -19,7 +19,7 @@ namespace MeshMaking
             List<IMeshBuilderPoint> points = new List<IMeshBuilderPoint>();
             List<MeshBuilderTriangle> triangles = new List<MeshBuilderTriangle>();
             VoxelCell baseCell = groundPoint.Voxels[0];
-            Vector3 lookTarget = baseCell.CellPosition + Vector3.up;
+            Vector3 lookTarget = Vector3.up;
             IMeshBuilderPoint corePoint = new MeshBuilderCellPoint(baseCell);
 
             points.Add(corePoint);
@@ -51,7 +51,7 @@ namespace MeshMaking
             VoxelCell targetCell = upwardFacing ? sourceCell.CellAbove : sourceCell.CellBelow;
             VoxelCell alignmentCell = upwardFacing ? sourceCell.CellAbove : sourceCell;
 
-            Vector3 lookTarget = upwardFacing ? sourceCell.CellPosition + Vector3.up * 2 : targetCell.CellPosition;
+            Vector3 lookTarget = upwardFacing ? Vector3.up : Vector3.down;
 
             List<IMeshBuilderPoint> points = new List<IMeshBuilderPoint>();
             List<MeshBuilderTriangle> triangles = new List<MeshBuilderTriangle>();

@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Linq;
+using TileDefinition;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class TileVisualBehavior : MonoBehaviour

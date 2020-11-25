@@ -1,4 +1,5 @@
 ﻿using GameGrid;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -51,6 +52,23 @@ namespace GameGrid
         public override string ToString()
         {
             return "(" + GroundPoint.Index + ", " + Height + ")";
+        }
+
+        internal IEnumerable<VoxelCell> GetConnectedCells()
+        {
+            return GetConnectedCellsIncludingNulls().Where(item => item != null);
+        }
+        private IEnumerable<VoxelCell> GetConnectedCellsIncludingNulls()
+        {
+            yield return CellAbove;
+            yield return CellBelow;
+            foreach (GroundPoint point in GroundPoint.DirectConnections.Concat(GroundPoint.DiagonalConnections))
+            {
+                VoxelCell cell = point.Voxels[Height];
+                yield return cell;
+                yield return cell.CellBelow;
+                yield return cell.CellAbove;
+            }
         }
     }
 }

@@ -1,58 +1,41 @@
-﻿public class DesignationsGrid
+﻿using System.Collections.Generic;
+using TileDefinition;
+
+
+public class DesignationsGrid
 {
     private readonly int height;
-    private readonly TileDesignationType[,] fillGrid;
+    private readonly bool[,] fillGrid;
 
-    public DesignationsGrid(int width, int height)
+    private readonly HashSet<TileConnectionType> filledConnectionTypes;
+
+    public DesignationsGrid(int width, 
+        int height, 
+        IEnumerable<TileConnectionType> setTypes)
     {
         width++;
         height++;
         this.height = height;
-        fillGrid = new TileDesignationType[width, height];
+        this.filledConnectionTypes = new HashSet<TileConnectionType>(setTypes);
+        fillGrid = new bool[width, height];
     }
 
-    public TileDesignationType GetPointState(int x, int y)
+    public void ToggleGridpoint(int x, int y)
     {
-        return fillGrid[x, y];
+        fillGrid[x, y] = !fillGrid[x, y];
     }
 
-    public void ToggleGridpoint(int x, int y, TileDesignationType type)
+    public bool IsOptionAllowed(int x, int y, Tile option)
     {
-        if (y >= height - 2) // No toggling the sky
-        {
-            return;
-        }
-        fillGrid[x, y] = fillGrid[x, y] == type ? TileDesignationType.Empty : type;
+        return Check(x, y, option.DownRight)
+            && Check(x + 1, y, option.DownLeft)
+            && Check(x, y + 1, option.UpRight)
+            && Check(x + 1, y + 1, option.UpLeft);
     }
 
-    public bool IsOptionAllowed(int x, int y, NewTile option)
+    private bool Check(int x, int y, TileConnectionType connectionType)
     {
-        return Check(x, y, option.BottomRight)
-            && Check(x + 1, y, option.BottomLeft)
-            && Check(x, y + 1, option.TopRight)
-            && Check(x + 1, y + 1, option.TopLeft);
-    }
-
-    public bool IsOptionAllowedAsFallback(int x, int y, NewTile option)
-    {
-        return FallbackCheck(x, y, option.BottomRight)
-            && FallbackCheck(x + 1, y, option.BottomLeft)
-            && FallbackCheck(x, y + 1, option.TopRight)
-            && FallbackCheck(x + 1, y + 1, option.TopLeft);
-    }
-    private bool FallbackCheck(int x, int y, TileDesignationType designationType)
-    {
-        bool isEmpty = fillGrid[x, y] == TileDesignationType.Empty;
-        if (isEmpty)
-        {
-            return designationType == TileDesignationType.Empty;
-        }
-        return designationType == TileDesignationType.DefaultFill 
-            || designationType == fillGrid[x,y];
-    }
-
-    private bool Check(int x, int y, TileDesignationType designationType)
-    {
-        return fillGrid[x, y] == designationType;
+        return fillGrid[x, y] == filledConnectionTypes.Contains(connectionType);
     }
 }
+

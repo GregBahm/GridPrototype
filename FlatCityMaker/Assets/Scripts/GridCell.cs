@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using TileDefinition;
 
 public class GridCell
 {
@@ -8,7 +10,9 @@ public class GridCell
     public int X { get; }
     public int Y { get; }
 
-    public NewTile FilledWith { get; set; }
+    public Tile FilledWith { get; set; }
+
+    public IReadOnlyList<Tile> OptionsFromDesignation { get; private set; }
     
     public GridCell(MainGrid main, int x, int y)
     {
@@ -17,38 +21,14 @@ public class GridCell
         Y = y;
     }
 
-    public void UpdateFill()
+    public void ResetDesignationOptions()
     {
-        NewTile tile = main.AllOptions.FirstOrDefault(OptionAllowed);
-        if(tile == null)
-        {
-            tile = main.AllOptions.FirstOrDefault(FallbackAllowed);
-            if(tile == null)
-            {
-                throw new Exception("Zero options from designation table");
-            }
-        }
-        FilledWith = tile;
+        // TODO: It should be possible to precompute these into a hash
+        OptionsFromDesignation = main.AllOptions.Where(DesignationsAllowOption).ToArray();
     }
 
-    private bool FallbackAllowed(NewTile option)
-    {
-        return main.Designations.IsOptionAllowedAsFallback(X, Y, option);
-    }
-
-    private bool OptionAllowed(NewTile option)
+    private bool DesignationsAllowOption(Tile option)
     {
         return main.Designations.IsOptionAllowed(X, Y, option);
     }
-
-    public override string ToString()
-    {
-        string ret = "(" + X + "," + Y + ")";
-        if(FilledWith != null)
-        {
-            return ret + "filled with " + FilledWith.Sprite.name;
-        }
-        return ret;
-    }
 }
-

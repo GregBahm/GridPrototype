@@ -9,7 +9,9 @@ namespace MeshMaking
         public string Key { get; }
         public Vector3 Position { get; }
 
-        public Vector2 Uv { get; } = Vector2.one;
+        public Vector2 Uv { get; } = Vector2.zero;
+
+        public bool IsCellPoint { get; } = true;
 
         public MeshBuilderCellPoint(VoxelCell cell)
         {

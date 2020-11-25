@@ -380,22 +380,31 @@ MonoBehaviour:
   DisplayTilePrefab: {fileID: 1048891552112466070, guid: a03d61fd2caad2d47825cab22853fa3c,
     type: 3}
   DisplayTilesTransform: {fileID: 143143806}
-  CurrentDesignationType: 2
-  Sky: {fileID: 11400000, guid: 96dfa289d889ef141a30ef5c81b22dc9, type: 2}
+  SkyTile: {fileID: 11400000, guid: eb40a7101c17d0644a1a7b7760e3235e, type: 2}
   options:
-  - {fileID: 11400000, guid: d9ecddd4c89538a4186864891b0bde24, type: 2}
-  - {fileID: 11400000, guid: a37be065a2f06bc4fb333308f81b8ca7, type: 2}
-  - {fileID: 11400000, guid: 1f7442ac07eed5b4e859c27550c02bf4, type: 2}
-  - {fileID: 11400000, guid: 6d4fa0ca8ec968748b394738fa7a5ea0, type: 2}
-  - {fileID: 11400000, guid: 031eab000fb1aea45800f5018aa1a506, type: 2}
-  - {fileID: 11400000, guid: 26771046cac876f43b2afa9c07ba9798, type: 2}
-  - {fileID: 11400000, guid: 96dfa289d889ef141a30ef5c81b22dc9, type: 2}
-  - {fileID: 11400000, guid: 4d4d113481e98c341b47980c8c310df5, type: 2}
-  - {fileID: 11400000, guid: f01d49407868fbc458699255b31199bb, type: 2}
-  - {fileID: 11400000, guid: 7da313afaace1bd47ba044dcd0eea6ae, type: 2}
-  - {fileID: 11400000, guid: a3a72a4fb5783bd4f9dd271c848b8317, type: 2}
-  - {fileID: 11400000, guid: a93681111eaa1e0488fa157783df30ef, type: 2}
-  - {fileID: 11400000, guid: 1fba57c0921437940a53235283a3a9d2, type: 2}
+  - {fileID: 11400000, guid: eb40a7101c17d0644a1a7b7760e3235e, type: 2}
+  - {fileID: 11400000, guid: 247808866dcd6dd43911be37af4d0f86, type: 2}
+  - {fileID: 11400000, guid: 25225d716e9cfe645a1c9c7952a7f1d6, type: 2}
+  - {fileID: 11400000, guid: 22f7aa031d2266a409b27b43d4c7ec6c, type: 2}
+  - {fileID: 11400000, guid: 16171d824743e5942b80157619a30c2b, type: 2}
+  - {fileID: 11400000, guid: 331df081a667a474694b94fc9e54e6d3, type: 2}
+  - {fileID: 11400000, guid: 8bd226bd36f22074abbd28b948ba71d4, type: 2}
+  - {fileID: 11400000, guid: 3401428745f52df47ad0ca71261439f7, type: 2}
+  - {fileID: 11400000, guid: 20ba09fd5d1f95b479962b205c1b83e5, type: 2}
+  - {fileID: 11400000, guid: a09dca1284ad91d4b833c9d23c4f68bb, type: 2}
+  - {fileID: 11400000, guid: 7f3d0bf9272e72e489fdf1145f1e3432, type: 2}
+  - {fileID: 11400000, guid: 3dae72f6c4489024693aa7616deb54c3, type: 2}
+  - {fileID: 11400000, guid: cbf8ce23044deea40be42d642fd953a3, type: 2}
+  - {fileID: 11400000, guid: 130ed307ef9cd814a9c921bb024f2233, type: 2}
+  - {fileID: 11400000, guid: 3a12d9fccf9b8bb429d1cc0072b36d1d, type: 2}
+  - {fileID: 11400000, guid: 97917d97faa898e46bd4e8bf1927347f, type: 2}
+  - {fileID: 11400000, guid: 81d192c5f5530b9478e5713f5f2b317a, type: 2}
+  - {fileID: 11400000, guid: c9d30ccf0c7785848bfc9d4d9b67cb50, type: 2}
+  - {fileID: 11400000, guid: 6d46eeffe7ae0794a85c64dd6e96bc07, type: 2}
+  - {fileID: 11400000, guid: 8160200bfe8e8894c96cc038e432d638, type: 2}
+  FilledConnectionTypes:
+  - {fileID: 11400000, guid: c5e6f881562d7764b9c984fe355bc617, type: 2}
+  - {fileID: 11400000, guid: f7a4158ad290b3c4e85f2b295b9d63f4, type: 2}
 --- !u!4 &360831928
 Transform:
   m_ObjectHideFlags: 0

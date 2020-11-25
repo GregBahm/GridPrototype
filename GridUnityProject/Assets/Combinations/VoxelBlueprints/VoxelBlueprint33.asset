@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8530589c0825764489ef903943e44ae8, type: 3}
+  m_Name: VoxelBlueprint33
+  m_EditorClassIdentifier: 
+  ArtContent: {fileID: -7504923150714586338, guid: 1ee60bae97fd449438807a6c72eb197b,
+    type: 3}
+  DesignationValues: 0001000001010001
+  Up: {fileID: 0}
+  Down: {fileID: 0}
+  PositiveX: {fileID: 0}
+  NegativeX: {fileID: 0}
+  PositiveZ: {fileID: 0}
+  NegativeZ: {fileID: 0}

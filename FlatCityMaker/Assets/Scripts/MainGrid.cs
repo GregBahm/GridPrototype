@@ -1,47 +1,39 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using TileDefinition;
 
 public class MainGrid
 {
-    private readonly int width;
-    private readonly int height;
+    public int Width { get; }
+    public int Height { get; }
 
     public DesignationsGrid Designations { get; }
 
-    public IEnumerable<NewTile> AllOptions { get; }
+    public IEnumerable<Tile> AllOptions { get; }
 
     public GridCell[,] Cells { get; private set; }
 
     public MainGrid(int width, int height, 
-        IEnumerable<NewTile> allOptions,
+        IEnumerable<Tile> allOptions,
         DesignationsGrid designations)
     {
         Designations = designations;
         AllOptions = allOptions;
-        this.width = width;
-        this.height = height;
+        this.Width = width;
+        this.Height = height;
         Cells = CreateCells();
-    }
-
-    public IEnumerable<GridCell> GetCellsConnectedToDesignationPoint(int x, int y)
-    {
-        x--;
-        y--;
-        if (x > 0 && y > 0)
-            yield return Cells[x, y];
-        if (x < width - 2 && y > 0)
-            yield return Cells[x + 1, y];
-        if (x > 0 && y < height - 1)
-            yield return Cells[x, y + 1];
-        if (x < width - 1 && y < height - 1)
-            yield return Cells[x + 1, y + 1];
+        foreach (GridCell cell in Cells)
+        {
+            cell.ResetDesignationOptions();
+        }
     }
 
     private GridCell[,] CreateCells()
     {
-        GridCell[,] ret = new GridCell[width, height];
-        for (int x = 0; x < width; x++)
+        GridCell[,] ret = new GridCell[Width, Height];
+        for (int x = 0; x < Width; x++)
         {
-            for (int y = 0; y < height; y++)
+            for (int y = 0; y < Height; y++)
             {
                 ret[x, y] = new GridCell(this, x, y);
             }

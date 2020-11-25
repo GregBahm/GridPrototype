@@ -1,13 +1,25 @@
 ﻿using GameGrid;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace MeshMaking
 {
-    class MeshBuilderTriangle : IHitTarget
+    class MeshBuilderTriangle
     {
         public IMeshBuilderPoint PointA { get; }
         public IMeshBuilderPoint PointB { get; }
         public IMeshBuilderPoint PointC { get; }
+        public Vector3 LookTarget { get; }
+
+        public IEnumerable<IMeshBuilderPoint> Points
+        {
+            get
+            {
+                yield return PointA;
+                yield return PointB;
+                yield return PointC;
+            }
+        }
 
         public VoxelCell TargetCell { get; }
         public VoxelCell SourceCell { get; }
@@ -25,6 +37,7 @@ namespace MeshMaking
             bool reorderVerts = GetShouldReorderVerts(lookTarget, pointA.Position, pointB.Position, pointC.Position);
             PointB = reorderVerts ? pointB : pointC;
             PointC = reorderVerts ? pointC : pointB;
+            LookTarget = lookTarget;
         }
             public MeshBuilderTriangle(VoxelCell targetCell,
             VoxelCell sourceCell,

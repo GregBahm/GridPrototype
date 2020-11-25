@@ -35,6 +35,7 @@
             {
                 float4 vertex : POSITION;
                 float2 uv : TEXCOORD0;
+                float3 normal : NORMAL;
             };
 
             struct v2f
@@ -49,13 +50,18 @@
             v2f vert (appdata v)
             {
                 v2f o;
+                o.uv = v.uv;
                 o.vertex = UnityObjectToClipPos(v.vertex);
-                o.uv = 1 - v.uv;
                 float3 worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
                 o.distToCursor = length(worldPos - _DistToCursor);
 				o._ShadowCoord = ComputeScreenPos(o.vertex);
                 o.worldPos = worldPos;
                 return o;
+            }
+
+            float AdjustGridLine(float grid)
+            {
+                return saturate(pow(grid, _TuneA) * _TuneB - _TuneC);
             }
 
             fixed4 frag(v2f i) : SV_Target
@@ -65,16 +71,18 @@
                 float alpha = (1 - i.distToCursor / 40);
                 alpha = pow(saturate(alpha), 20);
 
-                float grid = pow(pow(i.uv.x, _TuneA) + pow(i.uv.y, _TuneA), _TuneB);
-                grid = saturate(grid - _TuneC) * 1;
-                //grid = grid * alpha;
+                float gridAroundCells = i.uv.y;
+                gridAroundCells = AdjustGridLine(gridAroundCells);
+                float gridThroughCells = 1 - i.uv.x; 
+                gridThroughCells = AdjustGridLine(gridThroughCells);
+                float grid = gridAroundCells;
                 
+                shadowness = lerp(shadowness, 1, .5);
 				float3 ret = _Color * shadowness;
-                ret += i.worldPos.y * .1;
+                ret += i.worldPos.y * .05;
                 float height = saturate(1 - i.worldPos.y * 10);
                 float3 lineVal = lerp(ret, 1, alpha * .2 * height);
 				ret = lerp(ret, lineVal, grid);
-
                 return float4(ret, 1);
             }
             ENDCG

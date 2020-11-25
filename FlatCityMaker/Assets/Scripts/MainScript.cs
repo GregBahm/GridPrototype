@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
+using GridSolver;
+using TileDefinition;
 using UnityEngine;
 
 public class MainScript : MonoBehaviour
@@ -10,29 +13,31 @@ public class MainScript : MonoBehaviour
     public GameObject DisplayTilePrefab;
     public RectTransform DisplayTilesTransform;
 
-    public TileDesignationType CurrentDesignationType;
-
-    public NewTile Sky;
+    public Tile SkyTile;
 
     [SerializeField]
-    private NewTile[] options;
+    private Tile[] options;
+
+    public TileConnectionType[] FilledConnectionTypes;
+    public ReadOnlyCollection<TileInteractionBehavior> InteractionCells { get; private set; }
+    public IEnumerable<TileVisualBehavior> VisualTiles { get; private set; }
+
+    private GridSolver.Solver solver;
 
     public MainGrid MainGrid { get; private set; }
-    public IEnumerable<TileInteractionBehavior> InteractionTiles { get; private set; }
-    public IEnumerable<TileVisualBehavior> VisualTiles { get; private set; }
 
     void Start()
     {
-        IEnumerable<NewTile> allOptions = GetSymmetricalOptions();
-        DesignationsGrid designations = new DesignationsGrid(Width, Height);
+        IEnumerable<Tile> allOptions = GetSymmetricalOptions();
+        DesignationsGrid designations = new DesignationsGrid(Width, Height, FilledConnectionTypes);
         MainGrid = new MainGrid(Width, Height, allOptions, designations);
-        
+
         VisualTiles = CreateDisplayTiles();
-        InteractionTiles = CreateInteractionTiles();
-        FillAllWithSky();
+        InteractionCells = CreateInteractionTiles().AsReadOnly();
+        solver = new GridSolver.Solver(Width, Height);
     }
 
-    private IEnumerable<TileInteractionBehavior> CreateInteractionTiles()
+    private List<TileInteractionBehavior> CreateInteractionTiles()
     {
         List<TileInteractionBehavior> ret = new List<TileInteractionBehavior>();
         GameObject tiles = new GameObject("InteractionTiles");
@@ -40,13 +45,27 @@ public class MainScript : MonoBehaviour
         {
             for (int y = 0; y < Height + 1; y++)
             {
-                TileInteractionBehavior behavior = CreateInteractionTile(x, y);
-                behavior.gameObject.transform.parent = tiles.transform;
-                ret.Add(behavior);
+                TileInteractionBehavior obj = CreateInteractionTile(x, y);
+                obj.transform.parent = tiles.transform;
+                ret.Add(obj);
             }
         }
         tiles.transform.position = new Vector3(-(float)Width / 2, -(float)Height / 2);
         return ret;
+    }
+
+    private IEnumerable<GridCell> GetConnectedCells(int x, int y)
+    {
+        x--;
+        y--;
+        if (x >= 0 && y >= 0)
+            yield return MainGrid.Cells[x, y];
+        if (x < Width - 1 && y >= 0)
+            yield return MainGrid.Cells[x + 1, y];
+        if (x >= 0 && y < Height - 1)
+            yield return MainGrid.Cells[x, y + 1];
+        if (x < Width - 1 && y < Height - 1)
+            yield return MainGrid.Cells[x + 1, y + 1];
     }
 
     private TileInteractionBehavior CreateInteractionTile(int x, int y)
@@ -58,22 +77,14 @@ public class MainScript : MonoBehaviour
         TileInteractionBehavior behavior = obj.AddComponent<TileInteractionBehavior>();
         behavior.X = x;
         behavior.Y = y;
-        behavior.ConnectedCells = MainGrid.GetCellsConnectedToDesignationPoint(x, y).ToArray();
+        behavior.ConnectedCells = GetConnectedCells(x, y).ToArray();
         return behavior;
     }
 
-    private void FillAllWithSky()
+    private IEnumerable<Tile> GetSymmetricalOptions()
     {
-        foreach (var item in MainGrid.Cells)
-        {
-            item.FilledWith = Sky;
-        }
-    }
-
-    private IEnumerable<NewTile> GetSymmetricalOptions()
-    {
-        List<NewTile> ret = new List<NewTile>();
-        foreach (NewTile option in options)
+        List<Tile> ret = new List<Tile>();
+        foreach (Tile option in options)
         {
             ret.Add(option);
             if (option.GetIsAsymmetrical())
@@ -97,18 +108,31 @@ public class MainScript : MonoBehaviour
             RaycastHit hitInfo;
             if (Physics.Raycast(mouseRay, out hitInfo))
             {
-                TileInteractionBehavior interactor = hitInfo.collider.gameObject.GetComponent<TileInteractionBehavior>();
-                ToggleDesignation(interactor);
+                TileInteractionBehavior cell = hitInfo.collider.gameObject.GetComponent<TileInteractionBehavior>();
+                ToggleCell(cell);
             }
         }
     }
 
-    private void ToggleDesignation(TileInteractionBehavior interactor)
+    private void ToggleCell(TileInteractionBehavior cell)
     {
-        MainGrid.Designations.ToggleGridpoint(interactor.X, interactor.Y, CurrentDesignationType);
-        foreach (GridCell cell in interactor.ConnectedCells)
+        MainGrid.Designations.ToggleGridpoint(cell.X, cell.Y);
+        foreach (GridCell item in cell.ConnectedCells)
         {
-            cell.UpdateFill();
+            item.ResetDesignationOptions();
+        }
+        GridSolver.GridState solvedGrid = solver.GetSolved(MainGrid);
+        ApplySolvedGrid(solvedGrid);
+    }
+
+    private void ApplySolvedGrid(GridState solvedGrid)
+    {
+        for (int x = 0; x < Width; x++)
+        {
+            for (int y = 0; y < Height; y++)
+            {
+                MainGrid.Cells[x, y].FilledWith = solvedGrid.Cells[x, y].Choice;
+            }
         }
     }
 
@@ -138,4 +162,3 @@ public class MainScript : MonoBehaviour
         return behavior;
     }
 }
-

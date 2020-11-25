@@ -4,6 +4,7 @@ using MeshMaking;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -16,6 +17,9 @@ public class InteractionManager : MonoBehaviour
 
     [SerializeField]
     private float dragStartDistance = 2;
+
+    [SerializeField]
+    private ConstructionCursor cursor;
 
     private CameraInteraction cameraInteraction;
     private GameMain gameMain;
@@ -51,7 +55,11 @@ public class InteractionManager : MonoBehaviour
         }
         else
         {
-            IHitTarget potentialMeshInteraction = GetPotentialMeshInteraction();
+            MeshHitTarget potentialMeshInteraction = GetPotentialMeshInteraction();
+            if(potentialMeshInteraction != null)
+            {
+                cursor.PlaceCursor(potentialMeshInteraction);
+            }
             HandleRightMeshClicks(potentialMeshInteraction);
             HandleLeftMeshClicks(potentialMeshInteraction);
         }
@@ -133,32 +141,41 @@ public class InteractionManager : MonoBehaviour
         }
     }
 
-    private IHitTarget GetPotentialMeshInteraction()
+    private MeshHitTarget GetPotentialMeshInteraction()
     {
         RaycastHit hit;
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(ray, out hit))
         {
-            return gameMain.InteractionMesh.GetHitTarget(hit.triangleIndex);
+            MeshHitTarget ret = gameMain.InteractionMesh.GetHitTarget(hit.triangleIndex);
+            if (ret != null && !(ret.TargetCell != null && ret.TargetCell.GroundPoint.IsBorder))
+            {
+                return ret;
+            }
         }
         return null;
     }
 
-    private void HandleRightMeshClicks(IHitTarget hitInfo)
+    private void HandleRightMeshClicks(MeshHitTarget hitInfo)
     {
         if (Input.GetMouseButtonUp(1) && !rightDragDetector.IsDragging && hitInfo != null && hitInfo.SourceCell != null)
         {
             hitInfo.SourceCell.Filled = false;
             gameMain.UpdateInteractionGrid();
+            gameMain.UpdateVoxelVisuals(hitInfo.SourceCell);
         }
     }
 
-    private void HandleLeftMeshClicks(IHitTarget hitInfo)
+    private void HandleLeftMeshClicks(MeshHitTarget hitInfo)
     {
-        if (Input.GetMouseButtonUp(0) && !leftDragDetector.IsDragging && hitInfo != null && hitInfo.TargetCell != null)
+        if (Input.GetMouseButtonUp(0) 
+            && !leftDragDetector.IsDragging 
+            && hitInfo != null 
+            && hitInfo.TargetCell != null)
         {
             hitInfo.TargetCell.Filled = true;
             gameMain.UpdateInteractionGrid();
+            gameMain.UpdateVoxelVisuals(hitInfo.TargetCell);
         }
     }
 
