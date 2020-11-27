@@ -1,8 +1,8 @@
 ﻿*.vs
-/GridUnityProject/Library
-/GridUnityProject/Logs
-/GridUnityProject/obj
-/GridUnityProject/Packages
-/GridUnityProject/Temp
+*/Library
+*/Logs
+*/obj
+*/Packages
+*/Temp
 *.csproj
 *.sln
