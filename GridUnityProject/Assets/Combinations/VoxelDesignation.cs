@@ -9,6 +9,8 @@ public class VoxelDesignation
     private readonly bool[,,] description = new bool[2, 2, 2];
     public bool[,,] Description => description;
 
+    public string Key { get { return ToString(); } }
+
     public VoxelDesignation()
     {}
 

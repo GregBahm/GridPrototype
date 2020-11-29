@@ -38,7 +38,7 @@ public class GameMain : MonoBehaviour
         UpdateInteractionGrid();
         InteractionMeshObject.GetComponent<MeshFilter>().mesh = InteractionMesh.Mesh;
         BaseGridVisual.GetComponent<MeshFilter>().mesh = CloneInteractionMesh();
-        visualsAssembler = new VoxelVisualsManager(VoxelBlueprints, MainGrid, VoxelDisplayMat);
+        visualsAssembler = new VoxelVisualsManager(new DesignationOptionsManager(VoxelBlueprints), MainGrid, VoxelDisplayMat);
     }
 
     private Mesh CloneInteractionMesh()

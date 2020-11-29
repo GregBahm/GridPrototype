@@ -7,20 +7,23 @@ public class VoxelVisuals
 {
     public VoxelCell Cell { get; }
 
-    public IEnumerable<VoxelVisualComponent> Components { get; }
+    private Lazy<IEnumerable<VoxelVisualComponent>> componentsLoader;
+    public IEnumerable<VoxelVisualComponent> Components { get { return componentsLoader.Value; } }
 
     public VoxelVisuals(VoxelCell cell)
     {
         Cell = cell;
-        Components = CreateVisualComponents().ToArray();
+        componentsLoader = new Lazy<IEnumerable<VoxelVisualComponent>>(CreateVisualComponents);
     }
 
     private IEnumerable<VoxelVisualComponent> CreateVisualComponents()
     {
+        List<VoxelVisualComponent> ret = new List<VoxelVisualComponent>();
         foreach (GroundQuad quad in Cell.GroundPoint.PolyConnections)
         {
-            yield return new VoxelVisualComponent(Cell, quad, false);
-            yield return new VoxelVisualComponent(Cell, quad, true);
+            ret.Add(new VoxelVisualComponent(Cell, quad, false));
+            ret.Add(new VoxelVisualComponent(Cell, quad, true));
         }
+        return ret;
     }
 }

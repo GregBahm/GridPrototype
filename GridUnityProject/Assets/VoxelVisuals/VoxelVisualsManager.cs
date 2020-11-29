@@ -7,53 +7,16 @@ using UnityEngine;
 
 public class VoxelVisualsManager
 {
+    private readonly DesignationOptionsManager optionsManager;
     private readonly Transform piecesRoot;
     private readonly Material voxelDisplayMat;
-    private readonly VoxelVisualOption[] allOptions;
-    private readonly Dictionary<string, IEnumerable<VoxelVisualOption>> optionsByDesignationKey;
-    private readonly Dictionary<VoxelCell, VoxelVisuals> visuals;
     private readonly Dictionary<VoxelVisualComponent, MeshFilter> debugObjects = new Dictionary<VoxelVisualComponent, MeshFilter>();
 
-    public VoxelVisualsManager(VoxelBlueprint[] blueprints, MainGrid grid, Material voxelDisplayMat)
+    public VoxelVisualsManager(DesignationOptionsManager optionsManager, MainGrid grid, Material voxelDisplayMat)
     {
+        this.optionsManager = optionsManager;
         piecesRoot = new GameObject("Pieces Root").transform;
-        allOptions = GetAllOptions(blueprints).ToArray();
-        optionsByDesignationKey = GetOptionsByDesignationKey();
-        visuals = CreateVisuals(grid);
         this.voxelDisplayMat = voxelDisplayMat;
-    }
-
-    private Dictionary<string, IEnumerable<VoxelVisualOption>> GetOptionsByDesignationKey()
-    {
-        return allOptions.GroupBy(item => item.GetDesignationKey())
-            .ToDictionary(item => item.Key, item => (IEnumerable<VoxelVisualOption>)item);
-    }
-
-    private Dictionary<VoxelCell, VoxelVisuals> CreateVisuals(MainGrid grid)
-    {
-        Dictionary<VoxelCell, VoxelVisuals> ret = new Dictionary<VoxelCell, VoxelVisuals>();
-        foreach (GroundPoint point in grid.Points)
-        {
-            for (int i = 0; i < MainGrid.VoxelHeight - 1; i++)
-            {
-                VoxelCell cell = point.Voxels[i];
-                VoxelVisuals visuals = new VoxelVisuals(cell);
-                ret.Add(cell, visuals);
-            }
-        }
-        return ret;
-    }
-
-    private IEnumerable<VoxelVisualOption> GetAllOptions(VoxelBlueprint[] blueprints)
-    {
-        foreach (VoxelBlueprint blueprint in blueprints)
-        {
-            IEnumerable<VoxelVisualOption> options = blueprint.GenerateVisualOptions();
-            foreach (VoxelVisualOption option in options)
-            {
-                yield return option;
-            }
-        }
     }
 
     internal void UpdateVoxels(VoxelCell toggledCell)
@@ -68,11 +31,10 @@ public class VoxelVisualsManager
 
     private void UpdateVoxel(VoxelCell targetCell)
     {
-        VoxelVisuals visual = visuals[targetCell];
-        foreach (VoxelVisualComponent component in visual.Components)
+        foreach (VoxelVisualComponent component in targetCell.Visuals.Components)
         {
             VoxelDesignation designation = component.GetCurrentDesignation();
-            VoxelVisualOption option = optionsByDesignationKey[designation.ToString()].First();
+            VoxelVisualOption option = optionsManager.GetAvailableOptionsFor(designation).First();
             component.Contents = option;
             UpdateDebugObject(component);
         }
