@@ -1,4 +1,5 @@
 ﻿using GameGrid;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,43 +7,90 @@ using UnityEngine;
 
 public class VoxelOptionSolver
 {
-    private readonly DesignationOptionsManager optionsManager;
-
-    public VoxelOptionSolver(VoxelCell startingCell, DesignationOptionsManager optionsManager)
+    public VoxelOptionSolver(VoxelVisualComponent startingPoint, OptionsByDesignation optionsSource)
     {
-        this.optionsManager = optionsManager;
+        SolverCell sourceCell = new SolverCell(startingPoint, optionsSource);
+        if(!sourceCell.SolutionFound)
+        {
+            throw new Exception("Could not solve options");
+        }
+        ApplyOptions(sourceCell);
     }
 
-    public SolverCell Recursor(VoxelCell cell)
+    private void ApplyOptions(SolverCell sourceCell)
     {
-        VoxelVisualComponent component = cell.Visuals.Components.First(); // How does this actually work?
-        IEnumerable<VoxelVisualOption> options = optionsManager.GetAvailableOptionsFor(component.GetCurrentDesignation());
-        foreach (VoxelVisualOption option in options)
-        {
+        throw new NotImplementedException();
+    }
 
+    public class SolverState
+    {
+        private readonly Dictionary<VoxelVisualComponent, List<VoxelVisualOption>> optionsTable;
+
+        public SolverState(MainGrid grid, OptionsByDesignation optionsSource)
+        {
+            optionsTable = CreateBaseOptionsTable(grid, optionsSource);
+        }
+
+        private Dictionary<VoxelVisualComponent, List<VoxelVisualOption>> CreateBaseOptionsTable(MainGrid grid, OptionsByDesignation optionsSource)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool GetIsPotentiallyValid(VoxelVisualComponent component, VoxelVisualOption option)
+        {
+            throw new NotImplementedException();
+        }
+        public SolverState GetWithModification(VoxelVisualComponent component, VoxelVisualOption option)
+        {
+            throw new NotImplementedException();
         }
     }
 
     public class SolverCell
     {
-        public bool OptionWorks { get; }
+        public VoxelVisualComponent Component { get; }
+        public SolverState SolveState { get; }
+        public OptionsByDesignation OptionsSource { get; }
+        public bool SolutionFound { get; }
+        public VoxelVisualOption Option { get; }
         public IEnumerable<SolverCell> Consequences { get; }
 
-        public SolverCell(SolverCell option)
+        public SolverCell(VoxelVisualComponent component, OptionsByDesignation optionsSource, SolverState solveState)
         {
+            Component = component;
+            SolveState = solveState;
+            OptionsSource = optionsSource;
+            VoxelVisualOption[] options = GetOptions();
+            foreach (VoxelVisualOption option in options)
+            {
+                Consequences = TryWithOption(option);
+                if (Consequences != null)
+                    break;
+            }
+            SolutionFound = Consequences != null;
+        }
+
+        private VoxelVisualOption[] GetOptions()
+        {
+            VoxelVisualOption[] designationOptions = OptionsSource.GetOptions(Component.GetCurrentDesignation());
+        }
+
+        private IEnumerable<SolverCell> TryWithOption(VoxelVisualOption option)
+        {
+            SolverState newState = SolveState.GetWithModification(Component, option);
         }
     }
 }
-public class DesignationOptionsManager
+public class OptionsByDesignation
 {
     private readonly Dictionary<string, VoxelVisualOption[]> optionsByDesignationKey;
-    public DesignationOptionsManager(VoxelBlueprint[] blueprints)
+    public OptionsByDesignation(VoxelBlueprint[] blueprints)
     {
         VoxelVisualOption[] allOptions = GetAllOptions(blueprints).ToArray();
         optionsByDesignationKey = GetOptionsByDesignationKey(allOptions);
     }
 
-    public VoxelVisualOption[] GetAvailableOptionsFor(VoxelDesignation designation)
+    public VoxelVisualOption[] GetOptions(VoxelDesignation designation)
     {
         return optionsByDesignationKey[designation.Key];
     }

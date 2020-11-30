@@ -7,12 +7,12 @@ using UnityEngine;
 
 public class VoxelVisualsManager
 {
-    private readonly DesignationOptionsManager optionsManager;
+    private readonly OptionsByDesignation optionsManager;
     private readonly Transform piecesRoot;
     private readonly Material voxelDisplayMat;
     private readonly Dictionary<VoxelVisualComponent, MeshFilter> debugObjects = new Dictionary<VoxelVisualComponent, MeshFilter>();
 
-    public VoxelVisualsManager(DesignationOptionsManager optionsManager, MainGrid grid, Material voxelDisplayMat)
+    public VoxelVisualsManager(OptionsByDesignation optionsManager, MainGrid grid, Material voxelDisplayMat)
     {
         this.optionsManager = optionsManager;
         piecesRoot = new GameObject("Pieces Root").transform;
@@ -34,7 +34,7 @@ public class VoxelVisualsManager
         foreach (VoxelVisualComponent component in targetCell.Visuals.Components)
         {
             VoxelDesignation designation = component.GetCurrentDesignation();
-            VoxelVisualOption option = optionsManager.GetAvailableOptionsFor(designation).First();
+            VoxelVisualOption option = optionsManager.GetOptions(designation).First();
             component.Contents = option;
             UpdateDebugObject(component);
         }
