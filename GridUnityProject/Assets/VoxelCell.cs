@@ -39,17 +39,21 @@ public class VoxelCell
             return GroundPoint.Voxels[Height + 1];
         }
     }
-
-    public VoxelVisuals Visuals { get; }
+    
+    public VoxelVisuals Visuals { get; private set; }
 
     public VoxelCell(MainGrid grid, GroundPoint groundPoint, int height)
     {
         this.grid = grid;
         GroundPoint = groundPoint;
         Height = height;
-        Visuals = new VoxelVisuals(this);
     }
 
+    public void InitializeVisuals()
+    {
+        Visuals = new VoxelVisuals(this);
+    }
+    
     public override string ToString()
     {
         return "(" + GroundPoint.Index + ", " + Height + ")";

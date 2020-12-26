@@ -21,6 +21,20 @@ namespace GameGrid
 
         public IEnumerable<GroundEdge> BorderEdges { get; private set; }
 
+        public IEnumerable<VoxelCell> Voxels
+        {
+            get
+            {
+                foreach (GroundPoint point in Points)
+                {
+                    for (int i = 0; i < VoxelHeight; i++)
+                    {
+                        yield return point.Voxels[i];
+                    }
+                }
+            }
+        }
+
         private readonly Dictionary<GroundPoint, List<GroundEdge>> edgesTable = new Dictionary<GroundPoint, List<GroundEdge>>();
         private readonly Dictionary<GroundPoint, List<GroundQuad>> polyTable = new Dictionary<GroundPoint, List<GroundQuad>>();
         private readonly Dictionary<GroundEdge, List<GroundQuad>> bordersTable = new Dictionary<GroundEdge, List<GroundQuad>>();
@@ -61,6 +75,20 @@ namespace GameGrid
             if(Edges.Any(edge => edge.Quads.Count() == 0 || edge.Quads.Count() > 2))
             {
                 throw new Exception("Malformed data.");
+            }
+
+            UpdateVoxelVisuals();
+        }
+
+        private void UpdateVoxelVisuals()
+        {
+            foreach (VoxelCell voxel in Voxels)
+            {
+                voxel.InitializeVisuals();
+            }
+            foreach (var component in Voxels.SelectMany(item => item.Visuals.Components))
+            {
+                component.InitializeNeighbors();
             }
         }
 

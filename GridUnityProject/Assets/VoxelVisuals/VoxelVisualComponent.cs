@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using GameGrid;
 using UnityEngine;
 
@@ -13,6 +14,8 @@ public class VoxelVisualComponent
     public VoxelVisualOption Contents { get; set; }
     public Vector3 ContentPosition { get; }
 
+    public NeighborComponents Neighbors { get; private set; }
+
     public VoxelVisualComponent(VoxelCell coreCell, GroundQuad quad, bool onTopHalf)
     {
         Core = coreCell;
@@ -23,6 +26,59 @@ public class VoxelVisualComponent
         bottomLayer = new VoxelVisualsLayer(bottomCell, quad);
         topLayer = new VoxelVisualsLayer(topCell, quad);
         ContentPosition = coreCell.CellPosition + (onTopHalf ? new Vector3(0, .5f, 0) : Vector3.zero);
+    }
+
+    public void InitializeNeighbors()
+    {
+        VoxelVisualsLayer layer = OnTopHalf ? topLayer : bottomLayer;
+        VoxelVisualComponent up = GetUpNeighbor();
+        VoxelVisualComponent down = GetDownNeighbor();
+        VoxelVisualComponent left = layer.AdjacentCellA.Visuals.GetComponent(Quad, OnTopHalf);
+        VoxelVisualComponent right = GetHorizontalNeighbor(layer.AdjacentCellA.GroundPoint, layer.AdjacentCellB.GroundPoint);
+        VoxelVisualComponent forward = layer.AdjacentCellB.Visuals.GetComponent(Quad, OnTopHalf);
+        VoxelVisualComponent back = GetHorizontalNeighbor(layer.AdjacentCellB.GroundPoint, layer.AdjacentCellA.GroundPoint);
+        Neighbors = new NeighborComponents(up, down, forward, back, left, right);
+    }
+
+    private VoxelVisualComponent GetHorizontalNeighbor(GroundPoint parallelPoint, GroundPoint perpendicularPoint)
+    {
+        GroundPoint basePoint = Core.GroundPoint;
+        GroundEdge dividingEdge = Quad.GetEdge(basePoint, perpendicularPoint);
+        if (dividingEdge.IsBorder)
+        {
+            return null;
+        }
+        GroundQuad neighborQuad = dividingEdge.Quads.First(quad => quad != Quad);
+        GroundPoint neighborDiagonal = neighborQuad.GetDiagonalPoint(basePoint);
+        GroundPoint moneyPoint = neighborQuad.Points.First(point => point != perpendicularPoint && point != neighborDiagonal);
+
+        return moneyPoint.Voxels[Core.Height].Visuals.GetComponent(neighborQuad, OnTopHalf);
+    }
+
+    private VoxelVisualComponent GetDownNeighbor()
+    {
+        if(OnTopHalf)
+        {
+            return Core.Visuals.GetComponent(Quad, false);
+        }
+        if(Core.CellBelow == null)
+        {
+            return null;
+        }
+        return Core.CellBelow.Visuals.GetComponent(Quad, true);
+    }
+
+    private VoxelVisualComponent GetUpNeighbor()
+    {
+        if(OnTopHalf)
+        {
+            if(Core.CellAbove == null)
+            {
+                return null;
+            }
+            return Core.CellAbove.Visuals.GetComponent(Quad, false);
+        }
+        return Core.Visuals.GetComponent(Quad, true);
     }
 
     public VoxelDesignation GetCurrentDesignation()
@@ -45,7 +101,7 @@ public class VoxelVisualComponent
         }
         else
         {
-            // bottom goes straignt in, top is AND
+            // top goes straignt in, bottom is AND
             designation.Description[0, 0, 0] = bottomDesignationLayer[0, 0] && topDesignationLayer[0, 0];
             designation.Description[1, 0, 0] = bottomDesignationLayer[1, 0] && topDesignationLayer[1, 0];
             designation.Description[0, 0, 1] = bottomDesignationLayer[0, 1] && topDesignationLayer[0, 1];
@@ -133,6 +189,32 @@ public class VoxelVisualComponent
             GroundPoint[] otherPoints = basisQuad.Points.Where(item => item != basisCell.GroundPoint && item != diagonalPoint).ToArray();
             AdjacentCellA = otherPoints[0].Voxels[basisCell.Height];
             AdjacentCellB = otherPoints[1].Voxels[basisCell.Height];
+        }
+    }
+
+    public class NeighborComponents
+    {
+        public VoxelVisualComponent Up { get; }
+        public VoxelVisualComponent Down { get; }
+        public VoxelVisualComponent Forward { get; }
+        public VoxelVisualComponent Backward { get; }
+        public VoxelVisualComponent Left { get; }
+        public VoxelVisualComponent Right { get; }
+
+        public NeighborComponents(
+            VoxelVisualComponent up,
+            VoxelVisualComponent down,
+            VoxelVisualComponent forward,
+            VoxelVisualComponent backward,
+            VoxelVisualComponent left,
+            VoxelVisualComponent right)
+        {
+            Up = up;
+            Down = down;
+            Forward = forward;
+            Backward = backward;
+            Left = left;
+            Right = right;
         }
     }
 }

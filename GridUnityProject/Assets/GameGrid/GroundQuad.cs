@@ -32,6 +32,12 @@ namespace GameGrid
             diagonalsTable = GetDiagonalsTable();
         }
 
+        public GroundEdge GetEdge(GroundPoint pointA, GroundPoint pointB)
+        {
+            return Edges.First(edge => (edge.PointA == pointA && edge.PointB == pointB) 
+            || (edge.PointA == pointB && edge.PointB == pointA));
+        }
+
         private ReadOnlyCollection<GroundPoint> GetPoints()
         {
             HashSet<GroundPoint> rawPoints = new HashSet<GroundPoint>

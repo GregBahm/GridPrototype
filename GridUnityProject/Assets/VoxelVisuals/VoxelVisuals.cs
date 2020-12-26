@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using GameGrid;
 
@@ -7,23 +8,34 @@ public class VoxelVisuals
 {
     public VoxelCell Cell { get; }
 
-    private Lazy<IEnumerable<VoxelVisualComponent>> componentsLoader;
-    public IEnumerable<VoxelVisualComponent> Components { get { return componentsLoader.Value; } }
+    private readonly IReadOnlyDictionary<GroundQuad, VoxelVisualComponent> bottomComponents;
+    private readonly IReadOnlyDictionary<GroundQuad, VoxelVisualComponent> topComponents;
+    
+    public IEnumerable<VoxelVisualComponent> Components { get; }
 
     public VoxelVisuals(VoxelCell cell)
     {
         Cell = cell;
-        componentsLoader = new Lazy<IEnumerable<VoxelVisualComponent>>(CreateVisualComponents);
+        Dictionary<GroundQuad, VoxelVisualComponent> bottoms = new Dictionary<GroundQuad, VoxelVisualComponent>();
+        Dictionary<GroundQuad, VoxelVisualComponent> tops = new Dictionary<GroundQuad, VoxelVisualComponent>();
+        foreach (GroundQuad quad in cell.GroundPoint.PolyConnections)
+        {
+            VoxelVisualComponent bottom = new VoxelVisualComponent(Cell, quad, false);
+            VoxelVisualComponent top = new VoxelVisualComponent(Cell, quad, true);
+            bottoms.Add(quad, bottom);
+            tops.Add(quad, top);
+        }
+        bottomComponents = bottoms;
+        topComponents = tops;
+        Components = bottomComponents.Values.Concat(topComponents.Values).ToArray();
     }
 
-    private IEnumerable<VoxelVisualComponent> CreateVisualComponents()
+    public VoxelVisualComponent GetComponent(GroundQuad quad, bool onTopHalf)
     {
-        List<VoxelVisualComponent> ret = new List<VoxelVisualComponent>();
-        foreach (GroundQuad quad in Cell.GroundPoint.PolyConnections)
+        if(onTopHalf)
         {
-            ret.Add(new VoxelVisualComponent(Cell, quad, false));
-            ret.Add(new VoxelVisualComponent(Cell, quad, true));
+            return topComponents[quad];
         }
-        return ret;
+        return bottomComponents[quad];
     }
 }
