@@ -43,5 +43,12 @@ namespace TileDefinition
         {
             return Sprite.name;
         }
+
+        public string GetDesignationKey()
+        {
+            bool upLeftFilled = 
+            return new VoxelDesignation(UpLeft == TileCon).Key;
+                
+        }
     }
 }

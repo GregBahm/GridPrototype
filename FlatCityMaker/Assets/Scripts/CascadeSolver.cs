@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Dynamic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -111,30 +112,41 @@ public class CascadingSolverCellState
     }
 }
 
+public class VoxelDesignation
+{
+    public bool UpLeftFilled { get; }
+    public bool UpRightFilled { get; }
+    public bool DownLeftFilled { get; }
+    public bool DownRightFilled { get; }
+    public string Key { get; }
+
+    public VoxelDesignation(bool upLeft,
+        bool upRight,
+        bool downLeft,
+        bool downRight)
+    {
+        UpLeftFilled = upLeft;
+        UpRightFilled = upRight;
+        DownLeftFilled = downLeft;
+        DownRightFilled = downRight;
+        Key = UpLeftFilled + " " 
+            + UpRightFilled + " " 
+            + DownLeftFilled + " " 
+            + DownRightFilled;
+    }
+}
+
 public class OptionsByDesignation
 {
     private readonly Dictionary<string, Tile[]> optionsByDesignationKey;
-    public OptionsByDesignation(Tile[] blueprints)
+    public OptionsByDesignation(Tile[] tiles)
     {
-        Tile[] allOptions = GetAllOptions(blueprints).ToArray();
-        optionsByDesignationKey = GetOptionsByDesignationKey(allOptions);
+        optionsByDesignationKey = GetOptionsByDesignationKey(tiles);
     }
 
     public Tile[] GetOptions(VoxelDesignation designation)
     {
         return optionsByDesignationKey[designation.Key];
-    }
-
-    private IEnumerable<Tile> GetAllOptions(VoxelBlueprint[] blueprints)
-    {
-        foreach (VoxelBlueprint blueprint in blueprints)
-        {
-            IEnumerable<Tile> options = blueprint.GenerateVisualOptions();
-            foreach (Tile option in options)
-            {
-                yield return option;
-            }
-        }
     }
 
     private Dictionary<string, Tile[]> GetOptionsByDesignationKey(Tile[] allOptions)
