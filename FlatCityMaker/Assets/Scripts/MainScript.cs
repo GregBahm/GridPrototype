@@ -26,6 +26,13 @@ public class MainScript : MonoBehaviour
 
     public MainGrid MainGrid { get; private set; }
 
+    public static MainScript Instance { get; private set; }
+
+    private void Awake()
+    {
+        Instance = this;
+    }
+
     void Start()
     {
         IEnumerable<Tile> allOptions = GetSymmetricalOptions();

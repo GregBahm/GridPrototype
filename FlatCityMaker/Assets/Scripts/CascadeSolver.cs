@@ -1,8 +1,10 @@
-﻿using System;
+﻿using Packages.Rider.Editor.PostProcessors;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Dynamic;
 using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 using System.Threading.Tasks;
 using TileDefinition;
@@ -21,9 +23,9 @@ public class CascadeSolver
     public List<CascadingSolveState> StateHistory { get; }
     public CascadingSolveState LastState { get; private set; }
 
-    public CascadeSolver()
+    public CascadeSolver(MainGrid grid)
     {
-        CascadingSolveState initialState = new CascadingSolveState();
+        CascadingSolveState initialState = GetInitialState(grid.Cells);
         StateHistory = new List<CascadingSolveState>() { initialState };
         LastState = initialState;
         while(!LastState.IsEverythingSolved && StateHistory.Count < SolverLimit)
@@ -33,16 +35,38 @@ public class CascadeSolver
         }
     }
 
+    private CascadingSolveState GetInitialState(GridCell[,] cells) // TODO: Redo this method for the real thing
+    {
+        int gridWidth = cells.GetLength(0);
+        int gridHeight = cells.GetLength(1);
+        List<CascadingSolverCell> solverCells = new List<CascadingSolverCell>();
+        CascadngSolverCellForFlat[,] asGrid = new CascadngSolverCellForFlat[gridWidth, gridHeight];
+        foreach (GridCell item in cells)
+        {
+            CascadngSolverCellForFlat solverCell = new CascadngSolverCellForFlat(this);
+            asGrid[item.X, item.Y] = solverCell;
+            solverCells.Add(solverCell);
+        }
+        for (int x = 0; x < gridWidth; x++)
+        {
+            for (int y = 0; y < gridHeight; y++)
+            {
+                asGrid[x, y].SetNeighbors(x, y, asGrid, gridWidth, gridHeight);
+            }
+        }
+        return new CascadingSolveState(solverCells);
+    }
+
     internal CascadingSolverCellState GetStateOf(CascadingSolverCell cell)
     {
         return LastState.GetCellState(cell);
     }
 }
 
-public class CascadingSolverCell
+public abstract class CascadingSolverCell
 {
     private readonly CascadeSolver solver;
-    public IEnumerable<CascadingSolverCellNeighbor> Neighbors { get; }
+    public abstract IEnumerable<CascadingSolverCellNeighbor> Neighbors { get; }
 
     public CascadingSolverCell(CascadeSolver solver)
     {
@@ -64,11 +88,100 @@ public class CascadingSolverCell
     }
 }
 
+public class CascadngSolverCellForFlat : CascadingSolverCell // This won't be applicable to the grid
+{
+    private IEnumerable<CascadingSolverCellNeighbor> neighbors;
+    public override IEnumerable<CascadingSolverCellNeighbor> Neighbors => neighbors;
+
+    public CascadngSolverCellForFlat(CascadeSolver solver)
+        :base(solver)
+    { }
+
+    public void SetNeighbors(int cellX, int cellY, CascadingSolverCell[,] cells, int gridWidth, int gridHeight)
+    {
+        neighbors = GetNeighbors(cellX, cellY, cells, gridWidth, gridHeight).ToList();
+    }
+
+    private IEnumerable<CascadingSolverCellNeighbor> GetNeighbors(int cellX, int cellY, CascadingSolverCell[,] cells, int gridWidth, int gridHeight)
+    {
+        if (cellX > 0)
+        {
+            CascadingSolverCell neighbor = cells[cellX - 1, cellY];
+            yield return new RightNeighbor(neighbor);
+        }
+        if (cellX < gridWidth - 1)
+        {
+            CascadingSolverCell neighbor = cells[cellX + 1, cellY];
+            yield return new LeftNeighbor(neighbor);
+        }
+        if (cellY > 0)
+        {
+            CascadingSolverCell neighbor = cells[cellX, cellY - 1];
+            yield return new DownNeighbor(neighbor);
+        }
+        if (cellY < gridHeight - 1)
+        {
+            CascadingSolverCell neighbor = cells[cellX, cellY + 1];
+            yield return new UpNeighbor(neighbor);
+        }
+    }
+
+
+    public class LeftNeighbor : CascadingSolverCellNeighbor
+    {
+        public LeftNeighbor(CascadingSolverCell neighborCell)
+            : base(neighborCell, Connects)
+        { }
+
+        private static bool Connects(Tile option, Tile neighborOption)
+        {
+            return option.Left == neighborOption.Right;
+        }
+    }
+
+    public class RightNeighbor : CascadingSolverCellNeighbor
+    {
+        public RightNeighbor(CascadingSolverCell neighborCell)
+            : base(neighborCell, Connects)
+        { }
+
+        private static bool Connects(Tile option, Tile neighborOption)
+        {
+            return option.Right == neighborOption.Left;
+        }
+    }
+
+    public class UpNeighbor : CascadingSolverCellNeighbor
+    {
+        public UpNeighbor(CascadingSolverCell neighborCell)
+            : base(neighborCell, Connects)
+        { }
+
+        private static bool Connects(Tile option, Tile neighborOption)
+        {
+            return option.Up == neighborOption.Down;
+        }
+    }
+
+    public class DownNeighbor : CascadingSolverCellNeighbor
+    {
+        public DownNeighbor(CascadingSolverCell neighborCell)
+            : base(neighborCell, Connects)
+        { }
+
+
+        private static bool Connects(Tile option, Tile neighborOption)
+        {
+            return option.Down == neighborOption.Up;
+        }
+    }
+}
+
 public class CascadingSolverCellNeighbor
 {
-    private readonly Func<bool, Tile, Tile> comparisonFunction;
+    private readonly Func<Tile, Tile, bool> comparisonFunction;
     public CascadingSolverCell Cell { get; }
-    public CascadingSolverCellNeighbor(CascadingSolverCell cell, Func<bool, Tile, Tile> comparisonFunction)
+    public CascadingSolverCellNeighbor(CascadingSolverCell cell, Func<Tile, Tile, bool> comparisonFunction)
     {
         Cell = cell;
         this.comparisonFunction = comparisonFunction;
@@ -168,14 +281,14 @@ public class CascadingSolveState
         cellStateLookup = new Dictionary<CascadingSolverCell, CascadingSolverCellState>();
         foreach (CascadingSolverCell cell in cells)
         {
-            cellStateLookup.Add(cell, new CascadingSolverCellState())
+            //cellStateLookup.Add(cell, new CascadingSolverCellState()) TODO: Once Tile DesignationKey is in
         }
         //TODO: Gonna need to feed this what it needs to make the cells and their states...
     }
 
     public CascadingSolveState GetNextState()
     {
-
+        throw new NotImplementedException();
     }
 
     internal CascadingSolverCellState GetCellState(CascadingSolverCell cell)

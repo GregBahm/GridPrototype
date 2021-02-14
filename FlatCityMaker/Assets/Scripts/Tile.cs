@@ -1,5 +1,7 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace TileDefinition
@@ -46,9 +48,20 @@ namespace TileDefinition
 
         public string GetDesignationKey()
         {
-            bool upLeftFilled = 
-            return new VoxelDesignation(UpLeft == TileCon).Key;
+            bool upLeftFilled = GetIsFilled(UpLeft);
+            bool upRightFilled = GetIsFilled(UpRight);
+            bool downLeftFilled = GetIsFilled(DownLeft);
+            bool downRightFilled = GetIsFilled(DownRight);
+            return new VoxelDesignation(upLeftFilled,
+                upRightFilled,
+                downLeftFilled,
+                downRightFilled).Key;
                 
+        }
+
+        private bool GetIsFilled(TileConnectionType connection)
+        {
+            return MainScript.Instance.FilledConnectionTypes.Contains(connection);
         }
     }
 }
