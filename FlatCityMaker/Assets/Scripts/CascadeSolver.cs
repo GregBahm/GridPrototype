@@ -295,12 +295,33 @@ public class CascadingSolveState
     protected IReadOnlyDictionary<CascadingSolverCellConnections, CascadingSolverCellState> cellStateLookup;
 
     protected CascadingSolveState()
-    { }
+    {
+        IsEverythingSolved = false;
+    }
+
+    private CascadingSolveState(IReadOnlyDictionary<CascadingSolverCellConnections, CascadingSolverCellState> cellStateLookup)
+    {
+        this.cellStateLookup = cellStateLookup;
+        foreach (CascadingSolverCellState item in Cells)
+        {
+            item.SetStatus(this);
+        }
+        IsEverythingSolved = Cells.All(item => item.Status != CellStatus.Invalid);
+    }
 
     public CascadingSolveState GetNextState()
     {
-        // Here's the money melon. Once you have The solver initialized, do the thing.
-        throw new NotImplementedException();
+        Dictionary<CascadingSolverCellConnections, CascadingSolverCellState> newState = cellStateLookup.ToDictionary(item => item.Key, item => item.Value);
+        //  - Each cell checks to see whether their current choice is valid
+        //  - If the answer is no, checks whether it's invalid neighbor has more options
+        //  - If the answer is no, the cell eliminates their current option from the set of available options
+        //  - If the answer is yes ???
+        foreach (CascadingSolverCellState item in Cells.Where(item => item.Status == CellStatus.Invalid))
+        {
+            newState[item.Connections] = item.FallToNextOption();
+        }
+        return new CascadingSolveState(newState);
+
     }
 
     internal CascadingSolverCellState GetCellState(CascadingSolverCellConnections connections)
