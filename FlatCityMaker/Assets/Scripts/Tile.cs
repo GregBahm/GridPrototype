@@ -20,6 +20,7 @@ namespace TileDefinition
         public TileConnectionType DownRight;
 
         public bool HorizontallyFlipped { get; set; }
+        public int Priority { get; set; }
 
         public bool GetIsAsymmetrical()
         {

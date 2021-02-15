@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using GridSolver;
 using TileDefinition;
 using UnityEngine;
 
@@ -22,11 +21,16 @@ public class MainScript : MonoBehaviour
     public ReadOnlyCollection<TileInteractionBehavior> InteractionCells { get; private set; }
     public IEnumerable<TileVisualBehavior> VisualTiles { get; private set; }
 
-    private GridSolver.Solver solver;
-
     public MainGrid MainGrid { get; private set; }
 
     public static MainScript Instance { get; private set; }
+
+
+
+    private CascadeSolver solver;
+    private float lastDebugSolveTime = 1;
+    [Range(0, 1)]
+    public float DebugSolveTimeline = 1;
 
     private void Awake()
     {
@@ -41,7 +45,6 @@ public class MainScript : MonoBehaviour
 
         VisualTiles = CreateDisplayTiles();
         InteractionCells = CreateInteractionTiles().AsReadOnly();
-        solver = new GridSolver.Solver(Width, Height);
     }
 
     private List<TileInteractionBehavior> CreateInteractionTiles()
@@ -90,13 +93,19 @@ public class MainScript : MonoBehaviour
 
     private IEnumerable<Tile> GetSymmetricalOptions()
     {
+        int index = 0;
         List<Tile> ret = new List<Tile>();
         foreach (Tile option in options)
         {
+            option.Priority = index;
             ret.Add(option);
+            index++;
             if (option.GetIsAsymmetrical())
             {
-                ret.Add(option.GetHorizontallyFlipped());
+                Tile flipped = option.GetHorizontallyFlipped();
+                flipped.Priority = index;
+                index++;
+                ret.Add(flipped);
             }
         }
         return ret;
@@ -105,6 +114,12 @@ public class MainScript : MonoBehaviour
     private void Update()
     {
         HandleInteraction();
+        if(solver != null)
+        {
+            solver.AdvanceManually();
+            DisplaySolve();
+        }
+        lastDebugSolveTime = DebugSolveTimeline;
     }
 
     private void HandleInteraction()
@@ -128,15 +143,14 @@ public class MainScript : MonoBehaviour
         {
             item.ResetDesignationOptions();
         }
-        //GridSolver.GridState solvedGrid = solver.GetSolved(MainGrid);
-        //ApplySolvedGrid(solvedGrid);
-        DoCascadeSolve();
+        solver = new CascadeSolver(MainGrid);
+        DisplaySolve();
     }
 
-    private void DoCascadeSolve()
+    private void DisplaySolve()
     {
-        CascadeSolver cascade = new CascadeSolver(MainGrid);
-        foreach (CascadingSolverCellState cellState in cascade.LastState.Cells)
+        CascadingSolveState stateToDisplay = GetStateToDisplay();
+        foreach (CascadingSolverCellState cellState in stateToDisplay.Cells)
         {
             Tile tile = cellState.CurrentChoice;
             CascadngSolverConnectionsFlat flatCell = cellState.Connections as CascadngSolverConnectionsFlat;
@@ -144,15 +158,10 @@ public class MainScript : MonoBehaviour
         }
     }
 
-    private void ApplySolvedGrid(GridState solvedGrid)
+    private CascadingSolveState GetStateToDisplay()
     {
-        for (int x = 0; x < Width; x++)
-        {
-            for (int y = 0; y < Height; y++)
-            {
-                MainGrid.Cells[x, y].FilledWith = solvedGrid.Cells[x, y].Choice;
-            }
-        }
+        int index = (int)((solver.StateHistory.Count - 1) * DebugSolveTimeline);
+        return solver.StateHistory[index];
     }
 
     private IEnumerable<TileVisualBehavior> CreateDisplayTiles()

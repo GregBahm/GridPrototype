@@ -1,5 +1,6 @@
 ﻿using Packages.Rider.Editor.PostProcessors;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.Design;
@@ -9,18 +10,11 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 using System.Threading.Tasks;
 using TileDefinition;
-
-// The logic is:
-//  - Each cell starts with by getting their options from the designation table
-//  - Of the cells that have remaining options...
-//  - Each cell checks to see whether their current choice is valid
-//  - If the answer is no, checks whether it's invalid neighbor has more options
-//  - If the answer is no, the cell eliminates their current option from the set of available options
-//  - If the answer is yes ???
+using UnityEngine.UIElements;
 
 public class CascadeSolver
 {
-    private const int SolverLimit = 100000;
+    private const int SolverLimit = 10000;
     public List<CascadingSolveState> StateHistory { get; }
     public CascadingSolveState LastState { get; private set; }
 
@@ -29,7 +23,16 @@ public class CascadeSolver
         CascadingSolveState initialState = new CascadingSolveStateForFlat(this, grid);
         StateHistory = new List<CascadingSolveState>() { initialState };
         LastState = initialState;
-        while(!LastState.IsEverythingSolved && StateHistory.Count < SolverLimit)
+        //while(!LastState.IsEverythingSolved && StateHistory.Count < SolverLimit)
+        //{
+        //    LastState = LastState.GetNextState();
+        //    StateHistory.Add(LastState);
+        //}
+    }
+
+    public void AdvanceManually()
+    {
+        if (!LastState.IsEverythingSolved)
         {
             LastState = LastState.GetNextState();
             StateHistory.Add(LastState);
@@ -37,26 +40,30 @@ public class CascadeSolver
     }
 }
 
-public abstract class CascadingSolverCellConnections
+public abstract class CascadingSolverCellConnections : IEnumerable<CascadingSolverCellConnection>
 {
-    public abstract IEnumerable<CascadingSolverCellConnection> Neighbors { get; }
-
     public CascadingSolverCellConnections()
     {
     }
 
-    public bool AllConnectionsValid(CascadingSolveState state)
+    public IEnumerable<CascadingSolverCellState> GetInvalidConnections(CascadingSolveState state)
     {
-        Tile myChoice = state.GetCellState(this).CurrentChoice;
-        foreach (CascadingSolverCellConnection neighbor in Neighbors)
+        CascadingSolverCellState myState = state.GetCellState(this);
+        foreach (CascadingSolverCellConnection neighbor in this)
         {
-            Tile theirChoice = state.GetCellState(neighbor.Cell).CurrentChoice;
-            if (!neighbor.IsValid(myChoice, theirChoice))
+            CascadingSolverCellState theirState = state.GetCellState(neighbor.Cell);
+            if (!neighbor.IsValid(myState.CurrentChoice, theirState.CurrentChoice))
             {
-                return false;
+                yield return theirState;
             }
         }
-        return true;
+    }
+
+    public abstract IEnumerator<CascadingSolverCellConnection> GetEnumerator();
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return this.GetEnumerator();
     }
 }
 
@@ -66,7 +73,6 @@ public class CascadngSolverConnectionsFlat : CascadingSolverCellConnections // T
     public int Y { get; }
 
     private IEnumerable<CascadingSolverCellConnection> neighbors;
-    public override IEnumerable<CascadingSolverCellConnection> Neighbors => neighbors;
 
     public CascadngSolverConnectionsFlat(int x, int y)
         :base()
@@ -104,6 +110,10 @@ public class CascadngSolverConnectionsFlat : CascadingSolverCellConnections // T
         }
     }
 
+    public override IEnumerator<CascadingSolverCellConnection> GetEnumerator()
+    {
+        return neighbors.GetEnumerator();
+    }
 
     public class LeftNeighbor : CascadingSolverCellConnection
     {
@@ -179,6 +189,7 @@ public class CascadingSolverCellState
     public ReadOnlyCollection<Tile> RemainingOptions { get; }
 
     public CellStatus Status { get; private set; }
+    public IEnumerable<CascadingSolverCellState> InvalidNeighborConnections { get; private set; }
 
     public CascadingSolverCellState(IEnumerable<Tile> remainingOptions, CascadingSolverCellConnections connections)
     {
@@ -201,7 +212,8 @@ public class CascadingSolverCellState
         }
         else
         {
-            Status = Connections.AllConnectionsValid(state) ? CellStatus.Valid : CellStatus.Invalid;
+            InvalidNeighborConnections = Connections.GetInvalidConnections(state).ToList();
+            Status = InvalidNeighborConnections.Any() ? CellStatus.InvalidAndCanDrop : CellStatus.Valid;
         }
     }
 }
@@ -306,22 +318,34 @@ public class CascadingSolveState
         {
             item.SetStatus(this);
         }
-        IsEverythingSolved = Cells.All(item => item.Status != CellStatus.Invalid);
+        IsEverythingSolved = Cells.All(item => item.Status != CellStatus.InvalidAndCanDrop);
     }
 
     public CascadingSolveState GetNextState()
     {
         Dictionary<CascadingSolverCellConnections, CascadingSolverCellState> newState = cellStateLookup.ToDictionary(item => item.Key, item => item.Value);
-        //  - Each cell checks to see whether their current choice is valid
-        //  - If the answer is no, checks whether it's invalid neighbor has more options
-        //  - If the answer is no, the cell eliminates their current option from the set of available options
-        //  - If the answer is yes ???
-        foreach (CascadingSolverCellState item in Cells.Where(item => item.Status == CellStatus.Invalid))
+        // Each cell with multiple options checks to see whether their current choice is invalid
+        // If it is, they check to see whether their choice of tile is higher in priority than their invalid neighbors
+        // If it is, then they drop their current available option and the process starts over 
+        foreach (CascadingSolverCellState cellState in Cells.Where(item => item.Status == CellStatus.InvalidAndCanDrop))
         {
-            newState[item.Connections] = item.FallToNextOption();
+            if (ShouldFallToNextOption(cellState))
+            {
+                newState[cellState.Connections] = cellState.FallToNextOption();
+            }
         }
         return new CascadingSolveState(newState);
 
+    }
+
+    private bool ShouldFallToNextOption(CascadingSolverCellState cellState)
+    {
+        if(cellState.InvalidNeighborConnections.Any(state => state.Status == CellStatus.InvalidAndCanDrop))
+        {
+            int highestNeighborPriority = cellState.InvalidNeighborConnections.Max(item => item.CurrentChoice.Priority);
+            return cellState.CurrentChoice.Priority <= highestNeighborPriority;
+        }
+        return true;
     }
 
     internal CascadingSolverCellState GetCellState(CascadingSolverCellConnections connections)
@@ -333,6 +357,6 @@ public class CascadingSolveState
 public enum CellStatus
 {
     Valid,
-    Invalid,
+    InvalidAndCanDrop,
     OnLastOption,
 }
