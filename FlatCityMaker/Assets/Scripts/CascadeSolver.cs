@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel.Design;
 using System.Dynamic;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -25,7 +26,7 @@ public class CascadeSolver
 
     public CascadeSolver(MainGrid grid)
     {
-        CascadingSolveState initialState = GetInitialState(grid.Cells);
+        CascadingSolveState initialState = new CascadingSolveStateForFlat(this, grid);
         StateHistory = new List<CascadingSolveState>() { initialState };
         LastState = initialState;
         while(!LastState.IsEverythingSolved && StateHistory.Count < SolverLimit)
@@ -34,51 +35,22 @@ public class CascadeSolver
             StateHistory.Add(LastState);
         }
     }
-
-    private CascadingSolveState GetInitialState(GridCell[,] cells) // TODO: Redo this method for the real thing
-    {
-        int gridWidth = cells.GetLength(0);
-        int gridHeight = cells.GetLength(1);
-        List<CascadingSolverCell> solverCells = new List<CascadingSolverCell>();
-        CascadngSolverCellForFlat[,] asGrid = new CascadngSolverCellForFlat[gridWidth, gridHeight];
-        foreach (GridCell item in cells)
-        {
-            CascadngSolverCellForFlat solverCell = new CascadngSolverCellForFlat(this);
-            asGrid[item.X, item.Y] = solverCell;
-            solverCells.Add(solverCell);
-        }
-        for (int x = 0; x < gridWidth; x++)
-        {
-            for (int y = 0; y < gridHeight; y++)
-            {
-                asGrid[x, y].SetNeighbors(x, y, asGrid, gridWidth, gridHeight);
-            }
-        }
-        return new CascadingSolveState(solverCells);
-    }
-
-    internal CascadingSolverCellState GetStateOf(CascadingSolverCell cell)
-    {
-        return LastState.GetCellState(cell);
-    }
 }
 
-public abstract class CascadingSolverCell
+public abstract class CascadingSolverCellConnections
 {
-    private readonly CascadeSolver solver;
-    public abstract IEnumerable<CascadingSolverCellNeighbor> Neighbors { get; }
+    public abstract IEnumerable<CascadingSolverCellConnection> Neighbors { get; }
 
-    public CascadingSolverCell(CascadeSolver solver)
+    public CascadingSolverCellConnections()
     {
-        this.solver = solver;
     }
 
-    public bool AllConnectionsValid()
+    public bool AllConnectionsValid(CascadingSolveState state)
     {
-        Tile myChoice = solver.GetStateOf(this).CurrentChoice;
-        foreach (CascadingSolverCellNeighbor neighbor in Neighbors)
+        Tile myChoice = state.GetCellState(this).CurrentChoice;
+        foreach (CascadingSolverCellConnection neighbor in Neighbors)
         {
-            Tile theirChoice = solver.GetStateOf(neighbor.Cell).CurrentChoice;
+            Tile theirChoice = state.GetCellState(neighbor.Cell).CurrentChoice;
             if (!neighbor.IsValid(myChoice, theirChoice))
             {
                 return false;
@@ -88,48 +60,54 @@ public abstract class CascadingSolverCell
     }
 }
 
-public class CascadngSolverCellForFlat : CascadingSolverCell // This won't be applicable to the grid
+public class CascadngSolverConnectionsFlat : CascadingSolverCellConnections // This won't be applicable to the grid
 {
-    private IEnumerable<CascadingSolverCellNeighbor> neighbors;
-    public override IEnumerable<CascadingSolverCellNeighbor> Neighbors => neighbors;
+    public int X { get; }
+    public int Y { get; }
 
-    public CascadngSolverCellForFlat(CascadeSolver solver)
-        :base(solver)
-    { }
+    private IEnumerable<CascadingSolverCellConnection> neighbors;
+    public override IEnumerable<CascadingSolverCellConnection> Neighbors => neighbors;
 
-    public void SetNeighbors(int cellX, int cellY, CascadingSolverCell[,] cells, int gridWidth, int gridHeight)
+    public CascadngSolverConnectionsFlat(int x, int y)
+        :base()
+    {
+        X = x;
+        Y = y;
+    }
+
+    public void SetNeighbors(int cellX, int cellY, CascadingSolverCellConnections[,] cells, int gridWidth, int gridHeight)
     {
         neighbors = GetNeighbors(cellX, cellY, cells, gridWidth, gridHeight).ToList();
     }
 
-    private IEnumerable<CascadingSolverCellNeighbor> GetNeighbors(int cellX, int cellY, CascadingSolverCell[,] cells, int gridWidth, int gridHeight)
+    private IEnumerable<CascadingSolverCellConnection> GetNeighbors(int cellX, int cellY, CascadingSolverCellConnections[,] cells, int gridWidth, int gridHeight)
     {
         if (cellX > 0)
         {
-            CascadingSolverCell neighbor = cells[cellX - 1, cellY];
+            CascadingSolverCellConnections neighbor = cells[cellX - 1, cellY];
             yield return new RightNeighbor(neighbor);
         }
         if (cellX < gridWidth - 1)
         {
-            CascadingSolverCell neighbor = cells[cellX + 1, cellY];
+            CascadingSolverCellConnections neighbor = cells[cellX + 1, cellY];
             yield return new LeftNeighbor(neighbor);
         }
         if (cellY > 0)
         {
-            CascadingSolverCell neighbor = cells[cellX, cellY - 1];
+            CascadingSolverCellConnections neighbor = cells[cellX, cellY - 1];
             yield return new DownNeighbor(neighbor);
         }
         if (cellY < gridHeight - 1)
         {
-            CascadingSolverCell neighbor = cells[cellX, cellY + 1];
+            CascadingSolverCellConnections neighbor = cells[cellX, cellY + 1];
             yield return new UpNeighbor(neighbor);
         }
     }
 
 
-    public class LeftNeighbor : CascadingSolverCellNeighbor
+    public class LeftNeighbor : CascadingSolverCellConnection
     {
-        public LeftNeighbor(CascadingSolverCell neighborCell)
+        public LeftNeighbor(CascadingSolverCellConnections neighborCell)
             : base(neighborCell, Connects)
         { }
 
@@ -139,9 +117,9 @@ public class CascadngSolverCellForFlat : CascadingSolverCell // This won't be ap
         }
     }
 
-    public class RightNeighbor : CascadingSolverCellNeighbor
+    public class RightNeighbor : CascadingSolverCellConnection
     {
-        public RightNeighbor(CascadingSolverCell neighborCell)
+        public RightNeighbor(CascadingSolverCellConnections neighborCell)
             : base(neighborCell, Connects)
         { }
 
@@ -151,9 +129,9 @@ public class CascadngSolverCellForFlat : CascadingSolverCell // This won't be ap
         }
     }
 
-    public class UpNeighbor : CascadingSolverCellNeighbor
+    public class UpNeighbor : CascadingSolverCellConnection
     {
-        public UpNeighbor(CascadingSolverCell neighborCell)
+        public UpNeighbor(CascadingSolverCellConnections neighborCell)
             : base(neighborCell, Connects)
         { }
 
@@ -163,9 +141,9 @@ public class CascadngSolverCellForFlat : CascadingSolverCell // This won't be ap
         }
     }
 
-    public class DownNeighbor : CascadingSolverCellNeighbor
+    public class DownNeighbor : CascadingSolverCellConnection
     {
-        public DownNeighbor(CascadingSolverCell neighborCell)
+        public DownNeighbor(CascadingSolverCellConnections neighborCell)
             : base(neighborCell, Connects)
         { }
 
@@ -177,11 +155,11 @@ public class CascadngSolverCellForFlat : CascadingSolverCell // This won't be ap
     }
 }
 
-public class CascadingSolverCellNeighbor
+public class CascadingSolverCellConnection
 {
     private readonly Func<Tile, Tile, bool> comparisonFunction;
-    public CascadingSolverCell Cell { get; }
-    public CascadingSolverCellNeighbor(CascadingSolverCell cell, Func<Tile, Tile, bool> comparisonFunction)
+    public CascadingSolverCellConnections Cell { get; }
+    public CascadingSolverCellConnection(CascadingSolverCellConnections cell, Func<Tile, Tile, bool> comparisonFunction)
     {
         Cell = cell;
         this.comparisonFunction = comparisonFunction;
@@ -195,33 +173,36 @@ public class CascadingSolverCellNeighbor
 
 public class CascadingSolverCellState
 {
-    public CascadingSolverCell Cell { get; }
+    public CascadingSolverCellConnections Connections { get; }
 
     public Tile CurrentChoice { get; }
     public ReadOnlyCollection<Tile> RemainingOptions { get; }
-    public CellStatus State { get; }
 
-    public CascadingSolverCellState(IEnumerable<Tile> remainingOptions, CascadingSolverCell cell)
+    public CellStatus Status { get; private set; }
+
+    public CascadingSolverCellState(IEnumerable<Tile> remainingOptions, CascadingSolverCellConnections connections)
     {
-        Cell = cell;
+        Connections = connections;
         RemainingOptions = remainingOptions.ToList().AsReadOnly();
         CurrentChoice = RemainingOptions[0];
-        State = GetStatus();
     }
 
     public CascadingSolverCellState FallToNextOption()
     {
         IEnumerable<Tile> newOptions = RemainingOptions.Skip(1);
-        return new CascadingSolverCellState(newOptions, Cell);
+        return new CascadingSolverCellState(newOptions, Connections);
     }
 
-    private CellStatus GetStatus()
+    public void SetStatus(CascadingSolveState state)
     {
         if(RemainingOptions.Count == 1)
         {
-            return CellStatus.OnLastOption;
+            Status = CellStatus.OnLastOption;
         }
-        return Cell.AllConnectionsValid() ? CellStatus.Valid : CellStatus.Invalid;
+        else
+        {
+            Status = Connections.AllConnectionsValid(state) ? CellStatus.Valid : CellStatus.Invalid;
+        }
     }
 }
 
@@ -269,31 +250,62 @@ public class OptionsByDesignation
     }
 }
 
+public class CascadingSolveStateForFlat : CascadingSolveState
+{
+    public CascadingSolveStateForFlat(CascadeSolver solver, MainGrid grid)
+        :base()
+    {
+        Dictionary<CascadingSolverCellConnections, CascadingSolverCellState> initialLookup = new Dictionary<CascadingSolverCellConnections, CascadingSolverCellState>();
+
+        CascadngSolverConnectionsFlat[,] asGrid = new CascadngSolverConnectionsFlat[grid.Width, grid.Height];
+
+        for (int x = 0; x < grid.Width; x++)
+        {
+            for (int y = 0; y < grid.Height; y++)
+            {
+                GridCell item = grid.Cells[x, y];
+                CascadngSolverConnectionsFlat solverCell = new CascadngSolverConnectionsFlat(x, y);
+                asGrid[item.X, item.Y] = solverCell;
+            }
+        }
+        for (int x = 0; x < grid.Width; x++)
+        {
+            for (int y = 0; y < grid.Height; y++)
+            {
+                CascadngSolverConnectionsFlat connections = asGrid[x, y];
+                connections.SetNeighbors(x, y, asGrid, grid.Width, grid.Height);
+                IEnumerable<Tile> options = grid.Cells[x, y].OptionsFromDesignation;
+                CascadingSolverCellState cellState = new CascadingSolverCellState(options, connections);
+                initialLookup.Add(connections, cellState);
+            }
+        }
+        this.cellStateLookup = initialLookup;
+        foreach (CascadingSolverCellState cellState in Cells)
+        {
+            cellState.SetStatus(this);
+        }
+    }
+}
+
 public class CascadingSolveState
 {
     public IEnumerable<CascadingSolverCellState> Cells { get { return cellStateLookup.Values; } }
     public bool IsEverythingSolved { get; }
 
-    private readonly Dictionary<CascadingSolverCell, CascadingSolverCellState> cellStateLookup;
+    protected IReadOnlyDictionary<CascadingSolverCellConnections, CascadingSolverCellState> cellStateLookup;
 
-    public CascadingSolveState(IEnumerable<CascadingSolverCell> cells)
-    {
-        cellStateLookup = new Dictionary<CascadingSolverCell, CascadingSolverCellState>();
-        foreach (CascadingSolverCell cell in cells)
-        {
-            //cellStateLookup.Add(cell, new CascadingSolverCellState()) TODO: Once Tile DesignationKey is in
-        }
-        //TODO: Gonna need to feed this what it needs to make the cells and their states...
-    }
+    protected CascadingSolveState()
+    { }
 
     public CascadingSolveState GetNextState()
     {
+        // Here's the money melon. Once you have The solver initialized, do the thing.
         throw new NotImplementedException();
     }
 
-    internal CascadingSolverCellState GetCellState(CascadingSolverCell cell)
+    internal CascadingSolverCellState GetCellState(CascadingSolverCellConnections connections)
     {
-        return cellStateLookup[cell];
+        return cellStateLookup[connections];
     }
 }
 

@@ -128,8 +128,20 @@ public class MainScript : MonoBehaviour
         {
             item.ResetDesignationOptions();
         }
-        GridSolver.GridState solvedGrid = solver.GetSolved(MainGrid);
-        ApplySolvedGrid(solvedGrid);
+        //GridSolver.GridState solvedGrid = solver.GetSolved(MainGrid);
+        //ApplySolvedGrid(solvedGrid);
+        DoCascadeSolve();
+    }
+
+    private void DoCascadeSolve()
+    {
+        CascadeSolver cascade = new CascadeSolver(MainGrid);
+        foreach (CascadingSolverCellState cellState in cascade.LastState.Cells)
+        {
+            Tile tile = cellState.CurrentChoice;
+            CascadngSolverConnectionsFlat flatCell = cellState.Connections as CascadngSolverConnectionsFlat;
+            MainGrid.Cells[flatCell.X, flatCell.Y].FilledWith = tile;
+        }
     }
 
     private void ApplySolvedGrid(GridState solvedGrid)
