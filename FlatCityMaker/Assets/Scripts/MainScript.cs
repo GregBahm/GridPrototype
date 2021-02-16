@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using TileDefinition;
 using UnityEngine;
+using VisualsSolver;
 
 public class MainScript : MonoBehaviour
 {
@@ -27,7 +28,7 @@ public class MainScript : MonoBehaviour
 
 
 
-    private CascadeSolver solver;
+    private VisualsSolution solver;
     private float lastDebugSolveTime = 1;
     [Range(0, 1)]
     public float DebugSolveTimeline = 1;
@@ -143,22 +144,22 @@ public class MainScript : MonoBehaviour
         {
             item.ResetDesignationOptions();
         }
-        solver = new CascadeSolver(MainGrid);
+        solver = new VisualsSolution(MainGrid);
         DisplaySolve();
     }
 
     private void DisplaySolve()
     {
-        CascadingSolveState stateToDisplay = GetStateToDisplay();
-        foreach (CascadingSolverCellState cellState in stateToDisplay.Cells)
+        SolutionState stateToDisplay = GetStateToDisplay();
+        foreach (CellState cellState in stateToDisplay.Cells)
         {
             Tile tile = cellState.CurrentChoice;
-            CascadngSolverConnectionsFlat flatCell = cellState.Connections as CascadngSolverConnectionsFlat;
+            CellConnectionsForFlat flatCell = cellState.Connections as CellConnectionsForFlat;
             MainGrid.Cells[flatCell.X, flatCell.Y].FilledWith = tile;
         }
     }
 
-    private CascadingSolveState GetStateToDisplay()
+    private SolutionState GetStateToDisplay()
     {
         int index = (int)((solver.StateHistory.Count - 1) * DebugSolveTimeline);
         return solver.StateHistory[index];
