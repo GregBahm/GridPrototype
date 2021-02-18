@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using GameGrid;
 using UnityEngine;
+using VisualsSolver;
 
 public class VoxelVisualComponent
 {
@@ -38,6 +40,19 @@ public class VoxelVisualComponent
         VoxelVisualComponent forward = layer.AdjacentCellB.Visuals.GetComponent(Quad, OnTopHalf);
         VoxelVisualComponent back = GetHorizontalNeighbor(layer.AdjacentCellB.GroundPoint, layer.AdjacentCellA.GroundPoint);
         Neighbors = new NeighborComponents(up, down, forward, back, left, right);
+    }
+
+    internal IEnumerable<CellState> GetInvalidConnections(SolutionState state)
+    {
+        CellState myState = state.GetCellState(this);
+        foreach (var neighbor in Neighbors)
+        {
+            CellState theirState = state.GetCellState(neighbor.Cell);
+            if (!neighbor.IsValid(myState.CurrentChoice, theirState.CurrentChoice))
+            {
+                yield return theirState;
+            }
+        }
     }
 
     private VoxelVisualComponent GetHorizontalNeighbor(GroundPoint parallelPoint, GroundPoint perpendicularPoint)
@@ -189,32 +204,6 @@ public class VoxelVisualComponent
             GroundPoint[] otherPoints = basisQuad.Points.Where(item => item != basisCell.GroundPoint && item != diagonalPoint).ToArray();
             AdjacentCellA = otherPoints[0].Voxels[basisCell.Height];
             AdjacentCellB = otherPoints[1].Voxels[basisCell.Height];
-        }
-    }
-
-    public class NeighborComponents
-    {
-        public VoxelVisualComponent Up { get; }
-        public VoxelVisualComponent Down { get; }
-        public VoxelVisualComponent Forward { get; }
-        public VoxelVisualComponent Backward { get; }
-        public VoxelVisualComponent Left { get; }
-        public VoxelVisualComponent Right { get; }
-
-        public NeighborComponents(
-            VoxelVisualComponent up,
-            VoxelVisualComponent down,
-            VoxelVisualComponent forward,
-            VoxelVisualComponent backward,
-            VoxelVisualComponent left,
-            VoxelVisualComponent right)
-        {
-            Up = up;
-            Down = down;
-            Forward = forward;
-            Backward = backward;
-            Left = left;
-            Right = right;
         }
     }
 }

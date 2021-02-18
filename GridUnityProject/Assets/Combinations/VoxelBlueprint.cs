@@ -6,22 +6,26 @@ public class VoxelBlueprint : ScriptableObject
 {
     public Mesh ArtContent;
     public bool[] DesignationValues;
-    public VoxelConnection Up;
-    public VoxelConnection Down;
-    public VoxelConnection PositiveX;
-    public VoxelConnection NegativeX;
-    public VoxelConnection PositiveZ;
-    public VoxelConnection NegativeZ;
+    public VoxelConnectionType Up;
+    public VoxelConnectionType Down;
+    public VoxelConnectionType PositiveX;
+    public VoxelConnectionType NegativeX;
+    public VoxelConnectionType PositiveZ;
+    public VoxelConnectionType NegativeZ;
 
     public IEnumerable<VoxelVisualOption> GenerateVisualOptions()
     {
+        VoxelVisualConnections baseConnections = new VoxelVisualConnections(Up, Down, PositiveX, NegativeX, PositiveZ, NegativeZ);
+
         VoxelDesignation baseDesignation = new VoxelDesignation(DesignationValues);
         IEnumerable<GeneratedVoxelDesignation> variants = baseDesignation.GetUniqueVariants();
-
-        yield return new VoxelVisualOption(ArtContent, baseDesignation.Description, false, 0);
+        int priority = 0;
+        yield return new VoxelVisualOption(ArtContent, baseDesignation.Description, false, 0, priority, baseConnections);
         foreach (GeneratedVoxelDesignation variant in variants)
         {
-            yield return new VoxelVisualOption(ArtContent, variant.Description, variant.WasFlipped, variant.Rotations);
+            priority++;
+            VoxelVisualConnections connectionsVariant = baseConnections.GetVarient(variant.WasFlipped, variant.Rotations);
+            yield return new VoxelVisualOption(ArtContent, variant.Description, variant.WasFlipped, variant.Rotations, priority, connectionsVariant);
         }
     }
 }
