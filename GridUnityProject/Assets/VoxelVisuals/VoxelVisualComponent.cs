@@ -45,7 +45,7 @@ public class VoxelVisualComponent
     internal IEnumerable<CellState> GetInvalidConnections(SolutionState state)
     {
         CellState myState = state.GetCellState(this);
-        foreach (var neighbor in Neighbors)
+        foreach (CellConnection neighbor in Neighbors)
         {
             CellState theirState = state.GetCellState(neighbor.Cell);
             if (!neighbor.IsValid(myState.CurrentChoice, theirState.CurrentChoice))

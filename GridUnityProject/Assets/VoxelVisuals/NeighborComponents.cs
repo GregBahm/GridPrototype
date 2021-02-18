@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using VisualsSolver;
 
 public class NeighborComponents : IEnumerable<CellConnection>
@@ -37,7 +38,7 @@ public class NeighborComponents : IEnumerable<CellConnection>
             Backward,
             Left,
             Right
-        };
+        }.Where(item => item.Cell != null).ToList();
     }
 
     private static bool ConnectsUp(VoxelVisualOption source, VoxelVisualOption neighbor)

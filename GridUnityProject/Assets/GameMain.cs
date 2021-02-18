@@ -4,6 +4,7 @@ using System;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
+using VisualsSolver;
 
 public class GameMain : MonoBehaviour
 {
@@ -30,6 +31,7 @@ public class GameMain : MonoBehaviour
     public MainGrid MainGrid { get; private set; }
 
     private VoxelVisualsManager visualsAssembler;
+    private OptionsByDesignation optionsSource;
 
     private void Start()
     {
@@ -38,7 +40,8 @@ public class GameMain : MonoBehaviour
         UpdateInteractionGrid();
         InteractionMeshObject.GetComponent<MeshFilter>().mesh = InteractionMesh.Mesh;
         BaseGridVisual.GetComponent<MeshFilter>().mesh = CloneInteractionMesh();
-        visualsAssembler = new VoxelVisualsManager(new OptionsByDesignation(VoxelBlueprints), MainGrid, VoxelDisplayMat);
+        optionsSource = new OptionsByDesignation(VoxelBlueprints);
+        visualsAssembler = new VoxelVisualsManager(optionsSource, MainGrid, VoxelDisplayMat);
     }
 
     private Mesh CloneInteractionMesh()
@@ -49,6 +52,8 @@ public class GameMain : MonoBehaviour
         ret.uv = InteractionMesh.Mesh.uv;
         return ret;
     }
+
+    private VisualsSolution solver;
 
     private void Update()
     {
@@ -65,6 +70,11 @@ public class GameMain : MonoBehaviour
             Debug.Log("Grid Loaded");
         }
         visualsAssembler.ConstantlyUpdateComponentTransforms();
+        if(solver != null)
+        {
+            solver.AdvanceManually();
+            visualsAssembler.UpdateVoxels(solver.LastState);
+        }
     }
 
     public void UpdateInteractionGrid()
@@ -78,6 +88,8 @@ public class GameMain : MonoBehaviour
     {
         // Later we will want to do the whole wave collapse thing.
         // For now, we just want to tell this cell and all neighboring cells to update their display visuals based on the designation
-        visualsAssembler.UpdateVoxels(targetCell);
+        //visualsAssembler.UpdateVoxels(targetCell);
+
+        solver = new VisualsSolution(MainGrid, optionsSource);
     }
 }

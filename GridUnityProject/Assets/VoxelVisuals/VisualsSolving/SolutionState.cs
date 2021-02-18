@@ -23,7 +23,7 @@ namespace VisualsSolver
             Dictionary<VoxelVisualComponent, CellState> ret = new Dictionary<VoxelVisualComponent, CellState>();
             foreach(VoxelVisualComponent component in grid.Voxels.SelectMany(item => item.Visuals.Components))
             {
-                var options = optionsSource.GetOptions(component.GetCurrentDesignation());
+                VoxelVisualOption[] options = optionsSource.GetOptions(component.GetCurrentDesignation());
                 CellState state = new CellState(options, component);
                 ret.Add(component, state);
             }
@@ -69,6 +69,10 @@ namespace VisualsSolver
 
         internal CellState GetCellState(VoxelVisualComponent component)
         {
+            if(component == null)
+            {
+                throw new ArgumentNullException("component");
+            }
             return cellStateLookup[component];
         }
     }
