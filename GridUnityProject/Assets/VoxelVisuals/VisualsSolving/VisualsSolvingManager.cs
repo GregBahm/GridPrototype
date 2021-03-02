@@ -6,14 +6,23 @@ using UnityEngine;
 
 namespace VisualsSolving
 {
+    /*
+     *  Warning: This threading code relies on the implementation details of GameMain to prevent deadlocking.
+     *  The structure of the threading architecture is as follows:
+     *  On GameMain update, we check for a changed voxel. If we have one, we set changedVoxel for discovery by VisualsSolvingManager.MainLoop
+     *  Otherwise, GameMain checks the VisualsSolvingManager for ChangedVoxels to apply (and sets the field to null when they are found).
+     *  
+     *  In this object's MainLoop, we check for a changed voxel. If we have one, we reset the solver and start solving for Changed Voxels.
+     *  When we have ChangedVoxels we set it to the field for discovery by GameMain.Update()
+     */
     public class VisualsSolvingManager
     {
-        private bool continueLooping = true;
         private Thread thread;
 
-        public IEnumerable<KeyValuePair<VoxelVisualComponent, VoxelVisualOption>> ChangedVoxels;
+        private volatile bool continueLooping = true;
+        public volatile IEnumerable<KeyValuePair<VoxelVisualComponent, VoxelVisualOption>> ChangedVoxels;
+        private volatile VoxelCell changedVoxel;
 
-        private VoxelCell changedVoxel;
         private VisualsSolver currentSolver;
         private SolutionState lastSolution;
 
