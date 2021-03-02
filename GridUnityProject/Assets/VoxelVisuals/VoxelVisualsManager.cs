@@ -8,37 +8,14 @@ using VisualsSolving;
 
 public class VoxelVisualsManager
 {
-    private readonly OptionsByDesignation optionsManager;
     private readonly Transform piecesRoot;
     private readonly Material voxelDisplayMat;
     private readonly Dictionary<VoxelVisualComponent, MeshFilter> debugObjects = new Dictionary<VoxelVisualComponent, MeshFilter>();
 
-    public VoxelVisualsManager(OptionsByDesignation optionsManager, MainGrid grid, Material voxelDisplayMat)
+    public VoxelVisualsManager(Material voxelDisplayMat)
     {
-        this.optionsManager = optionsManager;
         piecesRoot = new GameObject("Pieces Root").transform;
         this.voxelDisplayMat = voxelDisplayMat;
-    }
-
-    internal void UpdateVoxels(VoxelCell toggledCell)
-    {
-        UpdateVoxel(toggledCell);
-        var connected = toggledCell.GetConnectedCells().ToArray();
-        foreach (VoxelCell cell in connected)
-        {
-            UpdateVoxel(cell);
-        }
-    }
-
-    private void UpdateVoxel(VoxelCell targetCell)
-    {
-        foreach (VoxelVisualComponent component in targetCell.Visuals.Components)
-        {
-            VoxelDesignation designation = component.GetCurrentDesignation();
-            VoxelVisualOption option = optionsManager.GetOptions(designation).First();
-            component.Contents = option;
-            UpdateDebugObject(component);
-        }
     }
 
     private List<Tuple<Material, VoxelVisualComponent>> debugMats = new List<Tuple<Material, VoxelVisualComponent>>();

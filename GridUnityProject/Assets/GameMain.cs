@@ -48,7 +48,7 @@ public class GameMain : MonoBehaviour
         InteractionMeshObject.GetComponent<MeshFilter>().mesh = InteractionMesh.Mesh;
         BaseGridVisual.GetComponent<MeshFilter>().mesh = CloneInteractionMesh();
         optionsSource = new OptionsByDesignation(VoxelBlueprints);
-        visualsAssembler = new VoxelVisualsManager(optionsSource, MainGrid, VoxelDisplayMat);
+        visualsAssembler = new VoxelVisualsManager(VoxelDisplayMat);
         solver = new VisualsSolvingManager(MainGrid, optionsSource);
     }
 
@@ -87,10 +87,9 @@ public class GameMain : MonoBehaviour
         }
         if(solver.ChangedVoxels != null)
         {
-            Debug.Log("got a solve");
             UpdateChangedVoxels();
         }
-        visualsAssembler.ConstantlyUpdateComponentTransforms();
+        //visualsAssembler.ConstantlyUpdateComponentTransforms();
     }
 
     private void UpdateChangedVoxels()
@@ -114,85 +113,5 @@ public class GameMain : MonoBehaviour
     internal void UpdateVoxelVisuals(VoxelCell changedCell)
     {
         solver.RegisterChangedVoxel(changedCell);
-    }
-}
-
-public class VisualsSolvingManager
-{
-    private bool continueLooping = true;
-    private Thread thread;
-
-    public volatile IEnumerable<KeyValuePair<VoxelVisualComponent, VoxelVisualOption>> ChangedVoxels;
-
-    private VoxelCell changedVoxel;
-    private VisualsSolver currentSolver;
-    private SolutionState lastSolution;
-
-    public VisualsSolvingManager(MainGrid grid, OptionsByDesignation optionsSource)
-    {
-        currentSolver = new VisualsSolver(grid, optionsSource);
-        lastSolution = currentSolver.FirstState;
-        thread = new Thread(MainLoop);
-        thread.Start();
-    }
-
-    public void RegisterChangedVoxel(VoxelCell changedVoxel)
-    {
-        this.changedVoxel = changedVoxel;
-    }
-
-    public void MainLoop()
-    {
-        while (continueLooping)
-        {
-            if(changedVoxel != null)
-            {
-                ResetSolver();
-            }
-            if(currentSolver.Status == VisualsSolver.SolverStatus.Solving)
-            {
-                UpdateVisualsSolver();
-            }
-        }
-    }
-
-    private void UpdateVisualsSolver()
-    {
-        Debug.Log("Advancing");
-        currentSolver.AdvanceOneStep();
-        if(currentSolver.Status != VisualsSolver.SolverStatus.Solving)
-        {
-            Debug.Log("This is a solve here");
-            ChangedVoxels = GetChangedVoxels();
-        }
-    }
-
-    private IEnumerable<KeyValuePair<VoxelVisualComponent, VoxelVisualOption>> GetChangedVoxels()
-    {
-        Dictionary<VoxelVisualComponent, VoxelVisualOption> lastState = lastSolution.GetDictionary();
-        Dictionary<VoxelVisualComponent, VoxelVisualOption> currentState = currentSolver.LastState.GetDictionary();
-
-        List<KeyValuePair<VoxelVisualComponent, VoxelVisualOption>> ret = new List<KeyValuePair<VoxelVisualComponent, VoxelVisualOption>>();
-        foreach (KeyValuePair<VoxelVisualComponent, VoxelVisualOption> entry in currentState)
-        {
-            if(lastState[entry.Key] != currentState[entry.Key])
-            {
-                ret.Add(entry);
-            }
-        }
-        return ret;
-    }
-
-    private void ResetSolver()
-    {
-        VoxelCell changed = changedVoxel;
-        currentSolver.UpdateForChangedVoxel(changed);
-        changedVoxel = null;
-    }
-
-    public void Destroy()
-    {
-        continueLooping = false;
-        thread.Abort();
     }
 }

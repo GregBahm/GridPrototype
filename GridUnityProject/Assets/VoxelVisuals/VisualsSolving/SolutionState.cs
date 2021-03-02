@@ -93,7 +93,11 @@ namespace VisualsSolving
                 VoxelVisualOption[] options = optionsSource.GetOptions(component.GetCurrentDesignation());
                 newLookup[component] = new CellState(options, component);
             }
-            // Note: might also need to update the changed cell's neighbors
+            foreach (VoxelVisualComponent component in changedCell.GetConnectedCells().SelectMany(item => item.Visuals.Components))
+            {
+                VoxelVisualOption[] options = optionsSource.GetOptions(component.GetCurrentDesignation());
+                newLookup[component] = new CellState(options, component);
+            }
             return new SolutionState(newLookup, optionsSource);
         }
     }
