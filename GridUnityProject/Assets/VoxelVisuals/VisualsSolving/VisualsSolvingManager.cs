@@ -11,7 +11,7 @@ namespace VisualsSolving
         private bool continueLooping = true;
         private Thread thread;
 
-        public volatile IEnumerable<KeyValuePair<VoxelVisualComponent, VoxelVisualOption>> ChangedVoxels;
+        public IEnumerable<KeyValuePair<VoxelVisualComponent, VoxelVisualOption>> ChangedVoxels;
 
         private VoxelCell changedVoxel;
         private VisualsSolver currentSolver;
@@ -93,22 +93,13 @@ namespace VisualsSolving
             public SolutionState FirstState { get { return StateHistory.First(); } }
             public SolutionState LastState { get { return StateHistory.Last(); } }
 
-            public SolverStatus Status
-            {
-                get
-                {
-                    if (StateHistory.Any() && LastState.IsEverythingSolved)
-                        return SolverStatus.Solved;
-                    if (StateHistory.Count >= SolverLimit)
-                        return SolverStatus.AtLimit;
-                    return SolverStatus.Solving;
-                }
-            }
+            public SolverStatus Status { get; private set; }
 
             public VisualsSolver(MainGrid grid, OptionsByDesignation optionsSource)
             {
                 SolutionState initialState = new SolutionState(grid, optionsSource);
                 StateHistory = new List<SolutionState>() { initialState };
+                Status = GetSolverStatus();
             }
 
             public void UpdateForChangedVoxel(VoxelCell changedVoxel)
@@ -118,12 +109,22 @@ namespace VisualsSolving
                 StateHistory.Add(state);
             }
 
+            private SolverStatus GetSolverStatus()
+            {
+                if (StateHistory.Any() && LastState.IsEverythingSolved)
+                    return SolverStatus.Solved;
+                if (StateHistory.Count >= SolverLimit)
+                    return SolverStatus.AtLimit;
+                return SolverStatus.Solving;
+            }
+
             public void AdvanceOneStep()
             {
                 if (StateHistory.Count < SolverLimit && !LastState.IsEverythingSolved)
                 {
                     SolutionState nextState = LastState.GetNextState();
                     StateHistory.Add(nextState);
+                    Status = GetSolverStatus();
                 }
             }
 
