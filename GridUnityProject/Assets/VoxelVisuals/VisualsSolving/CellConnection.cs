@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace VisualsSolver
+namespace VisualsSolving
 {
     public class CellConnection
     {

@@ -1,4 +1,4 @@
-﻿namespace VisualsSolver
+﻿namespace VisualsSolving
 {
     public enum CellStatus
     {

@@ -2,11 +2,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
-namespace VisualsSolver
+namespace VisualsSolving
 {
     public class SolutionState
     {
+        private readonly OptionsByDesignation optionsSource;
         public IEnumerable<CellState> Cells { get { return cellStateLookup.Values; } }
         public bool IsEverythingSolved { get; }
 
@@ -14,8 +16,14 @@ namespace VisualsSolver
 
         public SolutionState(MainGrid grid, OptionsByDesignation optionsSource)
         {
+            this.optionsSource = optionsSource;
             cellStateLookup = GetInitialDictionary(grid, optionsSource);
             IsEverythingSolved = false;
+        }
+
+        public Dictionary<VoxelVisualComponent, VoxelVisualOption> GetDictionary()
+        {
+            return cellStateLookup.ToDictionary(item => item.Key, item => item.Value.CurrentChoice);
         }
 
         private Dictionary<VoxelVisualComponent, CellState> GetInitialDictionary(MainGrid grid, OptionsByDesignation optionsSource)
@@ -30,9 +38,10 @@ namespace VisualsSolver
             return ret;
         }
 
-        private SolutionState(IReadOnlyDictionary<VoxelVisualComponent, CellState> cellStateLookup)
+        private SolutionState(IReadOnlyDictionary<VoxelVisualComponent, CellState> cellStateLookup, OptionsByDesignation optionsSource)
         {
             this.cellStateLookup = cellStateLookup;
+            this.optionsSource = optionsSource;
             foreach (CellState item in Cells)
             {
                 item.SetStatus(this);
@@ -53,7 +62,7 @@ namespace VisualsSolver
                     newState[cellState.Component] = cellState.FallToNextOption();
                 }
             }
-            return new SolutionState(newState);
+            return new SolutionState(newState, optionsSource);
 
         }
 
@@ -74,6 +83,18 @@ namespace VisualsSolver
                 throw new ArgumentNullException("component");
             }
             return cellStateLookup[component];
+        }
+
+        public SolutionState GetWithChangedCell(VoxelCell changedCell)
+        {
+            Dictionary<VoxelVisualComponent, CellState> newLookup = cellStateLookup.ToDictionary(item => item.Key, item => item.Value);
+            foreach (VoxelVisualComponent component in changedCell.Visuals.Components)
+            {
+                VoxelVisualOption[] options = optionsSource.GetOptions(component.GetCurrentDesignation());
+                newLookup[component] = new CellState(options, component);
+            }
+            // Note: might also need to update the changed cell's neighbors
+            return new SolutionState(newLookup, optionsSource);
         }
     }
 }

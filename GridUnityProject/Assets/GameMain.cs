@@ -1,10 +1,15 @@
-﻿using GameGrid;
+﻿using Cysharp.Threading.Tasks;
+using GameGrid;
 using MeshMaking;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.UIElements;
-using VisualsSolver;
+using VisualsSolving;
 
 public class GameMain : MonoBehaviour
 {
@@ -33,6 +38,8 @@ public class GameMain : MonoBehaviour
     private VoxelVisualsManager visualsAssembler;
     private OptionsByDesignation optionsSource;
 
+    private VisualsSolvingManager solver;
+
     private void Start()
     {
         MainGrid = LoadLastSave ? GroundLoader.Load() : GroundLoader.Load(DefaultGridFile.text);
@@ -42,6 +49,17 @@ public class GameMain : MonoBehaviour
         BaseGridVisual.GetComponent<MeshFilter>().mesh = CloneInteractionMesh();
         optionsSource = new OptionsByDesignation(VoxelBlueprints);
         visualsAssembler = new VoxelVisualsManager(optionsSource, MainGrid, VoxelDisplayMat);
+        solver = new VisualsSolvingManager(MainGrid, optionsSource);
+    }
+
+    private void OnDestroy()
+    {
+        solver.Destroy();
+    }
+
+    private void OnApplicationQuit()
+    {
+        solver.Destroy();
     }
 
     private Mesh CloneInteractionMesh()
@@ -52,8 +70,6 @@ public class GameMain : MonoBehaviour
         ret.uv = InteractionMesh.Mesh.uv;
         return ret;
     }
-
-    private VisualsSolution solver;
 
     private void Update()
     {
@@ -69,11 +85,22 @@ public class GameMain : MonoBehaviour
             MainGrid = GroundLoader.Load();
             Debug.Log("Grid Loaded");
         }
-        visualsAssembler.ConstantlyUpdateComponentTransforms();
-        if(solver != null)
+        if(solver.ChangedVoxels != null)
         {
-            solver.AdvanceManually();
-            visualsAssembler.UpdateVoxels(solver.LastState);
+            Debug.Log("got a solve");
+            UpdateChangedVoxels();
+        }
+        visualsAssembler.ConstantlyUpdateComponentTransforms();
+    }
+
+    private void UpdateChangedVoxels()
+    {
+        IEnumerable<KeyValuePair<VoxelVisualComponent, VoxelVisualOption>> changedVoxels = solver.ChangedVoxels;
+        solver.ChangedVoxels = null;
+        foreach (KeyValuePair<VoxelVisualComponent, VoxelVisualOption> item in changedVoxels)
+        {
+            item.Key.Contents = item.Value;
+            visualsAssembler.UpdateDebugObject(item.Key);
         }
     }
 
@@ -84,12 +111,88 @@ public class GameMain : MonoBehaviour
         InteractionMeshObject.GetComponent<MeshCollider>().sharedMesh = InteractionMesh.Mesh;
     }
 
-    internal void UpdateVoxelVisuals(VoxelCell targetCell)
+    internal void UpdateVoxelVisuals(VoxelCell changedCell)
     {
-        // Later we will want to do the whole wave collapse thing.
-        // For now, we just want to tell this cell and all neighboring cells to update their display visuals based on the designation
-        //visualsAssembler.UpdateVoxels(targetCell);
+        solver.RegisterChangedVoxel(changedCell);
+    }
+}
 
-        solver = new VisualsSolution(MainGrid, optionsSource);
+public class VisualsSolvingManager
+{
+    private bool continueLooping = true;
+    private Thread thread;
+
+    public volatile IEnumerable<KeyValuePair<VoxelVisualComponent, VoxelVisualOption>> ChangedVoxels;
+
+    private VoxelCell changedVoxel;
+    private VisualsSolver currentSolver;
+    private SolutionState lastSolution;
+
+    public VisualsSolvingManager(MainGrid grid, OptionsByDesignation optionsSource)
+    {
+        currentSolver = new VisualsSolver(grid, optionsSource);
+        lastSolution = currentSolver.FirstState;
+        thread = new Thread(MainLoop);
+        thread.Start();
+    }
+
+    public void RegisterChangedVoxel(VoxelCell changedVoxel)
+    {
+        this.changedVoxel = changedVoxel;
+    }
+
+    public void MainLoop()
+    {
+        while (continueLooping)
+        {
+            if(changedVoxel != null)
+            {
+                ResetSolver();
+            }
+            if(currentSolver.Status == VisualsSolver.SolverStatus.Solving)
+            {
+                UpdateVisualsSolver();
+            }
+        }
+    }
+
+    private void UpdateVisualsSolver()
+    {
+        Debug.Log("Advancing");
+        currentSolver.AdvanceOneStep();
+        if(currentSolver.Status != VisualsSolver.SolverStatus.Solving)
+        {
+            Debug.Log("This is a solve here");
+            ChangedVoxels = GetChangedVoxels();
+        }
+    }
+
+    private IEnumerable<KeyValuePair<VoxelVisualComponent, VoxelVisualOption>> GetChangedVoxels()
+    {
+        Dictionary<VoxelVisualComponent, VoxelVisualOption> lastState = lastSolution.GetDictionary();
+        Dictionary<VoxelVisualComponent, VoxelVisualOption> currentState = currentSolver.LastState.GetDictionary();
+
+        List<KeyValuePair<VoxelVisualComponent, VoxelVisualOption>> ret = new List<KeyValuePair<VoxelVisualComponent, VoxelVisualOption>>();
+        foreach (KeyValuePair<VoxelVisualComponent, VoxelVisualOption> entry in currentState)
+        {
+            if(lastState[entry.Key] != currentState[entry.Key])
+            {
+                ret.Add(entry);
+            }
+        }
+        return ret;
+    }
+
+    private void ResetSolver()
+    {
+        VoxelCell changed = changedVoxel;
+        currentSolver.UpdateForChangedVoxel(changed);
+        changedVoxel = null;
+    }
+
+    public void Destroy()
+    {
+        continueLooping = false;
+        thread.Abort();
     }
 }

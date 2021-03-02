@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using GameGrid;
 using UnityEngine;
-using VisualsSolver;
+using VisualsSolving;
 
 public class VoxelVisualComponent
 {

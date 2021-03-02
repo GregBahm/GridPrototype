@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using VisualsSolver;
+using VisualsSolving;
 
 public class VoxelVisualsManager
 {
@@ -52,7 +52,7 @@ public class VoxelVisualsManager
         }
     }
 
-    private void UpdateDebugObject(VoxelVisualComponent component)
+    public void UpdateDebugObject(VoxelVisualComponent component)
     {
         if (debugObjects.ContainsKey(component))
         {

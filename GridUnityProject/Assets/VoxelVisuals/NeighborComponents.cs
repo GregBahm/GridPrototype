@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using VisualsSolver;
+using VisualsSolving;
 
 public class NeighborComponents : IEnumerable<CellConnection>
 {
