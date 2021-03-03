@@ -39,6 +39,17 @@
 			float3 _AnchorC;
 			float3 _AnchorD; 
 
+            float4x4 _LightBoxTransform;
+            sampler2D _TopLighting;
+            sampler2D _BottomLighting;
+
+            float3 GetLighting(float3 worldPos)
+            {
+                float3 boxPos = mul(_LightBoxTransform, float4(worldPos, 1));
+                boxPos = boxPos / 2 + .5;
+                return boxPos;
+            }
+
 			float3 GetTransformedBaseVert(float3 vert)
 			{
                 vert.y *= .5;
@@ -64,16 +75,18 @@
                 return o;
             }
 
-            fixed4 frag (v2f i) : SV_Target
+            fixed4 frag(v2f i) : SV_Target
             {
-                float shadowness = SHADOW_ATTENUATION(i);
-                float ret = i.col.r;
-                //ret *= lerp(.8, 1, shadowness);
+                float3 baseLighting = GetLighting(i.worldPos);
 
-                ret += (i.worldPos.y * .1) - .2;
-                ret = lerp(ret, .6, i.col.g);
-                ret = lerp(ret, .4, i.col.b);
-				return float4(ret.xxx, 1);
+                float shadowness = SHADOW_ATTENUATION(i);
+                float baseTone = i.col.r;
+                //baseTone *= lerp(.8, 1, shadowness);
+                baseTone = lerp(baseTone, .6, i.col.g);
+                baseTone = lerp(baseTone, .4, i.col.b);
+                
+                float3 ret = baseLighting * baseTone;
+				return float4(ret, 1);
             }
             ENDCG
         }

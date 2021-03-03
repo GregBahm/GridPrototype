@@ -1,14 +1,8 @@
-﻿using Cysharp.Threading.Tasks;
-using GameGrid;
+﻿using GameGrid;
 using MeshMaking;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Serialization;
-using System.Threading;
 using UnityEngine;
-using UnityEngine.UIElements;
 using VisualsSolving;
 
 public class GameMain : MonoBehaviour
@@ -48,7 +42,7 @@ public class GameMain : MonoBehaviour
         InteractionMeshObject.GetComponent<MeshFilter>().mesh = InteractionMesh.Mesh;
         BaseGridVisual.GetComponent<MeshFilter>().mesh = CloneInteractionMesh();
         optionsSource = new OptionsByDesignation(VoxelBlueprints);
-        visualsAssembler = new VoxelVisualsManager(VoxelDisplayMat);
+        visualsAssembler = new VoxelVisualsManager(VoxelDisplayMat, optionsSource);
         solver = new VisualsSolvingManager(MainGrid, optionsSource);
     }
 
@@ -89,7 +83,7 @@ public class GameMain : MonoBehaviour
         {
             UpdateChangedVoxels();
         }
-        //visualsAssembler.ConstantlyUpdateComponentTransforms();
+        visualsAssembler.ConstantlyUpdateComponentTransforms();
     }
 
     private void UpdateChangedVoxels()
@@ -112,6 +106,7 @@ public class GameMain : MonoBehaviour
 
     internal void UpdateVoxelVisuals(VoxelCell changedCell)
     {
+        visualsAssembler.DoImmediateUpdate(changedCell);
         solver.RegisterChangedVoxel(changedCell);
     }
 }

@@ -31,6 +31,10 @@
 
             float3 _DistToCursor;
 
+            float4x4 _LightBoxTransform;
+            sampler2D _TopLighting;
+            sampler2D _BottomLighting;
+
             struct appdata
             {
                 float4 vertex : POSITION;
@@ -46,6 +50,13 @@
 				float4 _ShadowCoord : TEXCOORD2;
                 float3 worldPos : TEXCOORD3;
             };
+
+            float3 GetLighting(float3 worldPos)
+            {
+                float3 boxPos = mul(_LightBoxTransform, float4(worldPos, 1));
+                boxPos = boxPos / 2 + .5;
+                return boxPos;
+            }
 
             v2f vert (appdata v)
             {
@@ -66,6 +77,7 @@
 
             fixed4 frag(v2f i) : SV_Target
             {
+                float3 baseLighting = GetLighting(i.worldPos);
 				float shadowness = SHADOW_ATTENUATION(i);
 
                 float alpha = (1 - i.distToCursor / 40);
@@ -78,7 +90,7 @@
                 float grid = gridAroundCells;
                 
                 shadowness = lerp(shadowness, 1, .5);
-				float3 ret = _Color * shadowness;
+				float3 ret = baseLighting * shadowness;
                 ret += i.worldPos.y * .05;
                 float height = saturate(1 - i.worldPos.y * 10);
                 float3 lineVal = lerp(ret, 1, alpha * .2 * height);
