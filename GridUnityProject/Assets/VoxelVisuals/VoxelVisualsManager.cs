@@ -10,12 +10,14 @@ public class VoxelVisualsManager
 {
     private readonly Transform piecesRoot;
     private readonly Material voxelDisplayMat;
+    private readonly OptionsByDesignation optionsSource;
     private readonly Dictionary<VoxelVisualComponent, MeshFilter> debugObjects = new Dictionary<VoxelVisualComponent, MeshFilter>();
 
-    public VoxelVisualsManager(Material voxelDisplayMat)
+    public VoxelVisualsManager(Material voxelDisplayMat, OptionsByDesignation optionsSource)
     {
         piecesRoot = new GameObject("Pieces Root").transform;
         this.voxelDisplayMat = voxelDisplayMat;
+        this.optionsSource = optionsSource;
     }
 
     private List<Tuple<Material, VoxelVisualComponent>> debugMats = new List<Tuple<Material, VoxelVisualComponent>>();
@@ -86,5 +88,26 @@ public class VoxelVisualsManager
             ret += " " + component.Contents.Rotations.ToString() + " rotations";
         }
         return ret;
+    }
+
+    internal void DoImmediateUpdate(VoxelCell toggledCell)
+    {
+        UpdateVoxel(toggledCell);
+        //var connected = toggledCell.GetConnectedCells().ToArray();
+        //foreach (VoxelCell cell in connected)
+        //{
+        //    UpdateVoxel(cell);
+        //}
+    }
+
+    private void UpdateVoxel(VoxelCell targetCell)
+    {
+        foreach (VoxelVisualComponent component in targetCell.Visuals.Components)
+        {
+            VoxelDesignation designation = component.GetCurrentDesignation();
+            VoxelVisualOption option = optionsSource.GetOptions(designation).First();
+            component.Contents = option;
+            UpdateDebugObject(component);
+        }
     }
 }
