@@ -6,6 +6,7 @@
 /GridUnityProject/Temp
 *.csproj
 *.sln
+*.vsconfig
 
 /WaveFunctionTest/Library
 /WaveFunctionTest/Logs
