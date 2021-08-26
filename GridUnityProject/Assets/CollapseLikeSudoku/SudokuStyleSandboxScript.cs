@@ -112,18 +112,18 @@ namespace SudokuStyle
 
         public bool IsValid(VoxelVisualOption option, VoxelVisualComponent component)
         {
-            return (component.Neighbors.Up.Cell == null ||
-                cellStateLookup[component.Neighbors.Up.Cell].ConnectsDown(option.Connections.Up))
-                && (component.Neighbors.Down.Cell == null ||
-                cellStateLookup[component.Neighbors.Down.Cell].ConnectsUp(option.Connections.Down))
-                && (component.Neighbors.Left.Cell == null ||
-                cellStateLookup[component.Neighbors.Left.Cell].ConnectsRight(option.Connections.Left))
-                && (component.Neighbors.Right.Cell == null ||
-                cellStateLookup[component.Neighbors.Right.Cell].ConnectsLeft(option.Connections.Right))
-                && (component.Neighbors.Forward.Cell == null ||
-                cellStateLookup[component.Neighbors.Forward.Cell].ConnectsBack(option.Connections.Forward))
-                && (component.Neighbors.Backward.Cell == null ||
-                cellStateLookup[component.Neighbors.Backward.Cell].ConnectsForward(option.Connections.Back));
+            return (component.Neighbors.Up == null ||
+                cellStateLookup[component.Neighbors.Up].ConnectsDown(option.Connections.Up))
+                && (component.Neighbors.Down == null ||
+                cellStateLookup[component.Neighbors.Down].ConnectsUp(option.Connections.Down))
+                && (component.Neighbors.Left == null ||
+                cellStateLookup[component.Neighbors.Left].ConnectsRight(option.Connections.Left))
+                && (component.Neighbors.Right == null ||
+                cellStateLookup[component.Neighbors.Right].ConnectsLeft(option.Connections.Right))
+                && (component.Neighbors.Forward == null ||
+                cellStateLookup[component.Neighbors.Forward].ConnectsBack(option.Connections.Forward))
+                && (component.Neighbors.Backward == null ||
+                cellStateLookup[component.Neighbors.Backward].ConnectsForward(option.Connections.Back));
         }
     }
 
@@ -185,39 +185,39 @@ namespace SudokuStyle
 
         public IEnumerable<CellState> GetNewDirtyCells(CellState oldCell)
         {
-            if (Component.Neighbors.Up.Cell != null && oldCell.up.Count != up.Count)
+            if (Component.Neighbors.Up != null && oldCell.up.Count != up.Count)
             {
-                CellState ret = solver[Component.Neighbors.Up.Cell];
+                CellState ret = solver[Component.Neighbors.Up];
                 if (ret.RemainingOptions.Count > 1)
                     yield return ret;
             }
-            if (Component.Neighbors.Down.Cell != null && oldCell.down.Count != down.Count)
+            if (Component.Neighbors.Down != null && oldCell.down.Count != down.Count)
             {
-                CellState ret = solver[Component.Neighbors.Down.Cell];
+                CellState ret = solver[Component.Neighbors.Down];
                 if (ret.RemainingOptions.Count > 1)
                     yield return ret;
             }
-            if (Component.Neighbors.Left.Cell != null && oldCell.left.Count != left.Count)
+            if (Component.Neighbors.Left != null && oldCell.left.Count != left.Count)
             {
-                CellState ret = solver[Component.Neighbors.Left.Cell];
+                CellState ret = solver[Component.Neighbors.Left];
                 if (ret.RemainingOptions.Count > 1)
                     yield return ret;
             }
-            if (Component.Neighbors.Right.Cell != null && oldCell.right.Count != right.Count)
+            if (Component.Neighbors.Right != null && oldCell.right.Count != right.Count)
             {
-                CellState ret = solver[Component.Neighbors.Right.Cell];
+                CellState ret = solver[Component.Neighbors.Right];
                 if (ret.RemainingOptions.Count > 1)
                     yield return ret;
             }
-            if (Component.Neighbors.Forward.Cell != null && oldCell.forward.Count != forward.Count)
+            if (Component.Neighbors.Forward != null && oldCell.forward.Count != forward.Count)
             {
-                CellState ret = solver[Component.Neighbors.Forward.Cell];
+                CellState ret = solver[Component.Neighbors.Forward];
                 if (ret.RemainingOptions.Count > 1)
                     yield return ret;
             }
-            if (Component.Neighbors.Backward.Cell != null && oldCell.back.Count != back.Count)
+            if (Component.Neighbors.Backward != null && oldCell.back.Count != back.Count)
             {
-                CellState ret = solver[Component.Neighbors.Backward.Cell];
+                CellState ret = solver[Component.Neighbors.Backward];
                 if (ret.RemainingOptions.Count > 1)
                     yield return ret;
             }

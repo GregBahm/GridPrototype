@@ -4,7 +4,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using VisualsSolving;
 
 public class VoxelVisualsManager
 {
@@ -59,15 +58,6 @@ public class VoxelVisualsManager
             obj.transform.position = component.ContentPosition;
             debugObjects.Add(component, filter);
             obj.transform.SetParent(piecesRoot, false);
-        }
-    }
-
-    internal void UpdateVoxels(SolutionState lastState)
-    {
-        foreach (CellState cellState in lastState.Cells)
-        {
-            cellState.Component.Contents = cellState.CurrentChoice;
-            UpdateDebugObject(cellState.Component);
         }
     }
 

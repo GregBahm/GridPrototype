@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using GameGrid;
 using UnityEngine;
-using VisualsSolving;
 
 public class VoxelVisualComponent
 {
@@ -40,19 +39,6 @@ public class VoxelVisualComponent
         VoxelVisualComponent forward = layer.AdjacentCellB.Visuals.GetComponent(Quad, OnTopHalf);
         VoxelVisualComponent back = GetHorizontalNeighbor(layer.AdjacentCellB.GroundPoint, layer.AdjacentCellA.GroundPoint);
         Neighbors = new NeighborComponents(up, down, forward, back, left, right);
-    }
-
-    internal IEnumerable<CellState> GetInvalidConnections(SolutionState state)
-    {
-        CellState myState = state.GetCellState(this);
-        foreach (CellConnection neighbor in Neighbors)
-        {
-            CellState theirState = state.GetCellState(neighbor.Cell);
-            if (!neighbor.IsValid(myState.CurrentChoice, theirState.CurrentChoice))
-            {
-                yield return theirState;
-            }
-        }
     }
 
     private VoxelVisualComponent GetHorizontalNeighbor(GroundPoint parallelPoint, GroundPoint perpendicularPoint)
