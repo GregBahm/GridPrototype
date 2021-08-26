@@ -28,16 +28,16 @@
             {
                 float2 uv : TEXCOORD0;
                 float4 vertex : SV_POSITION;
-				float3 baseVert : TEXCOORD1;
+				        float3 baseVert : TEXCOORD1;
                 float4 _ShadowCoord : TEXCOORD2;
                 float3 worldPos : TEXCOORD3;
                 float3 col : COLOR;
             };
 
             float3 _AnchorA;
-			float3 _AnchorB;
-			float3 _AnchorC;
-			float3 _AnchorD; 
+			      float3 _AnchorB;
+			      float3 _AnchorC;
+			      float3 _AnchorD; 
 
             float4x4 _LightBoxTransform;
             sampler2D _TopLighting;
@@ -50,25 +50,25 @@
                 return boxPos;
             }
 
-			float3 GetTransformedBaseVert(float3 vert)
-			{
+			      float3 GetTransformedBaseVert(float3 vert)
+			      {
                 vert.y *= .5;
-				vert.xz += .5;
+				        vert.xz += .5;
                 //vert.x = 1 - vert.x;
 
-				float3 anchorStart = lerp(_AnchorB, _AnchorA, vert.x);
-				float3 anchorEnd = lerp(_AnchorC, _AnchorD, vert.x);
-				float3 flatPosition = lerp(anchorStart, anchorEnd, vert.z);
-				return float3(flatPosition.x, vert.y, flatPosition.z);
-			}
+				        float3 anchorStart = lerp(_AnchorB, _AnchorA, vert.x);
+				        float3 anchorEnd = lerp(_AnchorC, _AnchorD, vert.x);
+				        float3 flatPosition = lerp(anchorStart, anchorEnd, vert.z);
+				        return float3(flatPosition.x, vert.y, flatPosition.z);
+			      }
 
             v2f vert (appdata v)
             {
                 v2f o;
-				float3 transformedVert = GetTransformedBaseVert(v.vertex);
+				        float3 transformedVert = GetTransformedBaseVert(v.vertex);
                 o.vertex = UnityObjectToClipPos(transformedVert);
-				o.uv = v.uv;
-				o.baseVert = v.vertex;
+				        o.uv = v.uv;
+				      o.baseVert = v.vertex;
                 o.col = v.col;
                 o.worldPos = mul(unity_ObjectToWorld, float4(transformedVert, 1)).xyz;
                 o._ShadowCoord = ComputeScreenPos(o.vertex);
@@ -86,7 +86,7 @@
                 baseTone = lerp(baseTone, .4, i.col.b);
                 
                 float3 ret = baseLighting * baseTone;
-				return float4(ret, 1);
+				        return float4(ret, 1);
             }
             ENDCG
         }

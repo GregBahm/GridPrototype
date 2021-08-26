@@ -28,6 +28,9 @@ public class GameMain : MonoBehaviour
     [SerializeField]
     private Material VoxelDisplayMat;
 
+    [SerializeField]
+    private VoxelConnectionType GroundConnection;
+
     public MainGrid MainGrid { get; private set; }
 
     private VoxelVisualsManager visualsAssembler;
@@ -74,9 +77,6 @@ public class GameMain : MonoBehaviour
         visualsAssembler.ConstantlyUpdateComponentTransforms();
     }
 
-    public int UnsolvedCells;
-    public int DirtyCells;
-
     private const double solverWaitTime = (double)1 / 30;
 
     private void HandleSolver()
@@ -94,8 +94,6 @@ public class GameMain : MonoBehaviour
                 }
                 UpdateSolvedVoxelVisuals();
                 solver.StepForward();
-                UnsolvedCells = solver.unsolvedCells.Count;
-                DirtyCells = solver.dirtyCells.Count;
             }
         }
     }

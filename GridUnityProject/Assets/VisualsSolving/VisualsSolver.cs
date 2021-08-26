@@ -8,8 +8,9 @@ namespace VisualsSolving
     public class VisualsSolver
     {
         private Dictionary<VoxelVisualComponent, CellState> cellStateLookup;
-        public readonly HashSet<CellState> unsolvedCells;
-        public readonly HashSet<CellState> dirtyCells = new HashSet<CellState>();
+        private readonly HashSet<CellState> unsolvedCells;
+        private HashSet<CellState> currentDirtyCells = new HashSet<CellState>();
+        private HashSet<CellState> nextDirtyCells = new HashSet<CellState>();
         public List<CellState> ReadyToDisplayVoxels { get; } = new List<CellState>();
 
         public bool SolveComplete
@@ -36,15 +37,20 @@ namespace VisualsSolving
                 }
                 else
                 {
-                    dirtyCells.Add(item);
+                    currentDirtyCells.Add(item);
                 }
             }
-            unsolvedCells = new HashSet<CellState>(dirtyCells);
+            unsolvedCells = new HashSet<CellState>(currentDirtyCells);
         }
 
         public void StepForward()
         {
-            if(dirtyCells.Any())
+            if(!currentDirtyCells.Any() && nextDirtyCells.Any())
+            {
+                currentDirtyCells = nextDirtyCells;
+                nextDirtyCells = new HashSet<CellState>();
+            }
+            if(currentDirtyCells.Any())
             {
                 SudokuACell();
             }
@@ -59,8 +65,8 @@ namespace VisualsSolving
         // If this changes the possibility of the cell, its neighbors are made dirty
         private void SudokuACell()
         {
-            CellState dirtyCell = dirtyCells.First();
-            dirtyCells.Remove(dirtyCell);
+            CellState dirtyCell = currentDirtyCells.First();
+            currentDirtyCells.Remove(dirtyCell);
             unsolvedCells.Remove(dirtyCell);
             CellState cleanCell = dirtyCell.GetReducedOptions();
             cellStateLookup[cleanCell.Component] = cleanCell;
@@ -74,7 +80,7 @@ namespace VisualsSolving
             }
             foreach (CellState cell in cleanCell.GetNewDirtyCells(dirtyCell))
             {
-                dirtyCells.Add(cell);
+                nextDirtyCells.Add(cell);
             }
         }
 
@@ -84,13 +90,13 @@ namespace VisualsSolving
         {
             CellState toCollapse = unsolvedCells.First();
             unsolvedCells.Remove(toCollapse);
-            dirtyCells.Remove(toCollapse);
+            currentDirtyCells.Remove(toCollapse);
             CellState collapsed = toCollapse.GetCollapsed();
             cellStateLookup[collapsed.Component] = collapsed;
             ReadyToDisplayVoxels.Add(collapsed);
             foreach (CellState cell in collapsed.GetNewDirtyCells(toCollapse))
             {
-                dirtyCells.Add(cell);
+                currentDirtyCells.Add(cell);
             }
         }
 
