@@ -340,8 +340,9 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7f2a83bbe8a3c2a4e8ae1e7e80f86d6b, type: 2}
   - {fileID: 11400000, guid: a4ee3919f0824474d9b9333e6cb37aa2, type: 2}
   VoxelDisplayMat: {fileID: 2100000, guid: c92dbb93533e359449fc2dfaf9d41853, type: 2}
-  UnsolvedCells: 0
-  DirtyCells: 0
+  GroundConnection: {fileID: 11400000, guid: 72b24cdbfd663e349955d51a9e49a6e7, type: 2}
+  Dirty: 0
+  Unsolved: 0
 --- !u!4 &536624979
 Transform:
   m_ObjectHideFlags: 0

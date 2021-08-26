@@ -8,8 +8,8 @@ namespace VisualsSolving
     public class VisualsSolver
     {
         private Dictionary<VoxelVisualComponent, CellState> cellStateLookup;
-        private readonly HashSet<CellState> unsolvedCells;
-        private HashSet<CellState> currentDirtyCells = new HashSet<CellState>();
+        public readonly HashSet<CellState> unsolvedCells;
+        public HashSet<CellState> currentDirtyCells = new HashSet<CellState>();
         private HashSet<CellState> nextDirtyCells = new HashSet<CellState>();
         public List<CellState> ReadyToDisplayVoxels { get; } = new List<CellState>();
 

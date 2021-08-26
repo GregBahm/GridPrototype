@@ -13,19 +13,20 @@ public class VoxelBlueprint : ScriptableObject
     public VoxelConnectionType PositiveZ;
     public VoxelConnectionType NegativeZ;
 
-    public IEnumerable<VoxelVisualOption> GenerateVisualOptions()
+    public IEnumerable<VoxelVisualOption> GenerateVisualOptions(VoxelConnectionType groundType)
     {
         VoxelVisualConnections baseConnections = new VoxelVisualConnections(Up, Down, PositiveX, NegativeX, PositiveZ, NegativeZ);
 
         VoxelDesignation baseDesignation = new VoxelDesignation(DesignationValues);
         IEnumerable<GeneratedVoxelDesignation> variants = baseDesignation.GetUniqueVariants();
         int priority = 0;
-        yield return new VoxelVisualOption(ArtContent, baseDesignation.Description, false, 0, priority, baseConnections);
+        bool isGround = Down == groundType;
+        yield return new VoxelVisualOption(ArtContent, baseDesignation.Description, false, 0, priority, baseConnections, isGround);
         foreach (GeneratedVoxelDesignation variant in variants)
         {
             priority++;
             VoxelVisualConnections connectionsVariant = baseConnections.GetVarient(variant.WasFlipped, variant.Rotations);
-            yield return new VoxelVisualOption(ArtContent, variant.Description, variant.WasFlipped, variant.Rotations, priority, connectionsVariant);
+            yield return new VoxelVisualOption(ArtContent, variant.Description, variant.WasFlipped, variant.Rotations, priority, connectionsVariant, isGround);
         }
     }
 }
