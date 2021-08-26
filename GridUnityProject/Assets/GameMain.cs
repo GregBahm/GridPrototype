@@ -1,6 +1,6 @@
 ﻿using GameGrid;
 using MeshMaking;
-using SudokuStyle;
+using VisualsSolving;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,7 +33,7 @@ public class GameMain : MonoBehaviour
     private VoxelVisualsManager visualsAssembler;
     private OptionsByDesignation optionsSource;
 
-    private SudokuStyleSolver solver;
+    private VisualsSolver solver;
 
     private void Start()
     {
@@ -44,7 +44,7 @@ public class GameMain : MonoBehaviour
         BaseGridVisual.GetComponent<MeshFilter>().mesh = CloneInteractionMesh();
         optionsSource = new OptionsByDesignation(VoxelBlueprints);
         visualsAssembler = new VoxelVisualsManager(VoxelDisplayMat, optionsSource);
-        solver = new SudokuStyleSolver(MainGrid, optionsSource);
+        solver = new VisualsSolver(MainGrid, optionsSource);
     }
 
     private Mesh CloneInteractionMesh()
@@ -120,6 +120,6 @@ public class GameMain : MonoBehaviour
     internal void UpdateVoxelVisuals(VoxelCell changedCell)
     {
         visualsAssembler.DoImmediateUpdate(changedCell);
-        solver = new SudokuStyleSolver(MainGrid, optionsSource);
+        solver = new VisualsSolver(MainGrid, optionsSource);
     }
 }
