@@ -123,8 +123,8 @@ namespace VisualsSolving
                 for (int i = MainGrid.VoxelHeight - 1; i >= 0; i--)
                 {
                     VoxelCell voxel = point.Voxels[i];
-                    takeColumn = takeColumn || voxel.Filled;
-                    if (takeColumn)
+                    takeColumn = takeColumn || voxel.Visuals.Components.Any(item => item.Contents != null);
+                    if (takeColumn || i == 0)
                         yield return voxel;
                 }
             }
