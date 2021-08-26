@@ -2,7 +2,6 @@
 /GridUnityProject/Library
 /GridUnityProject/Logs
 /GridUnityProject/obj
-/GridUnityProject/Packages
 /GridUnityProject/Temp
 *.csproj
 *.sln
@@ -11,11 +10,9 @@
 /WaveFunctionTest/Library
 /WaveFunctionTest/Logs
 /WaveFunctionTest/obj
-/WaveFunctionTest/Packages
 /WaveFunctionTest/Temp
 
 /FlatCityMaker/Library
 /FlatCityMaker/Logs
 /FlatCityMaker/obj
-/FlatCityMaker/Packages
 /FlatCityMaker/Temp

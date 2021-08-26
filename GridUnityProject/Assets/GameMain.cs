@@ -1,9 +1,10 @@
 ﻿using GameGrid;
 using MeshMaking;
+using SudokuStyle;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
-using VisualsSolving;
 
 public class GameMain : MonoBehaviour
 {
@@ -32,7 +33,7 @@ public class GameMain : MonoBehaviour
     private VoxelVisualsManager visualsAssembler;
     private OptionsByDesignation optionsSource;
 
-    private VisualsSolvingManager solver;
+    private SudokuStyleSolver solver;
 
     private void Start()
     {
@@ -43,17 +44,7 @@ public class GameMain : MonoBehaviour
         BaseGridVisual.GetComponent<MeshFilter>().mesh = CloneInteractionMesh();
         optionsSource = new OptionsByDesignation(VoxelBlueprints);
         visualsAssembler = new VoxelVisualsManager(VoxelDisplayMat, optionsSource);
-        solver = new VisualsSolvingManager(MainGrid, optionsSource);
-    }
-
-    private void OnDestroy()
-    {
-        solver.Destroy();
-    }
-
-    private void OnApplicationQuit()
-    {
-        solver.Destroy();
+        solver = new SudokuStyleSolver(MainGrid, optionsSource);
     }
 
     private Mesh CloneInteractionMesh()
@@ -79,22 +70,44 @@ public class GameMain : MonoBehaviour
             MainGrid = GroundLoader.Load();
             Debug.Log("Grid Loaded");
         }
-        if(solver.ChangedVoxels != null)
-        {
-            UpdateChangedVoxels();
-        }
+        HandleSolver();
         visualsAssembler.ConstantlyUpdateComponentTransforms();
     }
 
-    private void UpdateChangedVoxels()
+    public int UnsolvedCells;
+    public int DirtyCells;
+
+    private const double solverWaitTime = (double)1 / 30;
+
+    private void HandleSolver()
     {
-        IEnumerable<KeyValuePair<VoxelVisualComponent, VoxelVisualOption>> changedVoxels = solver.ChangedVoxels;
-        solver.ChangedVoxels = null;
-        foreach (KeyValuePair<VoxelVisualComponent, VoxelVisualOption> item in changedVoxels)
+        if (!solver.SolveComplete)
         {
-            item.Key.Contents = item.Value;
-            visualsAssembler.UpdateDebugObject(item.Key);
+            double startTime = Time.realtimeSinceStartupAsDouble;
+            bool keepGoing = true;
+            while(keepGoing && !solver.SolveComplete)
+            {
+                double currentTime = Time.realtimeSinceStartupAsDouble;
+                if(currentTime - startTime > solverWaitTime)
+                {
+                    keepGoing = false;
+                }
+                UpdateSolvedVoxelVisuals();
+                solver.StepForward();
+                UnsolvedCells = solver.unsolvedCells.Count;
+                DirtyCells = solver.dirtyCells.Count;
+            }
         }
+    }
+
+    private void UpdateSolvedVoxelVisuals()
+    {
+        foreach (CellState item in solver.ReadyToDisplayVoxels)
+        {
+            item.Component.Contents = item.RemainingOptions[0];
+            visualsAssembler.UpdateDebugObject(item.Component);
+        }
+        solver.ReadyToDisplayVoxels.Clear();
     }
 
     public void UpdateInteractionGrid()
@@ -107,6 +120,6 @@ public class GameMain : MonoBehaviour
     internal void UpdateVoxelVisuals(VoxelCell changedCell)
     {
         visualsAssembler.DoImmediateUpdate(changedCell);
-        solver.RegisterChangedVoxel(changedCell);
+        solver = new SudokuStyleSolver(MainGrid, optionsSource);
     }
 }
