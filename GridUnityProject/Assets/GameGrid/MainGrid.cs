@@ -7,7 +7,7 @@ namespace GameGrid
 {
     public class MainGrid
     {
-        public static int VoxelHeight { get; } = 10;
+        public static int VoxelHeight { get; } = 50;
 
         private List<GroundPoint> points = new List<GroundPoint>();
         public IReadOnlyList<GroundPoint> Points { get { return points; } }

@@ -65,37 +65,37 @@ namespace VisualsSolving
 
         public IEnumerable<CellState> GetNewDirtyCells(CellState oldCell)
         {
-            if (Component.Neighbors.Up != null && oldCell.up.Count != up.Count)
+            if (solver.HasConnection(Component.Neighbors.Up) && oldCell.up.Count != up.Count)
             {
                 CellState ret = solver[Component.Neighbors.Up];
                 if (ret.RemainingOptions.Count > 1)
                     yield return ret;
             }
-            if (Component.Neighbors.Down != null && oldCell.down.Count != down.Count)
+            if (solver.HasConnection(Component.Neighbors.Down) && oldCell.down.Count != down.Count)
             {
                 CellState ret = solver[Component.Neighbors.Down];
                 if (ret.RemainingOptions.Count > 1)
                     yield return ret;
             }
-            if (Component.Neighbors.Left != null && oldCell.left.Count != left.Count)
+            if (solver.HasConnection(Component.Neighbors.Left) && oldCell.left.Count != left.Count)
             {
                 CellState ret = solver[Component.Neighbors.Left];
                 if (ret.RemainingOptions.Count > 1)
                     yield return ret;
             }
-            if (Component.Neighbors.Right != null && oldCell.right.Count != right.Count)
+            if (solver.HasConnection(Component.Neighbors.Right) && oldCell.right.Count != right.Count)
             {
                 CellState ret = solver[Component.Neighbors.Right];
                 if (ret.RemainingOptions.Count > 1)
                     yield return ret;
             }
-            if (Component.Neighbors.Forward != null && oldCell.forward.Count != forward.Count)
+            if (solver.HasConnection(Component.Neighbors.Forward) && oldCell.forward.Count != forward.Count)
             {
                 CellState ret = solver[Component.Neighbors.Forward];
                 if (ret.RemainingOptions.Count > 1)
                     yield return ret;
             }
-            if (Component.Neighbors.Backward != null && oldCell.back.Count != back.Count)
+            if (solver.HasConnection(Component.Neighbors.Backward) && oldCell.back.Count != back.Count)
             {
                 CellState ret = solver[Component.Neighbors.Backward];
                 if (ret.RemainingOptions.Count > 1)

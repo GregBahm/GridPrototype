@@ -1,4 +1,5 @@
 ﻿using GameGrid;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -96,7 +97,8 @@ namespace VisualsSolving
         private Dictionary<VoxelVisualComponent, CellState> GetInitialDictionary(MainGrid grid, OptionsByDesignation optionsSource)
         {
             Dictionary<VoxelVisualComponent, CellState> ret = new Dictionary<VoxelVisualComponent, CellState>();
-            foreach (VoxelVisualComponent component in grid.Voxels.SelectMany(item => item.Visuals.Components))
+            IEnumerable<VoxelCell> voxelsToSolve = GetVoxelsToSolve(grid); 
+            foreach (VoxelVisualComponent component in voxelsToSolve.SelectMany(item => item.Visuals.Components))
             {
                 VoxelVisualOption[] options = optionsSource.GetOptions(component.GetCurrentDesignation());
                 CellState state = new CellState(this, options, component);
@@ -104,22 +106,43 @@ namespace VisualsSolving
             }
             return ret;
         }
+        
+        // There's no point in solving every empty voxel
+        // So we only solve voxels with a designation or somewhere below a designation
+        private IEnumerable<VoxelCell> GetVoxelsToSolve(MainGrid grid)
+        {
+            foreach (GroundPoint point in grid.Points)
+            {
+                bool takeColumn = false;
+                for (int i = MainGrid.VoxelHeight - 1; i >= 0; i--)
+                {
+                    VoxelCell voxel = point.Voxels[i];
+                    takeColumn = takeColumn || voxel.Filled;
+                    if (takeColumn)
+                        yield return voxel;
+                }
+            }
+        }
 
+        public bool HasConnection(VoxelVisualComponent neighbor)
+        {
+            return neighbor != null && cellStateLookup.ContainsKey(neighbor);
+        }
 
         public bool IsValid(VoxelVisualOption option, VoxelVisualComponent component)
         {
-            return (component.Neighbors.Up == null ||
-                cellStateLookup[component.Neighbors.Up].ConnectsDown(option.Connections.Up))
-                && (component.Neighbors.Down == null ||
-                cellStateLookup[component.Neighbors.Down].ConnectsUp(option.Connections.Down))
-                && (component.Neighbors.Left == null ||
-                cellStateLookup[component.Neighbors.Left].ConnectsRight(option.Connections.Left))
-                && (component.Neighbors.Right == null ||
-                cellStateLookup[component.Neighbors.Right].ConnectsLeft(option.Connections.Right))
-                && (component.Neighbors.Forward == null ||
-                cellStateLookup[component.Neighbors.Forward].ConnectsBack(option.Connections.Forward))
-                && (component.Neighbors.Backward == null ||
-                cellStateLookup[component.Neighbors.Backward].ConnectsForward(option.Connections.Back));
+            return (!HasConnection(component.Neighbors.Up) ||
+                    cellStateLookup[component.Neighbors.Up].ConnectsDown(option.Connections.Up))
+                && (!HasConnection(component.Neighbors.Down) ||
+                    cellStateLookup[component.Neighbors.Down].ConnectsUp(option.Connections.Down))
+                && (!HasConnection(component.Neighbors.Left) ||
+                    cellStateLookup[component.Neighbors.Left].ConnectsRight(option.Connections.Left))
+                && (!HasConnection(component.Neighbors.Right) ||
+                    cellStateLookup[component.Neighbors.Right].ConnectsLeft(option.Connections.Right))
+                && (!HasConnection(component.Neighbors.Forward) ||
+                    cellStateLookup[component.Neighbors.Forward].ConnectsBack(option.Connections.Forward))
+                && (!HasConnection(component.Neighbors.Backward) ||
+                    cellStateLookup[component.Neighbors.Backward].ConnectsForward(option.Connections.Back));
         }
     }
 }
