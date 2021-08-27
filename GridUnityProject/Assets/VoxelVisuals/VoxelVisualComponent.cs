@@ -113,6 +113,7 @@ public class VoxelVisualComponent
             designation.Description[0, 1, 1] = topDesignationLayer[0, 1];
             designation.Description[1, 1, 1] = topDesignationLayer[1, 1]; 
         }
+        designation.IsGround = Core.Height == 0 && !OnTopHalf;
         return designation;
     }
 

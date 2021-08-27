@@ -8,7 +8,7 @@ public class NeighborComponents
     public VoxelVisualComponent Up { get; }
     public VoxelVisualComponent Down { get; }
     public VoxelVisualComponent Forward { get; }
-    public VoxelVisualComponent Backward { get; }
+    public VoxelVisualComponent Back { get; }
     public VoxelVisualComponent Left { get; }
     public VoxelVisualComponent Right { get; }
 
@@ -16,14 +16,14 @@ public class NeighborComponents
         VoxelVisualComponent up,
         VoxelVisualComponent down,
         VoxelVisualComponent forward,
-        VoxelVisualComponent backward,
+        VoxelVisualComponent back,
         VoxelVisualComponent left,
         VoxelVisualComponent right)
     {
         Up = up;
         Down = down;
         Forward = forward;
-        Backward = backward;
+        Back = back;
         Left = left;
         Right = right;
     }

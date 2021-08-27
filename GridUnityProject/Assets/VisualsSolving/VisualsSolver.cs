@@ -7,9 +7,10 @@ namespace VisualsSolving
 {
     public class VisualsSolver
     {
+        private readonly VoxelConnectionType groundConnection;
         private Dictionary<VoxelVisualComponent, CellState> cellStateLookup;
-        public readonly HashSet<CellState> unsolvedCells;
-        public HashSet<CellState> currentDirtyCells = new HashSet<CellState>();
+        private readonly HashSet<CellState> unsolvedCells;
+        private HashSet<CellState> currentDirtyCells = new HashSet<CellState>();
         private HashSet<CellState> nextDirtyCells = new HashSet<CellState>();
         public List<CellState> ReadyToDisplayVoxels { get; } = new List<CellState>();
 
@@ -26,7 +27,7 @@ namespace VisualsSolving
             get { return cellStateLookup[component]; }
         }
 
-        public VisualsSolver(MainGrid grid, OptionsByDesignation optionsSource)
+        public VisualsSolver(MainGrid grid, OptionsByDesignation optionsSource, VoxelConnectionType groundConnection)
         {
             cellStateLookup = GetInitialDictionary(grid, optionsSource);
             foreach (CellState item in cellStateLookup.Values)
@@ -41,6 +42,7 @@ namespace VisualsSolving
                 }
             }
             unsolvedCells = new HashSet<CellState>(currentDirtyCells);
+            this.groundConnection = groundConnection;
         }
 
         public void StepForward()
@@ -76,6 +78,10 @@ namespace VisualsSolving
             }
             else
             {
+                if(cleanCell.RemainingOptions.Count == 0)
+                {
+                    throw new Exception("No options remaining for cell!");
+                }
                 ReadyToDisplayVoxels.Add(cleanCell);
             }
             foreach (CellState cell in cleanCell.GetNewDirtyCells(dirtyCell))
@@ -135,20 +141,49 @@ namespace VisualsSolving
             return neighbor != null && cellStateLookup.ContainsKey(neighbor);
         }
 
+        private bool IsValid(VoxelVisualComponent neighbor, VoxelConnectionType connectionType, CellState.ConnectionDirection direction)
+        {
+            if (neighbor != null)
+            {
+                if (cellStateLookup.ContainsKey(neighbor))
+                {
+                    if (!cellStateLookup[neighbor].Connects(connectionType, direction))
+                    {
+                        return false;
+                    }
+                }
+                else if (connectionType != null)
+                {
+                    return false;
+                }
+            }else if(direction == CellState.ConnectionDirection.Down)
+            {
+                return connectionType == groundConnection;
+            }
+            return true;
+        }
+
         public bool IsValid(VoxelVisualOption option, VoxelVisualComponent component)
         {
-            return (!HasConnection(component.Neighbors.Up) ||
-                    cellStateLookup[component.Neighbors.Up].ConnectsDown(option.Connections.Up))
-                && (!HasConnection(component.Neighbors.Down) ||
-                    cellStateLookup[component.Neighbors.Down].ConnectsUp(option.Connections.Down))
-                && (!HasConnection(component.Neighbors.Left) ||
-                    cellStateLookup[component.Neighbors.Left].ConnectsRight(option.Connections.Left))
-                && (!HasConnection(component.Neighbors.Right) ||
-                    cellStateLookup[component.Neighbors.Right].ConnectsLeft(option.Connections.Right))
-                && (!HasConnection(component.Neighbors.Forward) ||
-                    cellStateLookup[component.Neighbors.Forward].ConnectsBack(option.Connections.Forward))
-                && (!HasConnection(component.Neighbors.Backward) ||
-                    cellStateLookup[component.Neighbors.Backward].ConnectsForward(option.Connections.Back));
+            if(!IsValid(component.Neighbors.Up, option.Connections.Up, CellState.ConnectionDirection.Up))
+                return false;
+
+            if (!IsValid(component.Neighbors.Down, option.Connections.Down, CellState.ConnectionDirection.Down))
+                return false;
+
+            if (!IsValid(component.Neighbors.Left, option.Connections.Left, CellState.ConnectionDirection.Left))
+                return false;
+
+            if (!IsValid(component.Neighbors.Right, option.Connections.Right, CellState.ConnectionDirection.Right))
+                return false;
+
+            if (!IsValid(component.Neighbors.Forward, option.Connections.Forward, CellState.ConnectionDirection.Forward))
+                return false;
+
+            if (!IsValid(component.Neighbors.Back, option.Connections.Back, CellState.ConnectionDirection.Back))
+                return false;
+
+            return true;
         }
     }
 }

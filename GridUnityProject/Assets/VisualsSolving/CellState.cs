@@ -34,12 +34,25 @@ namespace VisualsSolving
             back = new HashSet<VoxelConnectionType>(RemainingOptions.Select(item => item.Connections.Back));
         }
 
-        public bool ConnectsUp(VoxelConnectionType type) { return up.Contains(type); }
-        public bool ConnectsDown(VoxelConnectionType type) { return down.Contains(type); }
-        public bool ConnectsLeft(VoxelConnectionType type) { return left.Contains(type); }
-        public bool ConnectsRight(VoxelConnectionType type) { return right.Contains(type); }
-        public bool ConnectsForward(VoxelConnectionType type) { return forward.Contains(type); }
-        public bool ConnectsBack(VoxelConnectionType type) { return back.Contains(type); }
+        public bool Connects(VoxelConnectionType type, ConnectionDirection direction)
+        {
+            switch (direction)
+            {
+                case ConnectionDirection.Up:
+                    return down.Contains(type);
+                case ConnectionDirection.Down:
+                    return up.Contains(type);
+                case ConnectionDirection.Left:
+                    return right.Contains(type);
+                case ConnectionDirection.Right:
+                    return left.Contains(type);
+                case ConnectionDirection.Forward:
+                    return back.Contains(type);
+                case ConnectionDirection.Back:
+                default:
+                    return forward.Contains(type);
+            }
+        }
 
         public CellState GetReducedOptions()
         {
@@ -95,12 +108,22 @@ namespace VisualsSolving
                 if (ret.RemainingOptions.Count > 1)
                     yield return ret;
             }
-            if (solver.HasConnection(Component.Neighbors.Backward) && oldCell.back.Count != back.Count)
+            if (solver.HasConnection(Component.Neighbors.Back) && oldCell.back.Count != back.Count)
             {
-                CellState ret = solver[Component.Neighbors.Backward];
+                CellState ret = solver[Component.Neighbors.Back];
                 if (ret.RemainingOptions.Count > 1)
                     yield return ret;
             }
+        }
+
+        public enum ConnectionDirection
+        {
+            Up,
+            Down,
+            Left,
+            Right,
+            Forward,
+            Back
         }
     }
 }

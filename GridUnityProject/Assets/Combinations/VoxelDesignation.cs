@@ -8,6 +8,7 @@ public class VoxelDesignation
     [SerializeField]
     private readonly bool[,,] description = new bool[2, 2, 2];
     public bool[,,] Description => description;
+    public bool IsGround { get; set; }
 
     public string Key { get { return ToString(); } }
 

@@ -4,9 +4,9 @@ using System.Linq;
 public class OptionsByDesignation
 {
     private readonly Dictionary<string, VoxelVisualOption[]> optionsByDesignationKey;
-    public OptionsByDesignation(VoxelBlueprint[] blueprints, VoxelConnectionType groundType)
+    public OptionsByDesignation(VoxelBlueprint[] blueprints)
     {
-        VoxelVisualOption[] allOptions = GetAllOptions(blueprints, groundType).ToArray();
+        VoxelVisualOption[] allOptions = GetAllOptions(blueprints).ToArray();
         optionsByDesignationKey = GetOptionsByDesignationKey(allOptions);
     }
 
@@ -15,11 +15,11 @@ public class OptionsByDesignation
         return optionsByDesignationKey[designation.Key];
     }
 
-    private IEnumerable<VoxelVisualOption> GetAllOptions(VoxelBlueprint[] blueprints, VoxelConnectionType groundType)
+    private IEnumerable<VoxelVisualOption> GetAllOptions(VoxelBlueprint[] blueprints)
     {
         foreach (VoxelBlueprint blueprint in blueprints)
         {
-            IEnumerable<VoxelVisualOption> options = blueprint.GenerateVisualOptions(groundType);
+            IEnumerable<VoxelVisualOption> options = blueprint.GenerateVisualOptions();
             foreach (VoxelVisualOption option in options)
             {
                 yield return option;

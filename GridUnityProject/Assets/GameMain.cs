@@ -45,9 +45,9 @@ public class GameMain : MonoBehaviour
         UpdateInteractionGrid();
         InteractionMeshObject.GetComponent<MeshFilter>().mesh = InteractionMesh.Mesh;
         BaseGridVisual.GetComponent<MeshFilter>().mesh = CloneInteractionMesh();
-        optionsSource = new OptionsByDesignation(VoxelBlueprints, GroundConnection);
+        optionsSource = new OptionsByDesignation(VoxelBlueprints);
         visualsAssembler = new VoxelVisualsManager(VoxelDisplayMat, optionsSource);
-        solver = new VisualsSolver(MainGrid, optionsSource);
+        solver = new VisualsSolver(MainGrid, optionsSource, GroundConnection);
     }
 
     private Mesh CloneInteractionMesh()
@@ -79,8 +79,6 @@ public class GameMain : MonoBehaviour
 
     private const double solverWaitTime = (double)1 / 30;
 
-    public int Dirty;
-    public int Unsolved;
     private void HandleSolver()
     {
         if (!solver.SolveComplete)
@@ -96,8 +94,6 @@ public class GameMain : MonoBehaviour
                 }
                 UpdateSolvedVoxelVisuals();
                 solver.StepForward();
-                Dirty = solver.currentDirtyCells.Count;
-                Unsolved = solver.unsolvedCells.Count;
             }
         }
     }
@@ -122,6 +118,6 @@ public class GameMain : MonoBehaviour
     internal void UpdateVoxelVisuals(VoxelCell changedCell)
     {
         visualsAssembler.DoImmediateUpdate(changedCell);
-        solver = new VisualsSolver(MainGrid, optionsSource);
+        solver = new VisualsSolver(MainGrid, optionsSource, GroundConnection);
     }
 }
