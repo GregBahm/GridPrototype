@@ -305,6 +305,19 @@ MonoBehaviour:
   InteractionMeshObject: {fileID: 1421543770}
   BaseGridVisual: {fileID: 579425808}
   VoxelBlueprints:
+  - {fileID: 11400000, guid: 83bfe241b9cc5c241a49c3e5f2b96329, type: 2}
+  - {fileID: 11400000, guid: fdc2fdc9e2657b54fac9ac80fa7f8fe7, type: 2}
+  - {fileID: 11400000, guid: e0ac41fd690704e428f663474805e47e, type: 2}
+  - {fileID: 11400000, guid: f76218eb83549ef4d98b7816753f61c5, type: 2}
+  - {fileID: 11400000, guid: cd28ac2913e0383439cab0ea5e4a382a, type: 2}
+  - {fileID: 11400000, guid: 0765d99864752024f928d5635e9399a5, type: 2}
+  - {fileID: 11400000, guid: 446b295780d6c0e479e84f430d11bf7b, type: 2}
+  - {fileID: 11400000, guid: 0bde931f963e83544952173a62041fd6, type: 2}
+  - {fileID: 11400000, guid: 02005f8cffa41754cad2ec56963515dc, type: 2}
+  - {fileID: 11400000, guid: ebf2c519addcdbe4884386499cd8a6cf, type: 2}
+  - {fileID: 11400000, guid: d1c727edc834d5f49a2d4c874f47fa8d, type: 2}
+  - {fileID: 11400000, guid: c3ae102c89a7c7d45a195230019f2dc4, type: 2}
+  - {fileID: 11400000, guid: 8a8709ff392c1084092681fb063ab712, type: 2}
   - {fileID: 11400000, guid: 44e11c60c57da6949baf9c0d18fcd85c, type: 2}
   - {fileID: 11400000, guid: 7f151efbe4a063c4480f27dae674ed60, type: 2}
   - {fileID: 11400000, guid: 7cd9a5bf92a959f48b36c6ba7a9f6cc5, type: 2}
@@ -339,7 +352,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: b77503c09b6dc454f8094ab32376144f, type: 2}
   - {fileID: 11400000, guid: 7f2a83bbe8a3c2a4e8ae1e7e80f86d6b, type: 2}
   - {fileID: 11400000, guid: a4ee3919f0824474d9b9333e6cb37aa2, type: 2}
-  - {fileID: 11400000, guid: 8a8709ff392c1084092681fb063ab712, type: 2}
   VoxelDisplayMat: {fileID: 2100000, guid: c92dbb93533e359449fc2dfaf9d41853, type: 2}
   GroundConnection: {fileID: 11400000, guid: 72b24cdbfd663e349955d51a9e49a6e7, type: 2}
 --- !u!4 &536624979
