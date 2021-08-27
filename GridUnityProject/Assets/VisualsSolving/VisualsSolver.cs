@@ -11,7 +11,6 @@ namespace VisualsSolving
         private Dictionary<VoxelVisualComponent, CellState> cellStateLookup;
         private readonly HashSet<CellState> unsolvedCells;
         private HashSet<CellState> currentDirtyCells = new HashSet<CellState>();
-        private HashSet<CellState> nextDirtyCells = new HashSet<CellState>();
         public List<CellState> ReadyToDisplayVoxels { get; } = new List<CellState>();
 
         public bool SolveComplete
@@ -47,11 +46,6 @@ namespace VisualsSolving
 
         public void StepForward()
         {
-            if(!currentDirtyCells.Any() && nextDirtyCells.Any())
-            {
-                currentDirtyCells = nextDirtyCells;
-                nextDirtyCells = new HashSet<CellState>();
-            }
             if(currentDirtyCells.Any())
             {
                 SudokuACell();
@@ -86,7 +80,7 @@ namespace VisualsSolving
             }
             foreach (CellState cell in cleanCell.GetNewDirtyCells(dirtyCell))
             {
-                nextDirtyCells.Add(cell);
+                currentDirtyCells.Add(cell);
             }
         }
 

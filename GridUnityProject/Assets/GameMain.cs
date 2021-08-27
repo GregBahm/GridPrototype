@@ -88,7 +88,7 @@ public class GameMain : MonoBehaviour
             while(keepGoing && !solver.SolveComplete)
             {
                 double currentTime = Time.realtimeSinceStartupAsDouble;
-                if(currentTime - startTime > solverWaitTime)
+                if (currentTime - startTime > solverWaitTime)
                 {
                     keepGoing = false;
                 }
