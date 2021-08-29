@@ -26,7 +26,7 @@ public class VoxelVisualConnections
         Back = back;
     }
 
-    internal VoxelVisualConnections GetVarient(bool wasFlipped, int rotations)
+    internal VoxelVisualConnections GetVariant(bool wasFlipped, int rotations)
     {
         VoxelConnectionType left = Left;
         VoxelConnectionType right = Right;

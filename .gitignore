@@ -1,18 +1,22 @@
 ﻿*.vs
+*.csproj
+*.sln
+*.vsconfig
+
 /GridUnityProject/Library
 /GridUnityProject/Logs
 /GridUnityProject/obj
 /GridUnityProject/Temp
-*.csproj
-*.sln
-*.vsconfig
+/GridUnityProject/UserSettings/
 
 /WaveFunctionTest/Library
 /WaveFunctionTest/Logs
 /WaveFunctionTest/obj
 /WaveFunctionTest/Temp
+/WaveFunctionTest/UserSettings/
 
 /FlatCityMaker/Library
 /FlatCityMaker/Logs
 /FlatCityMaker/obj
 /FlatCityMaker/Temp
+/FlatCityMaker/UserSettings/

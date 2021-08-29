@@ -124,7 +124,7 @@ namespace VisualsSolving
                 {
                     VoxelCell voxel = point.Voxels[i];
                     takeColumn = takeColumn || voxel.Visuals.Components.Any(item => item.Contents != null);
-                    if (takeColumn || i == 0)
+                    if (takeColumn)
                         yield return voxel;
                 }
             }

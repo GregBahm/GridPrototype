@@ -53,11 +53,15 @@ public class VoxelVisualsManager
             component.SetComponentTransform(mat);
             renderer.material = mat;
             debugMats.Add(new Tuple<Material, VoxelVisualComponent>(mat, component));
-
+            
             filter.mesh = component.Contents.Mesh;
             obj.transform.position = component.ContentPosition;
             debugObjects.Add(component, filter);
             obj.transform.SetParent(piecesRoot, false);
+
+            //TODO: Delete this when you're done debugging
+            VoxelVisualDebugger debugger = obj.AddComponent<VoxelVisualDebugger>();
+            debugger.Component = component;
         }
     }
 
@@ -83,11 +87,6 @@ public class VoxelVisualsManager
     internal void DoImmediateUpdate(VoxelCell toggledCell)
     {
         UpdateVoxel(toggledCell);
-        //var connected = toggledCell.GetConnectedCells().ToArray();
-        //foreach (VoxelCell cell in connected)
-        //{
-        //    UpdateVoxel(cell);
-        //}
     }
 
     private void UpdateVoxel(VoxelCell targetCell)
@@ -98,6 +97,28 @@ public class VoxelVisualsManager
             VoxelVisualOption option = optionsSource.GetOptions(designation).First();
             component.Contents = option;
             UpdateDebugObject(component);
+        }
+    }
+
+    private class VoxelVisualDebugger : MonoBehaviour
+    {
+        public bool DoDebug;
+        public VoxelVisualComponent Component;
+
+        private static Color PositiveZColor = new Color(0, 0, 1f);
+        private static Color NegativeZColor = new Color(0, 0, .5f);
+        private static Color PositiveXColor = new Color(1f, 0, 0);
+        private static Color NegativeXColor = new Color(.5f, 0, 0);
+
+        private void Update()
+        {
+            if(DoDebug)
+            {
+                Debug.DrawLine(Component.VisualCenter, Component.Neighbors.Forward.VisualCenter, PositiveZColor);
+                Debug.DrawLine(Component.VisualCenter, Component.Neighbors.Back.VisualCenter, NegativeZColor);
+                Debug.DrawLine(Component.VisualCenter, Component.Neighbors.Left.VisualCenter, PositiveXColor);
+                Debug.DrawLine(Component.VisualCenter, Component.Neighbors.Right.VisualCenter, NegativeXColor);
+            }
         }
     }
 }

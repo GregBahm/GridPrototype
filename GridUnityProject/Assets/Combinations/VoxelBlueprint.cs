@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "VoxelDefinition/VoxelBlueprint")]
@@ -18,13 +19,13 @@ public class VoxelBlueprint : ScriptableObject
         VoxelVisualConnections baseConnections = new VoxelVisualConnections(Up, Down, PositiveX, NegativeX, PositiveZ, NegativeZ);
 
         VoxelDesignation baseDesignation = new VoxelDesignation(DesignationValues);
-        IEnumerable<GeneratedVoxelDesignation> variants = baseDesignation.GetUniqueVariants();
         int priority = 0;
         yield return new VoxelVisualOption(ArtContent, baseDesignation.Description, false, 0, priority, baseConnections);
+        IEnumerable<GeneratedVoxelDesignation> variants = baseDesignation.GetUniqueVariants().ToArray();
         foreach (GeneratedVoxelDesignation variant in variants)
         {
             priority++;
-            VoxelVisualConnections connectionsVariant = baseConnections.GetVarient(variant.WasFlipped, variant.Rotations);
+            VoxelVisualConnections connectionsVariant = baseConnections.GetVariant(variant.WasFlipped, variant.Rotations);
             yield return new VoxelVisualOption(ArtContent, variant.Description, variant.WasFlipped, variant.Rotations, priority, connectionsVariant);
         }
     }

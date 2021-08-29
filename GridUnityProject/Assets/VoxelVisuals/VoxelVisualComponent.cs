@@ -14,10 +14,21 @@ public class VoxelVisualComponent
 
     public VoxelVisualOption Contents { get; set; }
     public Vector3 ContentPosition { get; }
+    public Vector3 VisualCenter
+    {
+        get
+        {
+            return ((anchors[0] + anchors[1] + anchors[2] + anchors[3]) / 4) + ContentPosition;
+        }
+    }
 
     public NeighborComponents Neighbors { get; private set; }
 
-    public VoxelVisualComponent(VoxelCell coreCell, GroundQuad quad, bool onTopHalf)
+    public int VisualsIndex { get; }
+
+    private Vector3[] anchors;
+
+    public VoxelVisualComponent(VoxelCell coreCell, GroundQuad quad, bool onTopHalf, int visualsIndex)
     {
         Core = coreCell;
         Quad = quad;
@@ -27,6 +38,7 @@ public class VoxelVisualComponent
         bottomLayer = new VoxelVisualsLayer(bottomCell, quad);
         topLayer = new VoxelVisualsLayer(topCell, quad);
         ContentPosition = coreCell.CellPosition + (onTopHalf ? new Vector3(0, .5f, 0) : Vector3.zero);
+        VisualsIndex = visualsIndex;
     }
 
     public void InitializeNeighbors()
@@ -34,26 +46,31 @@ public class VoxelVisualComponent
         VoxelVisualsLayer layer = OnTopHalf ? topLayer : bottomLayer;
         VoxelVisualComponent up = GetUpNeighbor();
         VoxelVisualComponent down = GetDownNeighbor();
-        VoxelVisualComponent left = layer.AdjacentCellA.Visuals.GetComponent(Quad, OnTopHalf);
-        VoxelVisualComponent right = GetHorizontalNeighbor(layer.AdjacentCellA.GroundPoint, layer.AdjacentCellB.GroundPoint);
-        VoxelVisualComponent forward = layer.AdjacentCellB.Visuals.GetComponent(Quad, OnTopHalf);
-        VoxelVisualComponent back = GetHorizontalNeighbor(layer.AdjacentCellB.GroundPoint, layer.AdjacentCellA.GroundPoint);
+
+        VoxelVisualComponent left = Core.Visuals.GetLeftNeighbor(this);
+        VoxelVisualComponent forward = Core.Visuals.GetForwardNeighbor(this);
+
+        VoxelVisualComponent right = GetHorizontalNeighbor(bottomLayer.AdjacentCellB);
+        VoxelVisualComponent back = GetHorizontalNeighbor(bottomLayer.AdjacentCellA);
+
         Neighbors = new NeighborComponents(up, down, forward, back, left, right);
+        anchors = GetAnchors();
     }
 
-    private VoxelVisualComponent GetHorizontalNeighbor(GroundPoint parallelPoint, GroundPoint perpendicularPoint)
+    private Vector3[] GetAnchors()
     {
-        GroundPoint basePoint = Core.GroundPoint;
-        GroundEdge dividingEdge = Quad.GetEdge(basePoint, perpendicularPoint);
-        if (dividingEdge.IsBorder)
-        {
-            return null;
-        }
-        GroundQuad neighborQuad = dividingEdge.Quads.First(quad => quad != Quad);
-        GroundPoint neighborDiagonal = neighborQuad.GetDiagonalPoint(basePoint);
-        GroundPoint moneyPoint = neighborQuad.Points.First(point => point != perpendicularPoint && point != neighborDiagonal);
+        Vector3 anchorA = Vector3.zero;
+        Vector3 anchorB = (bottomLayer.AdjacentCellA.CellPosition - bottomLayer.BasisCell.CellPosition) / 2;
+        Vector3 anchorC = bottomLayer.Center - bottomLayer.BasisCell.CellPosition;
+        Vector3 anchorD = (bottomLayer.AdjacentCellB.CellPosition - bottomLayer.BasisCell.CellPosition) / 2;
+        return new Vector3[] { anchorA, anchorB, anchorC, anchorD };
+    }
 
-        return moneyPoint.Voxels[Core.Height].Visuals.GetComponent(neighborQuad, OnTopHalf);
+    private VoxelVisualComponent GetHorizontalNeighbor(VoxelCell perpendicularCell)
+    {
+        if (perpendicularCell == null)
+            return null;
+        return perpendicularCell.Visuals.GetComponent(Quad, OnTopHalf);
     }
 
     private VoxelVisualComponent GetDownNeighbor()
@@ -132,18 +149,13 @@ public class VoxelVisualComponent
 
     public void SetComponentTransform(Material mat)
     {
-        Vector3 anchorA = Vector3.zero;
-        Vector3 anchorB = (bottomLayer.AdjacentCellA.CellPosition - bottomLayer.BasisCell.CellPosition) / 2;
-        Vector3 anchorC = bottomLayer.Center - bottomLayer.BasisCell.CellPosition;
-        Vector3 anchorD = (bottomLayer.AdjacentCellB.CellPosition - bottomLayer.BasisCell.CellPosition) / 2;
-        Vector3[] baseAnchors = new Vector3[] { anchorA, anchorB, anchorC, anchorD };
         if (Contents != null)
         {
             Vector3[] rotatedAnchors = new Vector3[4];
             for (int i = 0; i < 4; i++)
             {
                 int rotatedIndex = (i + 4 - Contents.Rotations) % 4;
-                rotatedAnchors[i] = baseAnchors[rotatedIndex];
+                rotatedAnchors[i] = anchors[rotatedIndex];
             }
             if(Contents.Flipped)
             {
@@ -158,7 +170,7 @@ public class VoxelVisualComponent
         }
         else
         {
-            SetAnchors(baseAnchors, mat);
+            SetAnchors(anchors, mat);
         }
     }
 
@@ -192,5 +204,10 @@ public class VoxelVisualComponent
             AdjacentCellA = otherPoints[0].Voxels[basisCell.Height];
             AdjacentCellB = otherPoints[1].Voxels[basisCell.Height];
         }
+    }
+
+    public override string ToString()
+    {
+        return "Component in " + Core.ToString() + ", " + (OnTopHalf ? " top" : " bottom") + " half";
     }
 }

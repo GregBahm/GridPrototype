@@ -31,4 +31,9 @@ public class VoxelVisualOption
         }
         return ret;
     }
+
+    public override string ToString()
+    {
+        return Mesh?.name;
+    }
 }
