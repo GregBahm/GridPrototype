@@ -17,7 +17,7 @@ MonoBehaviour:
   DesignationValues: 0000010100000101
   Up: {fileID: 11400000, guid: 3acc25944ba071148beb4d0ae226ce4d, type: 2}
   Down: {fileID: 0}
-  PositiveX: {fileID: 11400000, guid: 77c62381ec7794b49b0fc986d0a12ffa, type: 2}
-  NegativeX: {fileID: 11400000, guid: 77c62381ec7794b49b0fc986d0a12ffa, type: 2}
-  PositiveZ: {fileID: 11400000, guid: 77c62381ec7794b49b0fc986d0a12ffa, type: 2}
-  NegativeZ: {fileID: 11400000, guid: 77c62381ec7794b49b0fc986d0a12ffa, type: 2}
+  PositiveX: {fileID: 0}
+  NegativeX: {fileID: 0}
+  PositiveZ: {fileID: 0}
+  NegativeZ: {fileID: 0}

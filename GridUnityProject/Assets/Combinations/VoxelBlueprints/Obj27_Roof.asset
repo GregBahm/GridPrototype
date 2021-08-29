@@ -17,7 +17,7 @@ MonoBehaviour:
   DesignationValues: 0000010101010101
   Up: {fileID: 0}
   Down: {fileID: 0}
-  PositiveX: {fileID: 11400000, guid: 77c62381ec7794b49b0fc986d0a12ffa, type: 2}
-  NegativeX: {fileID: 11400000, guid: 77c62381ec7794b49b0fc986d0a12ffa, type: 2}
-  PositiveZ: {fileID: 11400000, guid: 77c62381ec7794b49b0fc986d0a12ffa, type: 2}
+  PositiveX: {fileID: 0}
+  NegativeX: {fileID: 0}
+  PositiveZ: {fileID: 0}
   NegativeZ: {fileID: 0}
