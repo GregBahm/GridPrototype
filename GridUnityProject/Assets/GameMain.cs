@@ -92,10 +92,10 @@ public class GameMain : MonoBehaviour
                 {
                     keepGoing = false;
                 }
-                UpdateSolvedVoxelVisuals();
                 solver.StepForward();
             }
         }
+        UpdateSolvedVoxelVisuals();
     }
 
     private void UpdateSolvedVoxelVisuals()
