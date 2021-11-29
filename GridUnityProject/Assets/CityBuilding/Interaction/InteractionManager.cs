@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-[RequireComponent(typeof(GameMain))]
+[RequireComponent(typeof(CityBuildingMain))]
 [RequireComponent(typeof(CameraInteraction))]
 public class InteractionManager : MonoBehaviour
 {
@@ -22,7 +22,7 @@ public class InteractionManager : MonoBehaviour
     private ConstructionCursor cursor;
 
     private CameraInteraction cameraInteraction;
-    private GameMain gameMain;
+    private CityBuildingMain gameMain;
 
     private DragDetector leftDragDetector;
     private DragDetector rightDragDetector;
@@ -34,7 +34,7 @@ public class InteractionManager : MonoBehaviour
 
     private void Start()
     {
-        gameMain = GetComponent<GameMain>();
+        gameMain = GetComponent<CityBuildingMain>();
         cameraInteraction = GetComponent<CameraInteraction>();
         leftDragDetector = new DragDetector(dragStartDistance);
         rightDragDetector = new DragDetector(dragStartDistance);

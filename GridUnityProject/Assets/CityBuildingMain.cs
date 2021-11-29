@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class GameMain : MonoBehaviour
+public class CityBuildingMain : MonoBehaviour
 {
     public bool LoadLastSave;
     public bool TestSave;
