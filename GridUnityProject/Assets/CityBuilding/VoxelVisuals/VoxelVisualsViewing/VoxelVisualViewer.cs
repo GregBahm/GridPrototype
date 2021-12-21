@@ -6,6 +6,8 @@ using UnityEngine;
 
 public class VoxelVisualViewer : MonoBehaviour
 {
+    public static VoxelVisualViewer Instance { get; private set; }
+
     public VoxelBlueprint CurrentBlueprint;
     public int CurrentBlueprintIndex;
     public bool Next;
@@ -24,6 +26,15 @@ public class VoxelVisualViewer : MonoBehaviour
 
     public ConnectionLabel[] ConnectionLabels;
     private MeshFilter meshFilter;
+
+    public Color AnyFilledColor;
+    public Color FlatRoofColor;
+    public Color SlantedRoofColor;
+
+    private void Awake()
+    {
+        Instance = this;
+    }
 
     private void Start()
     {
