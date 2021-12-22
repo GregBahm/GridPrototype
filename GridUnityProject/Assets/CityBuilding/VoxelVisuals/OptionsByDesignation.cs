@@ -29,7 +29,27 @@ public class OptionsByDesignation
 
     private Dictionary<string, VoxelVisualOption[]> GetOptionsByDesignationKey(VoxelVisualOption[] allOptions)
     {
-        return allOptions.GroupBy(item => item.GetDesignationKey())
-            .ToDictionary(item => item.Key, item => item.ToArray());
+        Dictionary<string, List<VoxelVisualOption>> lists = new Dictionary<string, List<VoxelVisualOption>>();
+        foreach (VoxelVisualOption option in allOptions)
+        {
+            IEnumerable<string> keys = option.GetDesignationKeys();
+            foreach (string key in keys)
+            {
+                if(lists.ContainsKey(key))
+                {
+                    lists[key].Add(option);
+                }
+                else
+                {
+                    lists.Add(key, new List<VoxelVisualOption>() { option });
+                }
+            }
+        }
+        Dictionary<string, VoxelVisualOption[]> ret = new Dictionary<string, VoxelVisualOption[]>();
+        foreach (var item in lists)
+        {
+            ret.Add(item.Key, item.Value.ToArray());
+        }
+        return ret;
     }
 }

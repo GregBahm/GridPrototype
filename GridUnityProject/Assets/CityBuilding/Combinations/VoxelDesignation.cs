@@ -15,21 +15,6 @@ public class VoxelDesignation
     public VoxelDesignation()
     {}
 
-    public SlotType[] GetFlatValues()
-    {
-        return new SlotType[8]
-        {
-            Description[0, 1, 1],
-            Description[1, 1, 1],
-            Description[0, 0, 1],
-            Description[1, 0, 1],
-            Description[0, 1, 0],
-            Description[1, 1, 0],
-            Description[0, 0, 0],
-            Description[1, 0, 0]
-        };
-    }
-
     public VoxelDesignation(SlotType[] values)
     {
         Description[0, 1, 1] = values[0];

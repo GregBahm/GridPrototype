@@ -19,7 +19,7 @@ public class VoxelBlueprint : ScriptableObject
     {
         VoxelVisualConnections baseConnections = new VoxelVisualConnections(Up, Down, PositiveX, NegativeX, PositiveZ, NegativeZ);
 
-        VoxelDesignation baseDesignation = new VoxelDesignation(Designations.ToArray());
+        VoxelDesignation baseDesignation = new VoxelDesignation(Designations.ToFlatArray());
         int priority = 0;
         yield return new VoxelVisualOption(ArtContent, baseDesignation.Description, false, 0, priority, baseConnections);
         IEnumerable<GeneratedVoxelDesignation> variants = baseDesignation.GetUniqueVariants().ToArray();
@@ -44,7 +44,7 @@ public class DesignationGrid
     public SlotType X0Y1Z1;
     public SlotType X1Y1Z1;
 
-    public SlotType[] ToArray()
+    public SlotType[] ToFlatArray()
     {
         return new SlotType[]
         {
@@ -57,6 +57,20 @@ public class DesignationGrid
             X0Y0Z0,
             X1Y0Z0,
         };
+    }
+
+    public SlotType[,,] ToCubedArray()
+    {
+        SlotType[,,] ret = new SlotType[2, 2, 2];
+        ret[0, 0, 0] = X0Y0Z0;
+        ret[1, 0, 0] = X1Y0Z0;
+        ret[0, 1, 0] = X0Y1Z0;
+        ret[1, 1, 0] = X1Y1Z0;
+        ret[0, 0, 1] = X0Y0Z1;
+        ret[1, 0, 1] = X1Y0Z1;
+        ret[0, 1, 1] = X0Y1Z1;
+        ret[1, 1, 1] = X1Y1Z1;
+        return ret;
     }
 }
 

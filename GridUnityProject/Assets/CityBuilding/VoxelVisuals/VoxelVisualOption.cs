@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class VoxelVisualOption
 {
@@ -22,14 +23,48 @@ public class VoxelVisualOption
         Connections = connections;
     }
 
-    public string GetDesignationKey()
+    public IEnumerable<string> GetDesignationKeys()
     {
-        string ret = "";
-        foreach (SlotType item in designation)
+        IEnumerable<SlotType[,,]> keys = GetAllPossibleDesignationKeys(designation, 0, 0, 0);
+        foreach (SlotType[,,] key in keys)
         {
-            ret += item.ToString() + " ";
+            string ret = "";
+            foreach (SlotType slot in key)
+            {
+                ret += slot.ToString() + " ";
+            }
+            yield return ret;
         }
-        return ret;
+    }
+
+    // For every "AnyFilled" slot, produce a version that is Slanted and version that is Flat  
+    private static IEnumerable<SlotType[,,]> GetAllPossibleDesignationKeys(SlotType[,,] currentDesignation, int startX, int startY, int startZ)
+    {
+        for (int x = startX; x < 2; x++)
+        {
+            for (int y = startY; y < 2; y++)
+            {
+                for (int z = startZ; z < 2; z++)
+                {
+                    if (currentDesignation[x, y, z] == SlotType.AnyFilled)
+                    {
+                        SlotType[,,] newDesignationA = currentDesignation.Clone() as SlotType[,,];
+                        SlotType[,,] newDesignationB = currentDesignation.Clone() as SlotType[,,];
+                        newDesignationA[x, y, z] = SlotType.FlatRoof;
+                        newDesignationB[x, y, z] = SlotType.SlantedRoof;
+                        foreach (SlotType[,,] item in GetAllPossibleDesignationKeys(newDesignationA, x, y, z))
+                        {
+                            yield return item;
+                        }
+                        foreach (SlotType[,,] item in GetAllPossibleDesignationKeys(newDesignationB, x, y, z))
+                        {
+                            yield return item;
+                        }
+                    }
+                }
+            }
+        }
+        yield return currentDesignation;
     }
 
     public override string ToString()
