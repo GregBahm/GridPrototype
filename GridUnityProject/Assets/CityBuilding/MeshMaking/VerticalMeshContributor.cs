@@ -19,13 +19,13 @@ namespace MeshMaking
             MeshBuilderConnectionPoint edgePoint = new MeshBuilderConnectionPoint(sourceCell, connectedCell);
             MeshBuilderConnectionPoint edgeAbovePoint = new MeshBuilderConnectionPoint(baseAbove, connectedAbove);
 
-            if(!connectedCell.Filled || edge.IsBorder)
+            if(!connectedCell.IsFilled || edge.IsBorder)
             {
                 points.Add(edgePoint);
                 points.Add(edgeAbovePoint);
             }
 
-            if (!connectedCell.Filled)
+            if (!connectedCell.IsFilled)
             {
                 foreach (GroundQuad quad in edge.Quads)
                 {

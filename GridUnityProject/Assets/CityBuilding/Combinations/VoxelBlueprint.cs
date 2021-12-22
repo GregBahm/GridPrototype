@@ -7,7 +7,6 @@ using UnityEngine;
 public class VoxelBlueprint : ScriptableObject
 {
     public Mesh ArtContent;
-    public bool[] DesignationValues;
     public VoxelConnectionType Up;
     public VoxelConnectionType Down;
     public VoxelConnectionType PositiveX;
@@ -20,7 +19,7 @@ public class VoxelBlueprint : ScriptableObject
     {
         VoxelVisualConnections baseConnections = new VoxelVisualConnections(Up, Down, PositiveX, NegativeX, PositiveZ, NegativeZ);
 
-        VoxelDesignation baseDesignation = new VoxelDesignation(DesignationValues);
+        VoxelDesignation baseDesignation = new VoxelDesignation(Designations.ToArray());
         int priority = 0;
         yield return new VoxelVisualOption(ArtContent, baseDesignation.Description, false, 0, priority, baseConnections);
         IEnumerable<GeneratedVoxelDesignation> variants = baseDesignation.GetUniqueVariants().ToArray();
@@ -44,6 +43,21 @@ public class DesignationGrid
     public SlotType X1Y0Z1;
     public SlotType X0Y1Z1;
     public SlotType X1Y1Z1;
+
+    public SlotType[] ToArray()
+    {
+        return new SlotType[]
+        {
+            X0Y1Z1,
+            X1Y1Z1,
+            X0Y0Z1,
+            X1Y0Z1,
+            X0Y1Z0,
+            X1Y1Z0,
+            X0Y0Z0,
+            X1Y0Z0,
+        };
+    }
 }
 
 public enum SlotType

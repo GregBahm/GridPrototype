@@ -42,12 +42,12 @@ namespace MeshMaking
 
         private bool GetDoesHaveTop()
         {
-            return (cell.Height == MainGrid.VoxelHeight - 1) || !cell.GroundPoint.Voxels[cell.Height + 1].Filled;
+            return (cell.Height == MainGrid.VoxelHeight - 1) || !cell.GroundPoint.Voxels[cell.Height + 1].IsFilled;
         }
 
         private bool GetDoesHaveBottom()
         {
-            return cell.Height != 0 && !cell.GroundPoint.Voxels[cell.Height - 1].Filled;
+            return cell.Height != 0 && !cell.GroundPoint.Voxels[cell.Height - 1].IsFilled;
         }
     }
 }

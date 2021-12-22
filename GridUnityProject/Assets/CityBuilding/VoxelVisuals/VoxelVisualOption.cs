@@ -3,7 +3,7 @@
 public class VoxelVisualOption
 {
     public Mesh Mesh { get; }
-    private readonly bool[,,] designation;
+    private readonly SlotType[,,] designation;
 
     public int Priority { get; }
 
@@ -12,7 +12,7 @@ public class VoxelVisualOption
 
     public VoxelVisualConnections Connections { get; }
 
-    public VoxelVisualOption(Mesh mesh, bool[,,] designation, bool flipped, int rotations, int priority, VoxelVisualConnections connections)
+    public VoxelVisualOption(Mesh mesh, SlotType[,,] designation, bool flipped, int rotations, int priority, VoxelVisualConnections connections)
     {
         Mesh = mesh;
         this.designation = designation;
@@ -25,7 +25,7 @@ public class VoxelVisualOption
     public string GetDesignationKey()
     {
         string ret = "";
-        foreach (bool item in designation)
+        foreach (SlotType item in designation)
         {
             ret += item.ToString() + " ";
         }

@@ -13,14 +13,18 @@ public class VoxelCell
 
     public int Height { get; }
 
-    public bool Filled
+    private SlotType designation;
+    public SlotType Designation
     {
-        get { return grid.IsFilled(this); }
+        get => designation;
         set
         {
-            grid.SetCellFilled(this, value);
+            designation = value;
+            grid.SetCellFilled(this, value != SlotType.Empty);
         }
     }
+
+    public bool IsFilled { get { return designation != SlotType.Empty; } }
 
     public VoxelCell CellBelow
     {

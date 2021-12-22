@@ -100,8 +100,8 @@ public class VoxelVisualComponent
 
     public VoxelDesignation GetCurrentDesignation()
     {
-        bool[,] bottomDesignationLayer = GetDesignationLayer(bottomLayer);
-        bool[,] topDesignationLayer = GetDesignationLayer(topLayer);
+        SlotType[,] bottomDesignationLayer = GetDesignationLayer(bottomLayer);
+        SlotType[,] topDesignationLayer = GetDesignationLayer(topLayer);
         VoxelDesignation designation = new VoxelDesignation();
         if(OnTopHalf)
         {
@@ -111,18 +111,18 @@ public class VoxelVisualComponent
             designation.Description[0, 0, 1] = bottomDesignationLayer[0, 1];
             designation.Description[1, 0, 1] = bottomDesignationLayer[1, 1];
 
-            designation.Description[0, 1, 0] = bottomDesignationLayer[0, 0] && topDesignationLayer[0,0];
-            designation.Description[1, 1, 0] = bottomDesignationLayer[1, 0] && topDesignationLayer[1, 0];
-            designation.Description[0, 1, 1] = bottomDesignationLayer[0, 1] && topDesignationLayer[0, 1];
-            designation.Description[1, 1, 1] = bottomDesignationLayer[1, 1] && topDesignationLayer[1, 1];
+            designation.Description[0, 1, 0] = GetConnectedDesignation(bottomDesignationLayer[0, 0], topDesignationLayer[0,0]);
+            designation.Description[1, 1, 0] = GetConnectedDesignation(bottomDesignationLayer[1, 0], topDesignationLayer[1, 0]);
+            designation.Description[0, 1, 1] = GetConnectedDesignation(bottomDesignationLayer[0, 1], topDesignationLayer[0, 1]);
+            designation.Description[1, 1, 1] = GetConnectedDesignation(bottomDesignationLayer[1, 1], topDesignationLayer[1, 1]);
         }
         else
         {
             // top goes straignt in, bottom is AND
-            designation.Description[0, 0, 0] = bottomDesignationLayer[0, 0] && topDesignationLayer[0, 0];
-            designation.Description[1, 0, 0] = bottomDesignationLayer[1, 0] && topDesignationLayer[1, 0];
-            designation.Description[0, 0, 1] = bottomDesignationLayer[0, 1] && topDesignationLayer[0, 1];
-            designation.Description[1, 0, 1] = bottomDesignationLayer[1, 1] && topDesignationLayer[1, 1];
+            designation.Description[0, 0, 0] = GetConnectedDesignation(bottomDesignationLayer[0, 0], topDesignationLayer[0, 0]);
+            designation.Description[1, 0, 0] = GetConnectedDesignation(bottomDesignationLayer[1, 0], topDesignationLayer[1, 0]);
+            designation.Description[0, 0, 1] = GetConnectedDesignation(bottomDesignationLayer[0, 1], topDesignationLayer[0, 1]);
+            designation.Description[1, 0, 1] = GetConnectedDesignation(bottomDesignationLayer[1, 1], topDesignationLayer[1, 1]);
 
             designation.Description[0, 1, 0] = topDesignationLayer[0, 0]; 
             designation.Description[1, 1, 0] = topDesignationLayer[1, 0]; 
@@ -133,16 +133,27 @@ public class VoxelVisualComponent
         return designation;
     }
 
-    private bool[,] GetDesignationLayer(VoxelVisualsLayer bottomLayer)
+    //TODO: Figure out if this logic is right.
+    // Currently returning "AnyFilled" if a is slanted roof and b is not. Should probably work out a better system.
+    private static SlotType GetConnectedDesignation(params SlotType[] designations)
     {
-        bool[,] ret = new bool[2, 2];
-        ret[0,0] = bottomLayer.BasisCell.Filled;
-        ret[1,0] = bottomLayer.BasisCell.Filled && bottomLayer.AdjacentCellA.Filled;
-        ret[0,1] = bottomLayer.BasisCell.Filled && bottomLayer.AdjacentCellB.Filled;
-        ret[1,1] = bottomLayer.BasisCell.Filled
-            && bottomLayer.DiagonalCell.Filled
-            && bottomLayer.AdjacentCellA.Filled
-            && bottomLayer.AdjacentCellB.Filled;
+        if(designations.Any(item => item == SlotType.Empty))
+            return SlotType.Empty;
+        if (designations.All(item => item == designations[0]))
+            return designations[0];
+        return SlotType.AnyFilled;
+    }
+
+    private SlotType[,] GetDesignationLayer(VoxelVisualsLayer bottomLayer)
+    {
+        SlotType[,] ret = new SlotType[2, 2];
+        ret[0,0] = bottomLayer.BasisCell.Designation;
+        ret[1,0] = GetConnectedDesignation(bottomLayer.BasisCell.Designation, bottomLayer.AdjacentCellA.Designation);
+        ret[0,1] = GetConnectedDesignation(bottomLayer.BasisCell.Designation, bottomLayer.AdjacentCellB.Designation);
+        ret[1,1] = GetConnectedDesignation(bottomLayer.BasisCell.Designation,
+            bottomLayer.DiagonalCell.Designation,
+            bottomLayer.AdjacentCellA.Designation,
+            bottomLayer.AdjacentCellB.Designation);
         return ret;
     }
 

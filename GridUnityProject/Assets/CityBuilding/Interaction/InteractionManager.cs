@@ -32,6 +32,8 @@ public class InteractionManager : MonoBehaviour
     [Range(-1, 1)]
     public float ExpansionAngleThreshold;
 
+    public SlotType FillType;
+
     private void Start()
     {
         gameMain = GetComponent<CityBuildingMain>();
@@ -171,7 +173,7 @@ public class InteractionManager : MonoBehaviour
     {
         if (Input.GetMouseButtonUp(1) && hitInfo != null && hitInfo.SourceCell != null)
         {
-            hitInfo.SourceCell.Filled = false;
+            hitInfo.SourceCell.Designation = SlotType.Empty;
             gameMain.UpdateInteractionGrid();
             gameMain.UpdateVoxelVisuals(hitInfo.SourceCell);
         }
@@ -183,7 +185,7 @@ public class InteractionManager : MonoBehaviour
             && hitInfo != null 
             && hitInfo.TargetCell != null)
         {
-            hitInfo.TargetCell.Filled = true;
+            hitInfo.TargetCell.Designation = FillType;
             gameMain.UpdateInteractionGrid();
             gameMain.UpdateVoxelVisuals(hitInfo.TargetCell);
         }

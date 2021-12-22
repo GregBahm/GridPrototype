@@ -389,6 +389,7 @@ MonoBehaviour:
   cursor: {fileID: 1616632275}
   GroundModificationMode: 0
   ExpansionAngleThreshold: -0.83
+  FillType: 2
 --- !u!114 &536624981
 MonoBehaviour:
   m_ObjectHideFlags: 0
