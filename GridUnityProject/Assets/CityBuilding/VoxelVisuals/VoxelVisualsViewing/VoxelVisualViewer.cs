@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 
@@ -13,15 +14,17 @@ public class VoxelVisualViewer : MonoBehaviour
     public bool Next;
     public bool Previous;
 
+    public bool ReportKeys;
+
     public VoxelBlueprint[] AllBlueprints;
 
     public VoxelDesignationDisplay X0Y0Z0Display;
-    public VoxelDesignationDisplay X1Y0Z0Display;
-    public VoxelDesignationDisplay X0Y1Z0Display;
-    public VoxelDesignationDisplay X1Y1Z0Display;
     public VoxelDesignationDisplay X0Y0Z1Display;
-    public VoxelDesignationDisplay X1Y0Z1Display;
+    public VoxelDesignationDisplay X0Y1Z0Display;
     public VoxelDesignationDisplay X0Y1Z1Display;
+    public VoxelDesignationDisplay X1Y0Z0Display;
+    public VoxelDesignationDisplay X1Y0Z1Display;
+    public VoxelDesignationDisplay X1Y1Z0Display;
     public VoxelDesignationDisplay X1Y1Z1Display;
 
     public ConnectionLabel[] ConnectionLabels;
@@ -48,6 +51,26 @@ public class VoxelVisualViewer : MonoBehaviour
 
         meshFilter.mesh = CurrentBlueprint.ArtContent;
         SetDesignationDisplay();
+
+        HandleKeyReport();
+    }
+
+    private void HandleKeyReport()
+    {
+        if(ReportKeys)
+        {
+            ReportKeys = false;
+            VoxelVisualOption[] options = CurrentBlueprint.GenerateVisualOptions().ToArray();
+            foreach (VoxelVisualOption option in options)
+            {
+                Debug.Log("New Variant");
+                string[] keys = option.GetDesignationKeys().ToArray();
+                foreach (string key in keys)
+                {
+                    Debug.Log(key);
+                }
+            }
+        }
     }
 
     private void UpdateBlueprintIndex()
@@ -72,12 +95,12 @@ public class VoxelVisualViewer : MonoBehaviour
     private void SetDesignationDisplay()
     {
         X0Y0Z0Display.UpdateDisplayContent(CurrentBlueprint.Designations.X0Y0Z0);
-        X1Y0Z0Display.UpdateDisplayContent(CurrentBlueprint.Designations.X1Y0Z0);
-        X0Y1Z0Display.UpdateDisplayContent(CurrentBlueprint.Designations.X0Y1Z0);
-        X1Y1Z0Display.UpdateDisplayContent(CurrentBlueprint.Designations.X1Y1Z0);
         X0Y0Z1Display.UpdateDisplayContent(CurrentBlueprint.Designations.X0Y0Z1);
-        X1Y0Z1Display.UpdateDisplayContent(CurrentBlueprint.Designations.X1Y0Z1);
+        X0Y1Z0Display.UpdateDisplayContent(CurrentBlueprint.Designations.X0Y1Z0);
         X0Y1Z1Display.UpdateDisplayContent(CurrentBlueprint.Designations.X0Y1Z1);
+        X1Y0Z0Display.UpdateDisplayContent(CurrentBlueprint.Designations.X1Y0Z0);
+        X1Y0Z1Display.UpdateDisplayContent(CurrentBlueprint.Designations.X1Y0Z1);
+        X1Y1Z0Display.UpdateDisplayContent(CurrentBlueprint.Designations.X1Y1Z0);
         X1Y1Z1Display.UpdateDisplayContent(CurrentBlueprint.Designations.X1Y1Z1);
     }
 }

@@ -146,9 +146,9 @@ public class VoxelVisualComponent
     private SlotType[,] GetDesignationLayer(VoxelVisualsLayer bottomLayer)
     {
         SlotType[,] ret = new SlotType[2, 2];
-        ret[0,0] = bottomLayer.BasisCell.Designation;
-        ret[1,0] = GetConnectedDesignation(bottomLayer.BasisCell.Designation, bottomLayer.AdjacentCellA.Designation);
-        ret[0,1] = GetConnectedDesignation(bottomLayer.BasisCell.Designation, bottomLayer.AdjacentCellB.Designation);
+        ret[0,1] = bottomLayer.BasisCell.Designation;
+        ret[0,0] = GetConnectedDesignation(bottomLayer.BasisCell.Designation, bottomLayer.AdjacentCellA.Designation);
+        ret[1,0] = GetConnectedDesignation(bottomLayer.BasisCell.Designation, bottomLayer.AdjacentCellB.Designation);
         ret[1,1] = GetConnectedDesignation(bottomLayer.BasisCell.Designation,
             bottomLayer.DiagonalCell.Designation,
             bottomLayer.AdjacentCellA.Designation,

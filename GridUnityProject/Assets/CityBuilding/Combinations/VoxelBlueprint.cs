@@ -36,26 +36,26 @@ public class VoxelBlueprint : ScriptableObject
 public class DesignationGrid
 {
     public SlotType X0Y0Z0;
-    public SlotType X1Y0Z0;
-    public SlotType X0Y1Z0;
-    public SlotType X1Y1Z0;
     public SlotType X0Y0Z1;
-    public SlotType X1Y0Z1;
+    public SlotType X0Y1Z0;
     public SlotType X0Y1Z1;
+    public SlotType X1Y0Z0;
+    public SlotType X1Y0Z1;
+    public SlotType X1Y1Z0;
     public SlotType X1Y1Z1;
 
     public SlotType[] ToFlatArray()
     {
         return new SlotType[]
         {
-            X0Y1Z1,
-            X1Y1Z1,
-            X0Y0Z1,
-            X1Y0Z1,
-            X0Y1Z0,
-            X1Y1Z0,
             X0Y0Z0,
+            X0Y0Z1,
+            X0Y1Z0,
+            X0Y1Z1,
             X1Y0Z0,
+            X1Y0Z1,
+            X1Y1Z0,
+            X1Y1Z1,
         };
     }
 
@@ -63,12 +63,12 @@ public class DesignationGrid
     {
         SlotType[,,] ret = new SlotType[2, 2, 2];
         ret[0, 0, 0] = X0Y0Z0;
-        ret[1, 0, 0] = X1Y0Z0;
-        ret[0, 1, 0] = X0Y1Z0;
-        ret[1, 1, 0] = X1Y1Z0;
         ret[0, 0, 1] = X0Y0Z1;
-        ret[1, 0, 1] = X1Y0Z1;
+        ret[0, 1, 0] = X0Y1Z0;
         ret[0, 1, 1] = X0Y1Z1;
+        ret[1, 0, 0] = X1Y0Z0;
+        ret[1, 0, 1] = X1Y0Z1;
+        ret[1, 1, 0] = X1Y1Z0;
         ret[1, 1, 1] = X1Y1Z1;
         return ret;
     }

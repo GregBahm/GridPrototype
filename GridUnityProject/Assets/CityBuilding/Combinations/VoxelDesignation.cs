@@ -18,23 +18,23 @@ public class VoxelDesignation
     public VoxelDesignation(SlotType[] values)
     {
         Description[0, 0, 0] = values[0];
-        Description[1, 0, 0] = values[1];
+        Description[0, 0, 1] = values[1];
         Description[0, 1, 0] = values[2];
-        Description[1, 1, 0] = values[3];
-        Description[0, 0, 1] = values[4];
+        Description[0, 1, 1] = values[3];
+        Description[1, 0, 0] = values[4];
         Description[1, 0, 1] = values[5];
-        Description[0, 1, 1] = values[6];
+        Description[1, 1, 0] = values[6];
         Description[1, 1, 1] = values[7];
     }
     public static string GetDesignationKey(SlotType[,,] description)
     {
         return "X0Y0Z0: " + description[0, 0, 0].ToString() + " " +
-               "X1Y0Z0: " + description[1, 0, 0].ToString() + " " +
-               "X0Y1Z0: " + description[0, 1, 0].ToString() + " " +
-               "X1Y1Z0: " + description[1, 1, 0].ToString() + " " +
                "X0Y0Z1: " + description[0, 0, 1].ToString() + " " +
-               "X1Y0Z1: " + description[1, 0, 1].ToString() + " " +
+               "X0Y1Z0: " + description[0, 1, 0].ToString() + " " +
                "X0Y1Z1: " + description[0, 1, 1].ToString() + " " +
+               "X1Y0Z0: " + description[1, 0, 0].ToString() + " " +
+               "X1Y0Z1: " + description[1, 0, 1].ToString() + " " +
+               "X1Y1Z0: " + description[1, 1, 0].ToString() + " " +
                "X1Y1Z1: " + description[1, 1, 1].ToString();
     }
 
