@@ -13,10 +13,18 @@ MonoBehaviour:
   m_Name: Emptiness_Ground
   m_EditorClassIdentifier: 
   ArtContent: {fileID: 0}
-  DesignationValues: 0000000000000000
   Up: {fileID: 0}
   Down: {fileID: 11400000, guid: 72b24cdbfd663e349955d51a9e49a6e7, type: 2}
   PositiveX: {fileID: 0}
   NegativeX: {fileID: 0}
   PositiveZ: {fileID: 0}
   NegativeZ: {fileID: 0}
+  Designations:
+    X0Y0Z0: 0
+    X1Y0Z0: 0
+    X0Y1Z0: 0
+    X1Y1Z0: 0
+    X0Y0Z1: 0
+    X1Y0Z1: 0
+    X0Y1Z1: 0
+    X1Y1Z1: 0

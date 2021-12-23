@@ -12,6 +12,10 @@ public class OptionsByDesignation
 
     public VoxelVisualOption[] GetOptions(VoxelDesignation designation)
     {
+        if(!optionsByDesignationKey.ContainsKey(designation.Key))
+        {
+            UnityEngine.Debug.Log("Yes officer this one right here.");
+        }
         return optionsByDesignationKey[designation.Key];
     }
 

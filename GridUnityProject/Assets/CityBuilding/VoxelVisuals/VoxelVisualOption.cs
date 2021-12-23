@@ -25,15 +25,10 @@ public class VoxelVisualOption
 
     public IEnumerable<string> GetDesignationKeys()
     {
-        IEnumerable<SlotType[,,]> keys = GetAllPossibleDesignationKeys(designation, 0, 0, 0);
-        foreach (SlotType[,,] key in keys)
+        IEnumerable<SlotType[,,]> keyDescriptions = GetAllPossibleDesignationKeys(designation, 0, 0, 0);
+        foreach (SlotType[,,] description in keyDescriptions)
         {
-            string ret = "";
-            foreach (SlotType slot in key)
-            {
-                ret += slot.ToString() + " ";
-            }
-            yield return ret;
+            yield return VoxelDesignation.GetDesignationKey(description);
         }
     }
 
@@ -60,6 +55,7 @@ public class VoxelVisualOption
                         {
                             yield return item;
                         }
+                        yield break;
                     }
                 }
             }

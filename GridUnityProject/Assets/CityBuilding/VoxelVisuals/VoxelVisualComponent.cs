@@ -133,15 +133,14 @@ public class VoxelVisualComponent
         return designation;
     }
 
-    //TODO: Figure out if this logic is right.
-    // Currently returning "AnyFilled" if a is slanted roof and b is not. Should probably work out a better system.
+    // In the case of a mismatch, currently defaults to slanted
     private static SlotType GetConnectedDesignation(params SlotType[] designations)
     {
         if(designations.Any(item => item == SlotType.Empty))
             return SlotType.Empty;
         if (designations.All(item => item == designations[0]))
             return designations[0];
-        return SlotType.AnyFilled;
+        return SlotType.SlantedRoof;
     }
 
     private SlotType[,] GetDesignationLayer(VoxelVisualsLayer bottomLayer)
