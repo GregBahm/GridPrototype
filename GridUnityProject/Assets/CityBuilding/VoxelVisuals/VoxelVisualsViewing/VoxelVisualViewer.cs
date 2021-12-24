@@ -61,15 +61,7 @@ public class VoxelVisualViewer : MonoBehaviour
         {
             ReportKeys = false;
             VoxelVisualOption[] options = CurrentBlueprint.GenerateVisualOptions().ToArray();
-            foreach (VoxelVisualOption option in options)
-            {
-                Debug.Log("New Variant");
-                string[] keys = option.GetDesignationKeys().ToArray();
-                foreach (string key in keys)
-                {
-                    Debug.Log(key);
-                }
-            }
+            Dictionary<VoxelVisualOption, string[]> toInspect = options.ToDictionary(item => item, item => item.GetDesignationKeys().ToArray());
         }
     }
 

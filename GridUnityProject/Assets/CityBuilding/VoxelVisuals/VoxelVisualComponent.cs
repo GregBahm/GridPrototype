@@ -58,10 +58,10 @@ public class VoxelVisualComponent
 
     private Vector3[] GetAnchors()
     {
-        Vector3 anchorA = Vector3.zero;
-        Vector3 anchorB = (bottomLayer.AdjacentCellA.CellPosition - bottomLayer.BasisCell.CellPosition) / 2;
-        Vector3 anchorC = bottomLayer.Center - bottomLayer.BasisCell.CellPosition;
-        Vector3 anchorD = (bottomLayer.AdjacentCellB.CellPosition - bottomLayer.BasisCell.CellPosition) / 2;
+        Vector3 anchorA = (bottomLayer.AdjacentCellA.CellPosition - bottomLayer.BasisCell.CellPosition) / 2;
+        Vector3 anchorB = Vector3.zero;
+        Vector3 anchorC = (bottomLayer.AdjacentCellB.CellPosition - bottomLayer.BasisCell.CellPosition) / 2;
+        Vector3 anchorD = bottomLayer.Center - bottomLayer.BasisCell.CellPosition;
         return new Vector3[] { anchorA, anchorB, anchorC, anchorD };
     }
 
@@ -74,11 +74,11 @@ public class VoxelVisualComponent
 
     private VoxelVisualComponent GetDownNeighbor()
     {
-        if(OnTopHalf)
+        if (OnTopHalf)
         {
             return Core.Visuals.GetComponent(Quad, false);
         }
-        if(Core.CellBelow == null)
+        if (Core.CellBelow == null)
         {
             return null;
         }
@@ -87,9 +87,9 @@ public class VoxelVisualComponent
 
     private VoxelVisualComponent GetUpNeighbor()
     {
-        if(OnTopHalf)
+        if (OnTopHalf)
         {
-            if(Core.CellAbove == null)
+            if (Core.CellAbove == null)
             {
                 return null;
             }
@@ -103,31 +103,31 @@ public class VoxelVisualComponent
         SlotType[,] bottomDesignationLayer = GetDesignationLayer(bottomLayer);
         SlotType[,] topDesignationLayer = GetDesignationLayer(topLayer);
         VoxelDesignation designation = new VoxelDesignation();
-        if(OnTopHalf)
+        if (OnTopHalf)
         {
             // bottom goes straignt in, top is AND
             designation.Description[0, 0, 0] = bottomDesignationLayer[0, 0];
-            designation.Description[1, 0, 0] = bottomDesignationLayer[1, 0];
             designation.Description[0, 0, 1] = bottomDesignationLayer[0, 1];
+            designation.Description[1, 0, 0] = bottomDesignationLayer[1, 0];
             designation.Description[1, 0, 1] = bottomDesignationLayer[1, 1];
 
-            designation.Description[0, 1, 0] = GetConnectedDesignation(bottomDesignationLayer[0, 0], topDesignationLayer[0,0]);
-            designation.Description[1, 1, 0] = GetConnectedDesignation(bottomDesignationLayer[1, 0], topDesignationLayer[1, 0]);
+            designation.Description[0, 1, 0] = GetConnectedDesignation(bottomDesignationLayer[0, 0], topDesignationLayer[0, 0]);
             designation.Description[0, 1, 1] = GetConnectedDesignation(bottomDesignationLayer[0, 1], topDesignationLayer[0, 1]);
+            designation.Description[1, 1, 0] = GetConnectedDesignation(bottomDesignationLayer[1, 0], topDesignationLayer[1, 0]);
             designation.Description[1, 1, 1] = GetConnectedDesignation(bottomDesignationLayer[1, 1], topDesignationLayer[1, 1]);
         }
         else
         {
             // top goes straignt in, bottom is AND
             designation.Description[0, 0, 0] = GetConnectedDesignation(bottomDesignationLayer[0, 0], topDesignationLayer[0, 0]);
-            designation.Description[1, 0, 0] = GetConnectedDesignation(bottomDesignationLayer[1, 0], topDesignationLayer[1, 0]);
             designation.Description[0, 0, 1] = GetConnectedDesignation(bottomDesignationLayer[0, 1], topDesignationLayer[0, 1]);
+            designation.Description[1, 0, 0] = GetConnectedDesignation(bottomDesignationLayer[1, 0], topDesignationLayer[1, 0]);
             designation.Description[1, 0, 1] = GetConnectedDesignation(bottomDesignationLayer[1, 1], topDesignationLayer[1, 1]);
 
-            designation.Description[0, 1, 0] = topDesignationLayer[0, 0]; 
-            designation.Description[1, 1, 0] = topDesignationLayer[1, 0]; 
+            designation.Description[0, 1, 0] = topDesignationLayer[0, 0];
             designation.Description[0, 1, 1] = topDesignationLayer[0, 1];
-            designation.Description[1, 1, 1] = topDesignationLayer[1, 1]; 
+            designation.Description[1, 1, 0] = topDesignationLayer[1, 0];
+            designation.Description[1, 1, 1] = topDesignationLayer[1, 1];
         }
         designation.IsGround = Core.Height == 0 && !OnTopHalf;
         return designation;
@@ -136,7 +136,7 @@ public class VoxelVisualComponent
     // In the case of a mismatch, currently defaults to slanted
     private static SlotType GetConnectedDesignation(params SlotType[] designations)
     {
-        if(designations.Any(item => item == SlotType.Empty))
+        if (designations.Any(item => item == SlotType.Empty))
             return SlotType.Empty;
         if (designations.All(item => item == designations[0]))
             return designations[0];
@@ -146,10 +146,10 @@ public class VoxelVisualComponent
     private SlotType[,] GetDesignationLayer(VoxelVisualsLayer bottomLayer)
     {
         SlotType[,] ret = new SlotType[2, 2];
-        ret[0,1] = bottomLayer.BasisCell.Designation;
-        ret[0,0] = GetConnectedDesignation(bottomLayer.BasisCell.Designation, bottomLayer.AdjacentCellA.Designation);
-        ret[1,0] = GetConnectedDesignation(bottomLayer.BasisCell.Designation, bottomLayer.AdjacentCellB.Designation);
-        ret[1,1] = GetConnectedDesignation(bottomLayer.BasisCell.Designation,
+        ret[1, 0] = GetConnectedDesignation(bottomLayer.BasisCell.Designation, bottomLayer.AdjacentCellA.Designation);
+        ret[0, 0] = bottomLayer.BasisCell.Designation;
+        ret[0, 1] = GetConnectedDesignation(bottomLayer.BasisCell.Designation, bottomLayer.AdjacentCellB.Designation);
+        ret[1, 1] = GetConnectedDesignation(bottomLayer.BasisCell.Designation,
             bottomLayer.DiagonalCell.Designation,
             bottomLayer.AdjacentCellA.Designation,
             bottomLayer.AdjacentCellB.Designation);
@@ -166,7 +166,7 @@ public class VoxelVisualComponent
                 int rotatedIndex = (i + 4 - Contents.Rotations) % 4;
                 rotatedAnchors[i] = anchors[rotatedIndex];
             }
-            if(Contents.Flipped)
+            if (Contents.Flipped)
             {
                 Vector3 anchor0 = rotatedAnchors[0];
                 Vector3 anchor2 = rotatedAnchors[2];

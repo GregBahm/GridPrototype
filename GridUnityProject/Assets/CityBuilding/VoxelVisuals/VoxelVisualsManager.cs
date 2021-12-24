@@ -103,6 +103,7 @@ public class VoxelVisualsManager
     private class VoxelVisualDebugger : MonoBehaviour
     {
         public bool DoDebug;
+        public bool ShowDesignation;
         public VoxelVisualComponent Component;
 
         private static Color PositiveZColor = new Color(0, 0, 1f);
@@ -112,6 +113,20 @@ public class VoxelVisualsManager
 
         private void Update()
         {
+            if(ShowDesignation)
+            {
+                ShowDesignation = false;
+                var designation = Component.GetCurrentDesignation();
+                CreateDesignationCube(0, 0, 0, designation);
+                CreateDesignationCube(0, 0, 1, designation);
+                CreateDesignationCube(0, 1, 0, designation);
+                CreateDesignationCube(0, 1, 1, designation);
+                CreateDesignationCube(1, 0, 0, designation);
+                CreateDesignationCube(1, 0, 1, designation);
+                CreateDesignationCube(1, 1, 0, designation);
+                CreateDesignationCube(1, 1, 1, designation);
+            }
+
             if(DoDebug)
             {
                 Debug.DrawLine(Component.VisualCenter, Component.Neighbors.Forward.VisualCenter, PositiveZColor);
@@ -119,6 +134,29 @@ public class VoxelVisualsManager
                 Debug.DrawLine(Component.VisualCenter, Component.Neighbors.Left.VisualCenter, PositiveXColor);
                 Debug.DrawLine(Component.VisualCenter, Component.Neighbors.Right.VisualCenter, NegativeXColor);
             }
+        }
+
+        private void CreateDesignationCube(int x, int y, int z, VoxelDesignation designation)
+        {
+            GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            Destroy(cube.GetComponent<BoxCollider>());
+            Vector3 center = Component.ContentPosition;
+            Vector3 toLeft = (Component.Neighbors.Left.VisualCenter - Component.ContentPosition) * .5f;
+            Vector3 toRight = (Component.Neighbors.Right.VisualCenter - Component.ContentPosition) * .5f;
+            Vector3 toForward = (Component.Neighbors.Forward.VisualCenter - Component.ContentPosition) * .5f;
+            Vector3 toBack = (Component.Neighbors.Back.VisualCenter - Component.ContentPosition) * .5f;
+
+            Vector3 boxPos = center;
+            boxPos += x == 0 ? toRight : toLeft;
+            boxPos += z == 0 ? toBack : toForward;
+            boxPos += y == 0 ? new Vector3(0, .125f, 0) : new Vector3(0, .375f, 0);
+            cube.transform.localScale = new Vector3(.20f, .20f, .20f);
+            cube.transform.position = boxPos;
+            if (designation.Description[x, y, z] == SlotType.Empty)
+            {
+                cube.GetComponent<MeshRenderer>().material.SetColor("_Color", Color.black);
+            }
+            cube.name = gameObject.name + " x" + x + " y" + y + " z" + z + " " + designation.Description[x, y, z].ToString();
         }
     }
 }
