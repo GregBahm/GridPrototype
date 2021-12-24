@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using UnityEditor;
 using UnityEngine;
 
 public class VoxelVisualViewer : MonoBehaviour
@@ -39,6 +40,24 @@ public class VoxelVisualViewer : MonoBehaviour
     private void Start()
     {
         meshFilter = GetComponent<MeshFilter>();
+        FixAll();
+    }
+
+    private void FixAll()
+    {
+        foreach (VoxelBlueprint item in AllBlueprints)
+        {
+            EditorUtility.SetDirty(item);
+            //SlotType[,,] cube = item.Designations.ToCubedArray();
+            //item.Designations.X0Y0Z0 = cube[1, 1, 1];
+            //item.Designations.X1Y0Z0 = cube[0, 1, 1];
+            //item.Designations.X0Y1Z0 = cube[1, 0, 1];
+            //item.Designations.X1Y1Z0 = cube[0, 0, 1];
+            //item.Designations.X0Y0Z1 = cube[1, 1, 0];
+            //item.Designations.X1Y0Z1 = cube[0, 1, 0];
+            //item.Designations.X0Y1Z1 = cube[1, 0, 0];
+            //item.Designations.X1Y1Z1 = cube[0, 0, 0];
+        }
     }
 
     private void Update()

@@ -14,7 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ArtContent: {fileID: -8870929683087262004, guid: c4200ad3f8074124c88f794631335e74,
     type: 3}
-  DesignationValues: 0000010100000101
   Up: {fileID: 11400000, guid: 3acc25944ba071148beb4d0ae226ce4d, type: 2}
   Down: {fileID: 0}
   PositiveX: {fileID: 0}
@@ -22,11 +21,11 @@ MonoBehaviour:
   PositiveZ: {fileID: 0}
   NegativeZ: {fileID: 0}
   Designations:
-    X0Y0Z0: 0
-    X1Y0Z0: 0
-    X0Y1Z0: 2
-    X1Y1Z0: 2
-    X0Y0Z1: 0
-    X1Y0Z1: 0
-    X0Y1Z1: 2
-    X1Y1Z1: 2
+    X0Y0Z0: 2
+    X1Y0Z0: 2
+    X0Y1Z0: 0
+    X1Y1Z0: 0
+    X0Y0Z1: 2
+    X1Y0Z1: 2
+    X0Y1Z1: 0
+    X1Y1Z1: 0

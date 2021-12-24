@@ -27,14 +27,19 @@ public class VoxelDesignation
         Description[1, 0, 0] = values[7];
     }
 
-    public override string ToString()
+    public static string GetDesignationKey(SlotType[,,] description)
     {
         string ret = "";
-        foreach (SlotType item in Description)
+        foreach (SlotType item in description)
         {
             ret += item.ToString() + " ";
         }
         return ret;
+    }
+
+    public override string ToString()
+    {
+        return GetDesignationKey(Description);
     }
 
     public GeneratedVoxelDesignation GetFlipped()

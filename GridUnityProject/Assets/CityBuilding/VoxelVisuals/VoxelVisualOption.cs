@@ -25,26 +25,21 @@ public class VoxelVisualOption
 
     public IEnumerable<string> GetDesignationKeys()
     {
-        IEnumerable<SlotType[,,]> keys = GetAllPossibleDesignationKeys(designation, 0, 0, 0);
-        foreach (SlotType[,,] key in keys)
+        IEnumerable<SlotType[,,]> keyDescriptions = GetAllPossibleDesignationKeys(designation);
+        foreach (SlotType[,,] description in keyDescriptions)
         {
-            string ret = "";
-            foreach (SlotType slot in key)
-            {
-                ret += slot.ToString() + " ";
-            }
-            yield return ret;
+            yield return VoxelDesignation.GetDesignationKey(description);
         }
     }
 
     // For every "AnyFilled" slot, produce a version that is Slanted and version that is Flat  
-    private static IEnumerable<SlotType[,,]> GetAllPossibleDesignationKeys(SlotType[,,] currentDesignation, int startX, int startY, int startZ)
+    private static IEnumerable<SlotType[,,]> GetAllPossibleDesignationKeys(SlotType[,,] currentDesignation)
     {
-        for (int x = startX; x < 2; x++)
+        for (int x = 0; x < 2; x++)
         {
-            for (int y = startY; y < 2; y++)
+            for (int y = 0; y < 2; y++)
             {
-                for (int z = startZ; z < 2; z++)
+                for (int z = 0; z < 2; z++)
                 {
                     if (currentDesignation[x, y, z] == SlotType.AnyFilled)
                     {
@@ -52,14 +47,15 @@ public class VoxelVisualOption
                         SlotType[,,] newDesignationB = currentDesignation.Clone() as SlotType[,,];
                         newDesignationA[x, y, z] = SlotType.FlatRoof;
                         newDesignationB[x, y, z] = SlotType.SlantedRoof;
-                        foreach (SlotType[,,] item in GetAllPossibleDesignationKeys(newDesignationA, x, y, z))
+                        foreach (SlotType[,,] item in GetAllPossibleDesignationKeys(newDesignationA))
                         {
                             yield return item;
                         }
-                        foreach (SlotType[,,] item in GetAllPossibleDesignationKeys(newDesignationB, x, y, z))
+                        foreach (SlotType[,,] item in GetAllPossibleDesignationKeys(newDesignationB))
                         {
                             yield return item;
                         }
+                        yield break;
                     }
                 }
             }
