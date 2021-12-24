@@ -163,7 +163,7 @@ public class VoxelVisualComponent
             Vector3[] rotatedAnchors = new Vector3[4];
             for (int i = 0; i < 4; i++)
             {
-                int rotatedIndex = (i + 4 - Contents.Rotations) % 4;
+                int rotatedIndex = (i + 4 + Contents.Rotations) % 4;
                 rotatedAnchors[i] = anchors[rotatedIndex];
             }
             if (Contents.Flipped)
