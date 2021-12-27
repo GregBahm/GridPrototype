@@ -41,7 +41,7 @@ public class VoxelDesignationDisplay : MonoBehaviour
                 return VoxelVisualViewer.Instance.AnyFilledColor;
             case SlotType.SlantedRoof:
                 return VoxelVisualViewer.Instance.SlantedRoofColor;
-            case SlotType.FlatRoof:
+            case SlotType.WalkableRoof:
             default:
                 return VoxelVisualViewer.Instance.FlatRoofColor;
         }

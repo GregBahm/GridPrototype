@@ -880,6 +880,7 @@ MonoBehaviour:
   CurrentBlueprintIndex: 2
   Next: 0
   Previous: 0
+  ReportKeys: 0
   AllBlueprints:
   - {fileID: 11400000, guid: 44e11c60c57da6949baf9c0d18fcd85c, type: 2}
   - {fileID: 11400000, guid: 8a8709ff392c1084092681fb063ab712, type: 2}
@@ -887,6 +888,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 83bfe241b9cc5c241a49c3e5f2b96329, type: 2}
   - {fileID: 11400000, guid: 7cd9a5bf92a959f48b36c6ba7a9f6cc5, type: 2}
   - {fileID: 11400000, guid: fdc2fdc9e2657b54fac9ac80fa7f8fe7, type: 2}
+  - {fileID: 11400000, guid: 3f98417d42dac394c8c1776b254cdd5c, type: 2}
   - {fileID: 11400000, guid: d0f868403414b9d4780a33b598f3fde0, type: 2}
   - {fileID: 11400000, guid: 5b6c8b87e32b0464e894e452bc57c4d3, type: 2}
   - {fileID: 11400000, guid: 2868dcac1d16e4a41a61c6b1e8aac3d8, type: 2}
@@ -931,12 +933,12 @@ MonoBehaviour:
   - {fileID: 11400000, guid: c3ae102c89a7c7d45a195230019f2dc4, type: 2}
   - {fileID: 11400000, guid: 09bd40fc57cc1e049aad9e1bb454f33b, type: 2}
   X0Y0Z0Display: {fileID: 1995884670}
-  X1Y0Z0Display: {fileID: 1407625051}
-  X0Y1Z0Display: {fileID: 406349580}
-  X1Y1Z0Display: {fileID: 2075857196}
   X0Y0Z1Display: {fileID: 191754765}
-  X1Y0Z1Display: {fileID: 2063534154}
+  X0Y1Z0Display: {fileID: 406349580}
   X0Y1Z1Display: {fileID: 124144317}
+  X1Y0Z0Display: {fileID: 1407625051}
+  X1Y0Z1Display: {fileID: 2063534154}
+  X1Y1Z0Display: {fileID: 2075857196}
   X1Y1Z1Display: {fileID: 1331160627}
   ConnectionLabels:
   - {fileID: 0}
@@ -978,7 +980,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10302, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: f81d8cf6eae3ec54a8af12cffe6f326a, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

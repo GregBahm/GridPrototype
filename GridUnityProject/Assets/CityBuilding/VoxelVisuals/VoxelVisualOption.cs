@@ -45,7 +45,7 @@ public class VoxelVisualOption
                     {
                         SlotType[,,] newDesignationA = currentDesignation.Clone() as SlotType[,,];
                         SlotType[,,] newDesignationB = currentDesignation.Clone() as SlotType[,,];
-                        newDesignationA[x, y, z] = SlotType.FlatRoof;
+                        newDesignationA[x, y, z] = SlotType.WalkableRoof;
                         newDesignationB[x, y, z] = SlotType.SlantedRoof;
                         foreach (SlotType[,,] item in GetAllPossibleDesignationKeys(newDesignationA))
                         {

@@ -14,7 +14,7 @@ public class OptionsByDesignation
     {
         if(!optionsByDesignationKey.ContainsKey(designation.Key))
         {
-            UnityEngine.Debug.Log("Yes officer this one right here.");
+            UnityEngine.Debug.LogError("Wanted but couldn't find this key: " + designation.Key);
         }
         return optionsByDesignationKey[designation.Key];
     }
