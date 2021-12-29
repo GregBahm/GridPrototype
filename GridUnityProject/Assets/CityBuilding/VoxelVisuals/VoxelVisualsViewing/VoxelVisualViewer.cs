@@ -3,10 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
+using UnityEditor;
 using UnityEngine;
 
 public class VoxelVisualViewer : MonoBehaviour
 {
+    private const string BlueprintsFolderPath = "Assets/CityBuilding/Combinations/VoxelBlueprints";
+
     public static VoxelVisualViewer Instance { get; private set; }
 
     public VoxelBlueprint CurrentBlueprint;
@@ -16,7 +19,7 @@ public class VoxelVisualViewer : MonoBehaviour
 
     public bool ReportKeys;
 
-    public VoxelBlueprint[] AllBlueprints;
+    private VoxelBlueprint[] allBlueprints;
 
     public VoxelDesignationDisplay X0Y0Z0Display;
     public VoxelDesignationDisplay X0Y0Z1Display;
@@ -30,9 +33,7 @@ public class VoxelVisualViewer : MonoBehaviour
     public ConnectionLabel[] ConnectionLabels;
     private MeshFilter meshFilter;
 
-    public Color AnyFilledColor;
-    public Color FlatRoofColor;
-    public Color SlantedRoofColor;
+    public VoxelVisualColors Colors;
 
     private void Awake()
     {
@@ -42,12 +43,68 @@ public class VoxelVisualViewer : MonoBehaviour
     private void Start()
     {
         meshFilter = GetComponent<MeshFilter>();
+        allBlueprints = GetAllBlueprints();
+
+    }
+
+    private void CorrectAssetNames()
+    {
+        foreach (VoxelBlueprint item in allBlueprints)
+        {
+            item.name = DeriveCorrectAssetName(item);
+            EditorUtility.SetDirty(item);
+            if (item.ArtContent != null)
+            {
+                item.ArtContent.name = item.name;
+                EditorUtility.SetDirty(item.ArtContent);
+            }
+        }
+    }
+
+    private static string DeriveCorrectAssetName(VoxelBlueprint blueprint)
+    {
+        return blueprint.Down.ToString() + " " +
+            GetNameComponent(blueprint.Designations.X0Y0Z0) + " " +
+            GetNameComponent(blueprint.Designations.X0Y0Z1) + " " +
+            GetNameComponent(blueprint.Designations.X0Y1Z0) + " " +
+            GetNameComponent(blueprint.Designations.X0Y1Z1) + " " +
+            GetNameComponent(blueprint.Designations.X1Y0Z0) + " " +
+            GetNameComponent(blueprint.Designations.X1Y0Z1) + " " +
+            GetNameComponent(blueprint.Designations.X1Y1Z0) + " " +
+            GetNameComponent(blueprint.Designations.X1Y1Z1) + " " +
+                blueprint.Up.ToString();
+    }
+
+    private static string GetNameComponent(SlotType slotType)
+    {
+        switch (slotType)
+        {
+            case SlotType.Empty:
+                return "E";
+            case SlotType.AnyFilled:
+                return "A";
+            case SlotType.SlantedRoof:
+                return "S";
+            case SlotType.WalkableRoof:
+                return "W";
+            case SlotType.Platform:
+                return "P";
+            case SlotType.Ground:
+            default:
+                return "G";
+        }
+    }
+
+    private VoxelBlueprint[] GetAllBlueprints()
+    {
+        string[] guids = AssetDatabase.FindAssets("t: VoxelBlueprint", new[] { BlueprintsFolderPath });
+        return guids.Select(item => AssetDatabase.LoadAssetAtPath<VoxelBlueprint>(AssetDatabase.GUIDToAssetPath(item))).ToArray();
     }
 
     private void Update()
     {
         UpdateBlueprintIndex();
-        CurrentBlueprint = AllBlueprints[CurrentBlueprintIndex];
+        CurrentBlueprint = allBlueprints[CurrentBlueprintIndex];
 
         meshFilter.mesh = CurrentBlueprint.ArtContent;
         SetDesignationDisplay();
@@ -77,10 +134,10 @@ public class VoxelVisualViewer : MonoBehaviour
             CurrentBlueprintIndex--;
             Previous = false;
         }
-        CurrentBlueprintIndex %= (AllBlueprints.Length);
+        CurrentBlueprintIndex %= (allBlueprints.Length);
         if (CurrentBlueprintIndex < 0)
         {
-            CurrentBlueprintIndex = AllBlueprints.Length + CurrentBlueprintIndex;
+            CurrentBlueprintIndex = allBlueprints.Length + CurrentBlueprintIndex;
         }
     }
 
@@ -94,5 +151,34 @@ public class VoxelVisualViewer : MonoBehaviour
         X1Y0Z1Display.UpdateDisplayContent(CurrentBlueprint.Designations.X1Y0Z1);
         X1Y1Z0Display.UpdateDisplayContent(CurrentBlueprint.Designations.X1Y1Z0);
         X1Y1Z1Display.UpdateDisplayContent(CurrentBlueprint.Designations.X1Y1Z1);
+    }
+}
+
+[Serializable]
+public class VoxelVisualColors
+{
+    public Color AnyFilled;
+    public Color WalkableRoof;
+    public Color SlantedRoof;
+    public Color Platform;
+    public Color Ground;
+
+    public Color GetColorFor(SlotType slotType)
+    {
+        switch (slotType)
+        {
+            case SlotType.AnyFilled:
+                return AnyFilled;
+            case SlotType.SlantedRoof:
+                return SlantedRoof;
+            case SlotType.WalkableRoof:
+                return WalkableRoof;
+            case SlotType.Platform:
+                return Platform;
+            case SlotType.Empty:
+            case SlotType.Ground:
+            default:
+                return Ground;
+        }
     }
 }

@@ -18,7 +18,7 @@ public class VoxelDesignationDisplay : MonoBehaviour
     public void UpdateDisplayContent(SlotType slotType)
     {
         Content.enabled = slotType != SlotType.Empty;
-        Color color = GetColor(slotType);
+        Color color = VoxelVisualViewer.Instance.Colors.GetColorFor(slotType);
         Content.material.SetColor("_Color", color);
         Label.text = GetLabelText(slotType);
     }
@@ -30,20 +30,5 @@ public class VoxelDesignationDisplay : MonoBehaviour
         string ret = baseLabel + " ";
         ret += slotType.ToString();
         return ret;
-    }
-
-    private Color GetColor(SlotType slotType)
-    {
-        switch (slotType)
-        {
-            case SlotType.Empty:
-            case SlotType.AnyFilled:
-                return VoxelVisualViewer.Instance.AnyFilledColor;
-            case SlotType.SlantedRoof:
-                return VoxelVisualViewer.Instance.SlantedRoofColor;
-            case SlotType.WalkableRoof:
-            default:
-                return VoxelVisualViewer.Instance.FlatRoofColor;
-        }
     }
 }

@@ -146,7 +146,7 @@ namespace VisualsSolving
                         return false;
                     }
                 }
-                else if (connectionType != null)
+                else if (connectionType != VoxelConnectionType.None)
                 {
                     return false;
                 }
