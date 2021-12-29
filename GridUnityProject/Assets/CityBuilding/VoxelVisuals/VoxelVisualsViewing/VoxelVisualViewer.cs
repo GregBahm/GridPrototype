@@ -44,16 +44,22 @@ public class VoxelVisualViewer : MonoBehaviour
     {
         meshFilter = GetComponent<MeshFilter>();
         allBlueprints = GetAllBlueprints();
-
+        CorrectAssetNames();
     }
 
     private void CorrectAssetNames()
     {
-        foreach (VoxelBlueprint item in allBlueprints)
+        string[] guids = AssetDatabase.FindAssets("t: VoxelBlueprint", new[] { BlueprintsFolderPath });
+        foreach (string guid in guids)
         {
+            string originalPath = AssetDatabase.GUIDToAssetPath(guid);
+            VoxelBlueprint item = AssetDatabase.LoadAssetAtPath<VoxelBlueprint>(originalPath);
+
+            string originalName = item.name;
             item.name = DeriveCorrectAssetName(item);
-            EditorUtility.SetDirty(item);
-            if (item.ArtContent != null)
+            AssetDatabase.RenameAsset(originalPath, "test");
+            return;
+            if (item.ArtContent != null && item.ArtContent.name == originalName)
             {
                 item.ArtContent.name = item.name;
                 EditorUtility.SetDirty(item.ArtContent);
