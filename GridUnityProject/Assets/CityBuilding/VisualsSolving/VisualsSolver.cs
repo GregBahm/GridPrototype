@@ -7,7 +7,6 @@ namespace VisualsSolving
 {
     public class VisualsSolver
     {
-        private readonly VoxelConnectionType groundConnection;
         private Dictionary<VoxelVisualComponent, CellState> cellStateLookup;
         private readonly HashSet<CellState> unsolvedCells;
         private HashSet<CellState> dirtyCells = new HashSet<CellState>();
@@ -26,7 +25,7 @@ namespace VisualsSolving
             get { return cellStateLookup[component]; }
         }
 
-        public VisualsSolver(MainGrid grid, OptionsByDesignation optionsSource, VoxelConnectionType groundConnection)
+        public VisualsSolver(MainGrid grid, OptionsByDesignation optionsSource)
         {
             cellStateLookup = GetInitialDictionary(grid, optionsSource);
             foreach (CellState item in cellStateLookup.Values)
@@ -41,7 +40,6 @@ namespace VisualsSolving
                 }
             }
             unsolvedCells = new HashSet<CellState>(dirtyCells);
-            this.groundConnection = groundConnection;
         }
 
         public void StepForward()
@@ -150,9 +148,6 @@ namespace VisualsSolving
                 {
                     return false;
                 }
-            }else if(direction == CellState.ConnectionDirection.Down)
-            {
-                return connectionType == groundConnection;
             }
             return true;
         }

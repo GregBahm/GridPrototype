@@ -22,10 +22,10 @@ MonoBehaviour:
   NegativeZ: 0
   Designations:
     X0Y0Z0: 5
-    X0Y0Z1: 0
+    X0Y0Z1: 5
     X0Y1Z0: 1
     X0Y1Z1: 0
-    X1Y0Z0: 0
-    X1Y0Z1: 0
+    X1Y0Z0: 5
+    X1Y0Z1: 5
     X1Y1Z0: 0
     X1Y1Z1: 0

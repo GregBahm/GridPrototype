@@ -345,6 +345,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: bba2ca7d70bd2b94e95eb6723ec6f48c, type: 2}
   - {fileID: 11400000, guid: 0877438b5b28a6c4e8de5a8b1ef30dd1, type: 2}
   - {fileID: 11400000, guid: 09bd40fc57cc1e049aad9e1bb454f33b, type: 2}
+  - {fileID: 11400000, guid: ae1d0686bbc59e448875755982fab89f, type: 2}
   - {fileID: 11400000, guid: af760e51b83cba1478b0c44f7df8e15c, type: 2}
   - {fileID: 11400000, guid: 20d3f80ae3eab2444956c2c50cf0c11b, type: 2}
   - {fileID: 11400000, guid: 7ee19315b75f975419f1273584fe781f, type: 2}
@@ -356,7 +357,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7f2a83bbe8a3c2a4e8ae1e7e80f86d6b, type: 2}
   - {fileID: 11400000, guid: a4ee3919f0824474d9b9333e6cb37aa2, type: 2}
   VoxelDisplayMat: {fileID: 2100000, guid: c92dbb93533e359449fc2dfaf9d41853, type: 2}
-  GroundConnection: {fileID: 11400000, guid: 72b24cdbfd663e349955d51a9e49a6e7, type: 2}
 --- !u!4 &536624979
 Transform:
   m_ObjectHideFlags: 0

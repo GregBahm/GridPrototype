@@ -28,9 +28,6 @@ public class CityBuildingMain : MonoBehaviour
     [SerializeField]
     private Material VoxelDisplayMat;
 
-    [SerializeField]
-    private VoxelConnectionType GroundConnection;
-
     public MainGrid MainGrid { get; private set; }
 
     private VoxelVisualsManager visualsAssembler;
@@ -47,7 +44,7 @@ public class CityBuildingMain : MonoBehaviour
         BaseGridVisual.GetComponent<MeshFilter>().mesh = CloneInteractionMesh();
         optionsSource = new OptionsByDesignation(VoxelBlueprints);
         visualsAssembler = new VoxelVisualsManager(VoxelDisplayMat, optionsSource);
-        solver = new VisualsSolver(MainGrid, optionsSource, GroundConnection);
+        solver = new VisualsSolver(MainGrid, optionsSource);
     }
 
     private Mesh CloneInteractionMesh()
@@ -118,6 +115,6 @@ public class CityBuildingMain : MonoBehaviour
     internal void UpdateVoxelVisuals(VoxelCell changedCell)
     {
         visualsAssembler.DoImmediateUpdate(changedCell);
-        solver = new VisualsSolver(MainGrid, optionsSource, GroundConnection);
+        solver = new VisualsSolver(MainGrid, optionsSource);
     }
 }

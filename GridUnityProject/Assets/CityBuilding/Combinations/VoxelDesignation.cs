@@ -8,7 +8,6 @@ public class VoxelDesignation
     [SerializeField]
     private readonly SlotType[,,] description = new SlotType[2, 2, 2];
     public SlotType[,,] Description => description;
-    public bool IsGround { get; set; }
 
     public string Key { get { return ToString(); } }
 

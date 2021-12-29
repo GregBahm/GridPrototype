@@ -10,10 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8530589c0825764489ef903943e44ae8, type: 3}
-  m_Name: Obj9_Ground
+  m_Name: Surrounded_Ground
   m_EditorClassIdentifier: 
-  ArtContent: {fileID: 6615124720108787141, guid: ef16b35e0bf5eb04da7fed4db0527f83,
-    type: 3}
+  ArtContent: {fileID: 0}
   Up: 0
   Down: 0
   PositiveX: 0
@@ -24,8 +23,8 @@ MonoBehaviour:
     X0Y0Z0: 5
     X0Y0Z1: 5
     X0Y1Z0: 1
-    X0Y1Z1: 0
+    X0Y1Z1: 1
     X1Y0Z0: 5
     X1Y0Z1: 5
     X1Y1Z0: 1
-    X1Y1Z1: 0
+    X1Y1Z1: 1

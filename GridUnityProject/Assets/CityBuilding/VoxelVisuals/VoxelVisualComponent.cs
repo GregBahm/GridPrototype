@@ -28,11 +28,14 @@ public class VoxelVisualComponent
 
     private Vector3[] anchors;
 
+    private bool isOnGround;
+
     public VoxelVisualComponent(VoxelCell coreCell, GroundQuad quad, bool onTopHalf, int visualsIndex)
     {
         Core = coreCell;
         Quad = quad;
         OnTopHalf = onTopHalf;
+        isOnGround = coreCell.CellBelow == null;
         VoxelCell bottomCell = onTopHalf ? coreCell : (coreCell.CellBelow ?? coreCell);
         VoxelCell topCell = onTopHalf ? (coreCell.CellAbove ?? coreCell) : coreCell;
         bottomLayer = new VoxelVisualsLayer(bottomCell, quad);
@@ -78,7 +81,7 @@ public class VoxelVisualComponent
         {
             return Core.Visuals.GetComponent(Quad, false);
         }
-        if (Core.CellBelow == null)
+        if (isOnGround)
         {
             return null;
         }
@@ -118,18 +121,27 @@ public class VoxelVisualComponent
         }
         else
         {
-            // top goes straignt in, bottom is AND
-            designation.Description[0, 0, 0] = GetConnectedDesignation(bottomDesignationLayer[0, 0], topDesignationLayer[0, 0]);
-            designation.Description[0, 0, 1] = GetConnectedDesignation(bottomDesignationLayer[0, 1], topDesignationLayer[0, 1]);
-            designation.Description[1, 0, 0] = GetConnectedDesignation(bottomDesignationLayer[1, 0], topDesignationLayer[1, 0]);
-            designation.Description[1, 0, 1] = GetConnectedDesignation(bottomDesignationLayer[1, 1], topDesignationLayer[1, 1]);
+            if (isOnGround)
+            {
+                designation.Description[0, 0, 0] = SlotType.Ground;
+                designation.Description[0, 0, 1] = SlotType.Ground;
+                designation.Description[1, 0, 0] = SlotType.Ground;
+                designation.Description[1, 0, 1] = SlotType.Ground;
+            }
+            else
+            {
+                // top goes straignt in, bottom is AND
+                designation.Description[0, 0, 0] = GetConnectedDesignation(bottomDesignationLayer[0, 0], topDesignationLayer[0, 0]);
+                designation.Description[0, 0, 1] = GetConnectedDesignation(bottomDesignationLayer[0, 1], topDesignationLayer[0, 1]);
+                designation.Description[1, 0, 0] = GetConnectedDesignation(bottomDesignationLayer[1, 0], topDesignationLayer[1, 0]);
+                designation.Description[1, 0, 1] = GetConnectedDesignation(bottomDesignationLayer[1, 1], topDesignationLayer[1, 1]);
+            }
 
             designation.Description[0, 1, 0] = topDesignationLayer[0, 0];
             designation.Description[0, 1, 1] = topDesignationLayer[0, 1];
             designation.Description[1, 1, 0] = topDesignationLayer[1, 0];
             designation.Description[1, 1, 1] = topDesignationLayer[1, 1];
         }
-        designation.IsGround = Core.Height == 0 && !OnTopHalf;
         return designation;
     }
 
