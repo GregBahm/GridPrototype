@@ -18,6 +18,9 @@ public class VoxelVisualViewer : MonoBehaviour
     public bool Previous;
 
     public bool ReportKeys;
+    public string GeneratedName;
+    public bool DoCorrectBlueprintName;
+    public bool DoCorrectArtContentName;
 
     private VoxelBlueprint[] allBlueprints;
 
@@ -44,7 +47,19 @@ public class VoxelVisualViewer : MonoBehaviour
     {
         meshFilter = GetComponent<MeshFilter>();
         allBlueprints = GetAllBlueprints();
-        CorrectAssetNames();
+        //CorrectAssetNames();
+    }
+
+    private void CorrectCurrentBlueprintName()
+    {
+        string originalPath = AssetDatabase.GetAssetPath(CurrentBlueprint);
+        AssetDatabase.RenameAsset(originalPath, GeneratedName);
+    }
+
+    private void CorrectArtContentName()
+    {
+        string originalPath = AssetDatabase.GetAssetPath(CurrentBlueprint.ArtContent);
+        AssetDatabase.RenameAsset(originalPath, GeneratedName);
     }
 
     private void CorrectAssetNames()
@@ -56,13 +71,12 @@ public class VoxelVisualViewer : MonoBehaviour
             VoxelBlueprint item = AssetDatabase.LoadAssetAtPath<VoxelBlueprint>(originalPath);
 
             string originalName = item.name;
-            item.name = DeriveCorrectAssetName(item);
-            AssetDatabase.RenameAsset(originalPath, "test");
-            return;
+            string newName = DeriveCorrectAssetName(item);
+            AssetDatabase.RenameAsset(originalPath, newName);
             if (item.ArtContent != null && item.ArtContent.name == originalName)
             {
-                item.ArtContent.name = item.name;
-                EditorUtility.SetDirty(item.ArtContent);
+                string artContentPath = AssetDatabase.GetAssetPath(item.ArtContent);
+                AssetDatabase.RenameAsset(artContentPath, newName);
             }
         }
     }
@@ -116,6 +130,21 @@ public class VoxelVisualViewer : MonoBehaviour
         SetDesignationDisplay();
 
         HandleKeyReport();
+
+        UpdateRenaming();
+    }
+
+    private void UpdateRenaming()
+    {
+        GeneratedName = DeriveCorrectAssetName(CurrentBlueprint);
+        if(DoCorrectBlueprintName)
+        {
+            CorrectCurrentBlueprintName();
+        }
+        if(DoCorrectArtContentName)
+        {
+            CorrectArtContentName();
+        }
     }
 
     private void HandleKeyReport()
