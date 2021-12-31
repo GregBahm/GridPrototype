@@ -6,6 +6,8 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "VoxelDefinition/VoxelBlueprint")]
 public class VoxelBlueprint : ScriptableObject
 {
+    public const string BlueprintsFolderPath = "Assets/CityBuilding/Combinations/VoxelBlueprints/";
+
     public Mesh ArtContent;
     public VoxelConnectionType Up;
     public VoxelConnectionType Down;
@@ -30,6 +32,62 @@ public class VoxelBlueprint : ScriptableObject
             yield return new VoxelVisualOption(ArtContent, variant.Description, variant.WasFlipped, variant.Rotations, priority, connectionsVariant);
         }
     }
+
+    public static string DeriveCorrectAssetName(VoxelBlueprint blueprint)
+    {
+        return blueprint.Down.ToString() + " " +
+            GetNameComponent(blueprint.Designations.X0Y0Z0) + " " +
+            GetNameComponent(blueprint.Designations.X0Y0Z1) + " " +
+            GetNameComponent(blueprint.Designations.X0Y1Z0) + " " +
+            GetNameComponent(blueprint.Designations.X0Y1Z1) + " " +
+            GetNameComponent(blueprint.Designations.X1Y0Z0) + " " +
+            GetNameComponent(blueprint.Designations.X1Y0Z1) + " " +
+            GetNameComponent(blueprint.Designations.X1Y1Z0) + " " +
+            GetNameComponent(blueprint.Designations.X1Y1Z1) + " " +
+                blueprint.Up.ToString();
+    }
+
+    private static string GetNameComponent(SlotType slotType)
+    {
+        switch (slotType)
+        {
+            case SlotType.Empty:
+                return "E";
+            case SlotType.AnyFilled:
+                return "A";
+            case SlotType.SlantedRoof:
+                return "S";
+            case SlotType.WalkableRoof:
+                return "W";
+            case SlotType.Platform:
+                return "P";
+            case SlotType.Ground:
+            default:
+                return "G";
+        }
+    }
+
+    public static SlotType GetSlotFromName(string firstLetter)
+    {
+        switch (firstLetter)
+        {
+            case "E":
+                return SlotType.Empty;
+            case "A":
+                return SlotType.AnyFilled;
+            case "S":
+                return SlotType.SlantedRoof;
+            case "W":
+                return SlotType.WalkableRoof;
+            case "P":
+                return SlotType.Platform;
+            case "G":
+                return SlotType.Ground;
+            default:
+                throw new Exception("No slot startting with letter \"" + firstLetter + "\"");
+        }
+    }
+
 }
 
 [Serializable]

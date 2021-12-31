@@ -8,8 +8,6 @@ using UnityEngine;
 
 public class VoxelVisualViewer : MonoBehaviour
 {
-    private const string BlueprintsFolderPath = "Assets/CityBuilding/Combinations/VoxelBlueprints";
-
     public static VoxelVisualViewer Instance { get; private set; }
 
     public VoxelBlueprint CurrentBlueprint;
@@ -64,14 +62,14 @@ public class VoxelVisualViewer : MonoBehaviour
 
     private void CorrectAssetNames()
     {
-        string[] guids = AssetDatabase.FindAssets("t: VoxelBlueprint", new[] { BlueprintsFolderPath });
+        string[] guids = AssetDatabase.FindAssets("t: VoxelBlueprint", new[] { VoxelBlueprint.BlueprintsFolderPath });
         foreach (string guid in guids)
         {
             string originalPath = AssetDatabase.GUIDToAssetPath(guid);
             VoxelBlueprint item = AssetDatabase.LoadAssetAtPath<VoxelBlueprint>(originalPath);
 
             string originalName = item.name;
-            string newName = DeriveCorrectAssetName(item);
+            string newName = VoxelBlueprint.DeriveCorrectAssetName(item);
             AssetDatabase.RenameAsset(originalPath, newName);
             if (item.ArtContent != null && item.ArtContent.name == originalName)
             {
@@ -81,43 +79,9 @@ public class VoxelVisualViewer : MonoBehaviour
         }
     }
 
-    private static string DeriveCorrectAssetName(VoxelBlueprint blueprint)
-    {
-        return blueprint.Down.ToString() + " " +
-            GetNameComponent(blueprint.Designations.X0Y0Z0) + " " +
-            GetNameComponent(blueprint.Designations.X0Y0Z1) + " " +
-            GetNameComponent(blueprint.Designations.X0Y1Z0) + " " +
-            GetNameComponent(blueprint.Designations.X0Y1Z1) + " " +
-            GetNameComponent(blueprint.Designations.X1Y0Z0) + " " +
-            GetNameComponent(blueprint.Designations.X1Y0Z1) + " " +
-            GetNameComponent(blueprint.Designations.X1Y1Z0) + " " +
-            GetNameComponent(blueprint.Designations.X1Y1Z1) + " " +
-                blueprint.Up.ToString();
-    }
-
-    private static string GetNameComponent(SlotType slotType)
-    {
-        switch (slotType)
-        {
-            case SlotType.Empty:
-                return "E";
-            case SlotType.AnyFilled:
-                return "A";
-            case SlotType.SlantedRoof:
-                return "S";
-            case SlotType.WalkableRoof:
-                return "W";
-            case SlotType.Platform:
-                return "P";
-            case SlotType.Ground:
-            default:
-                return "G";
-        }
-    }
-
     private VoxelBlueprint[] GetAllBlueprints()
     {
-        string[] guids = AssetDatabase.FindAssets("t: VoxelBlueprint", new[] { BlueprintsFolderPath });
+        string[] guids = AssetDatabase.FindAssets("t: VoxelBlueprint", new[] { VoxelBlueprint.BlueprintsFolderPath });
         return guids.Select(item => AssetDatabase.LoadAssetAtPath<VoxelBlueprint>(AssetDatabase.GUIDToAssetPath(item))).ToArray();
     }
 
@@ -136,12 +100,12 @@ public class VoxelVisualViewer : MonoBehaviour
 
     private void UpdateRenaming()
     {
-        GeneratedName = DeriveCorrectAssetName(CurrentBlueprint);
-        if(DoCorrectBlueprintName)
+        GeneratedName = VoxelBlueprint.DeriveCorrectAssetName(CurrentBlueprint);
+        if (DoCorrectBlueprintName)
         {
             CorrectCurrentBlueprintName();
         }
-        if(DoCorrectArtContentName)
+        if (DoCorrectArtContentName)
         {
             CorrectArtContentName();
         }
@@ -149,7 +113,7 @@ public class VoxelVisualViewer : MonoBehaviour
 
     private void HandleKeyReport()
     {
-        if(ReportKeys)
+        if (ReportKeys)
         {
             ReportKeys = false;
             VoxelVisualOption[] options = CurrentBlueprint.GenerateVisualOptions().ToArray();
@@ -159,7 +123,7 @@ public class VoxelVisualViewer : MonoBehaviour
 
     private void UpdateBlueprintIndex()
     {
-        if(Next)
+        if (Next)
         {
             CurrentBlueprintIndex++;
             Next = false;
