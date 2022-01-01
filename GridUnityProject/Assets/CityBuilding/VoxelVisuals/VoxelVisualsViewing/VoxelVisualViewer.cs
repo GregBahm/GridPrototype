@@ -11,16 +11,18 @@ public class VoxelVisualViewer : MonoBehaviour
     public static VoxelVisualViewer Instance { get; private set; }
 
     public VoxelBlueprint CurrentBlueprint;
+    public Mesh CurrentMesh;
     public int CurrentBlueprintIndex;
     public bool Next;
     public bool Previous;
 
-    public bool ReportKeys;
     public string GeneratedName;
-    public bool DoCorrectBlueprintName;
-    public bool DoCorrectArtContentName;
+    public string GeneratedMeshName;
+    public bool MakeStubFromBlueprint;
+    public bool SetCorrectBlueprintName;
+    public bool FindArtContentForBlueprint;
 
-    private VoxelBlueprint[] allBlueprints;
+    private List<VoxelBlueprint> allBlueprints;
 
     public VoxelDesignationDisplay X0Y0Z0Display;
     public VoxelDesignationDisplay X0Y0Z1Display;
@@ -45,7 +47,6 @@ public class VoxelVisualViewer : MonoBehaviour
     {
         meshFilter = GetComponent<MeshFilter>();
         allBlueprints = GetAllBlueprints();
-        //CorrectAssetNames();
     }
 
     private void CorrectCurrentBlueprintName()
@@ -54,71 +55,87 @@ public class VoxelVisualViewer : MonoBehaviour
         AssetDatabase.RenameAsset(originalPath, GeneratedName);
     }
 
-    private void CorrectArtContentName()
-    {
-        string originalPath = AssetDatabase.GetAssetPath(CurrentBlueprint.ArtContent);
-        AssetDatabase.RenameAsset(originalPath, GeneratedName);
-    }
-
-    private void CorrectAssetNames()
+    private List<VoxelBlueprint> GetAllBlueprints()
     {
         string[] guids = AssetDatabase.FindAssets("t: VoxelBlueprint", new[] { VoxelBlueprint.BlueprintsFolderPath });
-        foreach (string guid in guids)
-        {
-            string originalPath = AssetDatabase.GUIDToAssetPath(guid);
-            VoxelBlueprint item = AssetDatabase.LoadAssetAtPath<VoxelBlueprint>(originalPath);
-
-            string originalName = item.name;
-            string newName = VoxelBlueprint.DeriveCorrectAssetName(item);
-            AssetDatabase.RenameAsset(originalPath, newName);
-            if (item.ArtContent != null && item.ArtContent.name == originalName)
-            {
-                string artContentPath = AssetDatabase.GetAssetPath(item.ArtContent);
-                AssetDatabase.RenameAsset(artContentPath, newName);
-            }
-        }
-    }
-
-    private VoxelBlueprint[] GetAllBlueprints()
-    {
-        string[] guids = AssetDatabase.FindAssets("t: VoxelBlueprint", new[] { VoxelBlueprint.BlueprintsFolderPath });
-        return guids.Select(item => AssetDatabase.LoadAssetAtPath<VoxelBlueprint>(AssetDatabase.GUIDToAssetPath(item))).ToArray();
+        return guids.Select(item => AssetDatabase.LoadAssetAtPath<VoxelBlueprint>(AssetDatabase.GUIDToAssetPath(item))).ToList();
     }
 
     private void Update()
     {
         UpdateBlueprintIndex();
         CurrentBlueprint = allBlueprints[CurrentBlueprintIndex];
+        CurrentMesh = CurrentBlueprint.ArtContent;
 
         meshFilter.mesh = CurrentBlueprint.ArtContent;
         SetDesignationDisplay();
 
-        HandleKeyReport();
-
-        UpdateRenaming();
+        HandleCommands();
     }
 
-    private void UpdateRenaming()
+    private void HandleCommands()
     {
         GeneratedName = VoxelBlueprint.DeriveCorrectAssetName(CurrentBlueprint);
-        if (DoCorrectBlueprintName)
+        GeneratedMeshName = GeneratedName.Replace(' ', '_');
+        if (SetCorrectBlueprintName)
         {
+            SetCorrectBlueprintName = false;
             CorrectCurrentBlueprintName();
         }
-        if (DoCorrectArtContentName)
+        if (MakeStubFromBlueprint)
         {
-            CorrectArtContentName();
+            MakeStubFromBlueprint = false;
+            StubBlueprintFromCurrent();
         }
+        if(FindArtContentForBlueprint)
+        {
+            FindArtContentForBlueprint = false;
+            FindArtContent();
+        }
+    }
+
+    private void FindArtContent()
+    {
+        string[] assets = AssetDatabase.FindAssets(GeneratedMeshName, new[] { "Assets/ArtContent/VoxelVisuals/" });
+        if(assets.Length == 1)
+        {
+            Mesh mesh = AssetDatabase.LoadAssetAtPath<Mesh>(AssetDatabase.GUIDToAssetPath(assets[0]));
+            CurrentBlueprint.ArtContent = mesh;
+        }
+    }
+
+    private void StubBlueprintFromCurrent()
+    {
+        VoxelBlueprint blueprint = ScriptableObject.CreateInstance<VoxelBlueprint>();
+
+        blueprint.PositiveX = CurrentBlueprint.PositiveX;
+        blueprint.Up = CurrentBlueprint.Up;
+        blueprint.PositiveZ = CurrentBlueprint.PositiveZ;
+        blueprint.NegativeX = CurrentBlueprint.NegativeX;
+        blueprint.Down = CurrentBlueprint.Down;
+        blueprint.NegativeZ = CurrentBlueprint.NegativeZ;
+
+        blueprint.Designations = new DesignationGrid();
+        blueprint.Designations.X0Y0Z0 = CurrentBlueprint.Designations.X0Y0Z0;
+        blueprint.Designations.X0Y0Z1 = CurrentBlueprint.Designations.X0Y0Z1;
+        blueprint.Designations.X0Y1Z0 = CurrentBlueprint.Designations.X0Y1Z0;
+        blueprint.Designations.X0Y1Z1 = CurrentBlueprint.Designations.X0Y1Z1;
+        blueprint.Designations.X1Y0Z0 = CurrentBlueprint.Designations.X1Y0Z0;
+        blueprint.Designations.X1Y0Z1 = CurrentBlueprint.Designations.X1Y0Z1;
+        blueprint.Designations.X1Y1Z0 = CurrentBlueprint.Designations.X1Y1Z0;
+        blueprint.Designations.X1Y1Z1 = CurrentBlueprint.Designations.X1Y1Z1;
+
+        blueprint.name = "stub";
+        string path = VoxelBlueprint.BlueprintsFolderPath + "stub.asset";
+        AssetDatabase.CreateAsset(blueprint, path);
+        allBlueprints.Add(blueprint);
+        CurrentBlueprintIndex = allBlueprints.Count - 1;
     }
 
     private void HandleKeyReport()
     {
-        if (ReportKeys)
-        {
-            ReportKeys = false;
-            VoxelVisualOption[] options = CurrentBlueprint.GenerateVisualOptions().ToArray();
-            Dictionary<VoxelVisualOption, string[]> toInspect = options.ToDictionary(item => item, item => item.GetDesignationKeys().ToArray());
-        }
+        VoxelVisualOption[] options = CurrentBlueprint.GenerateVisualOptions().ToArray();
+        Dictionary<VoxelVisualOption, string[]> toInspect = options.ToDictionary(item => item, item => item.GetDesignationKeys().ToArray());
     }
 
     private void UpdateBlueprintIndex()
@@ -133,10 +150,10 @@ public class VoxelVisualViewer : MonoBehaviour
             CurrentBlueprintIndex--;
             Previous = false;
         }
-        CurrentBlueprintIndex %= (allBlueprints.Length);
+        CurrentBlueprintIndex %= (allBlueprints.Count);
         if (CurrentBlueprintIndex < 0)
         {
-            CurrentBlueprintIndex = allBlueprints.Length + CurrentBlueprintIndex;
+            CurrentBlueprintIndex = allBlueprints.Count + CurrentBlueprintIndex;
         }
     }
 

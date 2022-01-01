@@ -88,6 +88,11 @@ public class VoxelBlueprint : ScriptableObject
         }
     }
 
+    public static string GetBlueprintAssetPath(VoxelBlueprint blueprint)
+    {
+        string name = DeriveCorrectAssetName(blueprint);
+        return BlueprintsFolderPath + name + ".asset";
+    }
 }
 
 [Serializable]

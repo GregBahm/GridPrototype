@@ -36,17 +36,11 @@ public class BlueprintFromMesh : MonoBehaviour
         blueprint.Designations.X1Y1Z0 = x1y1z0;
         blueprint.Designations.X1Y1Z0 = x1y1z1;
 
-        string path = GetBlueprintAssetPath(blueprint);
+        string path = VoxelBlueprint.GetBlueprintAssetPath(blueprint);
         AssetDatabase.CreateAsset(blueprint, path);
         AssetDatabase.Refresh();
         EditorUtility.FocusProjectWindow();
         Selection.activeObject = blueprint;
-    }
-
-    private static string GetBlueprintAssetPath(VoxelBlueprint blueprint)
-    {
-        string name = VoxelBlueprint.DeriveCorrectAssetName(blueprint);
-        return VoxelBlueprint.BlueprintsFolderPath + name + ".asset";
     }
 
     private static SlotType GetSlotType(string slotLetter)
