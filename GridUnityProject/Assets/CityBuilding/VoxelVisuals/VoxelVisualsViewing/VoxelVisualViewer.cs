@@ -46,19 +46,13 @@ public class VoxelVisualViewer : MonoBehaviour
     private void Start()
     {
         meshFilter = GetComponent<MeshFilter>();
-        allBlueprints = GetAllBlueprints();
+        allBlueprints = VoxelBlueprint.GetAllBlueprints().ToList();
     }
 
     private void CorrectCurrentBlueprintName()
     {
         string originalPath = AssetDatabase.GetAssetPath(CurrentBlueprint);
         AssetDatabase.RenameAsset(originalPath, GeneratedName);
-    }
-
-    private List<VoxelBlueprint> GetAllBlueprints()
-    {
-        string[] guids = AssetDatabase.FindAssets("t: VoxelBlueprint", new[] { VoxelBlueprint.BlueprintsFolderPath });
-        return guids.Select(item => AssetDatabase.LoadAssetAtPath<VoxelBlueprint>(AssetDatabase.GUIDToAssetPath(item))).ToList();
     }
 
     private void Update()
@@ -101,6 +95,7 @@ public class VoxelVisualViewer : MonoBehaviour
         {
             Mesh mesh = AssetDatabase.LoadAssetAtPath<Mesh>(AssetDatabase.GUIDToAssetPath(assets[0]));
             CurrentBlueprint.ArtContent = mesh;
+            EditorUtility.SetDirty(CurrentBlueprint);
         }
     }
 

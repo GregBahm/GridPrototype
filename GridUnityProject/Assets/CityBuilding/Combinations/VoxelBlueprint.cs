@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor;
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "VoxelDefinition/VoxelBlueprint")]
@@ -31,6 +32,12 @@ public class VoxelBlueprint : ScriptableObject
             VoxelVisualConnections connectionsVariant = baseConnections.GetVariant(variant.WasFlipped, variant.Rotations);
             yield return new VoxelVisualOption(ArtContent, variant.Description, variant.WasFlipped, variant.Rotations, priority, connectionsVariant);
         }
+    }
+
+    public static VoxelBlueprint[] GetAllBlueprints()
+    {
+        string[] guids = AssetDatabase.FindAssets("t: VoxelBlueprint", new[] { VoxelBlueprint.BlueprintsFolderPath });
+        return guids.Select(item => AssetDatabase.LoadAssetAtPath<VoxelBlueprint>(AssetDatabase.GUIDToAssetPath(item))).ToArray();
     }
 
     public static string DeriveCorrectAssetName(VoxelBlueprint blueprint)

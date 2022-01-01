@@ -37,6 +37,8 @@ public class CityBuildingMain : MonoBehaviour
 
     private void Start()
     {
+        VoxelBlueprints = VoxelBlueprint.GetAllBlueprints();
+
         MainGrid = LoadLastSave ? GroundLoader.Load() : GroundLoader.Load(DefaultGridFile.text);
         InteractionMesh = new InteractionMesh(new Mesh());
         UpdateInteractionGrid();

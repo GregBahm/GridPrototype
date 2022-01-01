@@ -205,7 +205,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 0
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &313656613
 MonoBehaviour:
@@ -356,6 +356,10 @@ MonoBehaviour:
   - {fileID: 11400000, guid: b77503c09b6dc454f8094ab32376144f, type: 2}
   - {fileID: 11400000, guid: 7f2a83bbe8a3c2a4e8ae1e7e80f86d6b, type: 2}
   - {fileID: 11400000, guid: a4ee3919f0824474d9b9333e6cb37aa2, type: 2}
+  - {fileID: 11400000, guid: e7d9397dab85f554780f1b1e048ca094, type: 2}
+  - {fileID: 11400000, guid: 9932efa295ec89144942bf4cb2e8d3c5, type: 2}
+  - {fileID: 11400000, guid: 4ce01d9eae0aff04595ceba8cf9fd0f2, type: 2}
+  - {fileID: 11400000, guid: 4ce01d9eae0aff04595ceba8cf9fd0f2, type: 2}
   VoxelDisplayMat: {fileID: 2100000, guid: c92dbb93533e359449fc2dfaf9d41853, type: 2}
 --- !u!4 &536624979
 Transform:
@@ -372,7 +376,7 @@ Transform:
   - {fileID: 579425811}
   - {fileID: 1616632274}
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &536624980
 MonoBehaviour:
@@ -581,7 +585,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 1
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
 --- !u!1 &1090639041
 GameObject:
@@ -629,7 +633,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1133595418
 GameObject:
