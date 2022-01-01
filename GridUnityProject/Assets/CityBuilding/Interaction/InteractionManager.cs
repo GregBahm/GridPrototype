@@ -44,12 +44,12 @@ public class InteractionManager : MonoBehaviour
 
     private void Update()
     {
-        if(GroundModificationMode)
+        if (GroundModificationMode)
         {
             DoEasing();
             GridExpander expander = new GridExpander(gameMain.MainGrid, ExpansionAngleThreshold);
             expander.PreviewExpansion(gameMain.MainGrid);
-            if(Input.GetMouseButtonUp(0))
+            if (Input.GetMouseButtonUp(0))
             {
                 gameMain.MainGrid.AddToMesh(expander.Points, expander.Edges);
                 gameMain.UpdateInteractionGrid();
@@ -66,6 +66,16 @@ public class InteractionManager : MonoBehaviour
         HandleOrbit();
         HandlePan();
         cameraInteraction.HandleMouseScrollwheel();
+    }
+
+    public void SetFillToWalkableRoof()
+    {
+        FillType = SlotType.WalkableRoof;
+    }
+
+    public void SetFillToSlantedRoof()
+    {
+        FillType = SlotType.SlantedRoof;
     }
 
     private void UpdateCursor(MeshHitTarget potentialMeshInteraction)
