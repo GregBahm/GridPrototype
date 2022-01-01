@@ -10,9 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8530589c0825764489ef903943e44ae8, type: 3}
-  m_Name: None S W E E S E E E None
+  m_Name: None S S E E W S E E None
   m_EditorClassIdentifier: 
-  ArtContent: {fileID: 0}
+  ArtContent: {fileID: -2986409444112451308, guid: 4754f48693fad8342af09ebbb23e1621,
+    type: 3}
   Up: 0
   Down: 0
   PositiveX: 0
@@ -21,10 +22,10 @@ MonoBehaviour:
   NegativeZ: 0
   Designations:
     X0Y0Z0: 2
-    X0Y0Z1: 3
+    X0Y0Z1: 2
     X0Y1Z0: 0
     X0Y1Z1: 0
-    X1Y0Z0: 2
-    X1Y0Z1: 0
+    X1Y0Z0: 3
+    X1Y0Z1: 2
     X1Y1Z0: 0
     X1Y1Z1: 0
