@@ -145,14 +145,14 @@ public class VoxelVisualComponent
         return designation;
     }
 
-    // In the case of a mismatch, currently defaults to slanted
+    // In the case of a mismatch, currently defaults to walkable
     private static SlotType GetConnectedDesignation(params SlotType[] designations)
     {
         if (designations.Any(item => item == SlotType.Empty))
             return SlotType.Empty;
         if (designations.All(item => item == designations[0]))
             return designations[0];
-        return SlotType.SlantedRoof;
+        return SlotType.WalkableRoof;
     }
 
     private SlotType[,] GetDesignationLayer(VoxelVisualsLayer bottomLayer)
