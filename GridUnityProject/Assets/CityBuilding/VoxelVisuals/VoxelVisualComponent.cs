@@ -103,8 +103,8 @@ public class VoxelVisualComponent
 
     public VoxelDesignation GetCurrentDesignation()
     {
-        SlotType[,] bottomDesignationLayer = GetDesignationLayer(bottomLayer);
-        SlotType[,] topDesignationLayer = GetDesignationLayer(topLayer);
+        VoxelDesignationType[,] bottomDesignationLayer = GetDesignationLayer(bottomLayer);
+        VoxelDesignationType[,] topDesignationLayer = GetDesignationLayer(topLayer);
         VoxelDesignation designation = new VoxelDesignation();
         if (OnTopHalf)
         {
@@ -123,10 +123,10 @@ public class VoxelVisualComponent
         {
             if (isOnGround)
             {
-                designation.Description[0, 0, 0] = SlotType.Ground;
-                designation.Description[0, 0, 1] = SlotType.Ground;
-                designation.Description[1, 0, 0] = SlotType.Ground;
-                designation.Description[1, 0, 1] = SlotType.Ground;
+                designation.Description[0, 0, 0] = VoxelDesignationType.Ground;
+                designation.Description[0, 0, 1] = VoxelDesignationType.Ground;
+                designation.Description[1, 0, 0] = VoxelDesignationType.Ground;
+                designation.Description[1, 0, 1] = VoxelDesignationType.Ground;
             }
             else
             {
@@ -147,7 +147,7 @@ public class VoxelVisualComponent
     }
 
     // If a column or top half of a designation is SlantedRoof of WalkableRoof, set it to AnyFill.
-    private void SetAnyFills(SlotType[,,] designation)
+    private void SetAnyFills(VoxelDesignationType[,,] designation)
     {
         for (int x = 0; x < 2; x++)
         {
@@ -155,34 +155,34 @@ public class VoxelVisualComponent
             {
                 if(IsFill(designation[x, 1, z]))
                 {
-                    designation[x, 1, z] = SlotType.AnyFilled;
+                    designation[x, 1, z] = VoxelDesignationType.AnyFilled;
                     if(IsFill(designation[x, 0, z]))
                     {
-                        designation[x, 0, z] = SlotType.AnyFilled;
+                        designation[x, 0, z] = VoxelDesignationType.AnyFilled;
                     }
                 }
             }
         }
     }
 
-    private bool IsFill(SlotType slotType)
+    private bool IsFill(VoxelDesignationType slotType)
     {
-        return slotType == SlotType.SlantedRoof || slotType == SlotType.WalkableRoof;
+        return slotType == VoxelDesignationType.SlantedRoof || slotType == VoxelDesignationType.WalkableRoof;
     }
 
     // In the case of a mismatch, currently defaults to walkable
-    private static SlotType GetConnectedDesignation(params SlotType[] designations)
+    private static VoxelDesignationType GetConnectedDesignation(params VoxelDesignationType[] designations)
     {
-        if (designations.Any(item => item == SlotType.Empty))
-            return SlotType.Empty;
+        if (designations.Any(item => item == VoxelDesignationType.Empty))
+            return VoxelDesignationType.Empty;
         if (designations.All(item => item == designations[0]))
             return designations[0];
-        return SlotType.WalkableRoof;
+        return VoxelDesignationType.WalkableRoof;
     }
 
-    private SlotType[,] GetDesignationLayer(VoxelVisualsLayer bottomLayer)
+    private VoxelDesignationType[,] GetDesignationLayer(VoxelVisualsLayer bottomLayer)
     {
-        SlotType[,] ret = new SlotType[2, 2];
+        VoxelDesignationType[,] ret = new VoxelDesignationType[2, 2];
         ret[1, 0] = GetConnectedDesignation(bottomLayer.BasisCell.Designation, bottomLayer.AdjacentCellA.Designation);
         ret[0, 0] = bottomLayer.BasisCell.Designation;
         ret[0, 1] = GetConnectedDesignation(bottomLayer.BasisCell.Designation, bottomLayer.AdjacentCellB.Designation);

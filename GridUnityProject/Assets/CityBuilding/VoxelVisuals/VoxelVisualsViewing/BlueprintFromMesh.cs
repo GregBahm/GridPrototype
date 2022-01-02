@@ -12,14 +12,14 @@ public class BlueprintFromMesh : MonoBehaviour
         string[] meshComponents = mesh.name.Split('_');
 
         VoxelConnectionType downConnection = GetConnectionType(meshComponents[0]);
-        SlotType x0y0z0 = GetSlotType(meshComponents[1]);
-        SlotType x0y0z1 = GetSlotType(meshComponents[2]);
-        SlotType x0y1z0 = GetSlotType(meshComponents[3]);
-        SlotType x0y1z1 = GetSlotType(meshComponents[4]);
-        SlotType x1y0z0 = GetSlotType(meshComponents[5]);
-        SlotType x1y0z1 = GetSlotType(meshComponents[6]);
-        SlotType x1y1z0 = GetSlotType(meshComponents[7]);
-        SlotType x1y1z1 = GetSlotType(meshComponents[8]);
+        VoxelDesignationType x0y0z0 = GetSlotType(meshComponents[1]);
+        VoxelDesignationType x0y0z1 = GetSlotType(meshComponents[2]);
+        VoxelDesignationType x0y1z0 = GetSlotType(meshComponents[3]);
+        VoxelDesignationType x0y1z1 = GetSlotType(meshComponents[4]);
+        VoxelDesignationType x1y0z0 = GetSlotType(meshComponents[5]);
+        VoxelDesignationType x1y0z1 = GetSlotType(meshComponents[6]);
+        VoxelDesignationType x1y1z0 = GetSlotType(meshComponents[7]);
+        VoxelDesignationType x1y1z1 = GetSlotType(meshComponents[8]);
         VoxelConnectionType upConnection = GetConnectionType(meshComponents[9]);
 
         VoxelBlueprint blueprint = ScriptableObject.CreateInstance<VoxelBlueprint>();
@@ -43,7 +43,7 @@ public class BlueprintFromMesh : MonoBehaviour
         Selection.activeObject = blueprint;
     }
 
-    private static SlotType GetSlotType(string slotLetter)
+    private static VoxelDesignationType GetSlotType(string slotLetter)
     {
         return VoxelBlueprint.GetSlotFromName(slotLetter);
     }

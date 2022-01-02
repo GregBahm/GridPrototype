@@ -54,42 +54,42 @@ public class VoxelBlueprint : ScriptableObject
                 blueprint.Up.ToString();
     }
 
-    private static string GetNameComponent(SlotType slotType)
+    private static string GetNameComponent(VoxelDesignationType slotType)
     {
         switch (slotType)
         {
-            case SlotType.Empty:
+            case VoxelDesignationType.Empty:
                 return "E";
-            case SlotType.AnyFilled:
+            case VoxelDesignationType.AnyFilled:
                 return "A";
-            case SlotType.SlantedRoof:
+            case VoxelDesignationType.SlantedRoof:
                 return "S";
-            case SlotType.WalkableRoof:
+            case VoxelDesignationType.WalkableRoof:
                 return "W";
-            case SlotType.Platform:
+            case VoxelDesignationType.Platform:
                 return "P";
-            case SlotType.Ground:
+            case VoxelDesignationType.Ground:
             default:
                 return "G";
         }
     }
 
-    public static SlotType GetSlotFromName(string firstLetter)
+    public static VoxelDesignationType GetSlotFromName(string firstLetter)
     {
         switch (firstLetter)
         {
             case "E":
-                return SlotType.Empty;
+                return VoxelDesignationType.Empty;
             case "A":
-                return SlotType.AnyFilled;
+                return VoxelDesignationType.AnyFilled;
             case "S":
-                return SlotType.SlantedRoof;
+                return VoxelDesignationType.SlantedRoof;
             case "W":
-                return SlotType.WalkableRoof;
+                return VoxelDesignationType.WalkableRoof;
             case "P":
-                return SlotType.Platform;
+                return VoxelDesignationType.Platform;
             case "G":
-                return SlotType.Ground;
+                return VoxelDesignationType.Ground;
             default:
                 throw new Exception("No slot startting with letter \"" + firstLetter + "\"");
         }
@@ -105,18 +105,18 @@ public class VoxelBlueprint : ScriptableObject
 [Serializable]
 public class DesignationGrid
 {
-    public SlotType X0Y0Z0;
-    public SlotType X0Y0Z1;
-    public SlotType X0Y1Z0;
-    public SlotType X0Y1Z1;
-    public SlotType X1Y0Z0;
-    public SlotType X1Y0Z1;
-    public SlotType X1Y1Z0;
-    public SlotType X1Y1Z1;
+    public VoxelDesignationType X0Y0Z0;
+    public VoxelDesignationType X0Y0Z1;
+    public VoxelDesignationType X0Y1Z0;
+    public VoxelDesignationType X0Y1Z1;
+    public VoxelDesignationType X1Y0Z0;
+    public VoxelDesignationType X1Y0Z1;
+    public VoxelDesignationType X1Y1Z0;
+    public VoxelDesignationType X1Y1Z1;
 
-    public SlotType[] ToFlatArray()
+    public VoxelDesignationType[] ToFlatArray()
     {
-        return new SlotType[]
+        return new VoxelDesignationType[]
         {
             X0Y0Z0,
             X0Y0Z1,
@@ -129,9 +129,9 @@ public class DesignationGrid
         };
     }
 
-    public SlotType[,,] ToCubedArray()
+    public VoxelDesignationType[,,] ToCubedArray()
     {
-        SlotType[,,] ret = new SlotType[2, 2, 2];
+        VoxelDesignationType[,,] ret = new VoxelDesignationType[2, 2, 2];
         ret[0, 0, 0] = X0Y0Z0;
         ret[0, 0, 1] = X0Y0Z1;
         ret[0, 1, 0] = X0Y1Z0;

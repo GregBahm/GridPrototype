@@ -152,7 +152,7 @@ public class VoxelVisualsManager
             boxPos += y == 0 ? new Vector3(0, .125f, 0) : new Vector3(0, .375f, 0);
             cube.transform.localScale = new Vector3(.20f, .20f, .20f);
             cube.transform.position = boxPos;
-            if (designation.Description[x, y, z] == SlotType.Empty)
+            if (designation.Description[x, y, z] == VoxelDesignationType.Empty)
             {
                 cube.GetComponent<MeshRenderer>().material.SetColor("_Color", Color.black);
             }

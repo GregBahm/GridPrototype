@@ -168,20 +168,20 @@ public class VoxelVisualColors
     public Color Platform;
     public Color Ground;
 
-    public Color GetColorFor(SlotType slotType)
+    public Color GetColorFor(VoxelDesignationType slotType)
     {
         switch (slotType)
         {
-            case SlotType.AnyFilled:
+            case VoxelDesignationType.AnyFilled:
                 return AnyFilled;
-            case SlotType.SlantedRoof:
+            case VoxelDesignationType.SlantedRoof:
                 return SlantedRoof;
-            case SlotType.WalkableRoof:
+            case VoxelDesignationType.WalkableRoof:
                 return WalkableRoof;
-            case SlotType.Platform:
+            case VoxelDesignationType.Platform:
                 return Platform;
-            case SlotType.Empty:
-            case SlotType.Ground:
+            case VoxelDesignationType.Empty:
+            case VoxelDesignationType.Ground:
             default:
                 return Ground;
         }

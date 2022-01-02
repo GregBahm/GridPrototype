@@ -32,7 +32,7 @@ public class InteractionManager : MonoBehaviour
     [Range(-1, 1)]
     public float ExpansionAngleThreshold;
 
-    public SlotType FillType;
+    public VoxelDesignationType FillType;
 
     private void Start()
     {
@@ -70,12 +70,12 @@ public class InteractionManager : MonoBehaviour
 
     public void SetFillToWalkableRoof()
     {
-        FillType = SlotType.WalkableRoof;
+        FillType = VoxelDesignationType.WalkableRoof;
     }
 
     public void SetFillToSlantedRoof()
     {
-        FillType = SlotType.SlantedRoof;
+        FillType = VoxelDesignationType.SlantedRoof;
     }
 
     private void UpdateCursor(MeshHitTarget potentialMeshInteraction)
@@ -183,7 +183,7 @@ public class InteractionManager : MonoBehaviour
     {
         if (Input.GetMouseButtonUp(1) && hitInfo != null && hitInfo.SourceCell != null)
         {
-            hitInfo.SourceCell.Designation = SlotType.Empty;
+            hitInfo.SourceCell.Designation = VoxelDesignationType.Empty;
             gameMain.UpdateInteractionGrid();
             gameMain.UpdateVoxelVisuals(hitInfo.SourceCell);
         }

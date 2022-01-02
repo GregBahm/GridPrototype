@@ -1,4 +1,4 @@
-﻿public enum SlotType
+﻿public enum VoxelDesignationType
 {
     Empty = 0,
     AnyFilled = 1,

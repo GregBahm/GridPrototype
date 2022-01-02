@@ -6,15 +6,15 @@ using System;
 public class VoxelDesignation
 {
     [SerializeField]
-    private readonly SlotType[,,] description = new SlotType[2, 2, 2];
-    public SlotType[,,] Description => description;
+    private readonly VoxelDesignationType[,,] description = new VoxelDesignationType[2, 2, 2];
+    public VoxelDesignationType[,,] Description => description;
 
     public string Key { get { return ToString(); } }
 
     public VoxelDesignation()
     {}
 
-    public VoxelDesignation(SlotType[] values)
+    public VoxelDesignation(VoxelDesignationType[] values)
     {
         Description[0, 0, 0] = values[0];
         Description[0, 0, 1] = values[1];
@@ -25,7 +25,7 @@ public class VoxelDesignation
         Description[1, 1, 0] = values[6];
         Description[1, 1, 1] = values[7];
     }
-    public static string GetDesignationKey(SlotType[,,] description)
+    public static string GetDesignationKey(VoxelDesignationType[,,] description)
     {
         return "X0Y0Z0: " + description[0, 0, 0].ToString() + "\n" +
                "X0Y0Z1: " + description[0, 0, 1].ToString() + "\n" +
@@ -49,8 +49,8 @@ public class VoxelDesignation
         {
             for (int z = 0; z < 2; z++)
             {
-                SlotType left = Description[0, y, z];
-                SlotType right = Description[1, y, z];
+                VoxelDesignationType left = Description[0, y, z];
+                VoxelDesignationType right = Description[1, y, z];
                 ret.Description[0, y, z] = right;
                 ret.Description[1, y, z] = left;
             }
@@ -63,10 +63,10 @@ public class VoxelDesignation
         GeneratedVoxelDesignation ret = new GeneratedVoxelDesignation(wasFlipped, rotationCount);
         for (int y = 0; y < 2; y++)
         {
-            SlotType one = Description[0, y, 0];
-            SlotType two = Description[1, y, 0];
-            SlotType three = Description[1, y, 1];
-            SlotType four = Description[0, y, 1];
+            VoxelDesignationType one = Description[0, y, 0];
+            VoxelDesignationType two = Description[1, y, 0];
+            VoxelDesignationType three = Description[1, y, 1];
+            VoxelDesignationType four = Description[0, y, 1];
 
             ret.Description[0, y, 0] = two;
             ret.Description[1, y, 0] = three;

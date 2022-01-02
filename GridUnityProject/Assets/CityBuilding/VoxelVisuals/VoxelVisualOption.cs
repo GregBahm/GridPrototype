@@ -4,7 +4,7 @@ using UnityEngine;
 public class VoxelVisualOption
 {
     public Mesh Mesh { get; }
-    private readonly SlotType[,,] designation;
+    private readonly VoxelDesignationType[,,] designation;
 
     public int Priority { get; }
 
@@ -13,7 +13,7 @@ public class VoxelVisualOption
 
     public VoxelVisualConnections Connections { get; }
 
-    public VoxelVisualOption(Mesh mesh, SlotType[,,] designation, bool flipped, int rotations, int priority, VoxelVisualConnections connections)
+    public VoxelVisualOption(Mesh mesh, VoxelDesignationType[,,] designation, bool flipped, int rotations, int priority, VoxelVisualConnections connections)
     {
         Mesh = mesh;
         this.designation = designation;

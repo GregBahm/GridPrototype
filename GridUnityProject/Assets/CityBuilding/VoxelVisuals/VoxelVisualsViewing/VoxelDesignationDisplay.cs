@@ -15,17 +15,17 @@ public class VoxelDesignationDisplay : MonoBehaviour
         baseLabel = Label.text;
     }
 
-    public void UpdateDisplayContent(SlotType slotType)
+    public void UpdateDisplayContent(VoxelDesignationType slotType)
     {
-        Content.enabled = slotType != SlotType.Empty;
+        Content.enabled = slotType != VoxelDesignationType.Empty;
         Color color = VoxelVisualViewer.Instance.Colors.GetColorFor(slotType);
         Content.material.SetColor("_Color", color);
         Label.text = GetLabelText(slotType);
     }
 
-    private string GetLabelText(SlotType slotType)
+    private string GetLabelText(VoxelDesignationType slotType)
     {
-        if (slotType == SlotType.Empty)
+        if (slotType == VoxelDesignationType.Empty)
             return "";
         string ret = baseLabel + " ";
         ret += slotType.ToString();
