@@ -23,44 +23,9 @@ public class VoxelVisualOption
         Connections = connections;
     }
 
-    public IEnumerable<string> GetDesignationKeys()
+    public string GetDesignationKey()
     {
-        IEnumerable<SlotType[,,]> keyDescriptions = GetAllPossibleDesignationKeys(designation);
-        foreach (SlotType[,,] description in keyDescriptions)
-        {
-            yield return VoxelDesignation.GetDesignationKey(description);
-        }
-    }
-
-    // For every "AnyFilled" slot, produce a version that is Slanted and version that is Flat  
-    private static IEnumerable<SlotType[,,]> GetAllPossibleDesignationKeys(SlotType[,,] currentDesignation)
-    {
-        for (int x = 0; x < 2; x++)
-        {
-            for (int y = 0; y < 2; y++)
-            {
-                for (int z = 0; z < 2; z++)
-                {
-                    if (currentDesignation[x, y, z] == SlotType.AnyFilled)
-                    {
-                        SlotType[,,] newDesignationA = currentDesignation.Clone() as SlotType[,,];
-                        SlotType[,,] newDesignationB = currentDesignation.Clone() as SlotType[,,];
-                        newDesignationA[x, y, z] = SlotType.WalkableRoof;
-                        newDesignationB[x, y, z] = SlotType.SlantedRoof;
-                        foreach (SlotType[,,] item in GetAllPossibleDesignationKeys(newDesignationA))
-                        {
-                            yield return item;
-                        }
-                        foreach (SlotType[,,] item in GetAllPossibleDesignationKeys(newDesignationB))
-                        {
-                            yield return item;
-                        }
-                        yield break;
-                    }
-                }
-            }
-        }
-        yield return currentDesignation;
+        return VoxelDesignation.GetDesignationKey(designation);
     }
 
     public override string ToString()

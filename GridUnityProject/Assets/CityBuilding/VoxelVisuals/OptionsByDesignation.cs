@@ -12,9 +12,9 @@ public class OptionsByDesignation
 
     public VoxelVisualOption[] GetOptions(VoxelDesignation designation)
     {
-        if(!optionsByDesignationKey.ContainsKey(designation.Key))
+        if (!optionsByDesignationKey.ContainsKey(designation.Key))
         {
-            UnityEngine.Debug.LogError("Wanted but couldn't find this key: " + designation.Key);
+            UnityEngine.Debug.LogError("Wanted but couldn't find this key:\n" + designation.Key);
         }
         return optionsByDesignationKey[designation.Key];
     }
@@ -36,17 +36,14 @@ public class OptionsByDesignation
         Dictionary<string, List<VoxelVisualOption>> lists = new Dictionary<string, List<VoxelVisualOption>>();
         foreach (VoxelVisualOption option in allOptions)
         {
-            IEnumerable<string> keys = option.GetDesignationKeys();
-            foreach (string key in keys)
+            string key = option.GetDesignationKey();
+            if (lists.ContainsKey(key))
             {
-                if(lists.ContainsKey(key))
-                {
-                    lists[key].Add(option);
-                }
-                else
-                {
-                    lists.Add(key, new List<VoxelVisualOption>() { option });
-                }
+                lists[key].Add(option);
+            }
+            else
+            {
+                lists.Add(key, new List<VoxelVisualOption>() { option });
             }
         }
         Dictionary<string, VoxelVisualOption[]> ret = new Dictionary<string, VoxelVisualOption[]>();

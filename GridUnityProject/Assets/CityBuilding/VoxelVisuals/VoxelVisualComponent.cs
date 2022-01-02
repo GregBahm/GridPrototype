@@ -142,7 +142,32 @@ public class VoxelVisualComponent
             designation.Description[1, 1, 0] = topDesignationLayer[1, 0];
             designation.Description[1, 1, 1] = topDesignationLayer[1, 1];
         }
+        SetAnyFills(designation.Description);
         return designation;
+    }
+
+    // If a column or top half of a designation is SlantedRoof of WalkableRoof, set it to AnyFill.
+    private void SetAnyFills(SlotType[,,] designation)
+    {
+        for (int x = 0; x < 2; x++)
+        {
+            for (int z = 0; z < 2; z++)
+            {
+                if(IsFill(designation[x, 1, z]))
+                {
+                    designation[x, 1, z] = SlotType.AnyFilled;
+                    if(IsFill(designation[x, 0, z]))
+                    {
+                        designation[x, 0, z] = SlotType.AnyFilled;
+                    }
+                }
+            }
+        }
+    }
+
+    private bool IsFill(SlotType slotType)
+    {
+        return slotType == SlotType.SlantedRoof || slotType == SlotType.WalkableRoof;
     }
 
     // In the case of a mismatch, currently defaults to walkable

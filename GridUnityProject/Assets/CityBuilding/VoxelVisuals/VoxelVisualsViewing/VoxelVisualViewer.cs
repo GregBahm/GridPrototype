@@ -65,19 +65,7 @@ public class VoxelVisualViewer : MonoBehaviour
         SetDesignationDisplay();
 
         HandleCommands();
-
-        if(first)
-        {
-            first = false;
-            Dictionary<VoxelVisualOption, string[]> report = GenerateKeyReport();
-            foreach (string key in report.SelectMany(item => item.Value))
-            {
-                Debug.Log(key);
-            }
-        }
     }
-
-    private bool first = true;
 
     private void HandleCommands()
     {
@@ -137,12 +125,6 @@ public class VoxelVisualViewer : MonoBehaviour
         AssetDatabase.CreateAsset(blueprint, path);
         allBlueprints.Add(blueprint);
         CurrentBlueprintIndex = allBlueprints.Count - 1;
-    }
-
-    private Dictionary<VoxelVisualOption, string[]> GenerateKeyReport()
-    {
-        VoxelVisualOption[] options = CurrentBlueprint.GenerateVisualOptions().ToArray();
-        return options.ToDictionary(item => item, item => item.GetDesignationKeys().ToArray());
     }
 
     private void UpdateBlueprintIndex()
