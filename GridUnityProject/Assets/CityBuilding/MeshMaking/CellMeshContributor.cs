@@ -6,11 +6,11 @@ namespace MeshMaking
 {
     internal class CellMeshContributor : IMeshContributor
     {
-        private readonly VoxelCell cell;
+        private readonly DesignationCell cell;
         public IEnumerable<IMeshBuilderPoint> Points { get; }
         public IEnumerable<MeshBuilderTriangle> Triangles { get; }
 
-        public CellMeshContributor(VoxelCell cell)
+        public CellMeshContributor(DesignationCell cell)
         {
             this.cell = cell;
 
@@ -35,19 +35,19 @@ namespace MeshMaking
         {
             foreach (GroundEdge edge in cell.GroundPoint.Edges)
             {
-                VoxelCell connectedCell = edge.GetOtherPoint(cell.GroundPoint).Voxels[cell.Height];
+                DesignationCell connectedCell = edge.GetOtherPoint(cell.GroundPoint).DesignationCells[cell.Height];
                 yield return new VerticalMeshContributor(cell, edge, connectedCell);
             }
         }
 
         private bool GetDoesHaveTop()
         {
-            return (cell.Height == MainGrid.VoxelHeight - 1) || !cell.GroundPoint.Voxels[cell.Height + 1].IsFilled;
+            return (cell.Height == MainGrid.MaxHeight - 1) || !cell.GroundPoint.DesignationCells[cell.Height + 1].IsFilled;
         }
 
         private bool GetDoesHaveBottom()
         {
-            return cell.Height != 0 && !cell.GroundPoint.Voxels[cell.Height - 1].IsFilled;
+            return cell.Height != 0 && !cell.GroundPoint.DesignationCells[cell.Height - 1].IsFilled;
         }
     }
 }

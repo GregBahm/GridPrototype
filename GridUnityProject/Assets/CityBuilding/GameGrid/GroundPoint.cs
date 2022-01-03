@@ -15,8 +15,8 @@ namespace GameGrid
         public IEnumerable<GroundPoint> DirectConnections { get { return Edges.Select(item => item.GetOtherPoint(this)); } }
         public IEnumerable<GroundPoint> DiagonalConnections { get { return PolyConnections.Select(item => item.GetDiagonalPoint(this)); } }
         public IEnumerable<GroundQuad> PolyConnections { get { return grid.GetConnectedQuads(this); } }
-        private readonly VoxelCell[] voxels;
-        public IReadOnlyList<VoxelCell> Voxels { get { return voxels; } }
+        private readonly DesignationCell[] designationCells;
+        public IReadOnlyList<DesignationCell> DesignationCells { get { return designationCells; } }
         public bool IsBorder { get { return Edges.Any(item => item.IsBorder); } }
 
         public GroundPoint(MainGrid grid, int index, Vector2 initialPosition)
@@ -24,15 +24,15 @@ namespace GameGrid
             this.grid = grid;
             Index = index;
             Position = initialPosition;
-            voxels = GetVoxels();
+            designationCells = GetDesignationCells();
         }
 
-        private VoxelCell[] GetVoxels()
+        private DesignationCell[] GetDesignationCells()
         {
-            VoxelCell[] ret = new VoxelCell[MainGrid.VoxelHeight];
-            for (int i = 0; i < MainGrid.VoxelHeight; i++)
+            DesignationCell[] ret = new DesignationCell[MainGrid.MaxHeight];
+            for (int i = 0; i < MainGrid.MaxHeight; i++)
             {
-                ret[i] = new VoxelCell(grid, this, i);
+                ret[i] = new DesignationCell(grid, this, i);
             }
             return ret;
         }

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-public class VoxelVisualOption
+public class VisualCellOption
 {
     public Mesh Mesh { get; }
     private readonly VoxelDesignationType[,,] designation;
@@ -11,9 +11,9 @@ public class VoxelVisualOption
     public bool Flipped { get; }
     public int Rotations { get; }
 
-    public VoxelVisualConnections Connections { get; }
+    public VisualCellConnections Connections { get; }
 
-    public VoxelVisualOption(Mesh mesh, VoxelDesignationType[,,] designation, bool flipped, int rotations, int priority, VoxelVisualConnections connections)
+    public VisualCellOption(Mesh mesh, VoxelDesignationType[,,] designation, bool flipped, int rotations, int priority, VisualCellConnections connections)
     {
         Mesh = mesh;
         this.designation = designation;

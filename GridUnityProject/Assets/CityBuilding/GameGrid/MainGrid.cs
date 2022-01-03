@@ -7,7 +7,7 @@ namespace GameGrid
 {
     public class MainGrid
     {
-        public static int VoxelHeight { get; } = 50;
+        public static int MaxHeight { get; } = 50;
 
         private List<GroundPoint> points = new List<GroundPoint>();
         public IReadOnlyList<GroundPoint> Points { get { return points; } }
@@ -16,20 +16,20 @@ namespace GameGrid
 
         public IEnumerable<GroundEdge> Edges { get { return edges; } }
 
-        private List<GroundQuad> polys = new List<GroundQuad>();
-        public IEnumerable<GroundQuad> Polys { get { return polys; } }
+        private List<GroundQuad> quads = new List<GroundQuad>();
+        public IEnumerable<GroundQuad> Quads { get { return quads; } }
 
         public IEnumerable<GroundEdge> BorderEdges { get; private set; }
 
-        public IEnumerable<VoxelCell> Voxels
+        public IEnumerable<DesignationCell> Voxels
         {
             get
             {
                 foreach (GroundPoint point in Points)
                 {
-                    for (int i = 0; i < VoxelHeight; i++)
+                    for (int i = 0; i < MaxHeight; i++)
                     {
-                        yield return point.Voxels[i];
+                        yield return point.DesignationCells[i];
                     }
                 }
             }
@@ -39,27 +39,29 @@ namespace GameGrid
         private readonly Dictionary<GroundPoint, List<GroundQuad>> polyTable = new Dictionary<GroundPoint, List<GroundQuad>>();
         private readonly Dictionary<GroundEdge, List<GroundQuad>> bordersTable = new Dictionary<GroundEdge, List<GroundQuad>>();
 
-        private readonly HashSet<VoxelCell> filledCells = new HashSet<VoxelCell>();
-        public IEnumerable<VoxelCell> FilledCells { get { return filledCells; } }
+        private readonly Dictionary<GroundQuad, List<VisualCell>> visualsTable = new Dictionary<GroundQuad, List<VisualCell>>();
+
+        private readonly HashSet<DesignationCell> filledCells = new HashSet<DesignationCell>();
+        public IEnumerable<DesignationCell> FilledCells { get { return filledCells; } }
 
         public MainGrid(IEnumerable<GroundPointBuilder> points, IEnumerable<GroundEdgeBuilder> edges)
         {
             AddToMesh(points, edges);
         }
 
-        internal void SetCellFilled(VoxelCell voxelCell, bool value)
+        public void SetCellFilled(DesignationCell designationCell, bool value)
         {
             if(value)
             {
-                filledCells.Add(voxelCell);
+                filledCells.Add(designationCell);
             }
             else
             {
-                filledCells.Remove(voxelCell);
+                filledCells.Remove(designationCell);
             }
         }
 
-        public bool IsFilled(VoxelCell cell)
+        public bool IsFilled(DesignationCell cell)
         {
             return filledCells.Contains(cell);
         }
@@ -69,7 +71,7 @@ namespace GameGrid
             IEnumerable<GroundPoint> points = newPoints.Select(item => new GroundPoint(this, item.Index, item.Position)).ToArray();
             AddPoints(points);
             IEnumerable<GroundEdge> edges = newEdges.Select(item => new GroundEdge(this, Points[item.PointAIndex], Points[item.PointBIndex])).ToArray();
-            AddEdges(edges);
+            AddEdgesAndQuads(edges);
             BorderEdges = Edges.Where(item => item.IsBorder).ToArray();
 
             if(Edges.Any(edge => edge.Quads.Count() == 0 || edge.Quads.Count() > 2))
@@ -77,18 +79,31 @@ namespace GameGrid
                 throw new Exception("Malformed data.");
             }
 
+            foreach (GroundQuad groundQuad in Quads)
+            {
+                if(!visualsTable.ContainsKey(groundQuad))
+                {
+                    List<VisualCell> visualCells = new List<VisualCell>();
+                    for (int i = 0; i < MaxHeight - 1; i++)
+                    {
+                        visualCells.Add(new VisualCell(this, groundQuad, i));
+                    }
+                    visualsTable.Add(groundQuad, visualCells);
+                }
+            }
+
             UpdateVoxelVisuals();
         }
 
         private void UpdateVoxelVisuals()
         {
-            foreach (VoxelCell voxel in Voxels)
+            foreach (DesignationCell voxel in Voxels)
             {
-                voxel.InitializeVisuals();
+                voxel.PopulateVisuals();
             }
-            foreach (var component in Voxels.SelectMany(item => item.Visuals.Components))
+            foreach (VisualCell visualCell in visualsTable.SelectMany(item => item.Value))
             {
-                component.InitializeNeighbors();
+                visualCell.InitializeNeighbors();
             }
         }
 
@@ -102,7 +117,7 @@ namespace GameGrid
             }
         }
 
-        internal void DoEase()
+        public void DoEase()
         {
             foreach (GroundPoint point in Points)
             {
@@ -124,7 +139,7 @@ namespace GameGrid
             point.Position = normalAverage;
         }
 
-        private void AddEdges(IEnumerable<GroundEdge> newEdges)
+        private void AddEdgesAndQuads(IEnumerable<GroundEdge> newEdges)
         {
             HashSet<GroundPoint> edgesToSort = new HashSet<GroundPoint>();
             edges.AddRange(newEdges);
@@ -144,7 +159,7 @@ namespace GameGrid
             }
 
             QuadFinder quadFinder = new QuadFinder(this, edges.Where(item => item.IsBorder).ToArray());
-            polys.AddRange(quadFinder.Quads);
+            quads.AddRange(quadFinder.Quads);
             foreach (GroundQuad quad in quadFinder.Quads)
             {
                 foreach (GroundEdge edge in quad.Edges)
@@ -164,22 +179,27 @@ namespace GameGrid
             return Vector2.SignedAngle(Vector2.up, otherPoint.Position - point.Position);
         }
 
-        internal IEnumerable<GroundEdge> GetEdges(GroundPoint gridPoint)
+        public IEnumerable<GroundEdge> GetEdges(GroundPoint gridPoint)
         {
             return edgesTable[gridPoint];
         }
 
-        internal IEnumerable<GroundQuad> GetConnectedQuads(GroundPoint gridPoint)
+        public IEnumerable<GroundQuad> GetConnectedQuads(GroundPoint gridPoint)
         {
             return polyTable[gridPoint];
         }
 
-        internal bool GetIsBorder(GroundEdge gridEdge)
+        public VisualCell GetVisualCell(GroundQuad quad, int height)
+        {
+            return visualsTable[quad][height];
+        }
+
+        public bool GetIsBorder(GroundEdge gridEdge)
         {
             return bordersTable[gridEdge].Count < 2;
         }
 
-        internal IEnumerable<GroundQuad> GetConnectedQuads(GroundEdge gridEdge)
+        public IEnumerable<GroundQuad> GetConnectedQuads(GroundEdge gridEdge)
         {
             return bordersTable[gridEdge];
         }
@@ -212,7 +232,7 @@ namespace GameGrid
             public QuadFinder(MainGrid grid, IEnumerable<GroundEdge> borderEdges)
             {
                 this.grid = grid;
-                unavailableDiagonals = GetUnavailableDiagonals(grid.Polys);
+                unavailableDiagonals = GetUnavailableDiagonals(grid.Quads);
                 foreach (GroundEdge edge in borderEdges)
                 {
                     ProcessEdge(edge);

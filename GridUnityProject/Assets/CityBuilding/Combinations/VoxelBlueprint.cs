@@ -18,19 +18,19 @@ public class VoxelBlueprint : ScriptableObject
     public VoxelConnectionType NegativeZ;
     public DesignationGrid Designations;
 
-    public IEnumerable<VoxelVisualOption> GenerateVisualOptions()
+    public IEnumerable<VisualCellOption> GenerateVisualOptions()
     {
-        VoxelVisualConnections baseConnections = new VoxelVisualConnections(Up, Down, PositiveX, NegativeX, PositiveZ, NegativeZ);
+        VisualCellConnections baseConnections = new VisualCellConnections(Up, Down, PositiveX, NegativeX, PositiveZ, NegativeZ);
 
         VoxelDesignation baseDesignation = new VoxelDesignation(Designations.ToFlatArray());
         int priority = 0;
-        yield return new VoxelVisualOption(ArtContent, baseDesignation.Description, false, 0, priority, baseConnections);
+        yield return new VisualCellOption(ArtContent, baseDesignation.Description, false, 0, priority, baseConnections);
         IEnumerable<GeneratedVoxelDesignation> variants = baseDesignation.GetUniqueVariants().ToArray();
         foreach (GeneratedVoxelDesignation variant in variants)
         {
             priority++;
-            VoxelVisualConnections connectionsVariant = baseConnections.GetVariant(variant.WasFlipped, variant.Rotations);
-            yield return new VoxelVisualOption(ArtContent, variant.Description, variant.WasFlipped, variant.Rotations, priority, connectionsVariant);
+            VisualCellConnections connectionsVariant = baseConnections.GetVariant(variant.WasFlipped, variant.Rotations);
+            yield return new VisualCellOption(ArtContent, variant.Description, variant.WasFlipped, variant.Rotations, priority, connectionsVariant);
         }
     }
 

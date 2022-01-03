@@ -10,9 +10,9 @@ namespace VisualsSolving
     public class CellState
     {
         private readonly VisualsSolver solver;
-        public VoxelVisualComponent Component { get; }
+        public VisualCell Component { get; }
 
-        public ReadOnlyCollection<VoxelVisualOption> RemainingOptions { get; }
+        public ReadOnlyCollection<VisualCellOption> RemainingOptions { get; }
 
         private readonly HashSet<VoxelConnectionType> up;
         private readonly HashSet<VoxelConnectionType> down;
@@ -21,7 +21,7 @@ namespace VisualsSolving
         private readonly HashSet<VoxelConnectionType> forward;
         private readonly HashSet<VoxelConnectionType> back;
 
-        public CellState(VisualsSolver solver, IEnumerable<VoxelVisualOption> remainingOptions, VoxelVisualComponent component)
+        public CellState(VisualsSolver solver, IEnumerable<VisualCellOption> remainingOptions, VisualCell component)
         {
             this.solver = solver;
             Component = component;
@@ -61,7 +61,7 @@ namespace VisualsSolving
                 throw new InvalidOperationException("Can't reduce options because there is only one remaining option");
             }
 
-            VoxelVisualOption[] newRemainingOptions = RemainingOptions.Where(item => 
+            VisualCellOption[] newRemainingOptions = RemainingOptions.Where(item => 
                 solver.IsValid(item, Component)).ToArray();
 
             if(newRemainingOptions.Length != RemainingOptions.Count)
@@ -73,7 +73,7 @@ namespace VisualsSolving
 
         public CellState GetCollapsed()
         {
-            return new CellState(solver, new VoxelVisualOption[] { RemainingOptions.First() }, Component);
+            return new CellState(solver, new VisualCellOption[] { RemainingOptions.First() }, Component);
         }
 
         public IEnumerable<CellState> GetNewDirtyCells(CellState oldCell)

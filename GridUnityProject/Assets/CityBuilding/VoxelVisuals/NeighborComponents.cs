@@ -5,20 +5,20 @@ using System.Linq;
 
 public class NeighborComponents
 {
-    public VoxelVisualComponent Up { get; }
-    public VoxelVisualComponent Down { get; }
-    public VoxelVisualComponent Forward { get; }
-    public VoxelVisualComponent Back { get; }
-    public VoxelVisualComponent Left { get; }
-    public VoxelVisualComponent Right { get; }
+    public VisualCell Up { get; }
+    public VisualCell Down { get; }
+    public VisualCell Forward { get; }
+    public VisualCell Back { get; }
+    public VisualCell Left { get; }
+    public VisualCell Right { get; }
 
     public NeighborComponents(
-        VoxelVisualComponent up,
-        VoxelVisualComponent down,
-        VoxelVisualComponent forward,
-        VoxelVisualComponent back,
-        VoxelVisualComponent left,
-        VoxelVisualComponent right)
+        VisualCell up,
+        VisualCell down,
+        VisualCell forward,
+        VisualCell back,
+        VisualCell left,
+        VisualCell right)
     {
         Up = up;
         Down = down;

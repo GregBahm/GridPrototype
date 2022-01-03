@@ -12,10 +12,10 @@ namespace MeshMaking
         private readonly List<MeshBuilderTriangle> triangles = new List<MeshBuilderTriangle>();
         public IEnumerable<MeshBuilderTriangle> Triangles { get { return triangles; } }
 
-        public VerticalMeshContributor(VoxelCell sourceCell, GroundEdge edge, VoxelCell connectedCell)
+        public VerticalMeshContributor(DesignationCell sourceCell, GroundEdge edge, DesignationCell connectedCell)
         {
-            VoxelCell baseAbove = sourceCell.CellAbove;
-            VoxelCell connectedAbove = connectedCell.CellAbove;
+            DesignationCell baseAbove = sourceCell.CellAbove;
+            DesignationCell connectedAbove = connectedCell.CellAbove;
             MeshBuilderConnectionPoint edgePoint = new MeshBuilderConnectionPoint(sourceCell, connectedCell);
             MeshBuilderConnectionPoint edgeAbovePoint = new MeshBuilderConnectionPoint(baseAbove, connectedAbove);
 
@@ -30,9 +30,9 @@ namespace MeshMaking
                 foreach (GroundQuad quad in edge.Quads)
                 {
                     Vector3 quadPos = new Vector3(quad.Center.x, sourceCell.Height, quad.Center.y);
-                    VoxelCell diagonalCell = quad.GetDiagonalPoint(sourceCell.GroundPoint).Voxels[sourceCell.Height];
+                    DesignationCell diagonalCell = quad.GetDiagonalPoint(sourceCell.GroundPoint).DesignationCells[sourceCell.Height];
                     MeshBuilderConnectionPoint diagonalPoint = new MeshBuilderConnectionPoint(diagonalCell, sourceCell, quadPos);
-                    VoxelCell diagonalAbove = diagonalCell.CellAbove;
+                    DesignationCell diagonalAbove = diagonalCell.CellAbove;
                     Vector3 quadAbove = new Vector3(quad.Center.x, sourceCell.Height + 1, quad.Center.y);
                     MeshBuilderConnectionPoint diagonalAbovePoint = new MeshBuilderConnectionPoint(diagonalAbove, baseAbove, quadAbove);
 

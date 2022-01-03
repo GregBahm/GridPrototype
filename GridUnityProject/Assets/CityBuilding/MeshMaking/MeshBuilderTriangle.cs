@@ -21,11 +21,11 @@ namespace MeshMaking
             }
         }
 
-        public VoxelCell TargetCell { get; }
-        public VoxelCell SourceCell { get; }
+        public DesignationCell TargetCell { get; }
+        public DesignationCell SourceCell { get; }
 
-        public MeshBuilderTriangle(VoxelCell targetCell,
-            VoxelCell sourceCell,
+        public MeshBuilderTriangle(DesignationCell targetCell,
+            DesignationCell sourceCell,
             IMeshBuilderPoint pointA,
             IMeshBuilderPoint pointB,
             IMeshBuilderPoint pointC,
@@ -39,12 +39,12 @@ namespace MeshMaking
             PointC = reorderVerts ? pointC : pointB;
             LookTarget = lookTarget;
         }
-            public MeshBuilderTriangle(VoxelCell targetCell,
-            VoxelCell sourceCell,
+            public MeshBuilderTriangle(DesignationCell targetCell,
+            DesignationCell sourceCell,
             IMeshBuilderPoint pointA,
             IMeshBuilderPoint pointB,
             IMeshBuilderPoint pointC)
-            :this(targetCell, sourceCell, pointA, pointB, pointC, targetCell.CellPosition - pointA.Position)
+            :this(targetCell, sourceCell, pointA, pointB, pointC, targetCell.Position - pointA.Position)
         { }
 
         private bool GetShouldReorderVerts(Vector3 lookTarget, Vector3 pointA, Vector3 pointB, Vector3 pointC)

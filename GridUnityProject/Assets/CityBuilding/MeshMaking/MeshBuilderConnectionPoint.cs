@@ -6,8 +6,8 @@ namespace MeshMaking
 {
     internal class MeshBuilderConnectionPoint : IMeshBuilderPoint
     {
-        public VoxelCell CellA { get; }
-        public VoxelCell CellB { get; }
+        public DesignationCell CellA { get; }
+        public DesignationCell CellB { get; }
         public string Key { get; }
 
         public Vector3 Position { get; }
@@ -16,12 +16,12 @@ namespace MeshMaking
 
         public bool IsCellPoint { get; } = false;
 
-        public MeshBuilderConnectionPoint(VoxelCell cellA, VoxelCell cellB)
-            : this(cellA, cellB, (cellA.CellPosition + cellB.CellPosition) / 2)
+        public MeshBuilderConnectionPoint(DesignationCell cellA, DesignationCell cellB)
+            : this(cellA, cellB, (cellA.Position + cellB.Position) / 2)
         {
             Uv = Vector2.up;
         }
-        public MeshBuilderConnectionPoint(VoxelCell cellA, VoxelCell cellB, Vector3 position)
+        public MeshBuilderConnectionPoint(DesignationCell cellA, DesignationCell cellB, Vector3 position)
         {
             bool cellAFirst = GetIsCellAFirst(cellA, cellB);
             CellA = cellAFirst ? cellA : cellB;
@@ -31,7 +31,7 @@ namespace MeshMaking
             Uv = Vector2.one;
         }
 
-        private bool GetIsCellAFirst(VoxelCell cellA, VoxelCell cellB)
+        private bool GetIsCellAFirst(DesignationCell cellA, DesignationCell cellB)
         {
             if (cellA.GroundPoint.Index == cellB.GroundPoint.Index)
             {

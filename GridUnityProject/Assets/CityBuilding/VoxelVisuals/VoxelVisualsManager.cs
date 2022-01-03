@@ -9,17 +9,17 @@ public class VoxelVisualsManager
 {
     private readonly Transform piecesRoot;
     private readonly Material voxelDisplayMat;
-    private readonly OptionsByDesignation optionsSource;
-    private readonly Dictionary<VoxelVisualComponent, MeshFilter> debugObjects = new Dictionary<VoxelVisualComponent, MeshFilter>();
+    private readonly VisualOptionsByDesignation optionsSource;
+    private readonly Dictionary<VisualCell, MeshFilter> debugObjects = new Dictionary<VisualCell, MeshFilter>();
 
-    public VoxelVisualsManager(Material voxelDisplayMat, OptionsByDesignation optionsSource)
+    public VoxelVisualsManager(Material voxelDisplayMat, VisualOptionsByDesignation optionsSource)
     {
         piecesRoot = new GameObject("Pieces Root").transform;
         this.voxelDisplayMat = voxelDisplayMat;
         this.optionsSource = optionsSource;
     }
 
-    private List<Tuple<Material, VoxelVisualComponent>> debugMats = new List<Tuple<Material, VoxelVisualComponent>>();
+    private List<Tuple<Material, VisualCell>> debugMats = new List<Tuple<Material, VisualCell>>();
 
     public void ConstantlyUpdateComponentTransforms()
     {
@@ -30,7 +30,7 @@ public class VoxelVisualsManager
         }
     }
 
-    public void UpdateDebugObject(VoxelVisualComponent component)
+    public void UpdateDebugObject(VisualCell component)
     {
         if (debugObjects.ContainsKey(component))
         {
@@ -52,7 +52,7 @@ public class VoxelVisualsManager
             Material mat = new Material(voxelDisplayMat);
             component.SetComponentTransform(mat);
             renderer.material = mat;
-            debugMats.Add(new Tuple<Material, VoxelVisualComponent>(mat, component));
+            debugMats.Add(new Tuple<Material, VisualCell>(mat, component));
             
             filter.mesh = component.Contents.Mesh;
             obj.transform.position = component.ContentPosition;
@@ -65,9 +65,9 @@ public class VoxelVisualsManager
         }
     }
 
-    private string GetObjName(VoxelVisualComponent component)
+    private string GetObjName(VisualCell component)
     {
-        string ret = component.Core.ToString();
+        string ret = component.Quad.ToString();
         if (component.Contents == null || component.Contents.Mesh == null)
         {
             return ret + " (empty)";
@@ -84,17 +84,17 @@ public class VoxelVisualsManager
         return ret;
     }
 
-    internal void DoImmediateUpdate(VoxelCell toggledCell)
+    internal void DoImmediateUpdate(DesignationCell toggledCell)
     {
         UpdateVoxel(toggledCell);
     }
 
-    private void UpdateVoxel(VoxelCell targetCell)
+    private void UpdateVoxel(DesignationCell targetCell)
     {
-        foreach (VoxelVisualComponent component in targetCell.Visuals.Components)
+        foreach (VisualCell component in targetCell.Visuals)
         {
             VoxelDesignation designation = component.GetCurrentDesignation();
-            VoxelVisualOption option = optionsSource.GetOptions(designation).First();
+            VisualCellOption option = optionsSource.GetOptions(designation).First();
             component.Contents = option;
             UpdateDebugObject(component);
         }
@@ -103,8 +103,7 @@ public class VoxelVisualsManager
     private class VoxelVisualDebugger : MonoBehaviour
     {
         public bool DoDebug;
-        public bool ShowDesignation;
-        public VoxelVisualComponent Component;
+        public VisualCell Component;
 
         private static Color PositiveZColor = new Color(0, 0, 1f);
         private static Color NegativeZColor = new Color(0, 0, .5f);
@@ -113,50 +112,14 @@ public class VoxelVisualsManager
 
         private void Update()
         {
-            if(ShowDesignation)
-            {
-                ShowDesignation = false;
-                var designation = Component.GetCurrentDesignation();
-                CreateDesignationCube(0, 0, 0, designation);
-                CreateDesignationCube(0, 0, 1, designation);
-                CreateDesignationCube(0, 1, 0, designation);
-                CreateDesignationCube(0, 1, 1, designation);
-                CreateDesignationCube(1, 0, 0, designation);
-                CreateDesignationCube(1, 0, 1, designation);
-                CreateDesignationCube(1, 1, 0, designation);
-                CreateDesignationCube(1, 1, 1, designation);
-            }
 
             if(DoDebug)
             {
-                Debug.DrawLine(Component.VisualCenter, Component.Neighbors.Forward.VisualCenter, PositiveZColor);
-                Debug.DrawLine(Component.VisualCenter, Component.Neighbors.Back.VisualCenter, NegativeZColor);
-                Debug.DrawLine(Component.VisualCenter, Component.Neighbors.Left.VisualCenter, PositiveXColor);
-                Debug.DrawLine(Component.VisualCenter, Component.Neighbors.Right.VisualCenter, NegativeXColor);
+                Debug.DrawLine(Component.ContentPosition, Component.Neighbors.Forward.ContentPosition, PositiveZColor);
+                Debug.DrawLine(Component.ContentPosition, Component.Neighbors.Back.ContentPosition, NegativeZColor);
+                Debug.DrawLine(Component.ContentPosition, Component.Neighbors.Left.ContentPosition, PositiveXColor);
+                Debug.DrawLine(Component.ContentPosition, Component.Neighbors.Right.ContentPosition, NegativeXColor);
             }
-        }
-
-        private void CreateDesignationCube(int x, int y, int z, VoxelDesignation designation)
-        {
-            GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            Destroy(cube.GetComponent<BoxCollider>());
-            Vector3 center = Component.ContentPosition;
-            Vector3 toLeft = (Component.Neighbors.Left.VisualCenter - Component.ContentPosition) * .5f;
-            Vector3 toRight = (Component.Neighbors.Right.VisualCenter - Component.ContentPosition) * .5f;
-            Vector3 toForward = (Component.Neighbors.Forward.VisualCenter - Component.ContentPosition) * .5f;
-            Vector3 toBack = (Component.Neighbors.Back.VisualCenter - Component.ContentPosition) * .5f;
-
-            Vector3 boxPos = center;
-            boxPos += x == 0 ? toRight : toLeft;
-            boxPos += z == 0 ? toBack : toForward;
-            boxPos += y == 0 ? new Vector3(0, .125f, 0) : new Vector3(0, .375f, 0);
-            cube.transform.localScale = new Vector3(.20f, .20f, .20f);
-            cube.transform.position = boxPos;
-            if (designation.Description[x, y, z] == VoxelDesignationType.Empty)
-            {
-                cube.GetComponent<MeshRenderer>().material.SetColor("_Color", Color.black);
-            }
-            cube.name = gameObject.name + " x" + x + " y" + y + " z" + z + " " + designation.Description[x, y, z].ToString();
         }
     }
 }

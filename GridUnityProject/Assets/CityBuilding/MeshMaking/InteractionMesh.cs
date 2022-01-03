@@ -56,7 +56,7 @@ namespace MeshMaking
             {
                 indexTable.Add(meshBuidlerTriangles[i], i);
             }
-            foreach (IGrouping<VoxelCell, MeshBuilderTriangle> item in meshBuidlerTriangles.GroupBy(item => item.SourceCell))
+            foreach (IGrouping<DesignationCell, MeshBuilderTriangle> item in meshBuidlerTriangles.GroupBy(item => item.SourceCell))
             {
                 foreach(var subItem in item.GroupBy(subItem => subItem.TargetCell))
                 {
@@ -109,7 +109,7 @@ namespace MeshMaking
 
         private IEnumerable<IMeshContributor> GetMeshContributors(MainGrid grid)
         {
-            IMeshContributor[] groundContributor = grid.Points.Where(item => !item.Voxels[0].IsFilled).Select(item => new HorizontalMeshContributor(item)).ToArray();
+            IMeshContributor[] groundContributor = grid.Points.Where(item => !item.DesignationCells[0].IsFilled).Select(item => new HorizontalMeshContributor(item)).ToArray();
             IMeshContributor[] contributors = grid.FilledCells.Select(item => new CellMeshContributor(item)).ToArray();
             return groundContributor.Concat(contributors);
         }

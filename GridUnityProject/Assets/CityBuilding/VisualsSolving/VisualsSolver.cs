@@ -7,7 +7,7 @@ namespace VisualsSolving
 {
     public class VisualsSolver
     {
-        private Dictionary<VoxelVisualComponent, CellState> cellStateLookup;
+        private Dictionary<VisualCell, CellState> cellStateLookup;
         private readonly HashSet<CellState> unsolvedCells;
         private HashSet<CellState> dirtyCells = new HashSet<CellState>();
         public List<CellState> ReadyToDisplayVoxels { get; } = new List<CellState>();
@@ -20,12 +20,12 @@ namespace VisualsSolving
             }
         }
 
-        public CellState this[VoxelVisualComponent component]
+        public CellState this[VisualCell component]
         {
             get { return cellStateLookup[component]; }
         }
 
-        public VisualsSolver(MainGrid grid, OptionsByDesignation optionsSource)
+        public VisualsSolver(MainGrid grid, VisualOptionsByDesignation optionsSource)
         {
             cellStateLookup = GetInitialDictionary(grid, optionsSource);
             foreach (CellState item in cellStateLookup.Values)
@@ -98,13 +98,13 @@ namespace VisualsSolving
             }
         }
 
-        private Dictionary<VoxelVisualComponent, CellState> GetInitialDictionary(MainGrid grid, OptionsByDesignation optionsSource)
+        private Dictionary<VisualCell, CellState> GetInitialDictionary(MainGrid grid, VisualOptionsByDesignation optionsSource)
         {
-            Dictionary<VoxelVisualComponent, CellState> ret = new Dictionary<VoxelVisualComponent, CellState>();
-            IEnumerable<VoxelCell> voxelsToSolve = GetVoxelsToSolve(grid); 
-            foreach (VoxelVisualComponent component in voxelsToSolve.SelectMany(item => item.Visuals.Components))
+            Dictionary<VisualCell, CellState> ret = new Dictionary<VisualCell, CellState>();
+            IEnumerable<DesignationCell> voxelsToSolve = GetVoxelsToSolve(grid); 
+            foreach (VisualCell component in voxelsToSolve.SelectMany(item => item.Visuals))
             {
-                VoxelVisualOption[] options = optionsSource.GetOptions(component.GetCurrentDesignation());
+                VisualCellOption[] options = optionsSource.GetOptions(component.GetCurrentDesignation());
                 CellState state = new CellState(this, options, component);
                 ret.Add(component, state);
             }
@@ -113,27 +113,27 @@ namespace VisualsSolving
         
         // There's no point in solving every empty voxel
         // So we only solve voxels with a designation or somewhere below a designation
-        private IEnumerable<VoxelCell> GetVoxelsToSolve(MainGrid grid)
+        private IEnumerable<DesignationCell> GetVoxelsToSolve(MainGrid grid)
         {
             foreach (GroundPoint point in grid.Points)
             {
                 bool takeColumn = false;
-                for (int i = MainGrid.VoxelHeight - 1; i >= 0; i--)
+                for (int i = MainGrid.MaxHeight - 1; i >= 0; i--)
                 {
-                    VoxelCell voxel = point.Voxels[i];
-                    takeColumn = takeColumn || voxel.Visuals.Components.Any(item => item.Contents != null);
+                    DesignationCell voxel = point.DesignationCells[i];
+                    takeColumn = takeColumn || voxel.Visuals.Any(item => item.Contents != null);
                     if (takeColumn)
                         yield return voxel;
                 }
             }
         }
 
-        public bool HasConnection(VoxelVisualComponent neighbor)
+        public bool HasConnection(VisualCell neighbor)
         {
             return neighbor != null && cellStateLookup.ContainsKey(neighbor);
         }
 
-        private bool IsValid(VoxelVisualComponent neighbor, VoxelConnectionType connectionType, CellState.ConnectionDirection direction)
+        private bool IsValid(VisualCell neighbor, VoxelConnectionType connectionType, CellState.ConnectionDirection direction)
         {
             if (neighbor != null)
             {
@@ -152,7 +152,7 @@ namespace VisualsSolving
             return true;
         }
 
-        public bool IsValid(VoxelVisualOption option, VoxelVisualComponent component)
+        public bool IsValid(VisualCellOption option, VisualCell component)
         {
             if(!IsValid(component.Neighbors.Up, option.Connections.Up, CellState.ConnectionDirection.Up))
                 return false;

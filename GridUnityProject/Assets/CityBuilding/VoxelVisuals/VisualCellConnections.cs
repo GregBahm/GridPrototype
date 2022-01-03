@@ -1,6 +1,6 @@
 ﻿using System;
 
-public class VoxelVisualConnections
+public class VisualCellConnections
 {
     public VoxelConnectionType Up { get; }
     public VoxelConnectionType Down { get; }
@@ -11,7 +11,7 @@ public class VoxelVisualConnections
     public VoxelConnectionType Forward { get; }
     public VoxelConnectionType Back { get; }
 
-    public VoxelVisualConnections(VoxelConnectionType up,
+    public VisualCellConnections(VoxelConnectionType up,
         VoxelConnectionType down,
         VoxelConnectionType left,
         VoxelConnectionType right,
@@ -26,7 +26,7 @@ public class VoxelVisualConnections
         Back = back;
     }
 
-    internal VoxelVisualConnections GetVariant(bool wasFlipped, int rotations)
+    internal VisualCellConnections GetVariant(bool wasFlipped, int rotations)
     {
         VoxelConnectionType left = Left;
         VoxelConnectionType right = Right;
@@ -51,6 +51,6 @@ public class VoxelVisualConnections
             back = oldRight;
         }
 
-        return new VoxelVisualConnections(Up, Down, left, right, forward, back);
+        return new VisualCellConnections(Up, Down, left, right, forward, back);
     }
 }

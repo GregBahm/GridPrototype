@@ -9,12 +9,12 @@ namespace MeshMaking
 {
     public class MeshHitTarget
     {
-        public VoxelCell TargetCell { get; }
-        public VoxelCell SourceCell { get; }
+        public DesignationCell TargetCell { get; }
+        public DesignationCell SourceCell { get; }
         public Vector3[] FaceVerts { get; }
         public Vector3 Center { get; }
 
-        internal MeshHitTarget(VoxelCell targetCell, VoxelCell sourceCell, IEnumerable<MeshBuilderTriangle> tris)
+        internal MeshHitTarget(DesignationCell targetCell, DesignationCell sourceCell, IEnumerable<MeshBuilderTriangle> tris)
         {
             TargetCell = targetCell;
             SourceCell = sourceCell;

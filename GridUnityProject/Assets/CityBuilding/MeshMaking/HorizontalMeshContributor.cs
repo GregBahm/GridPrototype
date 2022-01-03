@@ -18,7 +18,7 @@ namespace MeshMaking
         {
             List<IMeshBuilderPoint> points = new List<IMeshBuilderPoint>();
             List<MeshBuilderTriangle> triangles = new List<MeshBuilderTriangle>();
-            VoxelCell baseCell = groundPoint.Voxels[0];
+            DesignationCell baseCell = groundPoint.DesignationCells[0];
             Vector3 lookTarget = Vector3.up;
             IMeshBuilderPoint corePoint = new MeshBuilderCellPoint(baseCell);
 
@@ -27,10 +27,10 @@ namespace MeshMaking
             {
                 GroundPoint diagonal = quad.GetDiagonalPoint(groundPoint);
                 Vector3 quadPos = new Vector3(quad.Center.x, 0, quad.Center.y);
-                IMeshBuilderPoint diagonalPoint = new MeshBuilderConnectionPoint(baseCell, diagonal.Voxels[0], quadPos);
+                IMeshBuilderPoint diagonalPoint = new MeshBuilderConnectionPoint(baseCell, diagonal.DesignationCells[0], quadPos);
                 GroundPoint[] otherPoints = quad.Points.Where(item => item != baseCell.GroundPoint && item != diagonal).ToArray();
-                IMeshBuilderPoint otherPointA = new MeshBuilderConnectionPoint(baseCell, otherPoints[0].Voxels[0]);
-                IMeshBuilderPoint otherPointB = new MeshBuilderConnectionPoint(baseCell, otherPoints[1].Voxels[0]);
+                IMeshBuilderPoint otherPointA = new MeshBuilderConnectionPoint(baseCell, otherPoints[0].DesignationCells[0]);
+                IMeshBuilderPoint otherPointB = new MeshBuilderConnectionPoint(baseCell, otherPoints[1].DesignationCells[0]);
 
                 MeshBuilderTriangle triangleA = new MeshBuilderTriangle(baseCell, null, corePoint, diagonalPoint, otherPointA, lookTarget);
                 MeshBuilderTriangle triangleB = new MeshBuilderTriangle(baseCell, null, diagonalPoint, corePoint, otherPointB, lookTarget);
@@ -46,10 +46,10 @@ namespace MeshMaking
             Triangles = triangles.ToArray();
         }
 
-        public HorizontalMeshContributor(VoxelCell sourceCell, bool upwardFacing)
+        public HorizontalMeshContributor(DesignationCell sourceCell, bool upwardFacing)
         {
-            VoxelCell targetCell = upwardFacing ? sourceCell.CellAbove : sourceCell.CellBelow;
-            VoxelCell alignmentCell = upwardFacing ? sourceCell.CellAbove : sourceCell;
+            DesignationCell targetCell = upwardFacing ? sourceCell.CellAbove : sourceCell.CellBelow;
+            DesignationCell alignmentCell = upwardFacing ? sourceCell.CellAbove : sourceCell;
 
             Vector3 lookTarget = upwardFacing ? Vector3.up : Vector3.down;
 
@@ -64,10 +64,10 @@ namespace MeshMaking
                 GroundPoint diagonal = quad.GetDiagonalPoint(targetCell.GroundPoint);
                 Vector3 quadPos = new Vector3(quad.Center.x, alignmentCell.Height, quad.Center.y);
 
-                IMeshBuilderPoint diagonalPoint = new MeshBuilderConnectionPoint(alignmentCell, diagonal.Voxels[alignmentCell.Height], quadPos);
+                IMeshBuilderPoint diagonalPoint = new MeshBuilderConnectionPoint(alignmentCell, diagonal.DesignationCells[alignmentCell.Height], quadPos);
                 GroundPoint[] otherPoints = quad.Points.Where(item => item != targetCell.GroundPoint && item != diagonal).ToArray();
-                IMeshBuilderPoint otherPointA = new MeshBuilderConnectionPoint(alignmentCell, otherPoints[0].Voxels[alignmentCell.Height]);
-                IMeshBuilderPoint otherPointB = new MeshBuilderConnectionPoint(alignmentCell, otherPoints[1].Voxels[alignmentCell.Height]);
+                IMeshBuilderPoint otherPointA = new MeshBuilderConnectionPoint(alignmentCell, otherPoints[0].DesignationCells[alignmentCell.Height]);
+                IMeshBuilderPoint otherPointB = new MeshBuilderConnectionPoint(alignmentCell, otherPoints[1].DesignationCells[alignmentCell.Height]);
 
                 MeshBuilderTriangle triangleA = new MeshBuilderTriangle(targetCell, sourceCell, corePoint, diagonalPoint, otherPointA, lookTarget);
                 MeshBuilderTriangle triangleB = new MeshBuilderTriangle(targetCell, sourceCell, diagonalPoint, corePoint, otherPointB, lookTarget);

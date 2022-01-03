@@ -5,7 +5,7 @@ namespace MeshMaking
 {
     class MeshBuilderCellPoint : IMeshBuilderPoint
     {
-        public VoxelCell Cell { get; }
+        public DesignationCell Cell { get; }
         public string Key { get; }
         public Vector3 Position { get; }
 
@@ -13,7 +13,7 @@ namespace MeshMaking
 
         public bool IsCellPoint { get; } = true;
 
-        public MeshBuilderCellPoint(VoxelCell cell)
+        public MeshBuilderCellPoint(DesignationCell cell)
         {
             Cell = cell;
             Key = cell.ToString();
