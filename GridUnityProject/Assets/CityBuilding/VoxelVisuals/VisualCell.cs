@@ -31,10 +31,10 @@ public class VisualCell
         ContentPosition = GetContentPosition();
         anchors = new Vector3[]
         {
-            designationCells[0, 0, 0].Position,
-            designationCells[0, 0, 1].Position,
-            designationCells[1, 0, 1].Position,
-            designationCells[1, 0, 0].Position
+            designationCells[1, 0, 0].Position - ContentPosition,
+            designationCells[0, 0, 0].Position - ContentPosition,
+            designationCells[0, 0, 1].Position - ContentPosition,
+            designationCells[1, 0, 1].Position - ContentPosition,
         };
     }
 

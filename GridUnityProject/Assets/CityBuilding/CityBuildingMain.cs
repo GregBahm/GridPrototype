@@ -72,7 +72,7 @@ public class CityBuildingMain : MonoBehaviour
             MainGrid = GroundLoader.Load();
             Debug.Log("Grid Loaded");
         }
-        HandleSolver();
+        //HandleSolver(); // TODO: Reactive the solver once everything else is working
         visualsAssembler.ConstantlyUpdateComponentTransforms();
     }
 
@@ -117,6 +117,6 @@ public class CityBuildingMain : MonoBehaviour
     internal void UpdateVoxelVisuals(DesignationCell changedCell)
     {
         visualsAssembler.DoImmediateUpdate(changedCell);
-        solver = new VisualsSolver(MainGrid, optionsSource);
+        //solver = new VisualsSolver(MainGrid, optionsSource); // TODO: Reactive the solver once everything else is working
     }
 }
