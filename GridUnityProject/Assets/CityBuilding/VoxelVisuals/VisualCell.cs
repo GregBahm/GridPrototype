@@ -12,7 +12,7 @@ public class VisualCell
 
     public GroundQuad Quad { get; }
 
-    private readonly DesignationCell[,,] designationCells;
+    private readonly IDesignationCell[,,] designationCells;
 
     public Vector3 ContentPosition { get; }
 
@@ -21,6 +21,8 @@ public class VisualCell
     public int Height { get; }
 
     private readonly Vector3[] anchors;
+
+    private static readonly Vector3 HeightOffset = new Vector3(0, .5f, 0);
 
     public VisualCell(MainGrid grid, GroundQuad quad, int height)
     {
@@ -31,36 +33,48 @@ public class VisualCell
         ContentPosition = GetContentPosition();
         anchors = new Vector3[]
         {
-            designationCells[1, 0, 0].Position - ContentPosition,
-            designationCells[0, 0, 0].Position - ContentPosition,
-            designationCells[0, 0, 1].Position - ContentPosition,
-            designationCells[1, 0, 1].Position - ContentPosition,
+            designationCells[1, 1, 0].Position - ContentPosition,
+            designationCells[0, 1, 0].Position - ContentPosition,
+            designationCells[0, 1, 1].Position - ContentPosition,
+            designationCells[1, 1, 1].Position - ContentPosition,
         };
     }
+
 
     private Vector3 GetContentPosition()
     {
         Vector3 ret = Vector3.zero;
-        foreach (DesignationCell cell in designationCells)
+        foreach (IDesignationCell cell in designationCells)
         {
             ret += cell.Position;
         }
         ret /= 8;
+        ret += HeightOffset;
         return ret;
     }
 
-    private DesignationCell[,,] GetDesignationCells()
+    private IDesignationCell[,,] GetDesignationCells()
     {
-        DesignationCell[,,] ret = new DesignationCell[2, 2, 2];
-        ret[0, 0, 0] = Quad.Points[0].DesignationCells[Height];
-        ret[0, 0, 1] = Quad.Points[1].DesignationCells[Height];
-        ret[1, 0, 1] = Quad.Points[2].DesignationCells[Height];
-        ret[1, 0, 0] = Quad.Points[3].DesignationCells[Height];
+        IDesignationCell[,,] ret = new IDesignationCell[2, 2, 2];
+        if(Height == 0)
+        {
+            ret[0, 0, 0] = new GroundDesignationCell(Quad.Points[0]);
+            ret[0, 0, 1] = new GroundDesignationCell(Quad.Points[1]);
+            ret[1, 0, 1] = new GroundDesignationCell(Quad.Points[2]);
+            ret[1, 0, 0] = new GroundDesignationCell(Quad.Points[3]);
+        }
+        else
+        {
+            ret[0, 0, 0] = Quad.Points[0].DesignationCells[Height - 1];
+            ret[0, 0, 1] = Quad.Points[1].DesignationCells[Height - 1];
+            ret[1, 0, 1] = Quad.Points[2].DesignationCells[Height - 1];
+            ret[1, 0, 0] = Quad.Points[3].DesignationCells[Height - 1];
+        }
 
-        ret[0, 1, 0] = Quad.Points[0].DesignationCells[Height + 1];
-        ret[0, 1, 1] = Quad.Points[1].DesignationCells[Height + 1];
-        ret[1, 1, 1] = Quad.Points[2].DesignationCells[Height + 1];
-        ret[1, 1, 0] = Quad.Points[3].DesignationCells[Height + 1];
+        ret[0, 1, 0] = Quad.Points[0].DesignationCells[Height];
+        ret[0, 1, 1] = Quad.Points[1].DesignationCells[Height];
+        ret[1, 1, 1] = Quad.Points[2].DesignationCells[Height];
+        ret[1, 1, 0] = Quad.Points[3].DesignationCells[Height];
         return ret;
     }
 
@@ -69,16 +83,16 @@ public class VisualCell
         VisualCell up = GetUpNeighbor();
         VisualCell down = GetDownNeighbor();
 
-        VisualCell left = GetAdjacentNeighbor(designationCells[0, 0, 0], designationCells[1, 0, 0]);
-        VisualCell forward = GetAdjacentNeighbor(designationCells[0, 0, 0], designationCells[0, 0, 1]);
+        VisualCell left = GetAdjacentNeighbor(designationCells[0, 1, 0], designationCells[1, 1, 0]);
+        VisualCell forward = GetAdjacentNeighbor(designationCells[0, 1, 0], designationCells[0, 1, 1]);
 
-        VisualCell right = GetAdjacentNeighbor(designationCells[0, 0, 1], designationCells[1, 0, 1]);
-        VisualCell back = GetAdjacentNeighbor(designationCells[1, 0, 0], designationCells[1, 0, 1]);
+        VisualCell right = GetAdjacentNeighbor(designationCells[0, 1, 1], designationCells[1, 1, 1]);
+        VisualCell back = GetAdjacentNeighbor(designationCells[1, 1, 0], designationCells[1, 1, 1]);
 
         Neighbors = new NeighborComponents(up, down, forward, back, left, right);
     }
 
-    private VisualCell GetAdjacentNeighbor(DesignationCell cellA, DesignationCell cellB)
+    private VisualCell GetAdjacentNeighbor(IDesignationCell cellA, IDesignationCell cellB)
     {
         IEnumerable<GroundQuad> quads = cellA.GroundPoint.PolyConnections
             .Where(item => item.Points.Contains(cellB.GroundPoint));
@@ -99,7 +113,7 @@ public class VisualCell
 
     private VisualCell GetUpNeighbor()
     {
-        if (Height == MainGrid.MaxHeight - 2)
+        if (Height > MainGrid.MaxHeight - 2)
             return null;
         return grid.GetVisualCell(Quad, Height + 1);
     }

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class DesignationCell
+public class DesignationCell : IDesignationCell
 {
     private readonly MainGrid grid;
     public GroundPoint GroundPoint { get; }
@@ -57,14 +57,11 @@ public class DesignationCell
     {
         List<VisualCell> visuals = new List<VisualCell>();
 
-        if(Height > 0)
-        {
-            visuals.AddRange(GroundPoint.PolyConnections.Select(item => grid.GetVisualCell(item, Height - 1)));
-        }
+        visuals.AddRange(GroundPoint.PolyConnections.Select(item => grid.GetVisualCell(item, Height)));
 
         if (Height < MainGrid.MaxHeight - 1)
         {
-            visuals.AddRange(GroundPoint.PolyConnections.Select(item => grid.GetVisualCell(item, Height)));
+            visuals.AddRange(GroundPoint.PolyConnections.Select(item => grid.GetVisualCell(item, Height + 1)));
         }
         Visuals = visuals;
     }

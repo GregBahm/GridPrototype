@@ -102,11 +102,14 @@ namespace VisualsSolving
         {
             Dictionary<VisualCell, CellState> ret = new Dictionary<VisualCell, CellState>();
             IEnumerable<DesignationCell> voxelsToSolve = GetVoxelsToSolve(grid); 
-            foreach (VisualCell component in voxelsToSolve.SelectMany(item => item.Visuals))
+            foreach (VisualCell visualCell in voxelsToSolve.SelectMany(item => item.Visuals))
             {
-                VisualCellOption[] options = optionsSource.GetOptions(component.GetCurrentDesignation());
-                CellState state = new CellState(this, options, component);
-                ret.Add(component, state);
+                if(!ret.ContainsKey(visualCell))
+                {
+                    VisualCellOption[] options = optionsSource.GetOptions(visualCell.GetCurrentDesignation());
+                    CellState state = new CellState(this, options, visualCell);
+                    ret.Add(visualCell, state);
+                }
             }
             return ret;
         }

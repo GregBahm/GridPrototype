@@ -13,6 +13,7 @@ namespace MeshMaking
         public DesignationCell SourceCell { get; }
         public Vector3[] FaceVerts { get; }
         public Vector3 Center { get; }
+        public Vector3 Normal { get; }
 
         internal MeshHitTarget(DesignationCell targetCell, DesignationCell sourceCell, IEnumerable<MeshBuilderTriangle> tris)
         {
@@ -21,6 +22,14 @@ namespace MeshMaking
             Vector3[] unsortedFaceVerts = GetUnsortedFaceVerts(tris).ToArray();
             Center = Average(unsortedFaceVerts);
             FaceVerts = GetSortedFaceVerts(tris, unsortedFaceVerts).ToArray();
+            if(TargetCell != null && SourceCell != null)
+            {
+                Normal = (TargetCell.Position - SourceCell.Position).normalized;
+            }
+            else
+            {
+                Normal = Vector3.up;
+            }
         }
 
         private IEnumerable<Vector3> GetSortedFaceVerts(IEnumerable<MeshBuilderTriangle> tris, Vector3[] unsortedFaceVerts)

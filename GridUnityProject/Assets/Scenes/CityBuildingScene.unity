@@ -493,7 +493,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: cd28ac2913e0383439cab0ea5e4a382a, type: 2}
   - {fileID: 11400000, guid: 0765d99864752024f928d5635e9399a5, type: 2}
   - {fileID: 11400000, guid: 446b295780d6c0e479e84f430d11bf7b, type: 2}
-  - {fileID: 11400000, guid: 0bde931f963e83544952173a62041fd6, type: 2}
+  - {fileID: 0}
   - {fileID: 11400000, guid: 02005f8cffa41754cad2ec56963515dc, type: 2}
   - {fileID: 11400000, guid: ebf2c519addcdbe4884386499cd8a6cf, type: 2}
   - {fileID: 11400000, guid: d59bff65ab1385d49b00b5d4f458f996, type: 2}
@@ -1074,8 +1074,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d4256d0cb26a1fb44bd2dc48083532c3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  UpdateSpeed: 0.306
-  LineOffset: 0.1
+  UpdateSpeed: 0.2
+  ShrinkAmount: 0.9
+  LineOffset: 0.2
 --- !u!1001 &1840303973
 PrefabInstance:
   m_ObjectHideFlags: 0

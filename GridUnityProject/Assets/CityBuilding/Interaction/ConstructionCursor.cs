@@ -8,6 +8,9 @@ public class ConstructionCursor : MonoBehaviour
     [Range(0, 1)]
     public float UpdateSpeed;
 
+    [Range(0, 1)]
+    public float ShrinkAmount = .9f;
+
     public float LineOffset = .1f;
 
     private float baseLineWidth;
@@ -25,7 +28,7 @@ public class ConstructionCursor : MonoBehaviour
         baseLineWidth = lineRenderer.widthMultiplier;
     }
 
-    private void UpdateCursorVisuals()
+    private void UpdateCursorVisuals(Vector3 normal)
     {
         if (targets == null)
         {
@@ -36,7 +39,7 @@ public class ConstructionCursor : MonoBehaviour
         for (int i = 0; i < targets.Length; i++)
         {
             Vector3 currentPos = lineRenderer.GetPosition(i);
-            Vector3 posTarget = GetPosTarget(targets[i]);
+            Vector3 posTarget = GetPosTarget(targets[i], normal);
             Vector3 newPos = Vector3.Lerp(currentPos, posTarget, UpdateSpeed * Time.deltaTime * 100);
             lineRenderer.SetPosition(i, newPos);
         }
@@ -44,11 +47,12 @@ public class ConstructionCursor : MonoBehaviour
         lineRenderer.widthMultiplier = Mathf.Lerp(lineRenderer.widthMultiplier, widthMultiplierTarget, UpdateSpeed * Time.deltaTime * 100);
     }
 
-    private Vector3 GetPosTarget(Vector3 rawTarget)
+    private Vector3 GetPosTarget(Vector3 rawTarget, Vector3 normal)
     {
         Vector3 ret = GetMouseModifiedPosTarget(rawTarget);
+        ret = Vector3.Lerp(targetCenter, ret, ShrinkAmount);
         float lineOffset = hideCursor ? LineOffset * 3 : LineOffset;
-        ret += new Vector3(0, lineOffset, 0);
+        ret += normal * lineOffset;
         return ret;
     }
 
@@ -74,7 +78,7 @@ public class ConstructionCursor : MonoBehaviour
         {
             PlaceCursor(meshHitTarget);
         }
-        UpdateCursorVisuals();
+        UpdateCursorVisuals(meshHitTarget?.Normal ?? Vector3.up);
     }
 
     private void PlaceCursor(MeshMaking.MeshHitTarget meshHitTarget)

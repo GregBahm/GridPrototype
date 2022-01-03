@@ -84,7 +84,7 @@ namespace GameGrid
                 if(!visualsTable.ContainsKey(groundQuad))
                 {
                     List<VisualCell> visualCells = new List<VisualCell>();
-                    for (int i = 0; i < MaxHeight - 1; i++)
+                    for (int i = 0; i < MaxHeight; i++)
                     {
                         visualCells.Add(new VisualCell(this, groundQuad, i));
                     }
