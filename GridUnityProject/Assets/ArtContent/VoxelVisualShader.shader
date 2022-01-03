@@ -52,7 +52,6 @@
 
 			      float3 GetTransformedBaseVert(float3 vert)
 			      {
-                vert.y *= .5;
 				        vert.xz += .5;
                 //vert.x = 1 - vert.x;
 
@@ -68,7 +67,7 @@
 				        float3 transformedVert = GetTransformedBaseVert(v.vertex);
                 o.vertex = UnityObjectToClipPos(transformedVert);
 				        o.uv = v.uv;
-				      o.baseVert = v.vertex;
+				        o.baseVert = v.vertex;
                 o.col = v.col;
                 o.worldPos = mul(unity_ObjectToWorld, float4(transformedVert, 1)).xyz;
                 o._ShadowCoord = ComputeScreenPos(o.vertex);
@@ -108,12 +107,10 @@
 
             float3 GetTransformedBaseVert(float3 vert)
             {
-                vert.y *= .5;
                 vert.xz += .5;
-                vert.x = 1 - vert.x;
 
-                float3 anchorStart = lerp(_AnchorA, _AnchorB, vert.x);
-                float3 anchorEnd = lerp(_AnchorD, _AnchorC, vert.x);
+                float3 anchorStart = lerp(_AnchorB, _AnchorA, vert.x);
+                float3 anchorEnd = lerp(_AnchorC, _AnchorD, vert.x);
                 float3 flatPosition = lerp(anchorStart, anchorEnd, vert.z);
                 return float3(flatPosition.x, vert.y, flatPosition.z);
             }

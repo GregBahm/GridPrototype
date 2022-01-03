@@ -67,7 +67,7 @@ public class VoxelVisualsManager
 
     private string GetObjName(VisualCell component)
     {
-        string ret = component.Quad.ToString();
+        string ret = "(" + component.Quad.ToString() + "), " + component.Height + " ";
         if (component.Contents == null || component.Contents.Mesh == null)
         {
             return ret + " (empty)";
