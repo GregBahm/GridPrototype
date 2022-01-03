@@ -9,17 +9,17 @@
     }
     SubShader
     { 
-		UsePass "Legacy Shaders/VertexLit/SHADOWCASTER"
+		//UsePass "Legacy Shaders/VertexLit/SHADOWCASTER"
         Tags { "RenderType"="Opaque" }
         LOD 100
         Pass
         {
-            Tags {"LightMode" = "ForwardBase"}
+            //Tags {"LightMode" = "ForwardBase"}
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
-			#pragma multi_compile_fwdbase
-			#include "AutoLight.cginc"
+			//#pragma multi_compile_fwdbase
+			//#include "AutoLight.cginc"
 
             #include "UnityCG.cginc"
 
@@ -47,7 +47,7 @@
                 float2 uv : TEXCOORD0;
                 float4 vertex : SV_POSITION;
                 float distToCursor : TEXCOORD1;
-				float4 _ShadowCoord : TEXCOORD2;
+				//float4 _ShadowCoord : TEXCOORD2;
                 float3 worldPos : TEXCOORD3;
             };
 
@@ -65,7 +65,7 @@
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 float3 worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
                 o.distToCursor = length(worldPos - _DistToCursor);
-				o._ShadowCoord = ComputeScreenPos(o.vertex);
+				//o._ShadowCoord = ComputeScreenPos(o.vertex);
                 o.worldPos = worldPos;
                 return o;
             }
@@ -78,7 +78,7 @@
             fixed4 frag(v2f i) : SV_Target
             {
                 float3 baseLighting = GetLighting(i.worldPos);
-				float shadowness = SHADOW_ATTENUATION(i);
+				//float shadowness = SHADOW_ATTENUATION(i);
 
                 float alpha = (1 - i.distToCursor / 40);
                 alpha = pow(saturate(alpha), 20);
@@ -89,8 +89,8 @@
                 gridThroughCells = AdjustGridLine(gridThroughCells);
                 float grid = gridAroundCells;
                 
-                shadowness = lerp(shadowness, 1, .5);
-				float3 ret = baseLighting * shadowness;
+        //        shadowness = lerp(shadowness, 1, .5);
+                float3 ret = baseLighting;// *shadowness;
                 ret += i.worldPos.y * .05;
                 float height = saturate(1 - i.worldPos.y * 10);
                 float3 lineVal = lerp(ret, 1, alpha * .2 * height);
