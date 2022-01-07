@@ -82,13 +82,11 @@
 
                 float alpha = (1 - i.distToCursor / 40);
                 alpha = pow(saturate(alpha), 20);
-
-                float gridAroundCells = i.uv.y;
+                float gridAroundCells = i.uv.x;
                 gridAroundCells = AdjustGridLine(gridAroundCells);
                 float gridThroughCells = 1 - i.uv.x; 
                 gridThroughCells = AdjustGridLine(gridThroughCells);
-                float grid = gridAroundCells;
-                
+                float grid = gridThroughCells;
         //        shadowness = lerp(shadowness, 1, .5);
                 float3 ret = baseLighting;// *shadowness;
                 ret += i.worldPos.y * .05;

@@ -158,31 +158,34 @@ public class VisualCell
         return slotType == VoxelDesignationType.SlantedRoof || slotType == VoxelDesignationType.WalkableRoof;
     }
 
-    public void SetComponentTransform(Material mat)
+    public void SetMaterialProperties(Material mat)
     {
         if (Contents != null)
         {
-            Vector3[] adjustedAnchors = new Vector3[4];
-            for (int i = 0; i < 4; i++)
-            {
-                int rotatedIndex = (i + 4 + Contents.Rotations) % 4;
-                adjustedAnchors[i] = anchors[rotatedIndex];
-            }
-            if (Contents.Flipped)
-            {
-                Vector3 anchor0 = adjustedAnchors[0];
-                Vector3 anchor2 = adjustedAnchors[2];
-                adjustedAnchors[0] = adjustedAnchors[1];
-                adjustedAnchors[1] = anchor0;
-                adjustedAnchors[2] = adjustedAnchors[3];
-                adjustedAnchors[3] = anchor2;
-            }
+            Vector3[] adjustedAnchors = GetAdjustedAnchors();
             SetAnchors(adjustedAnchors, mat);
+            mat.SetFloat("_Cull", Contents.Flipped ? 1 : 2);
         }
-        else
+    }
+
+    private Vector3[] GetAdjustedAnchors()
+    {
+        Vector3[] ret = new Vector3[4];
+        for (int i = 0; i < 4; i++)
         {
-            SetAnchors(anchors, mat);
+            int rotatedIndex = (i + 4 + Contents.Rotations) % 4;
+            ret[i] = anchors[rotatedIndex];
         }
+        if (Contents.Flipped)
+        {
+            Vector3 anchor0 = ret[0];
+            Vector3 anchor2 = ret[2];
+            ret[0] = ret[1];
+            ret[1] = anchor0;
+            ret[2] = ret[3];
+            ret[3] = anchor2;
+        }
+        return ret;
     }
 
     private void SetAnchors(Vector3[] adjustedAnchors, Material mat)

@@ -26,7 +26,7 @@ public class VoxelVisualsManager
         //TODO: Remove this when you're done iterating on the shaders
         foreach (var item in debugMats)
         {
-            item.Item2.SetComponentTransform(item.Item1);
+            item.Item2.SetMaterialProperties(item.Item1);
         }
     }
 
@@ -36,7 +36,7 @@ public class VoxelVisualsManager
         {
             debugObjects[component].mesh = component.Contents.Mesh;
             debugObjects[component].gameObject.name = GetObjName(component);
-            component.SetComponentTransform(debugObjects[component].GetComponent<MeshRenderer>().material);
+            component.SetMaterialProperties(debugObjects[component].GetComponent<MeshRenderer>().material);
         }
         else
         {
@@ -50,7 +50,7 @@ public class VoxelVisualsManager
             MeshFilter filter = obj.GetComponent<MeshFilter>();
             MeshRenderer renderer = obj.GetComponent<MeshRenderer>();
             Material mat = new Material(voxelDisplayMat);
-            component.SetComponentTransform(mat);
+            component.SetMaterialProperties(mat);
             renderer.material = mat;
             debugMats.Add(new Tuple<Material, VisualCell>(mat, component));
             
