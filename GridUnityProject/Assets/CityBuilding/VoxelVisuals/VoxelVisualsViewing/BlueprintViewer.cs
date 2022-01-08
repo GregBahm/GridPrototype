@@ -18,7 +18,6 @@ public class BlueprintViewer : MonoBehaviour
     public VoxelDesignationDisplay X1Y1Z1Display;
 
     public string GeneratedName;
-    public string GeneratedMeshName;
     public bool MakeStubFromBlueprint;
     public bool SetCorrectBlueprintName;
     public bool FindArtContentForBlueprint;
@@ -48,7 +47,6 @@ public class BlueprintViewer : MonoBehaviour
     private void HandleCommands()
     {
         GeneratedName = VoxelBlueprint.DeriveCorrectAssetName(Blueprint);
-        GeneratedMeshName = GeneratedName.Replace(' ', '_');
         if (SetCorrectBlueprintName)
         {
             SetCorrectBlueprintName = false;
@@ -68,7 +66,7 @@ public class BlueprintViewer : MonoBehaviour
 
     private void FindArtContent()
     {
-        string[] assets = AssetDatabase.FindAssets(GeneratedMeshName, new[] { "Assets/ArtContent/VoxelVisuals/" });
+        string[] assets = AssetDatabase.FindAssets(GeneratedName + " t:mesh", new[] { VoxelBlueprint.BlueprintsFolderPath });
         if (assets.Length == 1)
         {
             Mesh mesh = AssetDatabase.LoadAssetAtPath<Mesh>(AssetDatabase.GUIDToAssetPath(assets[0]));

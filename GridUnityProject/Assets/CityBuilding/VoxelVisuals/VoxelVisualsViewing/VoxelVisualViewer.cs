@@ -34,17 +34,20 @@ public class VoxelVisualViewer : MonoBehaviour
 
     private IEnumerable<BlueprintViewer> InstantiateBlueprints(List<VoxelBlueprint> allBlueprints)
     {
+        GameObject root = new GameObject("Blueprints");
         foreach (VoxelBlueprint blueprint in allBlueprints)
         {
-            yield return InstantiateBlueprint(blueprint);
+            yield return InstantiateBlueprint(blueprint, root.transform);
         }
     }
 
-    private BlueprintViewer InstantiateBlueprint(VoxelBlueprint blueprint)
+    private BlueprintViewer InstantiateBlueprint(VoxelBlueprint blueprint, Transform root)
     {
         GameObject gameObj = Instantiate(BlueprintViewerPrefab);
         BlueprintViewer ret = gameObj.GetComponent<BlueprintViewer>();
         ret.Blueprint = blueprint;
+        gameObj.name = blueprint.name;
+        gameObj.transform.SetParent(root);
         return ret;
     }
 

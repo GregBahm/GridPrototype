@@ -7,7 +7,7 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "VoxelDefinition/VoxelBlueprint")]
 public class VoxelBlueprint : ScriptableObject
 {
-    public const string BlueprintsFolderPath = "Assets/CityBuilding/Combinations/VoxelBlueprints/";
+    public const string BlueprintsFolderPath = "Assets/CityBuilding/VoxelBlueprints/";
 
     public Mesh ArtContent;
     public VoxelConnectionType Up;
@@ -45,14 +45,14 @@ public class VoxelBlueprint : ScriptableObject
     public static string DeriveCorrectAssetName(VoxelBlueprint blueprint)
     {
         return blueprint.Down.ToString() + " " +
-            GetNameComponent(blueprint.Designations.X0Y0Z0) + " " +
-            GetNameComponent(blueprint.Designations.X0Y0Z1) + " " +
-            GetNameComponent(blueprint.Designations.X0Y1Z0) + " " +
-            GetNameComponent(blueprint.Designations.X0Y1Z1) + " " +
-            GetNameComponent(blueprint.Designations.X1Y0Z0) + " " +
-            GetNameComponent(blueprint.Designations.X1Y0Z1) + " " +
-            GetNameComponent(blueprint.Designations.X1Y1Z0) + " " +
-            GetNameComponent(blueprint.Designations.X1Y1Z1) + " " +
+            GetNameComponent(blueprint.Designations.X0Y0Z0) + "_" +
+            GetNameComponent(blueprint.Designations.X0Y0Z1) + "_" +
+            GetNameComponent(blueprint.Designations.X0Y1Z0) + "_" +
+            GetNameComponent(blueprint.Designations.X0Y1Z1) + "_" +
+            GetNameComponent(blueprint.Designations.X1Y0Z0) + "_" +
+            GetNameComponent(blueprint.Designations.X1Y0Z1) + "_" +
+            GetNameComponent(blueprint.Designations.X1Y1Z0) + "_" +
+            GetNameComponent(blueprint.Designations.X1Y1Z1) + "_" +
                 blueprint.Up.ToString();
     }
 
