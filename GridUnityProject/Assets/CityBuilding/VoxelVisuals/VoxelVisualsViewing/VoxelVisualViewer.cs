@@ -45,6 +45,7 @@ public class VoxelVisualViewer : MonoBehaviour
     {
         GameObject gameObj = Instantiate(BlueprintViewerPrefab);
         BlueprintViewer ret = gameObj.GetComponent<BlueprintViewer>();
+        ret.GeneratedName = blueprint.GetCorrectAssetName();
         ret.Blueprint = blueprint;
         gameObj.name = blueprint.name;
         gameObj.transform.SetParent(root);

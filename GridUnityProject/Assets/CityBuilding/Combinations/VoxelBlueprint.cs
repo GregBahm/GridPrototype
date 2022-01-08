@@ -42,9 +42,14 @@ public class VoxelBlueprint : ScriptableObject
         return ret.ToArray();
     }
 
-    public static string DeriveCorrectAssetName(VoxelBlueprint blueprint)
+    public string GetCorrectAssetName()
     {
-        return blueprint.Down.ToString() + " " +
+        return GetCorrectAssetName(this);
+    }
+
+    public static string GetCorrectAssetName(VoxelBlueprint blueprint)
+    {
+        return blueprint.Down.ToString() + "_" +
             GetNameComponent(blueprint.Designations.X0Y0Z0) + "_" +
             GetNameComponent(blueprint.Designations.X0Y0Z1) + "_" +
             GetNameComponent(blueprint.Designations.X0Y1Z0) + "_" +
@@ -99,7 +104,7 @@ public class VoxelBlueprint : ScriptableObject
 
     public static string GetBlueprintAssetPath(VoxelBlueprint blueprint)
     {
-        string name = DeriveCorrectAssetName(blueprint);
+        string name = GetCorrectAssetName(blueprint);
         return BlueprintsFolderPath + name + ".asset";
     }
 }

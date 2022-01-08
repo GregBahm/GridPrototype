@@ -28,7 +28,7 @@ public class BlueprintViewer : MonoBehaviour
         meshFilter = GetComponent<MeshFilter>();
     }
 
-    private void CorrectCurrentBlueprintName()
+    public void CorrectCurrentBlueprintName()
     {
         string originalPath = AssetDatabase.GetAssetPath(Blueprint);
         AssetDatabase.RenameAsset(originalPath, GeneratedName);
@@ -37,6 +37,7 @@ public class BlueprintViewer : MonoBehaviour
     private void Update()
     {
         CurrentMesh = Blueprint.ArtContent;
+        GeneratedName = Blueprint.GetCorrectAssetName();
 
         meshFilter.mesh = Blueprint.ArtContent;
         SetDesignationDisplay();
@@ -46,7 +47,7 @@ public class BlueprintViewer : MonoBehaviour
 
     private void HandleCommands()
     {
-        GeneratedName = VoxelBlueprint.DeriveCorrectAssetName(Blueprint);
+        GeneratedName = VoxelBlueprint.GetCorrectAssetName(Blueprint);
         if (SetCorrectBlueprintName)
         {
             SetCorrectBlueprintName = false;
