@@ -71,8 +71,8 @@ Material:
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
-    - _TuneA: 49.1
-    - _TuneB: 7.3
+    - _TuneA: 74.3
+    - _TuneB: 7.12
     - _TuneC: 0
     - _UVSec: 0
     - _ZWrite: 1
