@@ -31,7 +31,7 @@ public class BlueprintViewer : MonoBehaviour
     public void CorrectCurrentBlueprintName()
     {
         string originalPath = AssetDatabase.GetAssetPath(Blueprint);
-        AssetDatabase.RenameAsset(originalPath, GeneratedName);
+        string errorMessageIfAny = AssetDatabase.RenameAsset(originalPath, GeneratedName);
     }
 
     private void Update()
@@ -67,7 +67,7 @@ public class BlueprintViewer : MonoBehaviour
 
     private void FindArtContent()
     {
-        string[] assets = AssetDatabase.FindAssets(GeneratedName + " t:mesh", new[] { VoxelBlueprint.BlueprintsFolderPath });
+        string[] assets = AssetDatabase.FindAssets(GeneratedName + " t:Mesh", new[] { VoxelBlueprint.BlueprintsFolderPath });
         if (assets.Length == 1)
         {
             Mesh mesh = AssetDatabase.LoadAssetAtPath<Mesh>(AssetDatabase.GUIDToAssetPath(assets[0]));

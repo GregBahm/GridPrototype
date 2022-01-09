@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +11,6 @@ public class VoxelVisualViewer : MonoBehaviour
     public GameObject BlueprintViewerPrefab;
 
     private BlueprintViewer[] blueprintViewers;
-    public VoxelVisualColors Colors;
 
     public float Margin;
 
@@ -77,51 +75,26 @@ public class VoxelVisualViewer : MonoBehaviour
         List<BlueprintViewer> piecesWithOnlyWalkable = new List<BlueprintViewer>();
         List<BlueprintViewer> piecesWithBoth = new List<BlueprintViewer>();
         List<BlueprintViewer> piecesWithNeather = new List<BlueprintViewer>();
+        List<BlueprintViewer> groundPieces = new List<BlueprintViewer>();
 
         foreach (BlueprintViewer blueprint in blueprintViewers)
         {
             VoxelDesignationType[] designations = blueprint.Blueprint.Designations.ToFlatArray();
             bool hasSlanted = designations.Any(item => item == VoxelDesignationType.SlantedRoof);
             bool hasWalkable = designations.Any(item => item == VoxelDesignationType.WalkableRoof);
+            bool hasGround = designations.Any(item => item == VoxelDesignationType.Ground);
             if (hasSlanted && hasWalkable)
                 piecesWithBoth.Add(blueprint);
             else if (hasSlanted)
                 piecesWithOnlySlanted.Add(blueprint);
             else if (hasWalkable)
                 piecesWithOnlyWalkable.Add(blueprint);
+            else if (hasGround)
+                groundPieces.Add(blueprint);
             else
                 piecesWithNeather.Add(blueprint);
         }
 
-        return new List<List<BlueprintViewer>> { piecesWithOnlySlanted, piecesWithOnlyWalkable, piecesWithBoth, piecesWithNeather };
-    }
-}
-
-[Serializable]
-public class VoxelVisualColors
-{
-    public Color AnyFilled;
-    public Color WalkableRoof;
-    public Color SlantedRoof;
-    public Color Platform;
-    public Color Ground;
-
-    public Color GetColorFor(VoxelDesignationType slotType)
-    {
-        switch (slotType)
-        {
-            case VoxelDesignationType.AnyFilled:
-                return AnyFilled;
-            case VoxelDesignationType.SlantedRoof:
-                return SlantedRoof;
-            case VoxelDesignationType.WalkableRoof:
-                return WalkableRoof;
-            case VoxelDesignationType.Platform:
-                return Platform;
-            case VoxelDesignationType.Empty:
-            case VoxelDesignationType.Ground:
-            default:
-                return Ground;
-        }
+        return new List<List<BlueprintViewer>> { piecesWithOnlySlanted, piecesWithOnlyWalkable, piecesWithBoth, groundPieces, piecesWithNeather };
     }
 }

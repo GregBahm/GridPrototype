@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEditor;
 
 public class CityBuildingMain : MonoBehaviour
 {
@@ -23,9 +24,6 @@ public class CityBuildingMain : MonoBehaviour
     private GameObject BaseGridVisual;
 
     [SerializeField]
-    private VoxelBlueprint[] VoxelBlueprints;
-
-    [SerializeField]
     private Material VoxelDisplayMat;
 
     public MainGrid MainGrid { get; private set; }
@@ -35,18 +33,40 @@ public class CityBuildingMain : MonoBehaviour
 
     private VisualsSolver solver;
 
+    public GameObject BlueprintViewerPrefab;
+
+    public static CityBuildingMain Instance;
+
+    private void Awake()
+    {
+        Instance = this;
+    }
+
     private void Start()
     {
-        VoxelBlueprints = VoxelBlueprint.GetAllBlueprints();
 
         MainGrid = LoadLastSave ? GroundLoader.Load() : GroundLoader.Load(DefaultGridFile.text);
         InteractionMesh = new InteractionMesh(new Mesh());
         UpdateInteractionGrid();
         InteractionMeshObject.GetComponent<MeshFilter>().mesh = InteractionMesh.Mesh;
         BaseGridVisual.GetComponent<MeshFilter>().mesh = CloneInteractionMesh();
-        optionsSource = new VisualOptionsByDesignation(VoxelBlueprints);
+        optionsSource = new VisualOptionsByDesignation();
         visualsAssembler = new VoxelVisualsManager(VoxelDisplayMat, optionsSource);
         solver = new VisualsSolver(MainGrid, optionsSource);
+    }
+
+    public void StubMissingBlueprint(VoxelDesignation designation)
+    {
+        GameObject gameObj = Instantiate(BlueprintViewerPrefab);
+        gameObj.transform.position = new Vector3(0, 5, 0);
+        BlueprintViewer viewer = gameObj.GetComponent<BlueprintViewer>();
+        VoxelBlueprint blueprint = ScriptableObject.CreateInstance<VoxelBlueprint>();
+        blueprint.Designations = DesignationGrid.FromDesignation(designation);
+        viewer.Blueprint = blueprint;
+
+        string path = VoxelBlueprint.GetBlueprintAssetPath(blueprint);
+        AssetDatabase.CreateAsset(blueprint, path);
+        AssetDatabase.Refresh();
     }
 
     private Mesh CloneInteractionMesh()

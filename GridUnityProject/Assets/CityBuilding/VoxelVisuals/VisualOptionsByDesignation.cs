@@ -3,9 +3,15 @@ using System.Linq;
 
 public class VisualOptionsByDesignation
 {
-    private readonly Dictionary<string, VisualCellOption[]> optionsByDesignationKey;
-    public VisualOptionsByDesignation(VoxelBlueprint[] blueprints)
+    private Dictionary<string, VisualCellOption[]> optionsByDesignationKey;
+    public VisualOptionsByDesignation()
     {
+        SetOptions();
+    }
+
+    private void SetOptions()
+    {
+        VoxelBlueprint[] blueprints = VoxelBlueprint.GetAllBlueprints();
         VisualCellOption[] allOptions = GetAllOptions(blueprints).ToArray();
         optionsByDesignationKey = GetOptionsByDesignationKey(allOptions);
     }
@@ -14,7 +20,12 @@ public class VisualOptionsByDesignation
     {
         if (!optionsByDesignationKey.ContainsKey(designation.Key))
         {
+            SetOptions();
+        }
+            if (!optionsByDesignationKey.ContainsKey(designation.Key))
+        {
             UnityEngine.Debug.LogError("Wanted but couldn't find this key:\n" + designation.Key);
+            CityBuildingMain.Instance.StubMissingBlueprint(designation);
         }
         return optionsByDesignationKey[designation.Key];
     }

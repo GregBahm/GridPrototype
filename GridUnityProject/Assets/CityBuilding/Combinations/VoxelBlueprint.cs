@@ -136,6 +136,20 @@ public class DesignationGrid
         };
     }
 
+    public static DesignationGrid FromDesignation(VoxelDesignation designation)
+    {
+        DesignationGrid ret = new DesignationGrid();
+        ret.X0Y0Z0 = designation.Description[0, 0, 0];
+        ret.X0Y0Z1 = designation.Description[0, 0, 1];
+        ret.X0Y1Z0 = designation.Description[0, 1, 0];
+        ret.X0Y1Z1 = designation.Description[0, 1, 1];
+        ret.X1Y0Z0 = designation.Description[1, 0, 0];
+        ret.X1Y0Z1 = designation.Description[1, 0, 1];
+        ret.X1Y1Z0 = designation.Description[1, 1, 0];
+        ret.X1Y1Z1 = designation.Description[1, 1, 1];
+        return ret;
+    }
+
     public VoxelDesignationType[,,] ToCubedArray()
     {
         VoxelDesignationType[,,] ret = new VoxelDesignationType[2, 2, 2];
