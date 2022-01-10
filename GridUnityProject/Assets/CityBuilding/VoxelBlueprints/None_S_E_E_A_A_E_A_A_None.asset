@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8530589c0825764489ef903943e44ae8, type: 3}
-  m_Name: None_S_E_E_A_A_A_A_A_None
+  m_Name: None_S_E_E_A_A_E_A_A_None
   m_EditorClassIdentifier: 
-  ArtContent: {fileID: -969325058198376070, guid: 98049418e27d03f46bd8837f07c5849b,
+  ArtContent: {fileID: 4859515289485278009, guid: b1db00c2c5e9d34498895cd15521fd17,
     type: 3}
   Up: 0
   Down: 0
@@ -26,6 +26,6 @@ MonoBehaviour:
     X0Y1Z0: 0
     X0Y1Z1: 1
     X1Y0Z0: 1
-    X1Y0Z1: 1
+    X1Y0Z1: 0
     X1Y1Z0: 1
     X1Y1Z1: 1
