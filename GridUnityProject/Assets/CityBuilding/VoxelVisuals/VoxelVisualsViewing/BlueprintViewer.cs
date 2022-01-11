@@ -41,7 +41,7 @@ public class BlueprintViewer : MonoBehaviour
 
         meshFilter.mesh = Blueprint.ArtContent;
         SetDesignationDisplay();
-
+        name = GeneratedName + (Blueprint.ArtContent == null ? " (Empty)" : "");
         HandleCommands();
     }
 
@@ -72,11 +72,12 @@ public class BlueprintViewer : MonoBehaviour
         {
             Mesh mesh = AssetDatabase.LoadAssetAtPath<Mesh>(AssetDatabase.GUIDToAssetPath(assets[0]));
             Blueprint.ArtContent = mesh;
+            name = GeneratedName + Blueprint.ArtContent == null ? " (Empty)" : "";
             EditorUtility.SetDirty(Blueprint);
         }
     }
 
-    private void StubBlueprintFromCurrent()
+    public void StubBlueprintFromCurrent()
     {
         VoxelBlueprint blueprint = ScriptableObject.CreateInstance<VoxelBlueprint>();
 
@@ -96,10 +97,15 @@ public class BlueprintViewer : MonoBehaviour
         blueprint.Designations.X1Y0Z1 = Blueprint.Designations.X1Y0Z1;
         blueprint.Designations.X1Y1Z0 = Blueprint.Designations.X1Y1Z0;
         blueprint.Designations.X1Y1Z1 = Blueprint.Designations.X1Y1Z1;
-
-        blueprint.name = "stub";
-        string path = VoxelBlueprint.BlueprintsFolderPath + "stub.asset";
+        blueprint.ArtContent = Blueprint.ArtContent;
+        blueprint.name = blueprint.GetCorrectAssetName();
+        string path = GetCorrectAssetPath();
         AssetDatabase.CreateAsset(blueprint, path);
+    }
+
+    public string GetCorrectAssetPath()
+    {
+        return VoxelBlueprint.BlueprintsFolderPath + Blueprint.GetCorrectAssetName() + ".asset";
     }
 
     private void SetDesignationDisplay()

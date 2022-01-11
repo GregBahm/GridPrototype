@@ -26,13 +26,27 @@ public class VoxelVisualViewer : MonoBehaviour
         OrganizedBlueprints visuals = new OrganizedBlueprints(this, allBlueprints);
         blueprintViewers = new List<BlueprintViewer>();
         visuals.InstantiateGameObjects();
-
         Report();
     }
 
+
+    //This code doesn't work right
+    //private void SaveAllBlueprints()
+    //{
+    //    foreach (BlueprintViewer viewer in blueprintViewers)
+    //    {
+    //        string path = viewer.GetCorrectAssetPath();
+    //        string[] foundAsset = AssetDatabase.FindAssets(path);
+    //        if(foundAsset.Length == 0)
+    //        {
+    //            viewer.StubBlueprintFromCurrent();
+    //        }
+    //    }
+    //}
+
     private void Report()
     {
-        int missing = blueprintViewers.Count(item => item.name == "");
+        int missing = blueprintViewers.Count(item => item.Blueprint.ArtContent == null);
         Debug.Log(blueprintViewers.Count + " blueprints, with " + missing + " missing.");
     }
 
@@ -42,7 +56,6 @@ public class VoxelVisualViewer : MonoBehaviour
         BlueprintViewer ret = gameObj.GetComponent<BlueprintViewer>();
         ret.GeneratedName = blueprint.GetCorrectAssetName();
         ret.Blueprint = blueprint;
-        gameObj.name = blueprint.name;
         blueprintViewers.Add(ret);
         return ret;
     }
