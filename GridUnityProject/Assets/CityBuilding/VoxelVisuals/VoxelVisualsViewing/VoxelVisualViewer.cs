@@ -22,7 +22,7 @@ public class VoxelVisualViewer : MonoBehaviour
 
     private void Start()
     {
-        IEnumerable<VoxelBlueprint> allBlueprints = VoxelBlueprint.GetAllBlueprints();
+        IEnumerable<VoxelBlueprint> allBlueprints = VoxelBlueprint.GetAllBlueprints().Where(item => item.ArtContent != null);
         OrganizedBlueprints visuals = new OrganizedBlueprints(this, allBlueprints);
         visuals.InstantiateGameObjects();
     }
@@ -44,6 +44,10 @@ public class VoxelVisualViewer : MonoBehaviour
 
     public BlueprintViewer InstantiateBlueprint(VoxelBlueprint blueprint)
     {
+        if(blueprint == null)
+        {
+            Debug.Log("Hey now");
+        }
         GameObject gameObj = Instantiate(BlueprintViewerPrefab);
         BlueprintViewer ret = gameObj.GetComponent<BlueprintViewer>();
         ret.GeneratedName = blueprint.GetCorrectAssetName();
@@ -103,11 +107,15 @@ public class VoxelVisualViewer : MonoBehaviour
     public static string GetInvariantKey(VoxelBlueprint blueprint)
     {
         IEnumerable<VisualCellOption> options = blueprint.GenerateVisualOptions();
-        List<string> asKeys = options.Select(item => item.GetDesignationKey()).ToList();
+        List<string> asKeys = options.Select(item => GetVisualCellOptionKey(item)).ToList();
         asKeys.Sort();
         return asKeys[0];
     }
 
+    private static string GetVisualCellOptionKey(VisualCellOption option)
+    {
+        return option.Connections.Down.ToString() + "_" + option.GetDesignationKey() + "_" + option.Connections.Up.ToString();
+    }
 
     private class OrganizedBlueprints
     {
@@ -121,6 +129,7 @@ public class VoxelVisualViewer : MonoBehaviour
         {
             this.mothership = mothership;
             this.allBlueprints = allBlueprints;
+            pieceDictionary = new Dictionary<string, VoxelBlueprint>();
             this.pieceDictionary = allBlueprints.ToDictionary(item => GetInvariantKey(item), item => item);
 
             roofPieces = GetRoofPieceGroups().ToList();
@@ -129,7 +138,7 @@ public class VoxelVisualViewer : MonoBehaviour
 
         private IEnumerable<PotentialStrutPair> GetNonRoofPieces()
         {
-            foreach (VoxelBlueprint blueprint in allBlueprints.Where(item => item.Down != VoxelConnectionType.BigStrut))
+            foreach (VoxelBlueprint blueprint in allBlueprints.Where(item => item.Up != VoxelConnectionType.BigStrut))
             {
                 VoxelDesignationType[] designations = blueprint.Designations.ToFlatArray();
                 if (designations.All(item => item != VoxelDesignationType.SlantedRoof 
@@ -170,7 +179,7 @@ public class VoxelVisualViewer : MonoBehaviour
         }
         private IEnumerable<VoxelBlueprint> GetBaseSlantPieces(IEnumerable<VoxelBlueprint> allBlueprints)
         {
-            foreach (VoxelBlueprint blueprint in allBlueprints)
+            foreach (VoxelBlueprint blueprint in allBlueprints.Where(item => item.Up != VoxelConnectionType.BigStrut))
             {
                 IEnumerable<VoxelDesignationType> slots = blueprint.Designations.ToFlatArray();
                 if (slots.Any(item => item == VoxelDesignationType.SlantedRoof) &&
@@ -181,7 +190,7 @@ public class VoxelVisualViewer : MonoBehaviour
 
         private void CreateAndPlacePiecePair(PotentialStrutPair pair, int xOffset, int yOffset)
         {
-            VoxelBlueprint blueprint = pair.BasePiece.ExistantBlueprint;
+            VoxelBlueprint blueprint = pair.BasePiece.BestBlueprint;
             BlueprintViewer viewer = mothership.InstantiateBlueprint(blueprint);
             mothership.PlaceBlueprint(viewer.transform, xOffset, yOffset);
 
@@ -290,7 +299,7 @@ public class VoxelVisualViewer : MonoBehaviour
         private BlueprintContainer TryFindStrut(Dictionary<string, VoxelBlueprint> allPieces)
         {
             VoxelBlueprint strutVersion = new VoxelBlueprint();
-            strutVersion.Down = VoxelConnectionType.BigStrut;
+            strutVersion.Up = VoxelConnectionType.BigStrut;
             strutVersion.Designations = BasePiece.HypotheticalBlueprint.Designations;
 
             string invariantKey = GetInvariantKey(strutVersion);
