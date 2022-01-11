@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,32 +22,33 @@ public class VoxelVisualViewer : MonoBehaviour
 
     private void Start()
     {
-        List<VoxelBlueprint> allBlueprints = VoxelBlueprint.GetAllBlueprints().ToList();
-        blueprintViewers = InstantiateBlueprints(allBlueprints).ToArray();
+        IEnumerable<VoxelBlueprint> allBlueprints = VoxelBlueprint.GetAllBlueprints();
+        OrganizedBlueprints visuals = new OrganizedBlueprints(this, allBlueprints);
+        visuals.InstantiateGameObjects();
     }
 
-    private void Update()
+    private void DoOldPlacementTechnique()
     {
+        List<VoxelBlueprint> allBlueprints = VoxelBlueprint.GetAllBlueprints().ToList();
+        blueprintViewers = InstantiateBlueprints(allBlueprints).ToArray();
         ArrangeBlueprints();
     }
 
     private IEnumerable<BlueprintViewer> InstantiateBlueprints(List<VoxelBlueprint> allBlueprints)
     {
-        GameObject root = new GameObject("Blueprints");
         foreach (VoxelBlueprint blueprint in allBlueprints)
         {
-            yield return InstantiateBlueprint(blueprint, root.transform);
+            yield return InstantiateBlueprint(blueprint);
         }
     }
 
-    private BlueprintViewer InstantiateBlueprint(VoxelBlueprint blueprint, Transform root)
+    public BlueprintViewer InstantiateBlueprint(VoxelBlueprint blueprint)
     {
         GameObject gameObj = Instantiate(BlueprintViewerPrefab);
         BlueprintViewer ret = gameObj.GetComponent<BlueprintViewer>();
         ret.GeneratedName = blueprint.GetCorrectAssetName();
         ret.Blueprint = blueprint;
         gameObj.name = blueprint.name;
-        gameObj.transform.SetParent(root);
         return ret;
     }
 
@@ -64,7 +66,7 @@ public class VoxelVisualViewer : MonoBehaviour
         }
     }
 
-    private void PlaceBlueprint(Transform transform, int xIndex, int yIndex)
+    public void PlaceBlueprint(Transform transform, int xIndex, int yIndex)
     {
         transform.position = new Vector3(-xIndex * (1f + Margin), 0, -yIndex * (1f + Margin));
     }
@@ -96,5 +98,215 @@ public class VoxelVisualViewer : MonoBehaviour
         }
 
         return new List<List<BlueprintViewer>> { piecesWithOnlySlanted, piecesWithOnlyWalkable, piecesWithBoth, groundPieces, piecesWithNeather };
+    }
+
+    public static string GetInvariantKey(VoxelBlueprint blueprint)
+    {
+        IEnumerable<VisualCellOption> options = blueprint.GenerateVisualOptions();
+        List<string> asKeys = options.Select(item => item.GetDesignationKey()).ToList();
+        asKeys.Sort();
+        return asKeys[0];
+    }
+
+
+    private class OrganizedBlueprints
+    {
+        private readonly VoxelVisualViewer mothership;
+        private readonly List<PotentialStrutPair> nonRoofPieces;
+        private readonly List<RoofPieceGroup> roofPieces;
+        private readonly IEnumerable<VoxelBlueprint> allBlueprints;
+        private readonly Dictionary<string, VoxelBlueprint> pieceDictionary;
+
+        public OrganizedBlueprints(VoxelVisualViewer mothership, IEnumerable<VoxelBlueprint> allBlueprints)
+        {
+            this.mothership = mothership;
+            this.allBlueprints = allBlueprints;
+            this.pieceDictionary = allBlueprints.ToDictionary(item => GetInvariantKey(item), item => item);
+
+            roofPieces = GetRoofPieceGroups().ToList();
+            nonRoofPieces = GetNonRoofPieces().ToList();
+        }
+
+        private IEnumerable<PotentialStrutPair> GetNonRoofPieces()
+        {
+            foreach (VoxelBlueprint blueprint in allBlueprints.Where(item => item.Down != VoxelConnectionType.BigStrut))
+            {
+                VoxelDesignationType[] designations = blueprint.Designations.ToFlatArray();
+                if (designations.All(item => item != VoxelDesignationType.SlantedRoof 
+                        && item != VoxelDesignationType.WalkableRoof))
+                {
+                    BlueprintContainer container = new BlueprintContainer(blueprint, blueprint);
+                    PotentialStrutPair pair = new PotentialStrutPair(container, pieceDictionary);
+                    yield return pair;
+                }
+            }
+        }
+
+        internal void InstantiateGameObjects()
+        {
+            InstantiateNonRoofPieces();
+            InstantiateRoofPieces();
+        }
+
+        private void InstantiateRoofPieces()
+        {
+            for (int i = 0; i < roofPieces.Count; i++)
+            {
+                RoofPieceGroup group = roofPieces[i];
+                CreateAndPlacePiecePair(group.SlantedPiece, i, 2);
+                CreateAndPlacePiecePair(group.WalkablePiece, i, 4);
+            }
+        }
+        private IEnumerable<RoofPieceGroup> GetRoofPieceGroups()
+        {
+            IEnumerable<VoxelBlueprint> slantPieces = GetBaseSlantPieces(allBlueprints);
+            List<RoofPieceGroup> ret = new List<RoofPieceGroup>();
+            foreach (VoxelBlueprint slantPiece in slantPieces)
+            {
+                RoofPieceGroup group = new RoofPieceGroup(slantPiece, pieceDictionary);
+                ret.Add(group);
+            }
+            return ret;
+        }
+        private IEnumerable<VoxelBlueprint> GetBaseSlantPieces(IEnumerable<VoxelBlueprint> allBlueprints)
+        {
+            foreach (VoxelBlueprint blueprint in allBlueprints)
+            {
+                IEnumerable<VoxelDesignationType> slots = blueprint.Designations.ToFlatArray();
+                if (slots.Any(item => item == VoxelDesignationType.SlantedRoof) &&
+                    !slots.Any(item => item == VoxelDesignationType.WalkableRoof))
+                    yield return blueprint;
+            }
+        }
+
+        private void CreateAndPlacePiecePair(PotentialStrutPair pair, int xOffset, int yOffset)
+        {
+            VoxelBlueprint blueprint = pair.BasePiece.ExistantBlueprint;
+            BlueprintViewer viewer = mothership.InstantiateBlueprint(blueprint);
+            mothership.PlaceBlueprint(viewer.transform, xOffset, yOffset);
+
+            if (pair.NeedsStrut)
+            {
+                VoxelBlueprint strutPiece = pair.WithStrut.BestBlueprint;
+                BlueprintViewer strutViewer = mothership.InstantiateBlueprint(strutPiece);
+                mothership.PlaceBlueprint(strutViewer.transform, xOffset, yOffset + 1);
+            }
+        }
+
+        private void InstantiateNonRoofPieces()
+        {
+            for (int i = 0; i < nonRoofPieces.Count; i++)
+            {
+                CreateAndPlacePiecePair(nonRoofPieces[i], i, 0);
+            }
+        }
+    }
+
+    private class RoofPieceGroup
+    {
+        public PotentialStrutPair SlantedPiece { get; }
+        public PotentialStrutPair WalkablePiece { get; }
+        public IEnumerable<PotentialStrutPair> ComboPieces { get; }
+
+        public RoofPieceGroup(VoxelBlueprint baseSlantedPiece, Dictionary<string, VoxelBlueprint> allPieces)
+        {
+            BlueprintContainer basePieceContainer = new BlueprintContainer(baseSlantedPiece, baseSlantedPiece);
+            SlantedPiece = new PotentialStrutPair(basePieceContainer, allPieces);
+            WalkablePiece = GetWalkablePiece(allPieces);
+            ComboPieces = GetComboPieces();
+        }
+
+        private IEnumerable<PotentialStrutPair> GetComboPieces()
+        {
+            //TODO: Generate all the combo piece options
+            return null;
+        }
+
+        private PotentialStrutPair GetWalkablePiece(Dictionary<string, VoxelBlueprint> allPieces)
+        {
+            VoxelBlueprint hypotheticalWalkablePiece = GetWalkablePieceKey();
+            string key = GetInvariantKey(hypotheticalWalkablePiece);
+            BlueprintContainer container;
+            if (allPieces.ContainsKey(key))
+            {
+                container = new BlueprintContainer(hypotheticalWalkablePiece, allPieces[key]);
+            }
+            else
+            {
+                container = new BlueprintContainer(hypotheticalWalkablePiece, null);
+            }
+            return new PotentialStrutPair(container, allPieces);
+        }
+
+        private VoxelBlueprint GetWalkablePieceKey()
+        {
+            VoxelDesignationType[] baseSet = SlantedPiece.BasePiece.ExistantBlueprint.Designations.ToFlatArray();
+            for (int i = 0; i < 8; i++)
+            {
+                if(baseSet[i] == VoxelDesignationType.SlantedRoof)
+                {
+                    baseSet[i] = VoxelDesignationType.WalkableRoof;
+                }
+            }
+            DesignationGrid newGrid = DesignationGrid.FromFlatArray(baseSet);
+            VoxelBlueprint ret = new VoxelBlueprint();
+            ret.Designations = newGrid;
+            return ret;
+        }
+    }
+
+    private class BlueprintContainer
+    {
+        public VoxelBlueprint HypotheticalBlueprint { get; }
+        public VoxelBlueprint ExistantBlueprint { get; }
+
+        public VoxelBlueprint BestBlueprint { get { return ExistantBlueprint ?? HypotheticalBlueprint; } }
+
+        public BlueprintContainer(VoxelBlueprint hypothetical, VoxelBlueprint existant)
+        {
+            HypotheticalBlueprint = hypothetical;
+            ExistantBlueprint = existant;
+        }
+    }
+
+    private class PotentialStrutPair
+    {
+        public BlueprintContainer BasePiece { get; }
+        public BlueprintContainer WithStrut { get; }
+        public bool NeedsStrut { get; }
+        public bool HasStrut { get; }
+
+        public PotentialStrutPair(BlueprintContainer basePiece, Dictionary<string, VoxelBlueprint> allPieces)
+        {
+            BasePiece = basePiece;
+            NeedsStrut = GetNeedsStrut();
+            if(NeedsStrut)
+            {
+                WithStrut = TryFindStrut(allPieces);
+                HasStrut = WithStrut != null;
+            }
+        }
+
+        private BlueprintContainer TryFindStrut(Dictionary<string, VoxelBlueprint> allPieces)
+        {
+            VoxelBlueprint strutVersion = new VoxelBlueprint();
+            strutVersion.Down = VoxelConnectionType.BigStrut;
+            strutVersion.Designations = BasePiece.HypotheticalBlueprint.Designations;
+
+            string invariantKey = GetInvariantKey(strutVersion);
+            if (allPieces.ContainsKey(invariantKey))
+                return new BlueprintContainer(strutVersion, allPieces[invariantKey]);
+            else
+                return new BlueprintContainer(strutVersion, null);
+        }
+
+        // A piece needs a strut when none of the designations on the top half are filled
+        private bool GetNeedsStrut()
+        {
+            return BasePiece.BestBlueprint.Designations.X0Y1Z0 != VoxelDesignationType.AnyFilled
+                && BasePiece.BestBlueprint.Designations.X0Y1Z1 != VoxelDesignationType.AnyFilled
+                && BasePiece.BestBlueprint.Designations.X1Y1Z0 != VoxelDesignationType.AnyFilled
+                && BasePiece.BestBlueprint.Designations.X1Y1Z1 != VoxelDesignationType.AnyFilled;
+        }
     }
 }

@@ -150,6 +150,20 @@ public class DesignationGrid
         return ret;
     }
 
+    public static DesignationGrid FromFlatArray(VoxelDesignationType[] values)
+    {
+        DesignationGrid ret = new DesignationGrid();
+        ret.X0Y0Z0 = values[0];
+        ret.X0Y0Z1 = values[1];
+        ret.X0Y1Z0 = values[2];
+        ret.X0Y1Z1 = values[3];
+        ret.X1Y0Z0 = values[4];
+        ret.X1Y0Z1 = values[5];
+        ret.X1Y1Z0 = values[6];
+        ret.X1Y1Z1 = values[7];
+        return ret;
+    }
+
     public VoxelDesignationType[,,] ToCubedArray()
     {
         VoxelDesignationType[,,] ret = new VoxelDesignationType[2, 2, 2];
