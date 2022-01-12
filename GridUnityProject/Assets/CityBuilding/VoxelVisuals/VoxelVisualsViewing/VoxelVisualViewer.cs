@@ -22,7 +22,7 @@ public class VoxelVisualViewer : MonoBehaviour
 
     private void Start()
     {
-        IEnumerable<VoxelBlueprint> allBlueprints = VoxelBlueprint.GetAllBlueprints().Where(item => item.ArtContent != null);
+        IEnumerable<VoxelBlueprint> allBlueprints = VoxelBlueprint.GetAllBlueprints();
         OrganizedBlueprints visuals = new OrganizedBlueprints(this, allBlueprints);
         blueprintViewers = new List<BlueprintViewer>();
         visuals.InstantiateGameObjects();
