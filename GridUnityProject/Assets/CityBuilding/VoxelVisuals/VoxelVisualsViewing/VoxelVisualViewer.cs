@@ -1,3 +1,4 @@
+using Autodesk.Fbx;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -27,6 +28,26 @@ public class VoxelVisualViewer : MonoBehaviour
         blueprintViewers = new List<BlueprintViewer>();
         visuals.InstantiateGameObjects();
         Report();
+        //GeneratePlatformPieces(visuals);
+    }
+
+    private void GeneratePlatformStubVisuals(OrganizedBlueprints visuals)
+    {
+        foreach (PotentialStrutPair item in visuals.walkwayBlueprints)
+        {
+            StubPlatformPieceVisual(item.BasePiece.BestBlueprint, visuals);
+            if (item.HasStrut)
+            {
+                StubPlatformPieceVisual(item.WithStrut.BestBlueprint, visuals);
+            }
+        }
+    }
+
+    private void StubPlatformPieceVisual(VoxelBlueprint blueprint, OrganizedBlueprints visuals)
+    {
+        PlatformPiece platformPiece = new PlatformPiece(blueprint, visuals.pieceDictionary);
+        if (platformPiece.NonPlatformEquivalent != null && platformPiece.NonPlatformEquivalent.ArtContent != null)
+            platformPiece.CreateStubVisual();
     }
 
 
@@ -84,8 +105,8 @@ public class VoxelVisualViewer : MonoBehaviour
         private readonly List<PotentialStrutPair> nonRoofPieces;
         private readonly List<RoofPieceGroup> roofPieces;
         private readonly IEnumerable<VoxelBlueprint> allBlueprints;
-        private readonly Dictionary<string, VoxelBlueprint> pieceDictionary;
-        private readonly List<PotentialStrutPair> walkwayBlueprints;
+        public readonly Dictionary<string, VoxelBlueprint> pieceDictionary;
+        public readonly List<PotentialStrutPair> walkwayBlueprints;
         public OrganizedBlueprints(VoxelVisualViewer mothership, IEnumerable<VoxelBlueprint> allBlueprints)
         {
             this.mothership = mothership;
@@ -373,6 +394,66 @@ public class VoxelVisualViewer : MonoBehaviour
             {
                 CreateAndPlacePiecePair(set[i], i, yOffset);
             }
+        }
+    }
+
+    private class PlatformPiece
+    {
+        public VoxelBlueprint PlatformViewer { get; }
+        public VoxelBlueprint NonPlatformEquivalent { get; }
+
+        public PlatformPiece(VoxelBlueprint platformBlueprint, Dictionary<string, VoxelBlueprint> allBlueprints)
+        {
+            PlatformViewer = platformBlueprint;
+            string nonPlatformKey = MakeNonPlatformKey();
+            if (allBlueprints.ContainsKey(nonPlatformKey))
+                NonPlatformEquivalent = allBlueprints[MakeNonPlatformKey()];
+        }
+
+        private string MakeNonPlatformKey()
+        {
+            VoxelBlueprint blueprintForKey = new VoxelBlueprint();
+            VoxelDesignationType[] baseDesignations = PlatformViewer.Designations.ToFlatArray();
+            for (int i = 0; i < baseDesignations.Length; i++)
+            {
+                if(baseDesignations[i] == VoxelDesignationType.Platform)
+                {
+                    baseDesignations[i] = VoxelDesignationType.Empty;
+                }
+            }
+            blueprintForKey.Designations = DesignationGrid.FromFlatArray(baseDesignations);
+            blueprintForKey.Up = PlatformViewer.Up;
+            blueprintForKey.Down = PlatformViewer.Down;
+            return GetInvariantKey(blueprintForKey);
+        }
+
+        public void CreateStubVisual()
+        {
+            GameObject baseObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            MeshFilter filter = baseObj.GetComponent<MeshFilter>();
+            filter.mesh = NonPlatformEquivalent.ArtContent;
+
+            var designations = PlatformViewer.Designations.ToCubedArray();
+            for (int x = 0; x < 2; x++)
+            {
+                for (int z = 0; z < 2; z++)
+                {
+                    if(designations[x, 0, z] == VoxelDesignationType.Platform)
+                    {
+                        AddCube(baseObj, x, z);
+                    }
+                }
+            }
+            ObjExporter.GameObjectToFile(baseObj, 0, "ExportTests/" + PlatformViewer.GetCorrectAssetName() + ".obj");
+        }
+
+        private void AddCube(GameObject baseObj, int x, int z)
+        {
+            GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            cube.transform.parent = baseObj.transform;
+            cube.transform.localScale = new Vector3(.5f, .03f, .5f);
+            cube.transform.localPosition = new Vector3(x * .5f - .25f, -0.015f, z * .5f - .25f);
+            cube.name = "Platform";
         }
     }
 
