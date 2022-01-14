@@ -10,21 +10,22 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8530589c0825764489ef903943e44ae8, type: 3}
-  m_Name: Contentless_None_A_A_A_A_A_A_A_A_None
+  m_Name: BigStrut_P_P_P_P_P_P_P_P_BigStrut
   m_EditorClassIdentifier: 
-  ArtContent: {fileID: 0}
-  Up: 0
-  Down: 0
+  ArtContent: {fileID: 3703101876242374199, guid: 1fe9c28e0e9575e4a8d3f63654fd8f99,
+    type: 3}
+  Up: 1
+  Down: 1
   PositiveX: 0
   NegativeX: 0
   PositiveZ: 0
   NegativeZ: 0
   Designations:
-    X0Y0Z0: 1
-    X0Y0Z1: 1
-    X0Y1Z0: 1
-    X0Y1Z1: 1
-    X1Y0Z0: 1
-    X1Y0Z1: 1
-    X1Y1Z0: 1
-    X1Y1Z1: 1
+    X0Y0Z0: 4
+    X0Y0Z1: 4
+    X0Y1Z0: 4
+    X0Y1Z1: 4
+    X1Y0Z0: 4
+    X1Y0Z1: 4
+    X1Y1Z0: 4
+    X1Y1Z1: 4

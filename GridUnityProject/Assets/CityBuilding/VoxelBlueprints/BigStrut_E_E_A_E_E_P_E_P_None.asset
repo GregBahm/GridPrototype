@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8530589c0825764489ef903943e44ae8, type: 3}
   m_Name: BigStrut_E_E_A_E_E_P_E_P_None
   m_EditorClassIdentifier: 
-  ArtContent: {fileID: 0}
+  ArtContent: {fileID: -6050345141496807247, guid: f0ae488537729634a946e6b9ca5341fc,
+    type: 3}
   Up: 0
   Down: 1
   PositiveX: 0

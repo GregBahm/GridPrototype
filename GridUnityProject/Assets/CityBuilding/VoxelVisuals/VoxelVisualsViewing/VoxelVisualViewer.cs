@@ -28,8 +28,6 @@ public class VoxelVisualViewer : MonoBehaviour
         blueprintViewers = new List<BlueprintViewer>();
         visuals.InstantiateGameObjects();
         Report();
-        //GeneratePlatformPieces(visuals);
-        SaveAllBlueprints();
     }
 
     private void GeneratePlatformStubVisuals(OrganizedBlueprints visuals)
@@ -52,7 +50,7 @@ public class VoxelVisualViewer : MonoBehaviour
     }
 
 
-    //This code doesn't work right
+    //This code doesn't work right. It seems to create changes that it shouldn't create.
     private void SaveAllBlueprints()
     {
         foreach (BlueprintViewer viewer in blueprintViewers)
@@ -113,6 +111,7 @@ public class VoxelVisualViewer : MonoBehaviour
             this.mothership = mothership;
             this.allBlueprints = allBlueprints;
             pieceDictionary = new Dictionary<string, VoxelBlueprint>();
+
             this.pieceDictionary = allBlueprints.ToDictionary(item => GetInvariantKey(item), item => item);
 
             roofPieces = GetRoofPieceGroups().ToList();
@@ -120,176 +119,18 @@ public class VoxelVisualViewer : MonoBehaviour
             walkwayBlueprints = GetWalkwayPieces(allBlueprints).ToList();
         }
 
-        // Make a method that copies the designation array with a pillar swapped out
-        // Then a method that yields a new blueprint with that designation array
-        // Then once you have all the blueprints, eliminate the redundants and get struts
         private IEnumerable<PotentialStrutPair> GetWalkwayPieces(IEnumerable<VoxelBlueprint> allBlueprints)
-        {
-            var basePieces = GetWalkwayBaseBlueprints(allBlueprints);
-            foreach (VoxelBlueprint blueprint in basePieces)
-            {
-                BlueprintContainer container = new BlueprintContainer(blueprint, blueprint);
-                yield return new PotentialStrutPair(container, pieceDictionary);
-            }
-        }
-
-        private IEnumerable<VoxelBlueprint> GetWalkwayBaseBlueprints(IEnumerable<VoxelBlueprint> allBlueprints)
-        {
-            IEnumerable<VoxelBlueprint> unfiltered = GetUnfilteredWalkwayBlueprints(allBlueprints);
-            Dictionary<string, VoxelBlueprint> uniqueBlueprints = new Dictionary<string, VoxelBlueprint>();
-            foreach (VoxelBlueprint blueprint in unfiltered)
-            {
-                string invariantKey = GetInvariantKey(blueprint);
-                if(!uniqueBlueprints.ContainsKey(invariantKey))
-                {
-                    uniqueBlueprints.Add(invariantKey, blueprint);
-                }
-            }
-            uniqueBlueprints.OrderBy(item => item.Key);
-            return uniqueBlueprints.Values;
-        }
-        private IEnumerable<VoxelBlueprint> GetUnfilteredWalkwayBlueprints(IEnumerable<VoxelBlueprint> allBlueprints)
         {
             foreach (VoxelBlueprint blueprint in allBlueprints.Where(item => item.Up != VoxelConnectionType.BigStrut))
             {
-                VoxelDesignationType[,,] source = blueprint.Designations.ToCubedArray();
-                bool a0_0 = IsPillarFree(source, 0, 0);
-                bool b1_0 = IsPillarFree(source, 1, 0);
-                bool c0_1 = IsPillarFree(source, 0, 1);
-                bool d1_1 = IsPillarFree(source, 1, 1);
-
-                //A
-                if (a0_0)
+                VoxelDesignationType[] designations = blueprint.Designations.ToFlatArray();
+                if (designations.Any(item => item == VoxelDesignationType.Platform))
                 {
-                    var swapped = GetWithWalkwaySet(source, 0, 0);
-                    yield return CreateBlueprintForWalkway(swapped, blueprint);
-                }
-                //B
-                if(b1_0)
-                {
-                    var swapped = GetWithWalkwaySet(source, 1, 0);
-                    yield return CreateBlueprintForWalkway(swapped, blueprint);
-                }
-                //C
-                if (c0_1)
-                {
-                    var swapped = GetWithWalkwaySet(source, 0, 1);
-                    yield return CreateBlueprintForWalkway(swapped, blueprint);
-                }
-                //D
-                if (d1_1)
-                {
-                    var swapped = GetWithWalkwaySet(source, 1, 1);
-                    yield return CreateBlueprintForWalkway(swapped, blueprint);
-                }
-                //AB
-                if(a0_0 && b1_0)
-                {
-                    var swapped = GetWithWalkwaySet(source, 0, 0);
-                    swapped = GetWithWalkwaySet(swapped, 1, 0);
-                    yield return CreateBlueprintForWalkway(swapped, blueprint);
-                }
-                //AC
-                if (a0_0 && c0_1)
-                {
-                    var swapped = GetWithWalkwaySet(source, 0, 0);
-                    swapped = GetWithWalkwaySet(swapped, 0, 1);
-                    yield return CreateBlueprintForWalkway(swapped, blueprint);
-                }
-                //AD
-                if (a0_0 && d1_1)
-                {
-                    var swapped = GetWithWalkwaySet(source, 0, 0);
-                    swapped = GetWithWalkwaySet(swapped, 1, 1);
-                    yield return CreateBlueprintForWalkway(swapped, blueprint);
-                }
-                //BC
-                if (b1_0 && c0_1)
-                {
-                    var swapped = GetWithWalkwaySet(source, 1, 0);
-                    swapped = GetWithWalkwaySet(swapped, 0, 1);
-                    yield return CreateBlueprintForWalkway(swapped, blueprint);
-                }
-                //BD
-                if (b1_0 && d1_1)
-                {
-                    var swapped = GetWithWalkwaySet(source, 1, 0);
-                    swapped = GetWithWalkwaySet(swapped, 1, 1);
-                    yield return CreateBlueprintForWalkway(swapped, blueprint);
-                }
-                //CD
-                if (c0_1 && d1_1)
-                {
-                    var swapped = GetWithWalkwaySet(source, 0, 1);
-                    swapped = GetWithWalkwaySet(swapped, 1, 1);
-                    yield return CreateBlueprintForWalkway(swapped, blueprint);
-                }
-                //ABC
-                if (a0_0 && b1_0 && c0_1)
-                {
-                    var swapped = GetWithWalkwaySet(source, 0, 0);
-                    swapped = GetWithWalkwaySet(swapped, 1, 0);
-                    swapped = GetWithWalkwaySet(swapped, 0, 1);
-                    yield return CreateBlueprintForWalkway(swapped, blueprint);
-                }
-                //ABD
-                if (a0_0 && b1_0 && d1_1)
-                {
-                    var swapped = GetWithWalkwaySet(source, 0, 0);
-                    swapped = GetWithWalkwaySet(swapped, 1, 0);
-                    swapped = GetWithWalkwaySet(swapped, 1, 1);
-                    yield return CreateBlueprintForWalkway(swapped, blueprint);
-                }
-                //ACD
-                if (a0_0 && c0_1 && d1_1)
-                {
-                    var swapped = GetWithWalkwaySet(source, 0, 0);
-                    swapped = GetWithWalkwaySet(swapped, 0, 1);
-                    swapped = GetWithWalkwaySet(swapped, 1, 1);
-                    yield return CreateBlueprintForWalkway(swapped, blueprint);
-                }
-                //BCD
-                //ACD
-                if (b1_0 && c0_1 && d1_1)
-                {
-                    var swapped = GetWithWalkwaySet(source, 1, 0);
-                    swapped = GetWithWalkwaySet(swapped, 0, 1);
-                    swapped = GetWithWalkwaySet(swapped, 1, 1);
-                    yield return CreateBlueprintForWalkway(swapped, blueprint);
-                }
-                //ABCD
-                if (a0_0 && b1_0 && c0_1 && d1_1)
-                {
-                    var swapped = GetWithWalkwaySet(source, 0, 0);
-                    swapped = GetWithWalkwaySet(swapped, 0, 1);
-                    swapped = GetWithWalkwaySet(swapped, 1, 0);
-                    swapped = GetWithWalkwaySet(swapped, 1, 1);
-                    yield return CreateBlueprintForWalkway(swapped, blueprint);
+                    BlueprintContainer container = new BlueprintContainer(blueprint, blueprint);
+                    PotentialStrutPair pair = new PotentialStrutPair(container, pieceDictionary);
+                    yield return pair;
                 }
             }
-        }
-
-        private VoxelBlueprint CreateBlueprintForWalkway(VoxelDesignationType[,,] designations, VoxelBlueprint source)
-        {
-            VoxelBlueprint ret = new VoxelBlueprint();
-            ret.Up = source.Up;
-            ret.Down = source.Down;
-            ret.Designations = DesignationGrid.FromCubeArray(designations);
-            return ret;
-        }
-
-        private VoxelDesignationType[,,] GetWithWalkwaySet(VoxelDesignationType[,,] source, int xToSwap, int zToSwap)
-        {
-            VoxelDesignationType[,,] ret = source.Clone() as VoxelDesignationType[,,];
-            ret[xToSwap, 0, zToSwap] = VoxelDesignationType.Platform;
-            ret[xToSwap, 1, zToSwap] = VoxelDesignationType.Platform;
-            return ret;
-        }
-
-        private bool IsPillarFree(VoxelDesignationType[,,] designationArray, int x, int y)
-        {
-            return designationArray[x, 0, y] == VoxelDesignationType.Empty
-                && designationArray[x, 1, y] == VoxelDesignationType.Empty;
         }
 
         private IEnumerable<PotentialStrutPair> GetNonRoofPieces()
@@ -298,7 +139,8 @@ public class VoxelVisualViewer : MonoBehaviour
             {
                 VoxelDesignationType[] designations = blueprint.Designations.ToFlatArray();
                 if (designations.All(item => item != VoxelDesignationType.SlantedRoof 
-                        && item != VoxelDesignationType.WalkableRoof))
+                        && item != VoxelDesignationType.WalkableRoof
+                        && item != VoxelDesignationType.Platform))
                 {
                     BlueprintContainer container = new BlueprintContainer(blueprint, blueprint);
                     PotentialStrutPair pair = new PotentialStrutPair(container, pieceDictionary);
@@ -369,8 +211,9 @@ public class VoxelVisualViewer : MonoBehaviour
             foreach (VoxelBlueprint blueprint in allBlueprints.Where(item => item.Up != VoxelConnectionType.BigStrut))
             {
                 IEnumerable<VoxelDesignationType> slots = blueprint.Designations.ToFlatArray();
-                if (slots.Any(item => item == VoxelDesignationType.SlantedRoof) &&
-                    !slots.Any(item => item == VoxelDesignationType.WalkableRoof))
+                if (slots.Any(item => item == VoxelDesignationType.SlantedRoof) 
+                    && !slots.Any(item => item == VoxelDesignationType.WalkableRoof)
+                    && !slots.Any(item => item == VoxelDesignationType.Platform))
                     yield return blueprint;
             }
         }
@@ -598,6 +441,8 @@ public class VoxelVisualViewer : MonoBehaviour
         {
             VoxelBlueprint strutVersion = new VoxelBlueprint();
             strutVersion.Up = VoxelConnectionType.BigStrut;
+            if (BasePiece.HypotheticalBlueprint.Designations.ToFlatArray().All(item => item == VoxelDesignationType.Platform || item == VoxelDesignationType.Empty))
+                strutVersion.Down = VoxelConnectionType.BigStrut;
             strutVersion.Designations = BasePiece.HypotheticalBlueprint.Designations;
 
             string invariantKey = GetInvariantKey(strutVersion);
