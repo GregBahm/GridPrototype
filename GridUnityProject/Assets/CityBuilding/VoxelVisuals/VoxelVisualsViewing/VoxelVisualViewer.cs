@@ -29,6 +29,7 @@ public class VoxelVisualViewer : MonoBehaviour
         visuals.InstantiateGameObjects();
         Report();
         //GeneratePlatformPieces(visuals);
+        SaveAllBlueprints();
     }
 
     private void GeneratePlatformStubVisuals(OrganizedBlueprints visuals)
@@ -52,18 +53,18 @@ public class VoxelVisualViewer : MonoBehaviour
 
 
     //This code doesn't work right
-    //private void SaveAllBlueprints()
-    //{
-    //    foreach (BlueprintViewer viewer in blueprintViewers)
-    //    {
-    //        string path = viewer.GetCorrectAssetPath();
-    //        string[] foundAsset = AssetDatabase.FindAssets(path);
-    //        if(foundAsset.Length == 0)
-    //        {
-    //            viewer.StubBlueprintFromCurrent();
-    //        }
-    //    }
-    //}
+    private void SaveAllBlueprints()
+    {
+        foreach (BlueprintViewer viewer in blueprintViewers)
+        {
+            string path = viewer.GetCorrectAssetPath();
+            string[] foundAsset = AssetDatabase.FindAssets(path);
+            if(foundAsset.Length == 0)
+            {
+                viewer.StubBlueprintFromCurrent();
+            }
+        }
+    }
 
     private void Report()
     {
