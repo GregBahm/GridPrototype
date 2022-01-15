@@ -135,7 +135,7 @@ public class VisualCell
         return ret;
     }
 
-    // If has a platform designation on the top half, set that designation to empty instead.
+    // If has a platform designation on the top half, or is under a non-empty slot, set that designation to empty instead.
     private void SetIncompletePlatformsToEmpty(VoxelDesignationType[,,] description)
     {
         for (int x = 0; x < 2; x++)
@@ -145,6 +145,11 @@ public class VisualCell
                 if(description[x, 1, z] == VoxelDesignationType.Platform)
                 {
                     description[x, 1, z] = VoxelDesignationType.Empty;
+                }
+                if(description[x, 0, z] == VoxelDesignationType.Platform 
+                    && description[x, 1, z] != VoxelDesignationType.Empty)
+                {
+                    description[x, 0, z] = VoxelDesignationType.Empty;
                 }
             }
         }

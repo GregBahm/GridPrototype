@@ -24,33 +24,10 @@ public class VoxelVisualViewer : MonoBehaviour
     private void Start()
     {
         IEnumerable<VoxelBlueprint> allBlueprints = VoxelBlueprint.GetAllBlueprints();
-        //FixPlatforms(allBlueprints);
         OrganizedBlueprints visuals = new OrganizedBlueprints(this, allBlueprints);
         blueprintViewers = new List<BlueprintViewer>();
         visuals.InstantiateGameObjects();
         Report();
-
-    }
-
-    private void FixPlatforms(IEnumerable<VoxelBlueprint> allBlueprints)
-    {
-        foreach (VoxelBlueprint item in allBlueprints)
-        {
-            SetTopPlatformsToEmpty(item);
-        }
-    }
-
-    private void SetTopPlatformsToEmpty(VoxelBlueprint blueprint)
-    {
-        if (blueprint.Designations.X0Y1Z0 == VoxelDesignationType.Platform)
-            blueprint.Designations.X0Y1Z0 = VoxelDesignationType.Empty;
-        if (blueprint.Designations.X0Y1Z1 == VoxelDesignationType.Platform)
-            blueprint.Designations.X0Y1Z1 = VoxelDesignationType.Empty;
-        if (blueprint.Designations.X1Y1Z0 == VoxelDesignationType.Platform)
-            blueprint.Designations.X1Y1Z0 = VoxelDesignationType.Empty;
-        if (blueprint.Designations.X1Y1Z1 == VoxelDesignationType.Platform)
-            blueprint.Designations.X1Y1Z1 = VoxelDesignationType.Empty;
-        EditorUtility.SetDirty(blueprint);
     }
 
     private void GeneratePlatformStubVisuals(OrganizedBlueprints visuals)
@@ -136,15 +113,6 @@ public class VoxelVisualViewer : MonoBehaviour
             this.allBlueprints = allBlueprints;
             pieceDictionary = new Dictionary<string, VoxelBlueprint>();
 
-            HashSet<string> keys = new HashSet<string>();
-            foreach (VoxelBlueprint item in allBlueprints)
-            {
-                string newKey = GetInvariantKey(item);
-                if(!keys.Add(newKey))
-                {
-                    Debug.Log("Sup sup sup");
-                }
-            }
             this.pieceDictionary = allBlueprints.ToDictionary(item => GetInvariantKey(item), item => item);
 
             roofPieces = GetRoofPieceGroups().ToList();
@@ -329,7 +297,7 @@ public class VoxelVisualViewer : MonoBehaviour
             GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
             cube.transform.parent = baseObj.transform;
             cube.transform.localScale = new Vector3(.5f, .03f, .5f);
-            cube.transform.localPosition = new Vector3(x * .5f - .25f, -0.015f, z * .5f - .25f);
+            cube.transform.localPosition = new Vector3(x * .5f - .225f, -0.015f, z * .5f - .225f);
             cube.name = "Platform";
         }
     }

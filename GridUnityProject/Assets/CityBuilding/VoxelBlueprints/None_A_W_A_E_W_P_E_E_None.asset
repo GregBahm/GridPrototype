@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8530589c0825764489ef903943e44ae8, type: 3}
   m_Name: None_A_W_A_E_W_P_E_E_None
   m_EditorClassIdentifier: 
-  ArtContent: {fileID: -4301130418520646565, guid: db96f3abd0324a74ca078c3b7f37fa57,
+  ArtContent: {fileID: 2933032012058709878, guid: 6931280e94ad7f240bb2f0a6e973e913,
     type: 3}
   Up: 0
   Down: 0
