@@ -30,6 +30,16 @@ public class VoxelVisualViewer : MonoBehaviour
         Report();
     }
 
+    private void MakeTheMegastub()
+    {
+        GameObject gameObjectRoot = new GameObject();
+        foreach (BlueprintViewer viewer in blueprintViewers.Where(item => item.Blueprint.ArtContent != null))
+        {
+            viewer.MeshFilter.gameObject.name = viewer.Blueprint.name;
+            viewer.MeshFilter.gameObject.transform.SetParent(gameObjectRoot.transform, true);
+        }
+    }
+
     private void GeneratePlatformStubVisuals(OrganizedBlueprints visuals)
     {
         foreach (PotentialStrutPair item in visuals.platformBlueprints)

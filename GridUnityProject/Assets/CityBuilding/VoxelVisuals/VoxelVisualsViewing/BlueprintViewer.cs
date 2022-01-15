@@ -21,12 +21,7 @@ public class BlueprintViewer : MonoBehaviour
     public bool MakeStubFromBlueprint;
     public bool SetCorrectBlueprintName;
     public bool FindArtContentForBlueprint;
-    private MeshFilter meshFilter;
-
-    private void Start()
-    {
-        meshFilter = GetComponent<MeshFilter>();
-    }
+    public MeshFilter MeshFilter;
 
     public void CorrectCurrentBlueprintName()
     {
@@ -39,7 +34,7 @@ public class BlueprintViewer : MonoBehaviour
         CurrentMesh = Blueprint.ArtContent;
         GeneratedName = Blueprint.GetCorrectAssetName();
 
-        meshFilter.mesh = Blueprint.ArtContent;
+        MeshFilter.mesh = Blueprint.ArtContent;
         SetDesignationDisplay();
         name = GeneratedName + (Blueprint.ArtContent == null ? " (Empty)" : "");
         HandleCommands();
