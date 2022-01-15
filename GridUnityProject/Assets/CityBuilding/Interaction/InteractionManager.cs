@@ -78,6 +78,11 @@ public class InteractionManager : MonoBehaviour
         FillType = VoxelDesignationType.SlantedRoof;
     }
 
+    public void SetFillToPlatform()
+    {
+        FillType = VoxelDesignationType.Platform;
+    }
+
     private void UpdateCursor(MeshHitTarget potentialMeshInteraction)
     {
         ConstructionCursor.MouseState state = Input.GetMouseButton(0) ? ConstructionCursor.MouseState.LeftClickDown

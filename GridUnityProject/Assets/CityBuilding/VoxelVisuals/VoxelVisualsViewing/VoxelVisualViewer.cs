@@ -24,15 +24,38 @@ public class VoxelVisualViewer : MonoBehaviour
     private void Start()
     {
         IEnumerable<VoxelBlueprint> allBlueprints = VoxelBlueprint.GetAllBlueprints();
+        //FixPlatforms(allBlueprints);
         OrganizedBlueprints visuals = new OrganizedBlueprints(this, allBlueprints);
         blueprintViewers = new List<BlueprintViewer>();
         visuals.InstantiateGameObjects();
         Report();
+
+    }
+
+    private void FixPlatforms(IEnumerable<VoxelBlueprint> allBlueprints)
+    {
+        foreach (VoxelBlueprint item in allBlueprints)
+        {
+            SetTopPlatformsToEmpty(item);
+        }
+    }
+
+    private void SetTopPlatformsToEmpty(VoxelBlueprint blueprint)
+    {
+        if (blueprint.Designations.X0Y1Z0 == VoxelDesignationType.Platform)
+            blueprint.Designations.X0Y1Z0 = VoxelDesignationType.Empty;
+        if (blueprint.Designations.X0Y1Z1 == VoxelDesignationType.Platform)
+            blueprint.Designations.X0Y1Z1 = VoxelDesignationType.Empty;
+        if (blueprint.Designations.X1Y1Z0 == VoxelDesignationType.Platform)
+            blueprint.Designations.X1Y1Z0 = VoxelDesignationType.Empty;
+        if (blueprint.Designations.X1Y1Z1 == VoxelDesignationType.Platform)
+            blueprint.Designations.X1Y1Z1 = VoxelDesignationType.Empty;
+        EditorUtility.SetDirty(blueprint);
     }
 
     private void GeneratePlatformStubVisuals(OrganizedBlueprints visuals)
     {
-        foreach (PotentialStrutPair item in visuals.walkwayBlueprints)
+        foreach (PotentialStrutPair item in visuals.platformBlueprints)
         {
             StubPlatformPieceVisual(item.BasePiece.BestBlueprint, visuals);
             if (item.HasStrut)
@@ -88,7 +111,8 @@ public class VoxelVisualViewer : MonoBehaviour
     public static string GetInvariantKey(VoxelBlueprint blueprint)
     {
         IEnumerable<VisualCellOption> options = blueprint.GenerateVisualOptions();
-        List<string> asKeys = options.Select(item => GetVisualCellOptionKey(item)).ToList();
+        List<string> asKeys = options.Select(item
+            => GetVisualCellOptionKey(item)).ToList();
         asKeys.Sort();
         return asKeys[0];
     }
@@ -105,21 +129,30 @@ public class VoxelVisualViewer : MonoBehaviour
         private readonly List<RoofPieceGroup> roofPieces;
         private readonly IEnumerable<VoxelBlueprint> allBlueprints;
         public readonly Dictionary<string, VoxelBlueprint> pieceDictionary;
-        public readonly List<PotentialStrutPair> walkwayBlueprints;
+        public readonly List<PotentialStrutPair> platformBlueprints;
         public OrganizedBlueprints(VoxelVisualViewer mothership, IEnumerable<VoxelBlueprint> allBlueprints)
         {
             this.mothership = mothership;
             this.allBlueprints = allBlueprints;
             pieceDictionary = new Dictionary<string, VoxelBlueprint>();
 
+            HashSet<string> keys = new HashSet<string>();
+            foreach (VoxelBlueprint item in allBlueprints)
+            {
+                string newKey = GetInvariantKey(item);
+                if(!keys.Add(newKey))
+                {
+                    Debug.Log("Sup sup sup");
+                }
+            }
             this.pieceDictionary = allBlueprints.ToDictionary(item => GetInvariantKey(item), item => item);
 
             roofPieces = GetRoofPieceGroups().ToList();
             nonRoofPieces = GetNonRoofPieces().ToList();
-            walkwayBlueprints = GetWalkwayPieces(allBlueprints).ToList();
+            platformBlueprints = GetPlatformPieces(allBlueprints).ToList();
         }
 
-        private IEnumerable<PotentialStrutPair> GetWalkwayPieces(IEnumerable<VoxelBlueprint> allBlueprints)
+        private IEnumerable<PotentialStrutPair> GetPlatformPieces(IEnumerable<VoxelBlueprint> allBlueprints)
         {
             foreach (VoxelBlueprint blueprint in allBlueprints.Where(item => item.Up != VoxelConnectionType.BigStrut))
             {
@@ -153,16 +186,16 @@ public class VoxelVisualViewer : MonoBehaviour
         {
             InstantiateSet(nonRoofPieces, 0);
             InstantiateRoofPieces();
-            InstantiateWalkwayBlueprints();
+            InstantiatePlatformBlueprints();
         }
 
-        private void InstantiateWalkwayBlueprints()
+        private void InstantiatePlatformBlueprints()
         {
             List<PotentialStrutPair> withSlanted = new List<PotentialStrutPair>();
             List<PotentialStrutPair> withWalkable = new List<PotentialStrutPair>();
             List<PotentialStrutPair> withBoth = new List<PotentialStrutPair>();
             List<PotentialStrutPair> withNeither = new List<PotentialStrutPair>();
-            foreach (PotentialStrutPair item in walkwayBlueprints)
+            foreach (PotentialStrutPair item in platformBlueprints)
             {
                 IEnumerable<VoxelDesignationType> designations = item.BasePiece.BestBlueprint.Designations.ToFlatArray();
                 bool hasSlanted = designations.Any(item => item == VoxelDesignationType.SlantedRoof);

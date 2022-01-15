@@ -131,7 +131,23 @@ public class VisualCell
             designationCells[1,1,1].Designation,
         });
         SetAnyFills(ret.Description);
+        SetIncompletePlatformsToEmpty(ret.Description);
         return ret;
+    }
+
+    // If has a platform designation on the top half, set that designation to empty instead.
+    private void SetIncompletePlatformsToEmpty(VoxelDesignationType[,,] description)
+    {
+        for (int x = 0; x < 2; x++)
+        {
+            for (int z = 0; z < 2; z++)
+            {
+                if(description[x, 1, z] == VoxelDesignationType.Platform)
+                {
+                    description[x, 1, z] = VoxelDesignationType.Empty;
+                }
+            }
+        }
     }
 
     // If a column or top half of a designation is SlantedRoof of WalkableRoof, set it to AnyFill.
