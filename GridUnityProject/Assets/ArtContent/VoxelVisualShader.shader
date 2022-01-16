@@ -101,11 +101,11 @@
 
             float GetSsao(float4 clipSpaceVertex)
             {
-              ///struct AmbientOcclusionFactor
-              //{
-              //  half indirectAmbientOcclusion;
-              //  half directAmbientOcclusion;
-              //};
+                ///struct AmbientOcclusionFactor
+                //{
+                //  half indirectAmbientOcclusion;
+                //  half directAmbientOcclusion;
+                //};
 
                 float2 normalizedScreenSpaceUv = GetNormalizedScreenSpaceUV(clipSpaceVertex);
                 AmbientOcclusionFactor aoFactor = GetScreenSpaceAmbientOcclusion(normalizedScreenSpaceUv);
