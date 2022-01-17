@@ -11,7 +11,7 @@ public class VoxelDesignationDisplay : MonoBehaviour
     public void UpdateDisplayContent(VoxelDesignationType slotType)
     {
         Content.enabled = slotType != VoxelDesignationType.Empty;
-        Color color = VoxelVisualColors.Instance.GetColorFor(slotType);
+        Color color = VoxelVisualBaseAssets.Instance.GetColorFor(slotType);
         Content.material.SetColor("_BaseColor", color);
     }
 }

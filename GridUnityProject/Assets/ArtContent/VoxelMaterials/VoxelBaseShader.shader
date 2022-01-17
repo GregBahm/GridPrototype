@@ -67,6 +67,7 @@
             float3 _AnchorD;
             CBUFFER_END
 
+
             float4x4 _LightBoxTransform;
             sampler2D _TopLighting;
             sampler2D _BottomLighting;
@@ -122,8 +123,7 @@
                 float3 ret = _BaseColor * baseLighting;
                 float ssao = GetSsao(i.vertex);
                 half shadow = MainLightRealtimeShadow(TransformWorldToShadowCoord(i.worldPos));
-
-                ret *= ssao;
+                ret = lerp(ret * float3(0, .25, .5), ret, ssao);
                 ret *= lerp(ret * float3(.5, .75, 1), ret, shadow);
 
                 return float4(ret, 1);
@@ -178,10 +178,9 @@
               input.positionOS.xyz = GetTransformedBaseVert(input.positionOS.xyz);
               input.normal.xyz = GetTransformedBaseVert(input.normal.xyz);
 
-              output.uv = TRANSFORM_TEX(input.texcoord, _BaseMap);
               output.positionCS = TransformObjectToHClip(input.positionOS.xyz);
               VertexNormalInputs normalInput = GetVertexNormalInputs(input.normal, input.tangentOS);
-                output.normalWS = NormalizeNormalPerVertex(normalInput.normalWS);
+              output.normalWS = NormalizeNormalPerVertex(normalInput.normalWS);
               return output;
             }
 

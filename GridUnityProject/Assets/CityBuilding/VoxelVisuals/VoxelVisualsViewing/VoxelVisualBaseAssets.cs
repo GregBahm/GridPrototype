@@ -2,15 +2,20 @@
 using UnityEngine;
 
 [Serializable]
-public class VoxelVisualColors : MonoBehaviour
+public class VoxelVisualBaseAssets : MonoBehaviour
 {
-    public static VoxelVisualColors Instance;
+    public static VoxelVisualBaseAssets Instance;
 
     public Color AnyFilled;
     public Color WalkableRoof;
     public Color SlantedRoof;
     public Color Platform;
     public Color Ground;
+
+    public Material WallMat;
+    public Material StrutMat;
+    public Material SlantedRoofMat;
+    public Material PlatformMat;
 
     private void Awake()
     {

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -36,7 +37,8 @@ public class BlueprintViewer : MonoBehaviour
         GeneratedName = Blueprint.GetCorrectAssetName();
 
         MeshFilter.mesh = Blueprint.ArtContent;
-        MeshRenderer.materials = Blueprint.Materials;
+        if(Blueprint.Materials != null)
+            MeshRenderer.materials = Blueprint.Materials;
         SetDesignationDisplay();
         name = GeneratedName + (Blueprint.ArtContent == null ? " (Empty)" : "");
         HandleCommands();
@@ -70,8 +72,29 @@ public class BlueprintViewer : MonoBehaviour
             Mesh mesh = AssetDatabase.LoadAssetAtPath<Mesh>(AssetDatabase.GUIDToAssetPath(assets[0]));
             Blueprint.ArtContent = mesh;
             name = GeneratedName + Blueprint.ArtContent == null ? " (Empty)" : "";
+            PopulateMaterials();
             EditorUtility.SetDirty(Blueprint);
         }
+    }
+
+    private void PopulateMaterials()
+    {
+            List<Material> materials = new List<Material>();
+            VoxelDesignationType[] designations = Blueprint.Designations.ToFlatArray();
+            if (designations.Contains(VoxelDesignationType.AnyFilled)
+                || designations.Contains(VoxelDesignationType.SlantedRoof)
+                || designations.Contains(VoxelDesignationType.WalkableRoof))
+                materials.Add(VoxelVisualBaseAssets.Instance.WallMat);
+            if (designations.Contains(VoxelDesignationType.SlantedRoof))
+                materials.Add(VoxelVisualBaseAssets.Instance.SlantedRoofMat);
+            if (designations.Contains(VoxelDesignationType.WalkableRoof)
+                || designations.Contains(VoxelDesignationType.Platform))
+                materials.Add(VoxelVisualBaseAssets.Instance.PlatformMat);
+            if (designations.Contains(VoxelDesignationType.Ground)
+                || Blueprint.Up == VoxelConnectionType.BigStrut
+                || Blueprint.Down == VoxelConnectionType.BigStrut)
+                materials.Add(VoxelVisualBaseAssets.Instance.StrutMat);
+            Blueprint.Materials = materials.ToArray();
     }
 
     public void StubBlueprintFromCurrent()

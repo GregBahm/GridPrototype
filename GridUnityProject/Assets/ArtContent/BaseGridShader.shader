@@ -2,32 +2,50 @@
 {
     Properties
     {
-		_Color("Color", Color) = (1,1,1,1)
+        _Color("Color", Color) = (1,1,1,1)
+        _ShadowColor("Shadow Color", Color) = (1,1,1,1)
         _TuneA("Tune A", Float) = 8
         _TuneB("Tune B", Range(0, 10)) = .3
         _TuneC("Tune C", Range(0, 100)) = .9 
     }
     SubShader
-    { 
-		//UsePass "Legacy Shaders/VertexLit/SHADOWCASTER"
-        Tags { "RenderType"="Opaque" }
+    {
+      Tags
+      {
+          "RenderType" = "Opaque"
+          "RenderPipeline" = "UniversalRenderPipeline"
+      }
         LOD 100
+
+        HLSLINCLUDE
+
+          #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+          #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+          CBUFFER_START(UnityPerMaterial)
+            float4 _BaseMap_ST;
+            float4 _BaseColor;
+            float _Cutoff;
+          CBUFFER_END
+        ENDHLSL
+
         Pass
         {
-            //Tags {"LightMode" = "ForwardBase"}
-            CGPROGRAM
+        Name "ForwardLit"
+        Tags { "LightMode" = "UniversalForward" }
+            HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
-			//#pragma multi_compile_fwdbase
-			//#include "AutoLight.cginc"
 
-            #include "UnityCG.cginc"
+            #pragma multi_compile _ _MAIN_LIGHT_SHADOWS_CASCADE
+            #pragma multi_compile _ _SHADOWS_SOFT
+            #pragma multi_compile _ _SCREEN_SPACE_OCCLUSION
 
             float _TuneA;
             float _TuneB;
             float _TuneC;
 
 			float3 _Color;
+      float3 _ShadowColor;
 
             float3 _DistToCursor;
 
@@ -47,7 +65,6 @@
                 float2 uv : TEXCOORD0;
                 float4 vertex : SV_POSITION;
                 float distToCursor : TEXCOORD1;
-				//float4 _ShadowCoord : TEXCOORD2;
                 float3 worldPos : TEXCOORD3;
             };
 
@@ -62,10 +79,9 @@
             {
                 v2f o;
                 o.uv = v.uv;
-                o.vertex = UnityObjectToClipPos(v.vertex);
+                o.vertex = TransformObjectToHClip(v.vertex);
                 float3 worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
                 o.distToCursor = length(worldPos - _DistToCursor);
-				//o._ShadowCoord = ComputeScreenPos(o.vertex);
                 o.worldPos = worldPos;
                 return o;
             }
@@ -75,27 +91,70 @@
                 return saturate(pow(grid, _TuneA) * _TuneB - _TuneC);
             }
 
-            fixed4 frag(v2f i) : SV_Target
+            float GetSsao(float4 clipSpaceVertex)
             {
-                float3 baseLighting = GetLighting(i.worldPos);
-				//float shadowness = SHADOW_ATTENUATION(i);
+              float2 normalizedScreenSpaceUv = GetNormalizedScreenSpaceUV(clipSpaceVertex);
+              AmbientOcclusionFactor aoFactor = GetScreenSpaceAmbientOcclusion(normalizedScreenSpaceUv);
+              return aoFactor.directAmbientOcclusion; //aoFactor.indirectAmbientOcclusion;
+            }
+
+            float4 frag(v2f i) : SV_Target
+            {
+                float3 ret = _Color;//  GetLighting(i.worldPos);
+                half shadow = MainLightRealtimeShadow(TransformWorldToShadowCoord(i.worldPos));
+                float ssao = GetSsao(i.vertex);
+                ret = lerp(ret * _ShadowColor, ret, shadow);
+                ret *= ssao;
 
                 float alpha = (1 - i.distToCursor / 40);
                 alpha = pow(saturate(alpha), 20);
-                float gridAroundCells = i.uv.x;
-                gridAroundCells = AdjustGridLine(gridAroundCells);
-                float gridThroughCells = 1 - i.uv.x; 
-                gridThroughCells = AdjustGridLine(gridThroughCells);
-                float grid = gridThroughCells;
-        //        shadowness = lerp(shadowness, 1, .5);
-                float3 ret = baseLighting;// *shadowness;
-                ret += i.worldPos.y * .05;
-                float height = saturate(1 - i.worldPos.y * 10);
-                float3 lineVal = lerp(ret, 1, alpha * .2 * height);
-				ret = lerp(ret, lineVal, grid);
+
+                float grid = 1 - i.uv.x;
+                grid = AdjustGridLine(grid);
+                float3 lineVal = lerp(ret, 1, alpha * .2 );
+				        ret = lerp(ret, lineVal, grid);
                 return float4(ret, 1);
             }
-            ENDCG
+            ENDHLSL
         }
+          Pass  // DepthNormals
+            {
+              Name "DepthNormals"
+              Tags { "LightMode" = "DepthNormals" }
+
+              ZWrite On
+              ZTest LEqual
+
+              HLSLPROGRAM
+                #pragma vertex DisplacedDepthNormalsVertex
+                #pragma fragment DepthNormalsFragment
+
+              // Material Keywords
+              #pragma shader_feature_local _NORMALMAP
+              #pragma shader_feature_local_fragment _ALPHATEST_ON
+              #pragma shader_feature_local_fragment _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
+
+              // GPU Instancing
+              #pragma multi_compile_instancing
+              //#pragma multi_compile _ DOTS_INSTANCING_ON
+
+              #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/CommonMaterial.hlsl"
+              #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/SurfaceInput.hlsl"
+              #include "Packages/com.unity.render-pipelines.universal/Shaders/DepthNormalsPass.hlsl"
+
+          Varyings DisplacedDepthNormalsVertex(Attributes input)
+          {
+            Varyings output = (Varyings)0;
+            UNITY_SETUP_INSTANCE_ID(input);
+            UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
+
+            output.positionCS = TransformObjectToHClip(input.positionOS.xyz);
+            VertexNormalInputs normalInput = GetVertexNormalInputs(float3(0, 1, 0), input.tangentOS);
+              output.normalWS = NormalizeNormalPerVertex(normalInput.normalWS);
+            return output;
+          }
+
+            ENDHLSL
+            }
     }
 }
