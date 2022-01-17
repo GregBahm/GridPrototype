@@ -10,5 +10,7 @@ public class LightingManager : MonoBehaviour
     private void Update()
     {
         Shader.SetGlobalMatrix("_LightBoxTransform", transform.worldToLocalMatrix);
+        Shader.SetGlobalTexture("_BottomLighting", Bottomlighting);
+        Shader.SetGlobalTexture("_TopLighting", TopLighting);
     }
 }

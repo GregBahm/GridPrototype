@@ -68,9 +68,10 @@
                 float3 worldPos : TEXCOORD3;
             };
 
-            float3 GetLighting(float3 worldPos)
+            float3 GetBoxLighting(float3 worldPos)
             {
                 float3 boxPos = mul(_LightBoxTransform, float4(worldPos, 1));
+                boxPos += .5;
                 boxPos = boxPos / 2 + .5;
                 return boxPos;
             }
@@ -100,9 +101,11 @@
 
             float4 frag(v2f i) : SV_Target
             {
-                float3 ret = _Color;//  GetLighting(i.worldPos);
+                float3 ret = _Color;//  
+                float3 boxLighting = GetBoxLighting(i.worldPos) + .5;
                 half shadow = MainLightRealtimeShadow(TransformWorldToShadowCoord(i.worldPos));
                 float ssao = GetSsao(i.vertex);
+                ret *= boxLighting;
                 ret = lerp(ret * _ShadowColor, ret, shadow);
                 ret *= ssao;
 

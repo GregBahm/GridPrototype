@@ -69,19 +69,27 @@
 
 
             float4x4 _LightBoxTransform;
-            sampler2D _TopLighting;
-            sampler2D _BottomLighting;
 
-            float3 GetLighting(float3 worldPos, float3 worldNormal)
+            TEXTURE2D(_BottomLighting);
+            SAMPLER(sampler_BottomLighting);
+            TEXTURE2D(_TopLighting);
+            SAMPLER(sampler_TopLighting);
+
+            float3 GetBoxLighting(float3 worldPos)
             {
-              return 1;
+              float3 boxPos = mul(_LightBoxTransform, float4(worldPos, 1));
+              boxPos += .5;
+              //boxPos = boxPos / 2 + .5;
+              float3 bottomSample = SAMPLE_TEXTURE2D(_BottomLighting, sampler_BottomLighting, boxPos.xz).rgb;
+              float3 topSample = SAMPLE_TEXTURE2D(_TopLighting, sampler_TopLighting, boxPos.xz).rgb;
+              return lerp(bottomSample, topSample, boxPos.y);
+            }
+
+            float GetBaseShade(float3 worldNormal)
+            {
                 float baseShade = dot(worldNormal, _MainLightPosition.xyz);
                 baseShade = lerp(baseShade, 1, .9);
                 return baseShade;
-
-                float3 boxPos = mul(_LightBoxTransform, float4(worldPos, 1));
-                boxPos = boxPos / 2 + .5;
-                return boxPos;
             }
 
             float3 GetTransformedBaseVert(float3 vert)
@@ -118,11 +126,14 @@
             {
                 float3 worldNorm = mul(unity_ObjectToWorld, i.normal);
                 worldNorm = normalize(worldNorm);
-                float3 baseLighting = GetLighting(i.worldPos, worldNorm);
-
-                float3 ret = _BaseColor * baseLighting;
+                float3 boxLighting = GetBoxLighting(i.worldPos);
+                float baseShade = GetBaseShade(worldNorm);
                 float ssao = GetSsao(i.vertex);
                 half shadow = MainLightRealtimeShadow(TransformWorldToShadowCoord(i.worldPos));
+
+                float3 ret = _BaseColor;
+                ret *= baseShade;
+                ret *= boxLighting + .5;
                 ret = lerp(ret * float3(0, .25, .5), ret, ssao);
                 ret *= lerp(ret * float3(.5, .75, 1), ret, shadow);
 
