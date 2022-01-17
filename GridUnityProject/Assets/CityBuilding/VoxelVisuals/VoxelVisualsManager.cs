@@ -25,7 +25,8 @@ public class VoxelVisualsManager
             filter.mesh = component.Contents.Mesh;
             filter.gameObject.name = GetObjName(component);
             MeshRenderer renderer = filter.GetComponent<MeshRenderer>();
-            renderer.materials = component.Contents.Materials.Select(item => new Material(item)).ToArray();
+            if(component.Contents.Materials != null)
+                renderer.materials = component.Contents.Materials.Select(item => new Material(item)).ToArray();
             component.SetMaterialProperties(renderer);
         }
         else
