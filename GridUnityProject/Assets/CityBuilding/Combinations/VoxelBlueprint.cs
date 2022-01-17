@@ -16,6 +16,8 @@ public class VoxelBlueprint : ScriptableObject
     public VoxelConnectionType Down;
     public DesignationGrid Designations;
 
+    public bool ArtContentless;
+
     public IEnumerable<VisualCellOption> GenerateVisualOptions()
     {
         VisualCellConnections baseConnections = new VisualCellConnections(Up, Down);

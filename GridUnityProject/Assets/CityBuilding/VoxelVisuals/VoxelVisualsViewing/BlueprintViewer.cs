@@ -40,7 +40,7 @@ public class BlueprintViewer : MonoBehaviour
         if(Blueprint.Materials != null)
             MeshRenderer.materials = Blueprint.Materials;
         SetDesignationDisplay();
-        name = GeneratedName + (Blueprint.ArtContent == null ? " (Empty)" : "");
+        name = GeneratedName + (Blueprint.ArtContent == null ? (Blueprint.ArtContentless ? " (Contentless)" : "  (Missing Art)") : "");
         HandleCommands();
     }
 

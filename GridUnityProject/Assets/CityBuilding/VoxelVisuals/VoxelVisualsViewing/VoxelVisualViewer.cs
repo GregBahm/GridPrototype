@@ -75,7 +75,7 @@ public class VoxelVisualViewer : MonoBehaviour
 
     private void Report()
     {
-        int missing = blueprintViewers.Count(item => item.Blueprint.ArtContent == null);
+        int missing = blueprintViewers.Count(item => item.Blueprint.ArtContent == null && !item.Blueprint.ArtContentless);
         Debug.Log(blueprintViewers.Count + " blueprints, with " + missing + " missing.");
     }
 
