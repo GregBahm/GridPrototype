@@ -118,17 +118,19 @@ namespace VisualsSolving
         // So we only solve voxels with a designation or somewhere below a designation
         private IEnumerable<DesignationCell> GetVoxelsToSolve(MainGrid grid)
         {
+            HashSet<DesignationCell> ret = new HashSet<DesignationCell>();
             foreach (GroundPoint point in grid.Points)
             {
                 bool takeColumn = false;
                 for (int i = MainGrid.MaxHeight - 1; i >= 0; i--)
                 {
                     DesignationCell voxel = point.DesignationCells[i];
-                    takeColumn = takeColumn || voxel.Visuals.Any(item => item.Contents != null);
+                    takeColumn = takeColumn || voxel.Visuals.Any(item => item.Contents != null && item.Contents.Mesh != null);
                     if (takeColumn)
-                        yield return voxel;
+                        ret.Add(voxel);
                 }
             }
+            return ret;
         }
 
         public bool HasConnection(VisualCell neighbor)

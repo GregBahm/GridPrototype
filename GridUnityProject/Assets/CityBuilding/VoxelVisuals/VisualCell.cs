@@ -131,7 +131,7 @@ public class VisualCell
             designationCells[1,1,1].Designation,
         });
         SetAnyFills(ret.Description);
-        SetIncompletePlatformsToEmpty(ret.Description);
+        //SetIncompletePlatformsToEmpty(ret.Description);
         return ret;
     }
 
