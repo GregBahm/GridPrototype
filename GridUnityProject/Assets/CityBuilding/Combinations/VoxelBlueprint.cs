@@ -33,7 +33,7 @@ public class VoxelBlueprint : ScriptableObject
 
     public static VoxelBlueprint[] GetAllBlueprints()
     {
-        string[] guids = AssetDatabase.FindAssets("t: VoxelBlueprint", new[] { VoxelBlueprint.BlueprintsFolderPath });
+        string[] guids = AssetDatabase.FindAssets("t: VoxelBlueprint", new[] { BlueprintsFolderPath });
         List<VoxelBlueprint> ret = guids.Select(item => AssetDatabase.LoadAssetAtPath<VoxelBlueprint>(AssetDatabase.GUIDToAssetPath(item))).ToList();
         //ret.Reverse();
         return ret.ToArray();

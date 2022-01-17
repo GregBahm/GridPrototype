@@ -9,7 +9,7 @@ public class VoxelVisualsManager
 {
     private readonly Transform piecesRoot;
     private readonly VisualOptionsByDesignation optionsSource;
-    private readonly Dictionary<VisualCell, MeshFilter> debugObjects = new Dictionary<VisualCell, MeshFilter>();
+    private readonly Dictionary<VisualCell, MeshFilter> voxelObjects = new Dictionary<VisualCell, MeshFilter>();
 
     public VoxelVisualsManager(VisualOptionsByDesignation optionsSource)
     {
@@ -19,9 +19,9 @@ public class VoxelVisualsManager
 
     public void UpdateDebugObject(VisualCell component)
     {
-        if (debugObjects.ContainsKey(component))
+        if (voxelObjects.ContainsKey(component))
         {
-            MeshFilter filter = debugObjects[component];
+            MeshFilter filter = voxelObjects[component];
             filter.mesh = component.Contents.Mesh;
             filter.gameObject.name = GetObjName(component);
             MeshRenderer renderer = filter.GetComponent<MeshRenderer>();
@@ -45,7 +45,7 @@ public class VoxelVisualsManager
             
             filter.mesh = component.Contents.Mesh;
             obj.transform.position = component.ContentPosition;
-            debugObjects.Add(component, filter);
+            voxelObjects.Add(component, filter);
             obj.transform.SetParent(piecesRoot, false);
         }
     }
