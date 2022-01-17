@@ -22,6 +22,7 @@ public class BlueprintViewer : MonoBehaviour
     public bool SetCorrectBlueprintName;
     public bool FindArtContentForBlueprint;
     public MeshFilter MeshFilter;
+    public MeshRenderer MeshRenderer;
 
     public void CorrectCurrentBlueprintName()
     {
@@ -35,6 +36,7 @@ public class BlueprintViewer : MonoBehaviour
         GeneratedName = Blueprint.GetCorrectAssetName();
 
         MeshFilter.mesh = Blueprint.ArtContent;
+        MeshRenderer.materials = Blueprint.Materials;
         SetDesignationDisplay();
         name = GeneratedName + (Blueprint.ArtContent == null ? " (Empty)" : "");
         HandleCommands();
@@ -76,12 +78,8 @@ public class BlueprintViewer : MonoBehaviour
     {
         VoxelBlueprint blueprint = ScriptableObject.CreateInstance<VoxelBlueprint>();
 
-        blueprint.PositiveX = Blueprint.PositiveX;
         blueprint.Up = Blueprint.Up;
-        blueprint.PositiveZ = Blueprint.PositiveZ;
-        blueprint.NegativeX = Blueprint.NegativeX;
         blueprint.Down = Blueprint.Down;
-        blueprint.NegativeZ = Blueprint.NegativeZ;
 
         blueprint.Designations = new DesignationGrid();
         blueprint.Designations.X0Y0Z0 = Blueprint.Designations.X0Y0Z0;

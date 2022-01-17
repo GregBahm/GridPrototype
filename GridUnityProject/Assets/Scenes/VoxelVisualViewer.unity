@@ -156,6 +156,10 @@ MonoBehaviour:
   BlueprintViewerPrefab: {fileID: 9022561768094614378, guid: ec7a44c63b814a44ea69ec28c6466e76,
     type: 3}
   Margin: 0.1
+  WallMat: {fileID: 2100000, guid: 9f17b7ea90d37e34fb8432e5dd89c294, type: 2}
+  StrutMat: {fileID: 2100000, guid: 0d6966f96b9de2a4ca7e36d3f84fed26, type: 2}
+  SlantedRoofMat: {fileID: 2100000, guid: 0977880ba7e5b4e4db9034d7b600fcd0, type: 2}
+  PlatformMat: {fileID: 2100000, guid: 9a8dce79f38daa14593880a47068152f, type: 2}
 --- !u!4 &1429157974
 Transform:
   m_ObjectHideFlags: 0

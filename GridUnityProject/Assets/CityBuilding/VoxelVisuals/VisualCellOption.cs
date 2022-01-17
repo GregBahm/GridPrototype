@@ -4,6 +4,7 @@ using UnityEngine;
 public class VisualCellOption
 {
     public Mesh Mesh { get; }
+    public Material[] Materials {get;}
     private readonly VoxelDesignationType[,,] designation;
 
     public int Priority { get; }
@@ -13,9 +14,16 @@ public class VisualCellOption
 
     public VisualCellConnections Connections { get; }
 
-    public VisualCellOption(Mesh mesh, VoxelDesignationType[,,] designation, bool flipped, int rotations, int priority, VisualCellConnections connections)
+    public VisualCellOption(Mesh mesh, 
+        Material[] materials,
+        VoxelDesignationType[,,] designation, 
+        bool flipped, 
+        int rotations, 
+        int priority, 
+        VisualCellConnections connections)
     {
         Mesh = mesh;
+        Materials = materials;
         this.designation = designation;
         Flipped = flipped;
         Rotations = rotations;

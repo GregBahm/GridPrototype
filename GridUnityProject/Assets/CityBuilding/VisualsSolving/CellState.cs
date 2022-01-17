@@ -16,10 +16,6 @@ namespace VisualsSolving
 
         private readonly HashSet<VoxelConnectionType> up;
         private readonly HashSet<VoxelConnectionType> down;
-        private readonly HashSet<VoxelConnectionType> left;
-        private readonly HashSet<VoxelConnectionType> right;
-        private readonly HashSet<VoxelConnectionType> forward;
-        private readonly HashSet<VoxelConnectionType> back;
 
         public CellState(VisualsSolver solver, IEnumerable<VisualCellOption> remainingOptions, VisualCell component)
         {
@@ -28,10 +24,6 @@ namespace VisualsSolving
             RemainingOptions = remainingOptions.ToList().AsReadOnly();
             up = new HashSet<VoxelConnectionType>(RemainingOptions.Select(item => item.Connections.Up));
             down = new HashSet<VoxelConnectionType>(RemainingOptions.Select(item => item.Connections.Down));
-            left = new HashSet<VoxelConnectionType>(RemainingOptions.Select(item => item.Connections.Left));
-            right = new HashSet<VoxelConnectionType>(RemainingOptions.Select(item => item.Connections.Right));
-            forward = new HashSet<VoxelConnectionType>(RemainingOptions.Select(item => item.Connections.Forward));
-            back = new HashSet<VoxelConnectionType>(RemainingOptions.Select(item => item.Connections.Back));
         }
 
         public bool Connects(VoxelConnectionType type, ConnectionDirection direction)
@@ -40,17 +32,9 @@ namespace VisualsSolving
             {
                 case ConnectionDirection.Up:
                     return down.Contains(type);
+                default:
                 case ConnectionDirection.Down:
                     return up.Contains(type);
-                case ConnectionDirection.Left:
-                    return right.Contains(type);
-                case ConnectionDirection.Right:
-                    return left.Contains(type);
-                case ConnectionDirection.Forward:
-                    return back.Contains(type);
-                case ConnectionDirection.Back:
-                default:
-                    return forward.Contains(type);
             }
         }
 
@@ -90,40 +74,12 @@ namespace VisualsSolving
                 if (ret.RemainingOptions.Count > 1)
                     yield return ret;
             }
-            if (solver.HasConnection(Component.Neighbors.Left) && oldCell.left.Count != left.Count)
-            {
-                CellState ret = solver[Component.Neighbors.Left];
-                if (ret.RemainingOptions.Count > 1)
-                    yield return ret;
-            }
-            if (solver.HasConnection(Component.Neighbors.Right) && oldCell.right.Count != right.Count)
-            {
-                CellState ret = solver[Component.Neighbors.Right];
-                if (ret.RemainingOptions.Count > 1)
-                    yield return ret;
-            }
-            if (solver.HasConnection(Component.Neighbors.Forward) && oldCell.forward.Count != forward.Count)
-            {
-                CellState ret = solver[Component.Neighbors.Forward];
-                if (ret.RemainingOptions.Count > 1)
-                    yield return ret;
-            }
-            if (solver.HasConnection(Component.Neighbors.Back) && oldCell.back.Count != back.Count)
-            {
-                CellState ret = solver[Component.Neighbors.Back];
-                if (ret.RemainingOptions.Count > 1)
-                    yield return ret;
-            }
         }
 
         public enum ConnectionDirection
         {
             Up,
-            Down,
-            Left,
-            Right,
-            Forward,
-            Back
+            Down
         }
     }
 }

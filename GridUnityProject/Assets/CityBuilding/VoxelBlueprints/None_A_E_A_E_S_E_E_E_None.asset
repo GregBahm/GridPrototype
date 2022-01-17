@@ -14,12 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ArtContent: {fileID: 3817799727241048817, guid: 100bcad591838bb44b84a29a09c696ee,
     type: 3}
+  Materials:
+  - {fileID: 2100000, guid: 0977880ba7e5b4e4db9034d7b600fcd0, type: 2}
+  - {fileID: 2100000, guid: 9f17b7ea90d37e34fb8432e5dd89c294, type: 2}
   Up: 0
   Down: 0
-  PositiveX: 0
-  NegativeX: 0
-  PositiveZ: 0
-  NegativeZ: 0
   Designations:
     X0Y0Z0: 1
     X0Y0Z1: 0

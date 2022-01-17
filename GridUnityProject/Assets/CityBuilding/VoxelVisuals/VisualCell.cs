@@ -179,13 +179,16 @@ public class VisualCell
         return slotType == VoxelDesignationType.SlantedRoof || slotType == VoxelDesignationType.WalkableRoof;
     }
 
-    public void SetMaterialProperties(Material mat)
+    public void SetMaterialProperties(MeshRenderer renderer)
     {
         if (Contents != null)
         {
             Vector3[] adjustedAnchors = GetAdjustedAnchors();
-            SetAnchors(adjustedAnchors, mat);
-            mat.SetFloat("_Cull", Contents.Flipped ? 1 : 2);
+            foreach (Material mat in renderer.materials)
+            {
+                SetAnchors(adjustedAnchors, mat);
+                mat.SetFloat("_Cull", Contents.Flipped ? 1 : 2);
+            }
         }
     }
 

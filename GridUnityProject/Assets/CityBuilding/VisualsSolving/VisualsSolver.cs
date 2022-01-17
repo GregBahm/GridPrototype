@@ -163,18 +163,6 @@ namespace VisualsSolving
             if (!IsValid(component.Neighbors.Down, option.Connections.Down, CellState.ConnectionDirection.Down))
                 return false;
 
-            if (!IsValid(component.Neighbors.Left, option.Connections.Left, CellState.ConnectionDirection.Left))
-                return false;
-
-            if (!IsValid(component.Neighbors.Right, option.Connections.Right, CellState.ConnectionDirection.Right))
-                return false;
-
-            if (!IsValid(component.Neighbors.Forward, option.Connections.Forward, CellState.ConnectionDirection.Forward))
-                return false;
-
-            if (!IsValid(component.Neighbors.Back, option.Connections.Back, CellState.ConnectionDirection.Back))
-                return false;
-
             return true;
         }
     }

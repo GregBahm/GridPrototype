@@ -10,27 +10,24 @@ public class VoxelBlueprint : ScriptableObject
     public const string BlueprintsFolderPath = "Assets/CityBuilding/VoxelBlueprints/";
 
     public Mesh ArtContent;
+    public Material[] Materials;
+
     public VoxelConnectionType Up;
     public VoxelConnectionType Down;
-    public VoxelConnectionType PositiveX;
-    public VoxelConnectionType NegativeX;
-    public VoxelConnectionType PositiveZ;
-    public VoxelConnectionType NegativeZ;
     public DesignationGrid Designations;
 
     public IEnumerable<VisualCellOption> GenerateVisualOptions()
     {
-        VisualCellConnections baseConnections = new VisualCellConnections(Up, Down, PositiveX, NegativeX, PositiveZ, NegativeZ);
+        VisualCellConnections baseConnections = new VisualCellConnections(Up, Down);
 
         VoxelDesignation baseDesignation = new VoxelDesignation(Designations.ToFlatArray());
         int priority = 0;
-        yield return new VisualCellOption(ArtContent, baseDesignation.Description, false, 0, priority, baseConnections);
+        yield return new VisualCellOption(ArtContent, Materials, baseDesignation.Description, false, 0, priority, baseConnections);
         IEnumerable<GeneratedVoxelDesignation> variants = baseDesignation.GetUniqueVariants().ToArray();
         foreach (GeneratedVoxelDesignation variant in variants)
         {
             priority++;
-            VisualCellConnections connectionsVariant = baseConnections.GetVariant(variant.WasFlipped, variant.Rotations);
-            yield return new VisualCellOption(ArtContent, variant.Description, variant.WasFlipped, variant.Rotations, priority, connectionsVariant);
+            yield return new VisualCellOption(ArtContent, Materials, variant.Description, variant.WasFlipped, variant.Rotations, priority, baseConnections);
         }
     }
 

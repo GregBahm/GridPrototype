@@ -183,6 +183,7 @@ MonoBehaviour:
   SetCorrectBlueprintName: 0
   FindArtContentForBlueprint: 0
   MeshFilter: {fileID: 1988827180572935124}
+  MeshRenderer: {fileID: 426504519707627087}
 --- !u!1001 &1034386186829145886
 PrefabInstance:
   m_ObjectHideFlags: 0

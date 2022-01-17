@@ -16,6 +16,11 @@ public class VoxelVisualViewer : MonoBehaviour
 
     public float Margin;
 
+    public Material WallMat;
+    public Material StrutMat;
+    public Material SlantedRoofMat;
+    public Material PlatformMat;
+
     private void Awake()
     {
         Instance = this;
@@ -28,6 +33,32 @@ public class VoxelVisualViewer : MonoBehaviour
         blueprintViewers = new List<BlueprintViewer>();
         visuals.InstantiateGameObjects();
         Report();
+
+        //SetMaterials();
+    }
+
+    private void SetMaterials()
+    {
+        foreach (VoxelBlueprint blueprint in blueprintViewers.Select(item => item.Blueprint).Where(item => item.ArtContent != null))
+        {
+            List<Material> materials = new List<Material>();
+            VoxelDesignationType[] designations = blueprint.Designations.ToFlatArray();
+            if (designations.Contains(VoxelDesignationType.AnyFilled)
+                || designations.Contains(VoxelDesignationType.SlantedRoof)
+                || designations.Contains(VoxelDesignationType.WalkableRoof))
+                materials.Add(WallMat);
+            if (designations.Contains(VoxelDesignationType.SlantedRoof))
+                materials.Add(SlantedRoofMat);
+            if (designations.Contains(VoxelDesignationType.WalkableRoof)
+                || designations.Contains(VoxelDesignationType.Platform))
+                materials.Add(PlatformMat);
+            if (designations.Contains(VoxelDesignationType.Ground)
+                || blueprint.Up == VoxelConnectionType.BigStrut 
+                || blueprint.Down == VoxelConnectionType.BigStrut)
+                materials.Add(StrutMat);
+            blueprint.Materials = materials.ToArray();
+            EditorUtility.SetDirty(blueprint);
+        }
     }
 
     private void MakeTheMegastub()

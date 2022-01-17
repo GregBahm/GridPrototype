@@ -23,9 +23,6 @@ public class CityBuildingMain : MonoBehaviour
     [SerializeField]
     private GameObject BaseGridVisual;
 
-    [SerializeField]
-    private Material VoxelDisplayMat;
-
     public MainGrid MainGrid { get; private set; }
 
     private VoxelVisualsManager visualsAssembler;
@@ -51,7 +48,7 @@ public class CityBuildingMain : MonoBehaviour
         InteractionMeshObject.GetComponent<MeshFilter>().mesh = InteractionMesh.Mesh;
         BaseGridVisual.GetComponent<MeshFilter>().mesh = CloneInteractionMesh();
         optionsSource = new VisualOptionsByDesignation();
-        visualsAssembler = new VoxelVisualsManager(VoxelDisplayMat, optionsSource);
+        visualsAssembler = new VoxelVisualsManager(optionsSource);
         solver = new VisualsSolver(MainGrid, optionsSource);
     }
 
@@ -93,7 +90,6 @@ public class CityBuildingMain : MonoBehaviour
             Debug.Log("Grid Loaded");
         }
         HandleSolver();
-        visualsAssembler.ConstantlyUpdateComponentTransforms();
     }
 
     private const double solverWaitTime = (double)1 / 30;

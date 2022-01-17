@@ -2,8 +2,12 @@
 {
   Properties
   {
-    [MainTexture] _BaseMap("Base Map (RGB) Smoothness / Alpha (A)", 2D) = "white" {}
+    _BaseColor("Color", Color) = (1, 1, 1, 1)
     [Enum(UnityEngine.Rendering.CullMode)] _Cull("Cull", Float) = 2
+    [HideInInspector]_AnchorA("Anchor A", Vector) = (0, 0, 0, 0)
+    [HideInInspector]_AnchorB("Anchor B", Vector) = (1, 0, 0, 0)
+    [HideInInspector]_AnchorC("Anchor C", Vector) = (0, 0, 1, 0)
+    [HideInInspector]_AnchorD("Anchor D", Vector) = (1, 0, 1, 0)
   }
     SubShader
   {
@@ -17,10 +21,7 @@
         CBUFFER_START(UnityPerMaterial)
           float4 _BaseMap_ST;
           float4 _BaseColor;
-          float4 _EmissionColor;
-          float4 _SpecColor;
           float _Cutoff;
-          float _Smoothness;
         CBUFFER_END
       ENDHLSL
 
@@ -70,8 +71,11 @@
             sampler2D _TopLighting;
             sampler2D _BottomLighting;
 
-            float3 GetLighting(float3 worldPos)
+            float3 GetLighting(float3 worldPos, float3 worldNormal)
             {
+                float baseShade = dot(worldNormal, float3(0, 1, .5));
+                baseShade = lerp(baseShade, 1, .9);
+                return baseShade;
                 float3 boxPos = mul(_LightBoxTransform, float4(worldPos, 1));
                 boxPos = boxPos / 2 + .5;
                 return boxPos;
@@ -114,19 +118,11 @@
 
             float4 frag(v2f i) : SV_Target
             {
-                float3 baseLighting = GetLighting(i.worldPos);
-
                 float3 worldNorm = mul(unity_ObjectToWorld, i.normal);
                 worldNorm = normalize(worldNorm);
-                //return float4(i.normal * .5 + .5, 1);
+                float3 baseLighting = GetLighting(i.worldPos, worldNorm);
 
-                //float shadowness = SHADOW_ATTENUATION(i);
-                float baseTone = i.col.r;
-                //baseTone *= lerp(.8, 1, shadowness);
-                baseTone = lerp(baseTone,  2, i.col.b);
-                baseTone = lerp(baseTone, .4, i.col.r);
-
-                float3 ret = baseLighting * baseTone;
+                float3 ret = _BaseColor * baseLighting;
                 float ssao = GetSsao(i.vertex);
                 ret *= ssao;
                 return float4(ret, 1);
