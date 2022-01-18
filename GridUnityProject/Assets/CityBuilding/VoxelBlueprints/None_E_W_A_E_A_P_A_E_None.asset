@@ -15,8 +15,8 @@ MonoBehaviour:
   ArtContent: {fileID: -6769748923746555710, guid: f6e05ed837d699b4390d8db7c405fe05,
     type: 3}
   Materials:
-  - {fileID: 2100000, guid: 9f17b7ea90d37e34fb8432e5dd89c294, type: 2}
   - {fileID: 2100000, guid: 9a8dce79f38daa14593880a47068152f, type: 2}
+  - {fileID: 2100000, guid: 9f17b7ea90d37e34fb8432e5dd89c294, type: 2}
   Up: 0
   Down: 0
   Designations:
@@ -28,3 +28,4 @@ MonoBehaviour:
     X1Y0Z1: 4
     X1Y1Z0: 1
     X1Y1Z1: 0
+  ArtContentless: 0

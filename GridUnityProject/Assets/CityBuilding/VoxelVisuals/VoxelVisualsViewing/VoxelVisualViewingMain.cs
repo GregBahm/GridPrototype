@@ -28,7 +28,7 @@ public class VoxelVisualViewingMain : MonoBehaviour
         visuals.InstantiateGameObjects();
         Report();
 
-        PrepareTheMegastub(visuals);
+        //PrepareTheMegastub(visuals);
     }
 
     private void PrepareTheMegastub(OrganizedBlueprints visuals)
