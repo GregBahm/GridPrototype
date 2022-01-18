@@ -154,7 +154,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   BlueprintViewerPrefab: {fileID: 9022561768094614378, guid: ec7a44c63b814a44ea69ec28c6466e76,
     type: 3}
-  Margin: 0.1
+  Margin: 0.25
 --- !u!4 &1429157974
 Transform:
   m_ObjectHideFlags: 0

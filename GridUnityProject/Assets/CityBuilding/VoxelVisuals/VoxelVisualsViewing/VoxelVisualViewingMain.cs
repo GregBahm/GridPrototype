@@ -6,9 +6,9 @@ using TMPro;
 using UnityEditor;
 using UnityEngine;
 
-public class VoxelVisualViewer : MonoBehaviour
+public class VoxelVisualViewingMain : MonoBehaviour
 {
-    public static VoxelVisualViewer Instance { get; private set; }
+    public static VoxelVisualViewingMain Instance { get; private set; }
     public GameObject BlueprintViewerPrefab;
 
     private List<BlueprintViewer> blueprintViewers;
@@ -27,35 +27,48 @@ public class VoxelVisualViewer : MonoBehaviour
         blueprintViewers = new List<BlueprintViewer>();
         visuals.InstantiateGameObjects();
         Report();
+
+        PrepareTheMegastub(visuals);
     }
 
-    private void MakeTheMegastub()
+    private void PrepareTheMegastub(OrganizedBlueprints visuals)
     {
-        GameObject gameObjectRoot = new GameObject();
-        foreach (BlueprintViewer viewer in blueprintViewers.Where(item => item.Blueprint.ArtContent != null))
+        GameObject gameObjectRoot = new GameObject("MEGASTUB");
+        foreach (BlueprintViewer viewer in blueprintViewers.Where(item => item.Blueprint.ArtContent != null
+            && !item.Blueprint.Designations.ToFlatArray().Any(item => item == VoxelDesignationType.Platform)
+            ))
         {
             viewer.MeshFilter.gameObject.name = viewer.Blueprint.name;
             viewer.MeshFilter.gameObject.transform.SetParent(gameObjectRoot.transform, true);
         }
-    }
-
-    private void GeneratePlatformStubVisuals(OrganizedBlueprints visuals)
-    {
-        foreach (PotentialStrutPair item in visuals.platformBlueprints)
+        List<GameObject> stubs = GeneratePlatformStubVisuals(visuals);
+        foreach (GameObject item in stubs)
         {
-            StubPlatformPieceVisual(item.BasePiece.BestBlueprint, visuals);
-            if (item.HasStrut)
-            {
-                StubPlatformPieceVisual(item.WithStrut.BestBlueprint, visuals);
-            }
+            item.transform.parent = gameObjectRoot.transform;
         }
     }
 
-    private void StubPlatformPieceVisual(VoxelBlueprint blueprint, OrganizedBlueprints visuals)
+    private List<GameObject> GeneratePlatformStubVisuals(OrganizedBlueprints visuals)
     {
-        PlatformPiece platformPiece = new PlatformPiece(blueprint, visuals.pieceDictionary);
+        List<GameObject> platformStubs = new List<GameObject>();
+        foreach (PotentialStrutPair item in visuals.platformBlueprints)
+        {
+            platformStubs.AddRange(StubPlatformPieceVisual(item.BasePiece.BestBlueprint, visuals));
+            if (item.HasStrut)
+            {
+                platformStubs.AddRange(StubPlatformPieceVisual(item.WithStrut.BestBlueprint, visuals));
+            }
+        }
+        return platformStubs;
+    }
+
+    private IEnumerable<GameObject> StubPlatformPieceVisual(VoxelBlueprint blueprint, OrganizedBlueprints visuals)
+    {
+        PlatformPiece platformPiece = new PlatformPiece(blueprint, visuals.pieceDictionary, blueprintViewers);
         if (platformPiece.NonPlatformEquivalent != null && platformPiece.NonPlatformEquivalent.ArtContent != null)
-            platformPiece.CreateStubVisual();
+        {
+            yield return platformPiece.CreateStubVisual();
+        }
     }
 
 
@@ -110,13 +123,13 @@ public class VoxelVisualViewer : MonoBehaviour
 
     private class OrganizedBlueprints
     {
-        private readonly VoxelVisualViewer mothership;
+        private readonly VoxelVisualViewingMain mothership;
         private readonly List<PotentialStrutPair> nonRoofPieces;
         private readonly List<RoofPieceGroup> roofPieces;
         private readonly IEnumerable<VoxelBlueprint> allBlueprints;
         public readonly Dictionary<string, VoxelBlueprint> pieceDictionary;
         public readonly List<PotentialStrutPair> platformBlueprints;
-        public OrganizedBlueprints(VoxelVisualViewer mothership, IEnumerable<VoxelBlueprint> allBlueprints)
+        public OrganizedBlueprints(VoxelVisualViewingMain mothership, IEnumerable<VoxelBlueprint> allBlueprints)
         {
             this.mothership = mothership;
             this.allBlueprints = allBlueprints;
@@ -238,7 +251,7 @@ public class VoxelVisualViewer : MonoBehaviour
             {
                 VoxelBlueprint strutPiece = pair.WithStrut.BestBlueprint;
                 BlueprintViewer strutViewer = mothership.InstantiateBlueprint(strutPiece);
-                mothership.PlaceBlueprint(strutViewer.transform, xOffset, yOffset + .75f);
+                mothership.PlaceBlueprint(strutViewer.transform, xOffset, yOffset + 1f);
             }
         }
 
@@ -253,12 +266,15 @@ public class VoxelVisualViewer : MonoBehaviour
 
     private class PlatformPiece
     {
-        public VoxelBlueprint PlatformViewer { get; }
+        public VoxelBlueprint PlatformBlueprint { get; }
         public VoxelBlueprint NonPlatformEquivalent { get; }
 
-        public PlatformPiece(VoxelBlueprint platformBlueprint, Dictionary<string, VoxelBlueprint> allBlueprints)
+        public BlueprintViewer Viewer { get; }
+
+        public PlatformPiece(VoxelBlueprint platformBlueprint, Dictionary<string, VoxelBlueprint> allBlueprints, List<BlueprintViewer> blueprintViewers)
         {
-            PlatformViewer = platformBlueprint;
+            PlatformBlueprint = platformBlueprint;
+            Viewer = blueprintViewers.First(item => item.Blueprint == platformBlueprint);
             string nonPlatformKey = MakeNonPlatformKey();
             if (allBlueprints.ContainsKey(nonPlatformKey))
                 NonPlatformEquivalent = allBlueprints[MakeNonPlatformKey()];
@@ -267,7 +283,7 @@ public class VoxelVisualViewer : MonoBehaviour
         private string MakeNonPlatformKey()
         {
             VoxelBlueprint blueprintForKey = new VoxelBlueprint();
-            VoxelDesignationType[] baseDesignations = PlatformViewer.Designations.ToFlatArray();
+            VoxelDesignationType[] baseDesignations = PlatformBlueprint.Designations.ToFlatArray();
             for (int i = 0; i < baseDesignations.Length; i++)
             {
                 if(baseDesignations[i] == VoxelDesignationType.Platform)
@@ -276,37 +292,40 @@ public class VoxelVisualViewer : MonoBehaviour
                 }
             }
             blueprintForKey.Designations = DesignationGrid.FromFlatArray(baseDesignations);
-            blueprintForKey.Up = PlatformViewer.Up;
-            blueprintForKey.Down = PlatformViewer.Down;
+            blueprintForKey.Up = PlatformBlueprint.Up;
+            blueprintForKey.Down = PlatformBlueprint.Down;
             return GetInvariantKey(blueprintForKey);
         }
 
-        public void CreateStubVisual()
+        public GameObject CreateStubVisual()
         {
-            GameObject baseObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            MeshFilter filter = baseObj.GetComponent<MeshFilter>();
+            GameObject ret = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            MeshFilter filter = ret.GetComponent<MeshFilter>();
+            MeshRenderer renderer = ret.GetComponent<MeshRenderer>();
+            renderer.materials = NonPlatformEquivalent.Materials;
             filter.mesh = NonPlatformEquivalent.ArtContent;
-
-            var designations = PlatformViewer.Designations.ToCubedArray();
+            ret.name = PlatformBlueprint.name;
+            var designations = PlatformBlueprint.Designations.ToCubedArray();
             for (int x = 0; x < 2; x++)
             {
                 for (int z = 0; z < 2; z++)
                 {
                     if(designations[x, 0, z] == VoxelDesignationType.Platform)
                     {
-                        AddCube(baseObj, x, z);
+                        AddCube(ret, x, z);
                     }
                 }
             }
-            ObjExporter.GameObjectToFile(baseObj, 0, "ExportTests/" + PlatformViewer.GetCorrectAssetName() + ".obj");
+            ret.transform.position = Viewer.transform.position;
+            return ret;
         }
 
         private void AddCube(GameObject baseObj, int x, int z)
         {
             GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
             cube.transform.parent = baseObj.transform;
-            cube.transform.localScale = new Vector3(.5f, .03f, .5f);
-            cube.transform.localPosition = new Vector3(x * .5f - .225f, -0.015f, z * .5f - .225f);
+            cube.transform.localScale = new Vector3(.5f, .03125f, .5f);
+            cube.transform.localPosition = new Vector3(x * .5f - .25f, -0.015625f, z * .5f - .25f);
             cube.name = "Platform";
         }
     }
