@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -44,6 +45,27 @@ public class BlueprintViewer : MonoBehaviour
         HandleCommands();
     }
 
+    private IEnumerable<Material> FindMaterials()
+    {
+        string assetPath = VoxelBlueprint.BlueprintsFolderPath + GeneratedName + ".fbx";
+        
+        GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(assetPath);
+        string[] materialNames = prefab.GetComponent<MeshRenderer>().sharedMaterials.Select(item => item.name).ToArray();
+        Dictionary<string, Material> mats = VoxelVisualBaseAssets.Instance.Materials.ToDictionary(item => item.name, item => item);
+        foreach (string item in materialNames)
+        {
+            if(mats.ContainsKey(item))
+            {
+                yield return mats[item];
+            }
+            else
+            {
+                Debug.LogError("Can't find material named " + item);
+                yield return null;
+            }
+        }
+    }
+
     private void HandleCommands()
     {
         GeneratedName = VoxelBlueprint.GetCorrectAssetName(Blueprint);
@@ -72,29 +94,9 @@ public class BlueprintViewer : MonoBehaviour
             Mesh mesh = AssetDatabase.LoadAssetAtPath<Mesh>(AssetDatabase.GUIDToAssetPath(assets[0]));
             Blueprint.ArtContent = mesh;
             name = GeneratedName + Blueprint.ArtContent == null ? " (Empty)" : "";
-            PopulateMaterials();
+            Blueprint.Materials = FindMaterials().ToArray();
             EditorUtility.SetDirty(Blueprint);
         }
-    }
-
-    private void PopulateMaterials()
-    {
-            List<Material> materials = new List<Material>();
-            VoxelDesignationType[] designations = Blueprint.Designations.ToFlatArray();
-            if (designations.Contains(VoxelDesignationType.AnyFilled)
-                || designations.Contains(VoxelDesignationType.SlantedRoof)
-                || designations.Contains(VoxelDesignationType.WalkableRoof))
-                materials.Add(VoxelVisualBaseAssets.Instance.WallMat);
-            if (designations.Contains(VoxelDesignationType.SlantedRoof))
-                materials.Add(VoxelVisualBaseAssets.Instance.SlantedRoofMat);
-            if (designations.Contains(VoxelDesignationType.WalkableRoof)
-                || designations.Contains(VoxelDesignationType.Platform))
-                materials.Add(VoxelVisualBaseAssets.Instance.PlatformMat);
-            if (designations.Contains(VoxelDesignationType.Ground)
-                || Blueprint.Up == VoxelConnectionType.BigStrut
-                || Blueprint.Down == VoxelConnectionType.BigStrut)
-                materials.Add(VoxelVisualBaseAssets.Instance.StrutMat);
-            Blueprint.Materials = materials.ToArray();
     }
 
     public void StubBlueprintFromCurrent()

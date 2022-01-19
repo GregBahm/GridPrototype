@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
@@ -16,6 +17,17 @@ public class VoxelVisualBaseAssets : MonoBehaviour
     public Material StrutMat;
     public Material SlantedRoofMat;
     public Material PlatformMat;
+
+    public IEnumerable<Material> Materials
+    {
+        get
+        {
+            yield return WallMat;
+            yield return StrutMat;
+            yield return SlantedRoofMat;
+            yield return PlatformMat;
+        }
+    }
 
     private void Awake()
     {
