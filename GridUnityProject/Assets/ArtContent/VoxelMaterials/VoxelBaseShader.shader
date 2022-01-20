@@ -2,7 +2,7 @@
 {
   Properties
   {
-    _BaseColor("Color", Color) = (1, 1, 1, 1)
+    _Color("Color", Color) = (1, 1, 1, 1)
     [Enum(UnityEngine.Rendering.CullMode)] _Cull("Cull", Float) = 2
     [HideInInspector]_AnchorA("Anchor A", Vector) = (0, 0, 0, 0)
     [HideInInspector]_AnchorB("Anchor B", Vector) = (1, 0, 0, 0)
@@ -65,6 +65,7 @@
             float3 _AnchorB;
             float3 _AnchorC;
             float3 _AnchorD;
+            float3 _Color;
             CBUFFER_END
 
 
@@ -79,7 +80,6 @@
             {
               float3 boxPos = mul(_LightBoxTransform, float4(worldPos, 1));
               boxPos += .5;
-              //boxPos = boxPos / 2 + .5;
               float3 bottomSample = SAMPLE_TEXTURE2D(_BottomLighting, sampler_BottomLighting, boxPos.xz).rgb;
               float3 topSample = SAMPLE_TEXTURE2D(_TopLighting, sampler_TopLighting, boxPos.xz).rgb;
               return lerp(bottomSample, topSample, boxPos.y);
@@ -124,6 +124,7 @@
 
             float4 frag(v2f i) : SV_Target
             {
+
                 float3 worldNorm = mul(unity_ObjectToWorld, i.normal);
                 worldNorm = normalize(worldNorm);
                 float3 boxLighting = GetBoxLighting(i.worldPos);
@@ -131,7 +132,7 @@
                 float ssao = GetSsao(i.vertex);
                 half shadow = MainLightRealtimeShadow(TransformWorldToShadowCoord(i.worldPos));
 
-                float3 ret = _BaseColor;
+                float3 ret = _Color;
                 ret *= baseShade;
                 ret *= boxLighting + .5;
                 ret = lerp(ret * float3(0, .25, .5), ret, ssao);

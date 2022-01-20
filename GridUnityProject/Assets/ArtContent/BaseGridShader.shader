@@ -46,12 +46,12 @@
 
 			float3 _Color;
       float3 _ShadowColor;
+      TEXTURE2D(_BottomLighting);
+      SAMPLER(sampler_BottomLighting);
 
             float3 _DistToCursor;
 
             float4x4 _LightBoxTransform;
-            sampler2D _TopLighting;
-            sampler2D _BottomLighting;
 
             struct appdata
             {
@@ -70,10 +70,9 @@
 
             float3 GetBoxLighting(float3 worldPos)
             {
-                float3 boxPos = mul(_LightBoxTransform, float4(worldPos, 1));
-                boxPos += .5;
-                boxPos = boxPos / 2 + .5;
-                return boxPos;
+              float3 boxPos = mul(_LightBoxTransform, float4(worldPos, 1));
+              boxPos += .5;
+              return SAMPLE_TEXTURE2D(_BottomLighting, sampler_BottomLighting, boxPos.xz).rgb;
             }
 
             v2f vert (appdata v)
