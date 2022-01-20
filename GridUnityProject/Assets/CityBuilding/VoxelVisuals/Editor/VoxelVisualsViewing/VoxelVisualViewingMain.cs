@@ -22,13 +22,21 @@ public class VoxelVisualViewingMain : MonoBehaviour
 
     private void Start()
     {
-        IEnumerable<VoxelBlueprint> allBlueprints = VoxelBlueprint.GetAllBlueprints();
+        IEnumerable<VoxelBlueprint> allBlueprints = GetAllBlueprints();
         OrganizedBlueprints visuals = new OrganizedBlueprints(this, allBlueprints);
         blueprintViewers = new List<BlueprintViewer>();
         visuals.InstantiateGameObjects();
         Report();
 
         //PrepareTheMegastub(visuals);
+    }
+
+    public static VoxelBlueprint[] GetAllBlueprints()
+    {
+        string[] guids = AssetDatabase.FindAssets("t: VoxelBlueprint", new[] { VoxelBlueprint.BlueprintsFolderPath });
+        List<VoxelBlueprint> ret = guids.Select(item => AssetDatabase.LoadAssetAtPath<VoxelBlueprint>(AssetDatabase.GUIDToAssetPath(item))).ToList();
+        //ret.Reverse();
+        return ret.ToArray();
     }
 
     private void PrepareTheMegastub(OrganizedBlueprints visuals)
@@ -489,5 +497,13 @@ public class VoxelVisualViewingMain : MonoBehaviour
                 && BasePiece.BestBlueprint.Designations.X1Y1Z0 != VoxelDesignationType.AnyFilled
                 && BasePiece.BestBlueprint.Designations.X1Y1Z1 != VoxelDesignationType.AnyFilled;
         }
+    }
+
+    [MenuItem("Blueprints/Populate Blueprints")]
+    static void PopulateBlueprints()
+    {
+        VoxelBlueprint[] blueprints = GetAllBlueprints();
+        GameObject obj = Selection.activeGameObject;
+        obj.GetComponent<CityBuildingMain>().Blueprints = blueprints;
     }
 }

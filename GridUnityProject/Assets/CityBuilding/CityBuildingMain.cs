@@ -30,7 +30,7 @@ public class CityBuildingMain : MonoBehaviour
 
     private VisualsSolver solver;
 
-    public GameObject BlueprintViewerPrefab;
+    public VoxelBlueprint[] Blueprints;
 
     public static CityBuildingMain Instance;
 
@@ -47,23 +47,25 @@ public class CityBuildingMain : MonoBehaviour
         UpdateInteractionGrid();
         InteractionMeshObject.GetComponent<MeshFilter>().mesh = InteractionMesh.Mesh;
         BaseGridVisual.GetComponent<MeshFilter>().mesh = CloneInteractionMesh();
-        optionsSource = new VisualOptionsByDesignation();
+        optionsSource = new VisualOptionsByDesignation(Blueprints);
         visualsAssembler = new VoxelVisualsManager(optionsSource);
         solver = new VisualsSolver(MainGrid, optionsSource);
     }
 
     public void StubMissingBlueprint(VoxelDesignation designation)
     {
-        GameObject gameObj = Instantiate(BlueprintViewerPrefab);
-        gameObj.transform.position = new Vector3(0, 5, 0);
-        BlueprintViewer viewer = gameObj.GetComponent<BlueprintViewer>();
-        VoxelBlueprint blueprint = ScriptableObject.CreateInstance<VoxelBlueprint>();
-        blueprint.Designations = DesignationGrid.FromDesignation(designation);
-        viewer.Blueprint = blueprint;
+#if UNITY_EDITOR
+        //GameObject gameObj = Instantiate(BlueprintViewerPrefab);
+        //gameObj.transform.position = new Vector3(0, 5, 0);
+        //BlueprintViewer viewer = gameObj.GetComponent<BlueprintViewer>();
+        //VoxelBlueprint blueprint = ScriptableObject.CreateInstance<VoxelBlueprint>();
+        //blueprint.Designations = DesignationGrid.FromDesignation(designation);
+        //viewer.Blueprint = blueprint;
 
-        string path = VoxelBlueprint.GetBlueprintAssetPath(blueprint);
-        AssetDatabase.CreateAsset(blueprint, path);
-        AssetDatabase.Refresh();
+        //string path = VoxelBlueprint.GetBlueprintAssetPath(blueprint);
+        //AssetDatabase.CreateAsset(blueprint, path);
+        //AssetDatabase.Refresh();
+#endif
     }
 
     private Mesh CloneInteractionMesh()

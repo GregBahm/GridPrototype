@@ -4,14 +4,15 @@ using System.Linq;
 public class VisualOptionsByDesignation
 {
     private Dictionary<string, VisualCellOption[]> optionsByDesignationKey;
-    public VisualOptionsByDesignation()
+    private readonly VoxelBlueprint[] blueprints;
+    public VisualOptionsByDesignation(VoxelBlueprint[] blueprints)
     {
+        this.blueprints = blueprints;
         SetOptions();
     }
 
     private void SetOptions()
     {
-        VoxelBlueprint[] blueprints = VoxelBlueprint.GetAllBlueprints();
         VisualCellOption[] allOptions = GetAllOptions(blueprints).ToArray();
         optionsByDesignationKey = GetOptionsByDesignationKey(allOptions);
     }
