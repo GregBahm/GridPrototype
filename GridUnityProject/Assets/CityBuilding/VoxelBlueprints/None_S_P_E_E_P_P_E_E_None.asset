@@ -15,6 +15,7 @@ MonoBehaviour:
   ArtContent: {fileID: -2124387055180791075, guid: d94befe807de82b4d908e2eb5a573c04,
     type: 3}
   Materials:
+  - {fileID: 2100000, guid: 0d6966f96b9de2a4ca7e36d3f84fed26, type: 2}
   - {fileID: 2100000, guid: 9a8dce79f38daa14593880a47068152f, type: 2}
   - {fileID: 2100000, guid: 0977880ba7e5b4e4db9034d7b600fcd0, type: 2}
   - {fileID: 2100000, guid: 9f17b7ea90d37e34fb8432e5dd89c294, type: 2}
