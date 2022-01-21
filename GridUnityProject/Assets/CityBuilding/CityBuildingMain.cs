@@ -25,7 +25,7 @@ public class CityBuildingMain : MonoBehaviour
 
     public MainGrid MainGrid { get; private set; }
 
-    private VoxelVisualsManager visualsAssembler;
+    private VoxelVisualsManager visualsManager;
     private VisualOptionsByDesignation optionsSource;
 
     private VisualsSolver solver;
@@ -48,7 +48,7 @@ public class CityBuildingMain : MonoBehaviour
         InteractionMeshObject.GetComponent<MeshFilter>().mesh = InteractionMesh.Mesh;
         BaseGridVisual.GetComponent<MeshFilter>().mesh = CloneInteractionMesh();
         optionsSource = new VisualOptionsByDesignation(Blueprints);
-        visualsAssembler = new VoxelVisualsManager(optionsSource);
+        visualsManager = new VoxelVisualsManager(optionsSource);
         solver = new VisualsSolver(MainGrid, optionsSource);
     }
 
@@ -120,7 +120,7 @@ public class CityBuildingMain : MonoBehaviour
         foreach (CellState item in solver.ReadyToDisplayVoxels)
         {
             item.Component.Contents = item.RemainingOptions[0];
-            visualsAssembler.UpdateDebugObject(item.Component);
+            visualsManager.UpdateDebugObject(item.Component);
         }
         solver.ReadyToDisplayVoxels.Clear();
     }
@@ -134,7 +134,7 @@ public class CityBuildingMain : MonoBehaviour
 
     internal void UpdateVoxelVisuals(DesignationCell changedCell)
     {
-        visualsAssembler.DoImmediateUpdate(changedCell);
+        visualsManager.DoImmediateUpdate(changedCell);
         solver = new VisualsSolver(MainGrid, optionsSource);
     }
 }

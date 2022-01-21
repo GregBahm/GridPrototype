@@ -25,7 +25,7 @@ public class VoxelVisualsManager
             filter.mesh = component.Contents.Mesh;
             filter.gameObject.name = GetObjName(component);
             MeshRenderer renderer = filter.GetComponent<MeshRenderer>();
-            if(component.Contents.Materials != null)
+            if (component.Contents.Materials != null)
                 renderer.materials = component.Contents.Materials.Select(item => new Material(item)).ToArray();
             component.SetMaterialProperties(renderer);
         }
@@ -46,7 +46,7 @@ public class VoxelVisualsManager
             filter.mesh = component.Contents.Mesh;
             obj.transform.position = component.ContentPosition;
             voxelObjects.Add(component, filter);
-            obj.transform.SetParent(piecesRoot, false);
+            obj.transform.SetParent(piecesRoot, true);
         }
     }
 

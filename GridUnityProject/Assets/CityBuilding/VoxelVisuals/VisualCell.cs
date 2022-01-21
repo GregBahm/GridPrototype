@@ -22,7 +22,7 @@ public class VisualCell
 
     private readonly Vector3[] anchors;
 
-    private static readonly Vector3 HeightOffset = new Vector3(0, .5f, 0);
+    public Vector3[] BoundyBoxPoints { get; }
 
     public VisualCell(MainGrid grid, GroundQuad quad, int height)
     {
@@ -30,6 +30,7 @@ public class VisualCell
         Quad = quad;
         Height = height;
         designationCells = GetDesignationCells();
+        BoundyBoxPoints = GetBoundyPoints().ToArray();
         ContentPosition = GetContentPosition();
         anchors = new Vector3[]
         {
@@ -40,17 +41,24 @@ public class VisualCell
         };
     }
 
+    private IEnumerable<Vector3> GetBoundyPoints()
+    {
+        yield return designationCells[0, 0, 0].Position;
+        yield return designationCells[0, 0, 1].Position;
+        yield return designationCells[1, 0, 1].Position;
+        yield return designationCells[1, 0, 0].Position;
+    }
 
     private Vector3 GetContentPosition()
     {
-        Vector3 ret = Vector3.zero;
-        foreach (IDesignationCell cell in designationCells)
-        {
-            ret += cell.Position;
-        }
-        ret /= 8;
-        ret += HeightOffset;
-        return ret;
+        float maxX = BoundyBoxPoints.Max(item => item.x);
+        float maxZ = BoundyBoxPoints.Max(item => item.z);
+        float minX = BoundyBoxPoints.Max(item => item.x);
+        float minZ = BoundyBoxPoints.Max(item => item.z);
+
+        float x = (maxX + minX) / 2;
+        float z = (maxZ + minZ) / 2;
+        return new Vector3(x, Height, z);
     }
 
     private IDesignationCell[,,] GetDesignationCells()
