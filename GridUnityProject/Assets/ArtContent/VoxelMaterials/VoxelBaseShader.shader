@@ -100,6 +100,27 @@
                 float3 flatPosition = lerp(anchorStart, anchorEnd, vert.z);
                 return float3(flatPosition.x, vert.y, flatPosition.z);
             }
+            float3 GetTransformedNormal(float3 vert, float3 normal)
+            {
+                vert.xz += .5;
+                float2 ab = normalize(_AnchorA.xz - _AnchorB.xz);
+                float2 bc = normalize(_AnchorB.xz - _AnchorC.xz);
+                float2 cd = normalize(_AnchorC.xz - _AnchorD.xz);
+                float2 da = normalize(_AnchorD.xz - _AnchorA.xz);
+
+                float2 anchorANormal = da * normal.x + ab * normal.z;
+                float2 anchorBNormal = ab * normal.z + bc * normal.x;
+                float2 anchorCNormal = bc * normal.x + cd * normal.z;
+                float2 anchorDNormal = cd * normal.z + da * normal.x;
+
+                float2 anchorStart = lerp(anchorBNormal, anchorANormal, vert.x);
+                float2 anchorEnd = lerp(anchorCNormal, anchorDNormal, vert.x);
+                float2 newNormal = lerp(anchorStart, anchorEnd, vert.z);
+
+                newNormal = newNormal * .5 + .5;
+                return float3(bc.x, 0, bc.y);
+                return float3(newNormal.x, normal.y, newNormal.y);
+            }
 
             v2f vert(appdata v)
             {
@@ -109,7 +130,7 @@
                 o.uv = v.uv;
                 o.baseVert = v.vertex;
                 o.col = v.col;
-                o.normal = GetTransformedBaseVert(v.normal);
+                o.normal = v.normal;//GetTransformedBaseVert(v.normal);
                 o.worldPos = mul(unity_ObjectToWorld, float4(transformedVert, 1)).xyz;
 
                 return o;
@@ -124,20 +145,21 @@
 
             float4 frag(v2f i) : SV_Target
             {
+                float3 transformedNormal = GetTransformedNormal(i.baseVert, i.normal);
+                //transformedNormal = normalize(transformedNormal);
+                return float4(transformedNormal, 1);
 
-                float3 worldNorm = mul(unity_ObjectToWorld, i.normal);
-                worldNorm = normalize(worldNorm);
-                float3 boxLighting = GetBoxLighting(i.worldPos);
-                float baseShade = GetBaseShade(worldNorm);
+                float3 boxLighting = GetBoxLighting(transformedNormal);
+                float baseShade = GetBaseShade(transformedNormal);
                 float ssao = GetSsao(i.vertex);
                 half shadow = MainLightRealtimeShadow(TransformWorldToShadowCoord(i.worldPos));
-
+                return ssao;
                 float3 ret = _Color;
                 ret *= baseShade;
                 ret *= boxLighting + .5;
                 ret = lerp(ret * float3(0, .25, .5), ret, ssao);
                 ret *= lerp(ret * float3(.5, .75, 1), ret, shadow);
-
+                ret = pow(ret * 2, 2);
                 return float4(ret, 1);
             }
             ENDHLSL
@@ -180,6 +202,14 @@
                 float3 flatPosition = lerp(anchorStart, anchorEnd, vert.z);
                 return float3(flatPosition.x, vert.y, flatPosition.z);
             }
+            float3 GetTransformedNormal(float3 normal)
+            {
+              float3 anchorStart = lerp(_AnchorB, _AnchorA, normal.x + .5);
+              float3 anchorEnd = lerp(_AnchorC, _AnchorD, normal.x + .5);
+              float3 flatPosition = lerp(anchorStart, anchorEnd, normal.z + .5);
+
+              return lerp(flatPosition, normal, abs(normal.y));
+            }
 
             Varyings DisplacedDepthNormalsVertex(Attributes input)
             {
@@ -188,7 +218,7 @@
               UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
 
               input.positionOS.xyz = GetTransformedBaseVert(input.positionOS.xyz);
-              input.normal.xyz = GetTransformedBaseVert(input.normal.xyz);
+              input.normal.xyz = GetTransformedNormal(input.normal.xyz);
 
               output.positionCS = TransformObjectToHClip(input.positionOS.xyz);
               VertexNormalInputs normalInput = GetVertexNormalInputs(input.normal, input.tangentOS);

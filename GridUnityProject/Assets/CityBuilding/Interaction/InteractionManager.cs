@@ -34,6 +34,13 @@ public class InteractionManager : MonoBehaviour
 
     public VoxelDesignationType FillType;
 
+    private readonly UndoManager undoManager;
+
+    public InteractionManager()
+    {
+        undoManager = new UndoManager(this);
+    }
+
     private void Start()
     {
         gameMain = GetComponent<CityBuildingMain>();
@@ -81,6 +88,11 @@ public class InteractionManager : MonoBehaviour
     public void SetFillToPlatform()
     {
         FillType = VoxelDesignationType.Platform;
+    }
+
+    public void Undo()
+    {
+        undoManager.Undo();
     }
 
     private void UpdateCursor(MeshHitTarget potentialMeshInteraction)
@@ -188,10 +200,14 @@ public class InteractionManager : MonoBehaviour
     {
         if (Input.GetMouseButtonUp(1) && hitInfo != null && hitInfo.SourceCell != null)
         {
-            hitInfo.SourceCell.Designation = VoxelDesignationType.Empty;
-            gameMain.UpdateInteractionGrid();
-            gameMain.UpdateVoxelVisuals(hitInfo.SourceCell);
+            RegisterDesignationUndo(hitInfo.SourceCell);
+            SetDesignation(hitInfo.SourceCell, VoxelDesignationType.Empty);
         }
+    }
+
+    private void RegisterDesignationUndo(DesignationCell cell)
+    {
+        undoManager.RegisterDesignationPlacement(cell);
     }
 
     private void HandleLeftMeshClicks(MeshHitTarget hitInfo)
@@ -200,10 +216,16 @@ public class InteractionManager : MonoBehaviour
             && hitInfo != null 
             && hitInfo.TargetCell != null)
         {
-            hitInfo.TargetCell.Designation = FillType;
-            gameMain.UpdateInteractionGrid();
-            gameMain.UpdateVoxelVisuals(hitInfo.TargetCell);
+            RegisterDesignationUndo(hitInfo.TargetCell);
+            SetDesignation(hitInfo.TargetCell, FillType);
         }
+    }
+
+    public void SetDesignation(DesignationCell cell, VoxelDesignationType type)
+    {
+        cell.Designation = type;
+        gameMain.UpdateInteractionGrid();
+        gameMain.UpdateVoxelVisuals(cell);
     }
 
     public static Vector3 GetGroundPositionAtScreenpoint(Vector3 screenPoint)
