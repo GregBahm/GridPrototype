@@ -6,14 +6,13 @@ public class UndoManager
     private readonly InteractionManager interactor;
     private readonly List<UndoableOperation> stack = new List<UndoableOperation>();
 
+    public bool CanUndo
+    {
+        get { return stack.Any(); }
+    }
     public UndoManager(InteractionManager interactor)
     {
         this.interactor = interactor;
-    }
-
-    public bool CanUndo()
-    {
-        return stack.Any();
     }
 
     public void Undo()

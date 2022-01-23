@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using UnityEngine;
-using UnityEngine.UIElements;
+using UnityEngine.UI;
 
 [RequireComponent(typeof(CityBuildingMain))]
 [RequireComponent(typeof(CameraInteraction))]
@@ -36,6 +36,7 @@ public class InteractionManager : MonoBehaviour
 
     private readonly UndoManager undoManager;
 
+    public Button UndoButton;
     public InteractionManager()
     {
         undoManager = new UndoManager(this);
@@ -73,6 +74,7 @@ public class InteractionManager : MonoBehaviour
         HandleOrbit();
         HandlePan();
         cameraInteraction.HandleMouseScrollwheel();
+        UndoButton.interactable = undoManager.CanUndo;
     }
 
     public void SetFillToWalkableRoof()
