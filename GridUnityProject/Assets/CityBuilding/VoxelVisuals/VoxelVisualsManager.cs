@@ -44,7 +44,9 @@ public class VoxelVisualsManager
             component.SetMaterialProperties(renderer);
             
             filter.mesh = component.Contents.Mesh;
-            obj.transform.position = component.ContentPosition;
+            obj.transform.position = component.Positioning.Center;
+            obj.transform.localScale = component.Positioning.BoundingBoxScale;
+            obj.transform.rotation = component.Positioning.BoundingBoxRotation;
             voxelObjects.Add(component, filter);
             obj.transform.SetParent(piecesRoot, true);
         }

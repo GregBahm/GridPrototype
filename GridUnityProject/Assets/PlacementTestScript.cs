@@ -6,105 +6,90 @@ using UnityEngine;
 
 public class PlacementTestScript : MonoBehaviour
 {
+    private Transform transformHelper;
     public Transform Box;
     public Transform PointA;
     public Transform PointB;
     public Transform PointC;
     public Transform PointD;
 
+    private void Start()
+    {
+        transformHelper = new GameObject().transform;
+    }
+
     private void Update()
     {
-        Vector2[] anchors = new Vector2[] {
-            new Vector2(PointA.position.x, PointA.position.z),
-            new Vector2(PointB.position.x, PointB.position.z),
-            new Vector2(PointC.position.x, PointC.position.z),
-            new Vector2(PointD.position.x, PointD.position.z),
+        Vector3[] anchors = new Vector3[] {
+            PointA.position,
+            PointB.position,
+            PointC.position,
+            PointD.position,
         };
         SetBoxTransform(Box, anchors);
     }
 
-    private void SetBoxTransform(Transform box, Vector2[] anchors)
+    private void SetBoxTransform(Transform box, Vector3[] anchors)
     {
         PlacementHelper helper = new PlacementHelper(anchors);
-        box.forward = helper.LongestLengthPointA - helper.LongestLengthPointB;
-        
+        transformHelper.forward = helper.RotationVector;
+        Vector3 localA = transformHelper.worldToLocalMatrix.MultiplyPoint(PointA.position);
+        Vector3 localB = transformHelper.worldToLocalMatrix.MultiplyPoint(PointB.position);
+        Vector3 localC = transformHelper.worldToLocalMatrix.MultiplyPoint(PointC.position);
+        Vector3 localD = transformHelper.worldToLocalMatrix.MultiplyPoint(PointD.position);
+        Vector3[] locals = new Vector3[] { localA, localB, localC, localD };
+        float maxX = locals.Max(item => item.x);
+        float minX = locals.Min(item => item.x);
+        float maxZ = locals.Max(item => item.z);
+        float minZ = locals.Min(item => item.z);
+
+        Vector3 center = new Vector3((maxX + minX) / 2, -1f, (maxZ + minZ) / 2);
+        Vector3 localScale = new Vector3(maxX - minX, 1, maxZ - minZ);
+
+        box.SetParent(transformHelper);
+        box.localRotation = Quaternion.identity;
+        box.localPosition = center;
+        box.localScale = localScale;
     }
 
     private class PlacementHelper
     {
-        public Vector2 LongestLengthPointA { get; }
-        public Vector2 LongestLengthPointB { get; }
-        public Vector2 AdditionalPointA { get; }
-        public Vector2 AdditionalPointB { get; }
+        public Vector3 RotationVector { get; }
 
-        public PlacementHelper(Vector2[] anchors)
+        public PlacementHelper(Vector3[] anchors)
         {
-            Vector2 centerPoint = GetCenterPoint(anchors);
-            anchors = anchors.OrderBy(item => Vector2.SignedAngle(centerPoint, item)).ToArray();
-            Vector2 ab = anchors[0] - anchors[1];
-            Vector2 bc = anchors[1] - anchors[2];
-            Vector2 cd = anchors[2] - anchors[3];
-            Vector2 da = anchors[3] - anchors[0];
+            Vector2 centerPoint = GetFlatCenterPoint(anchors);
+            anchors = anchors.OrderBy(item => Vector2.SignedAngle(Vector2.up, new Vector2(item.x, item.z) - centerPoint)).ToArray();
+            Vector3 ab = anchors[0] - anchors[1];
+            Vector3 bc = anchors[1] - anchors[2];
+            Vector3 cd = anchors[2] - anchors[3];
+            Vector3 da = anchors[3] - anchors[0];
 
-            LongestLength longestLength = GetLongestLength(ab, bc, cd, da);
-            switch (longestLength)
-            {
-                case LongestLength.AB:
-                    LongestLengthPointA = anchors[0];
-                    LongestLengthPointB = anchors[1];
-                    AdditionalPointA = anchors[2];
-                    AdditionalPointB = anchors[3];
-                    break;
-                case LongestLength.BC:
-                    LongestLengthPointA = anchors[1];
-                    LongestLengthPointB = anchors[2];
-                    AdditionalPointA = anchors[3];
-                    AdditionalPointB = anchors[0];
-                    break;
-                case LongestLength.CD:
-                    LongestLengthPointA = anchors[2];
-                    LongestLengthPointB = anchors[3];
-                    AdditionalPointA = anchors[0];
-                    AdditionalPointB = anchors[1];
-                    break;
-                case LongestLength.DA:
-                default:
-                    LongestLengthPointA = anchors[3];
-                    LongestLengthPointB = anchors[0];
-                    AdditionalPointA = anchors[1];
-                    AdditionalPointB = anchors[2];
-                    break;
-            }
+            RotationVector = GetRotationVector(ab, bc, cd, da);
         }
 
-        private LongestLength GetLongestLength(Vector2 ab, Vector2 bc, Vector2 cd, Vector2 da)
+        private Vector3 GetRotationVector(Vector3 ab, Vector3 bc, Vector3 cd, Vector3 da)
         {
             if(ab.sqrMagnitude > bc.sqrMagnitude && ab.sqrMagnitude > cd.sqrMagnitude && ab.sqrMagnitude > da.sqrMagnitude)
             {
-                return LongestLength.AB;
+                return ab;
             }
             if(bc.sqrMagnitude > cd.sqrMagnitude && bc.sqrMagnitude > da.sqrMagnitude)
             {
-                return LongestLength.BC;
+                return bc;
             }
             if(cd.sqrMagnitude > da.sqrMagnitude)
             {
-                return LongestLength.CD;
+                return cd;
             }
-            return LongestLength.DA;
+            return da;
         }
 
-        private enum LongestLength
+        private Vector2 GetFlatCenterPoint(Vector3[] anchors)
         {
-            AB,
-            BC,
-            CD,
-            DA
-        }
-        private Vector2 GetCenterPoint(Vector2[] anchors)
-        {
-            Vector2 sum = anchors[0] + anchors[1] + anchors[2] + anchors[3];
-            return sum / 4;
+            Vector3 sum = anchors[0] + anchors[1] + anchors[2] + anchors[3];
+            sum /= 4;
+            return new Vector2(sum.x, sum.z);
         }
     }
 

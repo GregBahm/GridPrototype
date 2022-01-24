@@ -14,15 +14,11 @@ public class VisualCell
 
     private readonly IDesignationCell[,,] designationCells;
 
-    public Vector3 ContentPosition { get; }
-
     public NeighborComponents Neighbors { get; private set; }
 
     public int Height { get; }
 
-    private readonly Vector3[] anchors;
-
-    public Vector3[] BoundyBoxPoints { get; }
+    public PositionData Positioning { get; }
 
     public VisualCell(MainGrid grid, GroundQuad quad, int height)
     {
@@ -30,35 +26,14 @@ public class VisualCell
         Quad = quad;
         Height = height;
         designationCells = GetDesignationCells();
-        BoundyBoxPoints = GetBoundyPoints().ToArray();
-        ContentPosition = GetContentPosition();
-        anchors = new Vector3[]
+        Vector3[] baseAnchors = new Vector3[]
         {
-            designationCells[1, 1, 0].Position - ContentPosition,
-            designationCells[0, 1, 0].Position - ContentPosition,
-            designationCells[0, 1, 1].Position - ContentPosition,
-            designationCells[1, 1, 1].Position - ContentPosition,
+            designationCells[1, 1, 0].Position,
+            designationCells[0, 1, 0].Position,
+            designationCells[0, 1, 1].Position,
+            designationCells[1, 1, 1].Position,
         };
-    }
-
-    private IEnumerable<Vector3> GetBoundyPoints()
-    {
-        yield return designationCells[0, 0, 0].Position;
-        yield return designationCells[0, 0, 1].Position;
-        yield return designationCells[1, 0, 1].Position;
-        yield return designationCells[1, 0, 0].Position;
-    }
-
-    private Vector3 GetContentPosition()
-    {
-        float maxX = BoundyBoxPoints.Max(item => item.x);
-        float maxZ = BoundyBoxPoints.Max(item => item.z);
-        float minX = BoundyBoxPoints.Max(item => item.x);
-        float minZ = BoundyBoxPoints.Max(item => item.z);
-
-        float x = (maxX + minX) / 2;
-        float z = (maxZ + minZ) / 2;
-        return new Vector3(x, Height, z);
+        Positioning = new PositionData(baseAnchors, height);
     }
 
     private IDesignationCell[,,] GetDesignationCells()
@@ -206,7 +181,7 @@ public class VisualCell
         for (int i = 0; i < 4; i++)
         {
             int rotatedIndex = (i + 4 + Contents.Rotations) % 4;
-            ret[i] = anchors[rotatedIndex];
+            ret[i] = this.Positioning.RelativeAnchors[rotatedIndex];
         }
         if (Contents.Flipped)
         {
@@ -226,5 +201,81 @@ public class VisualCell
         mat.SetVector("_AnchorB", adjustedAnchors[1]);
         mat.SetVector("_AnchorC", adjustedAnchors[2]);
         mat.SetVector("_AnchorD", adjustedAnchors[3]);
+    }
+
+    public class PositionData
+    {
+        public Vector3 Center { get; }
+        public Vector3 BoundingBoxScale { get; }
+        public Quaternion BoundingBoxRotation { get; }
+
+        public Vector3[] RelativeAnchors { get; }
+
+        public PositionData(Vector3[] anchors, int height)
+        {
+            GameObject helperObj = new GameObject();
+            Transform helperTransform = helperObj.transform;
+
+            Vector3 forwardHelper = GetRotationVector(anchors);
+            helperTransform.forward = forwardHelper;
+            Vector3 localA = helperTransform.worldToLocalMatrix.MultiplyPoint(anchors[0]);
+            Vector3 localB = helperTransform.worldToLocalMatrix.MultiplyPoint(anchors[1]);
+            Vector3 localC = helperTransform.worldToLocalMatrix.MultiplyPoint(anchors[2]);
+            Vector3 localD = helperTransform.worldToLocalMatrix.MultiplyPoint(anchors[3]);
+
+            Vector3[] locals = new Vector3[] { localA, localB, localC, localD };
+            float maxX = locals.Max(item => item.x);
+            float minX = locals.Min(item => item.x);
+            float maxZ = locals.Max(item => item.z);
+            float minZ = locals.Min(item => item.z);
+
+            Vector3 localPos = new Vector3((maxX + minX) / 2, height, (maxZ + minZ) / 2);
+            helperTransform.Translate(localPos, Space.Self);
+            Center = helperTransform.position;
+            BoundingBoxScale = new Vector3(maxX - minX, 1, maxZ - minZ);
+            BoundingBoxRotation = helperTransform.rotation;
+
+            helperTransform.localScale = BoundingBoxScale;
+            RelativeAnchors = anchors.Select(item =>
+                helperTransform.worldToLocalMatrix.MultiplyPoint(item)
+            ).ToArray();
+            GameObject.Destroy(helperObj);
+        }
+
+        private Vector3 GetRotationVector(Vector3[] anchors)
+        {
+            Vector2 centerPoint = GetFlatCenterPoint(anchors);
+            anchors = anchors.OrderBy(item => Vector2.SignedAngle(Vector2.up, new Vector2(item.x, item.z) - centerPoint)).ToArray();
+            Vector3 ab = anchors[0] - anchors[1];
+            Vector3 bc = anchors[1] - anchors[2];
+            Vector3 cd = anchors[2] - anchors[3];
+            Vector3 da = anchors[3] - anchors[0];
+
+            return GetRotationVector(ab, bc, cd, da);
+        }
+
+        private Vector3 GetRotationVector(Vector3 ab, Vector3 bc, Vector3 cd, Vector3 da)
+        {
+            if (ab.sqrMagnitude > bc.sqrMagnitude && ab.sqrMagnitude > cd.sqrMagnitude && ab.sqrMagnitude > da.sqrMagnitude)
+            {
+                return ab;
+            }
+            if (bc.sqrMagnitude > cd.sqrMagnitude && bc.sqrMagnitude > da.sqrMagnitude)
+            {
+                return bc;
+            }
+            if (cd.sqrMagnitude > da.sqrMagnitude)
+            {
+                return cd;
+            }
+            return da;
+        }
+
+        private Vector2 GetFlatCenterPoint(Vector3[] anchors)
+        {
+            Vector3 sum = anchors[0] + anchors[1] + anchors[2] + anchors[3];
+            sum /= 4;
+            return new Vector2(sum.x, sum.z);
+        }
     }
 }
