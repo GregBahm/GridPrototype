@@ -23,6 +23,7 @@ public class VoxelVisualsManager
         {
             MeshFilter filter = voxelObjects[component];
             filter.mesh = component.Contents.Mesh;
+            UpdateMeshBounds(filter);
             filter.gameObject.name = GetObjName(component);
             MeshRenderer renderer = filter.GetComponent<MeshRenderer>();
             if (component.Contents.Materials != null)
@@ -39,6 +40,7 @@ public class VoxelVisualsManager
             obj.name = GetObjName(component);
             GameObject.Destroy(obj.GetComponent<BoxCollider>());
             MeshFilter filter = obj.GetComponent<MeshFilter>();
+            UpdateMeshBounds(filter);
             MeshRenderer renderer = obj.GetComponent<MeshRenderer>();
             renderer.materials = component.Contents.Materials.Select(item => new Material(item)).ToArray();
             component.SetMaterialProperties(renderer);
@@ -47,6 +49,16 @@ public class VoxelVisualsManager
             obj.transform.position = component.ContentPosition;
             voxelObjects.Add(component, filter);
             obj.transform.SetParent(piecesRoot, true);
+        }
+    }
+
+    private static readonly Bounds ComponentBounds = new Bounds(Vector3.zero, Vector3.one* 2);
+
+    private void UpdateMeshBounds(MeshFilter filter)
+    {
+        if(filter.mesh != null)
+        {
+            filter.mesh.bounds = ComponentBounds;
         }
     }
 
