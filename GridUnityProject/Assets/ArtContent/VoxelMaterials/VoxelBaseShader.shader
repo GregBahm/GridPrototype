@@ -151,7 +151,7 @@
 
             float4 frag(v2f i) : SV_Target
             {
-                float3 boxLighting = GetBoxLighting(i.normal);
+                float3 boxLighting = GetBoxLighting(i.worldPos);
                 float baseShade = GetBaseShade(i.normal);
                 float ssao = GetSsao(i.vertex);
                 half shadow = MainLightRealtimeShadow(TransformWorldToShadowCoord(i.worldPos));
