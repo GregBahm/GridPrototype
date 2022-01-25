@@ -1,9 +1,9 @@
 ﻿using GameGrid;
 using MeshMaking;
 using VisualsSolving;
-using System;
 using UnityEngine;
 using UnityEditor;
+using System.Linq;
 
 public class CityBuildingMain : MonoBehaviour
 {
@@ -39,8 +39,29 @@ public class CityBuildingMain : MonoBehaviour
 
     private void Start()
     {
+        if(LoadLastSave)
+        {
+            GameSaveState state = GameSaveState.Load();
+            MainGrid = new MainGrid(state.Ground.Points, state.Ground.Edges);
+            Initialize();
+            foreach (var item in state.Designations.DesignationStates)
+            {
+                DesignationCell cell = MainGrid.Points[item.GroundPointIndex].DesignationCells[item.Height];
+                cell.Designation = item.Designation;
+                visualsManager.DoImmediateUpdate(cell);
+                solver = new VisualsSolver(MainGrid, optionsSource);
+            }
+            UpdateInteractionGrid();
+        }
+        else
+        {
+            MainGrid = GroundSaveState.LoadDefault();
+            Initialize();
+        }
+    }
 
-        MainGrid = LoadLastSave ? GroundLoader.Load() : GroundLoader.Load(DefaultGridFile.text);
+    private void Initialize()
+    {
         InteractionMesh = new InteractionMesh(new Mesh());
         UpdateInteractionGrid();
         InteractionMeshObject.GetComponent<MeshFilter>().mesh = InteractionMesh.Mesh;
@@ -80,13 +101,14 @@ public class CityBuildingMain : MonoBehaviour
         if(TestSave)
         {
             TestSave = false;
-            GroundLoader.Save(MainGrid);
+            GameSaveState state = new GameSaveState(this);
+            state.Save();
             Debug.Log("Grid Saved");
         }
         if(TestLoad)
         {
             TestLoad = false;
-            MainGrid = GroundLoader.Load();
+            //MainGrid = GroundSaveState.Load();
             Debug.Log("Grid Loaded");
         }
         HandleSolver();

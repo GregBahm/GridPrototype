@@ -7,13 +7,19 @@ using UnityEngine;
 namespace GameGrid
 {
     [Serializable]
-    public class GroundLoader
+    public class GroundSaveState
     {
-        private const string SaveFilePath = "TheSaveFile";
-
         public GroundPointBuilder[] Points;
 
         public GroundEdgeBuilder[] Edges;
+
+        public GroundSaveState(MainGrid grid)
+        {
+            GroundPointBuilder[] points = grid.Points.Select(item => new GroundPointBuilder(item)).ToArray();
+            GroundEdgeBuilder[] edges = grid.Edges.Select(item => new GroundEdgeBuilder(item)).ToArray();
+            Points = points.ToArray();
+            Edges = edges.ToArray();
+        }
 
         internal static MainGrid LoadDefault()
         {
@@ -41,38 +47,5 @@ namespace GameGrid
             }
             return new MainGrid(points, edges);
         }
-
-        public static MainGrid Load(string json)
-        {
-            GroundLoader gridLoader = JsonUtility.FromJson<GroundLoader>(json);
-            return new MainGrid(gridLoader.Points, gridLoader.Edges);
-        }
-
-        public GroundLoader(IEnumerable<GroundPointBuilder> points, IEnumerable<GroundEdgeBuilder> edges)
-        {
-            Points = points.ToArray();
-            Edges = edges.ToArray();
-        }
-
-        public static MainGrid Load()
-        {
-            string data = PlayerPrefs.GetString(SaveFilePath);
-            if(string.IsNullOrWhiteSpace(data))
-            {
-                Debug.Log("No save data found. Loading default grid");
-                return LoadDefault();
-            }
-            return Load(data);
-        }
-        public static void Save(MainGrid grid)
-        {
-            GroundPointBuilder[] points = grid.Points.Select(item => new GroundPointBuilder(item)).ToArray();
-            GroundEdgeBuilder[] edges = grid.Edges.Select(item => new GroundEdgeBuilder(item)).ToArray();
-            GroundLoader loader = new GroundLoader(points, edges);
-            string asJson = JsonUtility.ToJson(loader);
-            PlayerPrefs.SetString(SaveFilePath, asJson);
-            PlayerPrefs.Save();
-        }
     }
-
 }
