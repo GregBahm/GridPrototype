@@ -542,7 +542,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f587faec0a76214b93e49c82cd457d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  LoadLastSave: 0
+  LoadLastSave: 1
   TestSave: 0
   TestLoad: 0
   DefaultGridFile: {fileID: 4900000, guid: b9f4e34b83d6e4445a1c083578daf6bf, type: 3}

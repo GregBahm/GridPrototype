@@ -75,6 +75,7 @@ public class InteractionManager : MonoBehaviour
         HandlePan();
         cameraInteraction.HandleMouseScrollwheel();
         UndoButton.interactable = undoManager.CanUndo;
+        UndoButton.gameObject.SetActive(undoManager.CanUndo);
     }
 
     public void SetFillToWalkableRoof()
@@ -189,11 +190,7 @@ public class InteractionManager : MonoBehaviour
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(ray, out hit))
         {
-            MeshHitTarget ret = gameMain.InteractionMesh.GetHitTarget(hit.triangleIndex);
-            if (ret != null && !(ret.TargetCell != null && ret.TargetCell.GroundPoint.IsBorder))
-            {
-                return ret;
-            }
+            return gameMain.InteractionMesh.GetHitTarget(hit.triangleIndex);
         }
         return null;
     }
@@ -216,7 +213,8 @@ public class InteractionManager : MonoBehaviour
     {
         if (Input.GetMouseButtonUp(0) 
             && hitInfo != null 
-            && hitInfo.TargetCell != null)
+            && hitInfo.TargetCell != null
+            && !hitInfo.TargetCell.GroundPoint.IsBorder)
         {
             RegisterDesignationUndo(hitInfo.TargetCell);
             SetDesignation(hitInfo.TargetCell, FillType);
