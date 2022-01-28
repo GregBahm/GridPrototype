@@ -29,8 +29,8 @@ public class InteractionManager : MonoBehaviour
 
     public bool GroundModificationMode;
 
-    [Range(-1, 1)]
-    public float ExpansionAngleThreshold;
+    public int GridExpansions;
+    public float GridExpansionDistance = 1;
 
     public VoxelDesignationType FillType;
 
@@ -54,9 +54,10 @@ public class InteractionManager : MonoBehaviour
     {
         if (GroundModificationMode)
         {
-            DoEasing();
-            GridExpander expander = new GridExpander(gameMain.MainGrid, ExpansionAngleThreshold);
-            expander.PreviewExpansion(gameMain.MainGrid);
+            HandleEasing();
+            GridExpander expander = new GridExpander(gameMain.MainGrid, GridExpansions, GridExpansionDistance);
+            expander.Update(GetGridSpaceCursorPosition());
+            expander.PreviewExpansion();
             if (Input.GetMouseButtonUp(0))
             {
                 gameMain.MainGrid.AddToMesh(expander.Points, expander.Edges);
@@ -76,6 +77,16 @@ public class InteractionManager : MonoBehaviour
         cameraInteraction.HandleMouseScrollwheel();
         UndoButton.interactable = undoManager.CanUndo;
         UndoButton.gameObject.SetActive(undoManager.CanUndo);
+    }
+
+    private Vector2 GetGridSpaceCursorPosition()
+    {
+        Plane plane = new Plane(Vector3.up, 0);
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        float distance;
+        plane.Raycast(ray, out distance);
+        Vector3 planePosition = ray.GetPoint(distance);
+        return new Vector2(planePosition.x, planePosition.z);
     }
 
     public void SetFillToWalkableRoof()
@@ -106,13 +117,13 @@ public class InteractionManager : MonoBehaviour
         cursor.UpdateCursor(potentialMeshInteraction, state);
     }
 
-    private void DoEasing()
+    private void HandleEasing()
     {
-        if(Input.GetMouseButton(1))
+        if(Input.GetMouseButton(1)) // Holding right mouse button
         {
             gameMain.MainGrid.DoEase();
         }
-        if(Input.GetMouseButtonUp(1))
+        if(Input.GetMouseButtonUp(1)) // Released right mouse button
         {
             gameMain.UpdateInteractionGrid();
         }

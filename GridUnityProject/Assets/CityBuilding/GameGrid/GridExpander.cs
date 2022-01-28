@@ -10,34 +10,84 @@ using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Assets.GameGrid
-{
+{   
     class GridExpander
     {
-        public IEnumerable<GroundPointBuilder> Points { get; }
-        public IEnumerable<GroundEdgeBuilder> Edges { get; }
+        private readonly MainGrid grid;
 
-        public GridExpander(MainGrid grid, float angleThreshold)
+        public int VertExpansionCount { get; }
+        public float ExpansionDistance { get; }
+
+        public IEnumerable<GroundPointBuilder> Points { get; private set; }
+        public IEnumerable<GroundEdgeBuilder> Edges { get; private set; }
+
+        public GridExpander(MainGrid grid, int vertExpansionCount, float expansionDistance)
         {
-            ExpanderPoint[] expanderPoints = GetExpanderPoints(grid, angleThreshold).ToArray();
+            this.grid = grid;
+            VertExpansionCount = vertExpansionCount;
+            ExpansionDistance = expansionDistance;
+        }
 
+        public void Update(Vector2 gridSpaceCursorPos)
+        {
+            GroundPoint basePoint = GetClosestBorderPoint(gridSpaceCursorPos);
+
+            ExpansionChain chain = new ExpansionChain(basePoint, VertExpansionCount, grid, ExpansionDistance);
+            if(chain.IsFullRing)
+            {
+                SetFullRingPointsAndEdges(chain);
+            }
+            else
+            {
+                SetPartialRingPointsAndEdges(chain);
+            }
+        }
+
+        private void SetPartialRingPointsAndEdges(ExpansionChain chain)
+        {
             List<GroundPointBuilder> points = new List<GroundPointBuilder>();
             List<GroundEdgeBuilder> edges = new List<GroundEdgeBuilder>();
-            for (int i = 0; i < expanderPoints.Length; i++)
+            for (int i = 0; i < chain.ExpansionVertChain.Count - 1; i++)
             {
-                int nextIndex = (i + 1) % expanderPoints.Length;
-                ExpanderPoint current = expanderPoints[i];
-                ExpanderPoint next = expanderPoints[nextIndex];
-                points.AddRange(current.Points);
-                edges.AddRange(current.SpokeEdges);
+                GroundPointBuilder point = chain.ExpansionVertChain[i].NewPoint;
+                GroundEdgeBuilder spokEdge = new GroundEdgeBuilder(point.Index, chain.ExpansionVertChain[i].BasePoint.Index);
+                int nextVertIndex = (i + 1) % chain.ExpansionVertChain.Count;
+                GroundPointBuilder rimEdgePoint = chain.ExpansionVertChain[nextVertIndex].NewPoint;
+                GroundEdgeBuilder rimEdge = new GroundEdgeBuilder(point.Index, rimEdgePoint.Index);
+                points.Add(point);
+                edges.Add(spokEdge);
+                edges.Add(rimEdge);
+            }
+            points.Add(chain.ExpansionVertChain.Last().NewPoint);
+            edges.Add(chain.ExpansionVertChain.Last().SpokeEdge);
+            GroundEdgeBuilder startEdge = new GroundEdgeBuilder(chain.ChainReturnPointStart.Index, chain.ExpansionVertChain[0].NewPoint.Index);
+            GroundEdgeBuilder endEdge = new GroundEdgeBuilder(chain.ChainReturnPointEnd.Index, chain.ExpansionVertChain.Last().NewPoint.Index);
+            edges.Add(startEdge);
+            edges.Add(endEdge);
+            Points = points;
+            Edges = edges;
+        }
 
-                GroundEdgeBuilder rimEdge = new GroundEdgeBuilder(current.Points.Last().Index, next.Points.First().Index);
+        private void SetFullRingPointsAndEdges(ExpansionChain chain)
+        {
+            List<GroundPointBuilder> points = new List<GroundPointBuilder>();
+            List<GroundEdgeBuilder> edges = new List<GroundEdgeBuilder>();
+            for (int i = 0; i < chain.ExpansionVertChain.Count; i++)
+            {
+                GroundPointBuilder point = chain.ExpansionVertChain[i].NewPoint;
+                GroundEdgeBuilder spokEdge = chain.ExpansionVertChain[i].SpokeEdge;
+                int nextVertIndex = (i + 1) % chain.ExpansionVertChain.Count;
+                GroundPointBuilder rimEdgePoint = chain.ExpansionVertChain[nextVertIndex].NewPoint;
+                GroundEdgeBuilder rimEdge = new GroundEdgeBuilder(point.Index, rimEdgePoint.Index);
+                points.Add(point);
+                edges.Add(spokEdge);
                 edges.Add(rimEdge);
             }
             Points = points;
             Edges = edges;
         }
 
-        public void PreviewExpansion(MainGrid grid)
+        internal void PreviewExpansion()
         {
             Dictionary<int, Vector2> positions = Points.ToDictionary(item => item.Index, item => item.Position);
             foreach (GroundEdgeBuilder edge in Edges)
@@ -52,131 +102,150 @@ namespace Assets.GameGrid
             }
         }
 
-        private IEnumerable<ExpanderPoint> GetExpanderPoints(MainGrid grid, float angleThreshold)
+        private class ExpansionChain
         {
-            GroundEdge[] borderEdges = grid.BorderEdges.ToArray();
+            public bool IsFullRing { get; }
+            public GroundPoint ChainReturnPointStart { get; }
+            public GroundPoint ChainReturnPointEnd { get; }
+            public List<ExpanderVert> ExpansionVertChain { get; }
+
+            private readonly int expansions;
+            private readonly MainGrid grid;
+            private readonly float expansionDistance;
+
+            public ExpansionChain(GroundPoint basePoint, int expansions, MainGrid grid, float expansionDistance)
+            {
+                this.expansionDistance = expansionDistance;
+                this.grid = grid;
+                int maxExpansions = GetMaxExpansions(grid);
+                this.expansions = Mathf.Min(maxExpansions, expansions);
+                ExpansionVertChain = GetExpanderVertChain(basePoint);
+                IsFullRing = grid.BorderEdges.Count == ExpansionVertChain.Count;
+                if(!IsFullRing)
+                {
+                    if(expansions == 0)
+                    {
+                        ChainReturnPointStart = ExpansionVertChain[0].NeighborA;
+                        ChainReturnPointEnd = ExpansionVertChain[0].NeighborB;
+                    }
+                    else
+                    {
+                        HashSet<GroundPoint> usedPoints = new HashSet<GroundPoint>(ExpansionVertChain.Select(item => item.BasePoint));
+                        ChainReturnPointStart = GetChainReturnPoint(usedPoints, ExpansionVertChain.First());
+                        ChainReturnPointEnd = GetChainReturnPoint(usedPoints, ExpansionVertChain.Last());
+                    }
+                }
+            }
+
+            private GroundPoint GetChainReturnPoint(HashSet<GroundPoint> usedPoints, ExpanderVert expanderVert)
+            {
+                return usedPoints.Contains(expanderVert.NeighborA) ? expanderVert.NeighborB : expanderVert.NeighborA;
+            }
+
+            private List<ExpanderVert> GetExpanderVertChain(GroundPoint basePoint)
+            {
+                HashSet<GroundPoint> wrappedPoints = new HashSet<GroundPoint>();
+                List<ExpanderVert> expanderVerts = new List<ExpanderVert>();
+
+                int newVertIndex = grid.Points.Count;
+                ExpanderVert firstExpander = new ExpanderVert(basePoint, newVertIndex, expansionDistance);
+                expanderVerts.Add(firstExpander);
+                wrappedPoints.Add(basePoint);
+
+
+                GroundPoint nextPoint = firstExpander.NeighborA;
+                for (int i = 0; i < expansions; i++)
+                {
+                    wrappedPoints.Add(nextPoint);
+                    newVertIndex++;
+                    ExpanderVert newPoint = new ExpanderVert(nextPoint, newVertIndex, expansionDistance);
+                    expanderVerts.Add(newPoint);
+                    nextPoint = wrappedPoints.Contains(newPoint.NeighborA) ? newPoint.NeighborB : newPoint.NeighborA;
+                }
+                nextPoint = firstExpander.NeighborB;
+                for (int i = 0; i < expansions; i++)
+                {
+                    wrappedPoints.Add(nextPoint);
+                    newVertIndex++;
+                    ExpanderVert newPoint = new ExpanderVert(nextPoint, newVertIndex, expansionDistance);
+                    expanderVerts.Insert(0, newPoint);
+                    nextPoint = wrappedPoints.Contains(newPoint.NeighborA) ? newPoint.NeighborB : newPoint.NeighborA;
+                }
+                return expanderVerts;
+            }
+
+            private int GetMaxExpansions(MainGrid grid)
+            {
+                int borderCount = grid.BorderEdges.Count;
+                return (borderCount / 2) - 1;
+            }
+        }
+
+        private GroundPoint GetClosestBorderPoint(Vector2 gridSpaceCursorPos)
+        {
+            GroundPoint ret = null;
+            float minDist = float.PositiveInfinity;
+            IEnumerable<GroundPoint> borderPoints = GetBorderPoints();
+            foreach (GroundPoint point in borderPoints)
+            {
+                float pointDist = (point.Position - gridSpaceCursorPos).sqrMagnitude;
+                if(pointDist < minDist)
+                {
+                    ret = point;
+                    minDist = pointDist;
+                }
+            }
+            return ret;
+        }
+
+        private IEnumerable<GroundPoint> GetBorderPoints()
+        {
+            HashSet<GroundPoint> points = new HashSet<GroundPoint>();
+            foreach (GroundEdge edge in grid.BorderEdges)
+            {
+                points.Add(edge.PointA);
+                points.Add(edge.PointB);
+            }
+            return points;
+        }
+
+        public IEnumerable<GroundPointBuilder> PointsToAdd { get; }
+        public IEnumerable<GroundEdgeBuilder> EdgesToAdd { get; }
+    }
+    class ExpanderVert
+    {
+        public GroundPoint BasePoint { get; }
+        public GroundPoint NeighborA { get; }
+        public GroundPoint NeighborB { get; }
+
+        public GroundPointBuilder NewPoint { get; }
+        public GroundEdgeBuilder SpokeEdge { get; }
+
+        public ExpanderVert(GroundPoint basePoint, int newPointId, float expansionDistance)
+        {
+            BasePoint = basePoint;
             
-            GroundEdge currentEdge = borderEdges.First();
-            GroundPoint currentPoint = currentEdge.PointA;
-            int pointIndex = grid.Points.Count;
-            ExpanderPoint newPoint = new ExpanderPoint(currentEdge, currentPoint, 1, angleThreshold, grid.Points.Count);
-            yield return newPoint;
-            for (int i = 1; i < borderEdges.Length; i++)
+            GroundEdge[] borderEdges = BasePoint.Edges.Where(edge => edge.IsBorder).ToArray();
+            if (borderEdges.Length != 2)
             {
-                pointIndex += newPoint.Points.Count;
-                currentEdge = GetOtherBorderEdge(currentEdge, currentPoint);
-                currentPoint = currentEdge.GetOtherPoint(currentPoint);
-                newPoint = new ExpanderPoint(currentEdge, currentPoint, 1, angleThreshold, pointIndex);
-                yield return newPoint;
+                throw new Exception("ExpanderPoint's base point does not have exactly two border edges.");
             }
+            NeighborA = borderEdges[0].GetOtherPoint(basePoint);
+            NeighborB = borderEdges[1].GetOtherPoint(basePoint);
+            Vector2 position = GetPosition(expansionDistance);
+            NewPoint = new GroundPointBuilder(newPointId, position);
+            SpokeEdge = new GroundEdgeBuilder(BasePoint.Index, newPointId);
         }
 
-        private GroundEdge GetOtherBorderEdge(GroundEdge currentEdge, GroundPoint currentPoint)
+        private Vector2 GetPosition(float expansionDistance)
         {
-            return currentPoint.Edges.First(edge => edge.IsBorder && edge != currentEdge);
-        }
-
-        private class ExpanderPoint
-        {
-            private readonly float angleThreshold;
-            private readonly GroundEdge borderEdgeA;
-            private readonly GroundEdge borderEdgeB;
-
-            private readonly int vertStartIndex;
-
-            public GroundPoint BasePoint { get; }
-            public bool ExceedsAngleThreshold { get; }
-
-            private readonly Vector2 expandedPoint;
-            private readonly Vector2 perpendicularA;
-            private readonly Vector2 perpendicularB;
-
-            public ReadOnlyCollection<GroundPointBuilder> Points { get; }
-            public ReadOnlyCollection<GroundEdgeBuilder> SpokeEdges { get; }
-
-            public ExpanderPoint(GroundEdge baseEdge, GroundPoint basePoint, float expansionDistance, float angleThreshold, int vertStartIndex)
-            {
-                BasePoint = basePoint;
-                this.angleThreshold = angleThreshold;
-                this.vertStartIndex = vertStartIndex;
-
-                GroundEdge[] borderEdges = BasePoint.Edges.Where(edge => edge.IsBorder).ToArray();
-                if(borderEdges.Length != 2)
-                {
-                    throw new Exception("ExpanderPoint's base point does not have exactly two border edges.");
-                }
-                if(borderEdges[0] != baseEdge && borderEdges[1] != baseEdge)
-                {
-                    throw new Exception("ExpanderPoint's base edge is not one of its border edges.");
-                }
-                borderEdgeA = baseEdge;
-                borderEdgeB = borderEdges[0] == baseEdge ? borderEdges[1] : borderEdges[0];
-                ExceedsAngleThreshold = GetExceedsAngleThreshold();
-
-                ExpansionComponet componetA = new ExpansionComponet(borderEdgeA, basePoint);
-                ExpansionComponet componetB = new ExpansionComponet(borderEdgeB, basePoint);
-                expandedPoint = ((componetA.Offset + componetB.Offset) / 2).normalized * expansionDistance + BasePoint.Position;
-                perpendicularA = componetA.PointPos;
-                perpendicularB = componetB.PointPos;
-                Points = GetPoints().ToList().AsReadOnly();
-                SpokeEdges = GetSpokeEdges().ToList().AsReadOnly();
-
-            }
-
-            private class ExpansionComponet
-            {
-                public Vector2 Offset { get; }
-                public Vector2 PointPos { get; }
-
-                public ExpansionComponet(GroundEdge edge, GroundPoint basePoint)
-                {
-                    Vector2 quadCenter = edge.Quads.First().Center;
-                    Vector2 edgeSlope = (edge.GetOtherPoint(basePoint).Position - basePoint.Position).normalized;
-                    Vector2 perpendicular = new Vector2(-edgeSlope.y, edgeSlope.x);
-                    Vector2 toCenter = (basePoint.Position - quadCenter).normalized;
-                    float dotToCenter = Vector2.Dot(perpendicular, toCenter);
-
-                    Offset = dotToCenter > 0 ? perpendicular : -perpendicular;
-                    PointPos = basePoint.Position + Offset;
-                }
-            }
-
-
-            public IEnumerable<GroundPointBuilder> GetPoints()
-            {
-                if (ExceedsAngleThreshold)
-                {
-                    yield return new GroundPointBuilder(vertStartIndex, perpendicularA);
-                    yield return new GroundPointBuilder(vertStartIndex + 1, expandedPoint);
-                    yield return new GroundPointBuilder(vertStartIndex + 2, perpendicularB);
-                }
-                else
-                {
-                    yield return new GroundPointBuilder(vertStartIndex, expandedPoint);
-                }
-            }
-
-            public IEnumerable<GroundEdgeBuilder> GetSpokeEdges()
-            {
-                yield return new GroundEdgeBuilder(vertStartIndex, BasePoint.Index);
-                if (ExceedsAngleThreshold)
-                {
-                    yield return new GroundEdgeBuilder(vertStartIndex + 2, BasePoint.Index);
-                    yield return new GroundEdgeBuilder(vertStartIndex, vertStartIndex + 1);
-                    yield return new GroundEdgeBuilder(vertStartIndex + 1, vertStartIndex + 2);
-                }
-            }
-
-            private bool GetExceedsAngleThreshold()
-            {
-                Vector2 basePos = BasePoint.Position;
-                Vector2 adjacentA = borderEdgeA.GetOtherPoint(BasePoint).Position;
-                Vector2 adjacentB = borderEdgeB.GetOtherPoint(BasePoint).Position;
-
-                Vector2 toA = (basePos - adjacentA).normalized;
-                Vector2 toB = (basePos - adjacentB).normalized;
-                return Vector2.Dot(toA, toB) > angleThreshold;
-            }
+            Vector2 ab = (NeighborA.Position - NeighborB.Position).normalized;
+            Vector2 abCross = new Vector2(ab.y, -ab.x);
+            Vector2 newPos = BasePoint.Position + abCross * expansionDistance;
+            Vector2 altNewPos = BasePoint.Position + abCross * -expansionDistance;
+            if (newPos.sqrMagnitude > altNewPos.sqrMagnitude) // Always want to extrude points farther away from the origin
+                return newPos;
+            return altNewPos;
         }
     }
 }

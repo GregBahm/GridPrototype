@@ -19,7 +19,7 @@ namespace GameGrid
         private List<GroundQuad> quads = new List<GroundQuad>();
         public IEnumerable<GroundQuad> Quads { get { return quads; } }
 
-        public IEnumerable<GroundEdge> BorderEdges { get; private set; }
+        public IReadOnlyList<GroundEdge> BorderEdges { get; private set; }
 
         public IEnumerable<DesignationCell> Voxels
         {
