@@ -47,6 +47,7 @@ namespace Assets.GameGrid
         {
             List<GroundPointBuilder> points = new List<GroundPointBuilder>();
             List<GroundEdgeBuilder> edges = new List<GroundEdgeBuilder>();
+
             for (int i = 0; i < chain.ExpansionVertChain.Count - 1; i++)
             {
                 GroundPointBuilder point = chain.ExpansionVertChain[i].NewPoint;
@@ -60,12 +61,27 @@ namespace Assets.GameGrid
             }
             points.Add(chain.ExpansionVertChain.Last().NewPoint);
             edges.Add(chain.ExpansionVertChain.Last().SpokeEdge);
-            GroundEdgeBuilder startEdge = new GroundEdgeBuilder(chain.ChainReturnPointStart.Index, chain.ExpansionVertChain[0].NewPoint.Index);
-            GroundEdgeBuilder endEdge = new GroundEdgeBuilder(chain.ChainReturnPointEnd.Index, chain.ExpansionVertChain.Last().NewPoint.Index);
-            edges.Add(startEdge);
-            edges.Add(endEdge);
+
+            AddChainReturnQuad(points, edges, chain.ChainReturnPointStart, chain.ExpansionVertChain.First(), chain.NewStartPointIndex);
+            AddChainReturnQuad(points, edges, chain.ChainReturnPointEnd, chain.ExpansionVertChain.Last(), chain.NewEndPointIndex);
+
             Points = points;
             Edges = edges;
+        }
+
+        private void AddChainReturnQuad(List<GroundPointBuilder> points, List<GroundEdgeBuilder> edges, GroundPoint returnPoint, ExpanderVert expansionPoint, int spanPointIndex)
+        {
+            Vector2 spanPointPos = (returnPoint.Position + expansionPoint.NewPoint.Position) / 2;
+            Vector2 toBase = spanPointPos - expansionPoint.BasePoint.Position;
+            spanPointPos += toBase * .5f;
+            GroundPointBuilder spanPoint = new GroundPointBuilder(spanPointIndex, spanPointPos);
+
+            GroundEdgeBuilder expansionToSpan = new GroundEdgeBuilder(expansionPoint.NewPoint.Index, spanPointIndex);
+            GroundEdgeBuilder spanToReturn = new GroundEdgeBuilder(spanPointIndex, returnPoint.Index);
+
+            points.Add(spanPoint);
+            edges.Add(expansionToSpan);
+            edges.Add(spanToReturn);
         }
 
         private void SetFullRingPointsAndEdges(ExpansionChain chain)
@@ -106,7 +122,9 @@ namespace Assets.GameGrid
         {
             public bool IsFullRing { get; }
             public GroundPoint ChainReturnPointStart { get; }
+            public int NewStartPointIndex { get; }
             public GroundPoint ChainReturnPointEnd { get; }
+            public int NewEndPointIndex { get; }
             public List<ExpanderVert> ExpansionVertChain { get; }
 
             private readonly int expansions;
@@ -134,6 +152,8 @@ namespace Assets.GameGrid
                         ChainReturnPointStart = GetChainReturnPoint(usedPoints, ExpansionVertChain.First());
                         ChainReturnPointEnd = GetChainReturnPoint(usedPoints, ExpansionVertChain.Last());
                     }
+                    NewStartPointIndex = grid.Points.Count + 1;
+                    NewEndPointIndex = grid.Points.Count + 2;
                 }
             }
 

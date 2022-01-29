@@ -68,7 +68,10 @@ namespace GameGrid
 
         public void AddToMesh(IEnumerable<GroundPointBuilder> newPoints, IEnumerable<GroundEdgeBuilder> newEdges)
         {
-            IEnumerable<GroundPoint> points = newPoints.Select(item => new GroundPoint(this, item.Index, item.Position)).ToArray();
+            GroundPointBuilder[] sortedNewPoints = newPoints.OrderBy(item => item.Index).ToArray();
+            ValidatePointIndicies(sortedNewPoints);
+
+            IEnumerable<GroundPoint> points = sortedNewPoints.Select(item => new GroundPoint(this, item.Index, item.Position)).ToArray();
             AddPoints(points);
             IEnumerable<GroundEdge> edges = newEdges.Select(item => new GroundEdge(this, Points[item.PointAIndex], Points[item.PointBIndex])).ToArray();
             AddEdgesAndQuads(edges);
@@ -76,7 +79,7 @@ namespace GameGrid
 
             if(Edges.Any(edge => edge.Quads.Count() == 0 || edge.Quads.Count() > 2))
             {
-                throw new Exception("Malformed data.");
+                throw new Exception("Malformed data. Ensure all point and edges form quads.");
             }
 
             foreach (GroundQuad groundQuad in Quads)
@@ -93,6 +96,19 @@ namespace GameGrid
             }
 
             UpdateVoxelVisuals();
+        }
+
+        // new points must start at the beginning of the current index and increment up from there
+        private void ValidatePointIndicies(GroundPointBuilder[] sortedNewPoints)
+        {
+            int startingIndex = Points.Count;
+            for (int i = 0; i < sortedNewPoints.Length; i++)
+            {
+                if(sortedNewPoints[i].Index != startingIndex + i)
+                {
+                    throw new InvalidOperationException("New Points being added to mesh do not have correct indices.");
+                }
+            }
         }
 
         private void UpdateVoxelVisuals()
@@ -206,10 +222,18 @@ namespace GameGrid
 
         private IEnumerable<PotentialDiagonal> GetPotentialDiagonals(GroundEdge edge)
         {
-            List<PotentialDiagonal> ret = new List<PotentialDiagonal>();
-            ret.AddRange(GetPotentialDiagonals(edge.PointA));
-            ret.AddRange(GetPotentialDiagonals(edge.PointB));
-            return ret;
+            Dictionary<string, PotentialDiagonal> ret = new Dictionary<string, PotentialDiagonal>();
+            foreach (PotentialDiagonal item in GetPotentialDiagonals(edge.PointA))
+            {
+                if (!ret.ContainsKey(item.Key))
+                    ret.Add(item.Key, item);
+            }
+            foreach (PotentialDiagonal item in GetPotentialDiagonals(edge.PointB))
+            {
+                if (!ret.ContainsKey(item.Key))
+                    ret.Add(item.Key, item);
+            }
+            return ret.Values;
         }
         private IEnumerable<PotentialDiagonal> GetPotentialDiagonals(GroundPoint point)
         {
@@ -254,18 +278,22 @@ namespace GameGrid
 
             private void ProcessEdge(GroundEdge edge)
             {
-                IEnumerable<PotentialDiagonal> potentialDiagonals = grid.GetPotentialDiagonals(edge);
+                IEnumerable<PotentialDiagonal> potentialDiagonals = grid.GetPotentialDiagonals(edge); // Every point connection to a point of this edge. If it's not an edge, it's the diagonal of a quad 
+
                 foreach (PotentialDiagonal potentialDiagonal in potentialDiagonals)
                 {
-                    if (!unavailableDiagonals.Contains(potentialDiagonal.Key))
+                    if (!unavailableDiagonals.Contains(potentialDiagonal.Key)) // Need to check in line because unavailable changes during the loop
                     {
-
-                        if (availableDiagonals.ContainsKey(potentialDiagonal.Key))
+                        if (availableDiagonals.ContainsKey(potentialDiagonal.Key)) // Another edge has already put this diagonal in the list
                         {
                             PotentialDiagonal otherHalf = availableDiagonals[potentialDiagonal.Key];
                             if (potentialDiagonal.SharedPoint != otherHalf.SharedPoint)
                             {
                                 GroundQuad newQuad = new GroundQuad(potentialDiagonal.EdgeA, potentialDiagonal.EdgeB, otherHalf.EdgeA, otherHalf.EdgeB);
+                                if (quads.Any(item => item.ToString() == newQuad.ToString()))
+                                {
+                                    throw new Exception("That ain't right.");
+                                }
                                 RegisterNewQuad(newQuad);
                                 quads.Add(newQuad);
                             }
@@ -292,8 +320,12 @@ namespace GameGrid
 
             private IEnumerable<string> GetKeysFor(GroundQuad quad)
             {
+                yield return PotentialDiagonal.GetKey(quad.Points[0].Index, quad.Points[1].Index);
                 yield return PotentialDiagonal.GetKey(quad.Points[0].Index, quad.Points[2].Index);
+                yield return PotentialDiagonal.GetKey(quad.Points[0].Index, quad.Points[3].Index);
+                yield return PotentialDiagonal.GetKey(quad.Points[1].Index, quad.Points[2].Index);
                 yield return PotentialDiagonal.GetKey(quad.Points[1].Index, quad.Points[3].Index);
+                yield return PotentialDiagonal.GetKey(quad.Points[2].Index, quad.Points[3].Index);
             }
         }
 
