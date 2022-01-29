@@ -136,7 +136,7 @@ namespace Assets.GameGrid
                 this.expansionDistance = expansionDistance;
                 this.grid = grid;
                 int maxExpansions = GetMaxExpansions(grid);
-                this.expansions = Mathf.Min(maxExpansions, expansions);
+                this.expansions = Mathf.Clamp(expansions, 0, maxExpansions);
                 ExpansionVertChain = GetExpanderVertChain(basePoint);
                 IsFullRing = grid.BorderEdges.Count == ExpansionVertChain.Count;
                 if(!IsFullRing)
@@ -152,8 +152,8 @@ namespace Assets.GameGrid
                         ChainReturnPointStart = GetChainReturnPoint(usedPoints, ExpansionVertChain.First());
                         ChainReturnPointEnd = GetChainReturnPoint(usedPoints, ExpansionVertChain.Last());
                     }
-                    NewStartPointIndex = grid.Points.Count + 1;
-                    NewEndPointIndex = grid.Points.Count + 2;
+                    NewStartPointIndex = grid.Points.Count + 1 + this.expansions;
+                    NewEndPointIndex = grid.Points.Count + 2 + this.expansions;
                 }
             }
 
@@ -172,9 +172,11 @@ namespace Assets.GameGrid
                 expanderVerts.Add(firstExpander);
                 wrappedPoints.Add(basePoint);
 
+                float oddExpansions = Mathf.FloorToInt((float)expansions / 2);
+                float evenExpansions = Mathf.CeilToInt((float)expansions / 2);
 
                 GroundPoint nextPoint = firstExpander.NeighborA;
-                for (int i = 0; i < expansions; i++)
+                for (int i = 0; i < oddExpansions; i++)
                 {
                     wrappedPoints.Add(nextPoint);
                     newVertIndex++;
@@ -183,7 +185,7 @@ namespace Assets.GameGrid
                     nextPoint = wrappedPoints.Contains(newPoint.NeighborA) ? newPoint.NeighborB : newPoint.NeighborA;
                 }
                 nextPoint = firstExpander.NeighborB;
-                for (int i = 0; i < expansions; i++)
+                for (int i = 0; i < evenExpansions; i++)
                 {
                     wrappedPoints.Add(nextPoint);
                     newVertIndex++;
@@ -197,7 +199,7 @@ namespace Assets.GameGrid
             private int GetMaxExpansions(MainGrid grid)
             {
                 int borderCount = grid.BorderEdges.Count;
-                return (borderCount / 2) - 1;
+                return (borderCount) - 1;
             }
         }
 
