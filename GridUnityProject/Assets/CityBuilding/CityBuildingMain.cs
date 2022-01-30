@@ -139,6 +139,10 @@ public class CityBuildingMain : MonoBehaviour
     {
         InteractionMesh.UpdateGroundMesh(MainGrid);
         BaseGridVisual.GetComponent<MeshFilter>().mesh = InteractionMesh.BaseGridMesh;
+        if(visualsManager != null)
+        {
+            visualsManager.UpdateForBaseGridModification();
+        }
     }
 
     public void UpdateInteractionGrid()

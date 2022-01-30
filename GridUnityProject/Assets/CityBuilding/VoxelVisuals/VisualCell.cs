@@ -14,15 +14,15 @@ public class VisualCell
 
     private readonly IDesignationCell[,,] designationCells;
 
-    public Vector3 ContentPosition { get; }
+    public Vector3 ContentPosition { get; private set; }
 
     public NeighborComponents Neighbors { get; private set; }
 
     public int Height { get; }
 
-    private readonly Vector3[] anchors;
+    private Vector3[] anchors;
 
-    public Vector3[] BoundyBoxPoints { get; }
+    public Vector3[] BoundyBoxPoints { get; private set; }
 
     public VisualCell(MainGrid grid, GroundQuad quad, int height)
     {
@@ -32,13 +32,27 @@ public class VisualCell
         designationCells = GetDesignationCells();
         BoundyBoxPoints = GetBoundyPoints().ToArray();
         ContentPosition = GetContentPosition();
-        anchors = new Vector3[]
-        {
+        anchors = GetAnchors();
+    }
+
+    public void UpdateForBaseGridModification(MeshRenderer renderer)
+    {
+        BoundyBoxPoints = GetBoundyPoints().ToArray();
+        ContentPosition = GetContentPosition();
+        anchors = GetAnchors();
+        SetMaterialProperties(renderer);
+        renderer.transform.position = ContentPosition;
+    }
+
+    private Vector3[] GetAnchors()
+    {
+        return new Vector3[]
+           {
             designationCells[1, 1, 0].Position - ContentPosition,
             designationCells[0, 1, 0].Position - ContentPosition,
             designationCells[0, 1, 1].Position - ContentPosition,
             designationCells[1, 1, 1].Position - ContentPosition,
-        };
+           };
     }
 
     private IEnumerable<Vector3> GetBoundyPoints()

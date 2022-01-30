@@ -135,24 +135,39 @@ namespace GameGrid
 
         public void DoEase()
         {
-            foreach (GroundPoint point in Points.Where(item => !item.IsBorder))
+            foreach (GroundPoint point in Points.Where(point => point.IsBorder))
             {
-                DoEasePoint(point, 1);
+                DoEaseBorderPoint(point);
+            }
+            foreach (GroundPoint point in Points.Where(point => !point.IsBorder))
+            {
+                DoEaseInteriorPoint(point);
             }
         }
-        private void DoEasePoint(GroundPoint point, float targetCellLength)
+        private void DoEaseBorderPoint(GroundPoint point)
         {
-            Vector2 normalAverage = Vector2.zero;
-            GroundPoint[] allConnections = point.DirectConnections.Concat(point.DiagonalConnections).ToArray();
-            foreach (GroundPoint connection in allConnections)
+            Vector2 positionAverage = Vector2.zero;
+            Vector2[] borderConnections = point.DirectConnections.Where(item => item.IsBorder).Select(item => item.Position).ToArray();
+            foreach (Vector2 connection in borderConnections)
             {
-                Vector2 diff = point.Position - connection.Position;
-                Vector2 diffNormal = diff.normalized * targetCellLength;
-                Vector2 targetPos = connection.Position + diffNormal;
-                normalAverage += targetPos;
+                positionAverage += connection;
             }
-            normalAverage /= allConnections.Length;
-            point.Position = normalAverage;
+            positionAverage /= borderConnections.Count();
+            if(positionAverage.sqrMagnitude > point.Position.sqrMagnitude)
+            {
+                point.Position = positionAverage;
+            }
+        }
+
+        private void DoEaseInteriorPoint(GroundPoint point)
+        {
+            Vector2 positionAverage = Vector2.zero;
+            foreach(GroundPoint connection in point.DirectConnections)
+            {
+                positionAverage += connection.Position;
+            }
+            positionAverage /= point.DirectConnections.Count();
+            point.Position = positionAverage;
         }
 
         private void AddEdgesAndQuads(IEnumerable<GroundEdge> newEdges)

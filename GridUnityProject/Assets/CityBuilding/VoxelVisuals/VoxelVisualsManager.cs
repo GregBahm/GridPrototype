@@ -9,7 +9,7 @@ public class VoxelVisualsManager
 {
     private readonly Transform piecesRoot;
     private readonly VisualOptionsByDesignation optionsSource;
-    private readonly Dictionary<VisualCell, MeshFilter> voxelObjects = new Dictionary<VisualCell, MeshFilter>();
+    private readonly Dictionary<VisualCell, VisualCellGameobjects> voxelObjects = new Dictionary<VisualCell, VisualCellGameobjects>();
 
     public VoxelVisualsManager(VisualOptionsByDesignation optionsSource)
     {
@@ -21,14 +21,13 @@ public class VoxelVisualsManager
     {
         if (voxelObjects.ContainsKey(component))
         {
-            MeshFilter filter = voxelObjects[component];
-            filter.mesh = component.Contents.Mesh;
-            UpdateMeshBounds(filter);
-            filter.gameObject.name = GetObjName(component);
-            MeshRenderer renderer = filter.GetComponent<MeshRenderer>();
+            VisualCellGameobjects gameObjects = voxelObjects[component];
+            gameObjects.Filter.mesh = component.Contents.Mesh;
+            UpdateMeshBounds(gameObjects.Filter);
+            gameObjects.Obj.name = GetObjName(component);
             if (component.Contents.Materials != null)
-                renderer.materials = component.Contents.Materials.Select(item => new Material(item)).ToArray();
-            component.SetMaterialProperties(renderer);
+                gameObjects.Renderer.materials = component.Contents.Materials.Select(item => new Material(item)).ToArray();
+            component.SetMaterialProperties(gameObjects.Renderer);
         }
         else
         {
@@ -47,7 +46,8 @@ public class VoxelVisualsManager
             
             filter.mesh = component.Contents.Mesh;
             obj.transform.position = component.ContentPosition;
-            voxelObjects.Add(component, filter);
+            VisualCellGameobjects gameObjects = new VisualCellGameobjects(obj, filter, renderer);
+            voxelObjects.Add(component, gameObjects);
             obj.transform.SetParent(piecesRoot, true);
         }
     }
@@ -94,6 +94,28 @@ public class VoxelVisualsManager
             VisualCellOption option = optionsSource.GetOptions(designation).First();
             component.Contents = option;
             UpdateDebugObject(component);
+        }
+    }
+
+    internal void UpdateForBaseGridModification()
+    {
+        foreach (KeyValuePair<VisualCell, VisualCellGameobjects> item in voxelObjects)
+        {
+            item.Key.UpdateForBaseGridModification(item.Value.Renderer);
+        }
+    }
+
+    private class VisualCellGameobjects
+    {
+        public GameObject Obj { get; }
+        public MeshFilter Filter { get; }
+        public MeshRenderer Renderer { get; }
+
+        public VisualCellGameobjects(GameObject obj, MeshFilter filter, MeshRenderer renderer)
+        {
+            Obj = obj;
+            Filter = filter;
+            Renderer = renderer;
         }
     }
 }
