@@ -11,10 +11,12 @@ namespace MeshMaking
         private IReadOnlyList<MeshHitTarget> hitTable;
 
         public Mesh Mesh { get; }
+        public Mesh BaseGridMesh { get; }
 
-        public InteractionMesh(Mesh mesh)
+        public InteractionMesh()
         {
-            Mesh = mesh;
+            Mesh = new Mesh();
+            BaseGridMesh = new Mesh();
         }
 
         public MeshHitTarget GetHitTarget(int hitTringleIndex)
@@ -46,6 +48,31 @@ namespace MeshMaking
             Mesh.triangles = triangles.ToArray();
             Mesh.RecalculateBounds();
             hitTable = CreateHittable(meshBuidlerTriangles);
+        }
+
+        public void UpdateGroundMesh(MainGrid grid)
+        {
+            IEnumerable<IMeshContributor> meshContributors = GetGroundContributors(grid).ToArray();
+            VertTable vertTable = new VertTable(meshContributors);
+
+            BaseGridMesh.Clear();
+            BaseGridMesh.vertices = vertTable.GetPoints();
+
+            List<MeshBuilderTriangle> meshBuidlerTriangles = new List<MeshBuilderTriangle>();
+            List<int> triangles = new List<int>();
+            foreach (IMeshContributor item in meshContributors)
+            {
+                foreach (MeshBuilderTriangle triangle in item.Triangles)
+                {
+                    triangles.Add(vertTable.GetVertIndex(triangle.PointA));
+                    triangles.Add(vertTable.GetVertIndex(triangle.PointB));
+                    triangles.Add(vertTable.GetVertIndex(triangle.PointC));
+                    meshBuidlerTriangles.Add(triangle);
+                }
+            }
+            BaseGridMesh.uv = vertTable.GetUvs();
+            BaseGridMesh.triangles = triangles.ToArray();
+            BaseGridMesh.RecalculateBounds();
         }
 
         private IReadOnlyList<MeshHitTarget> CreateHittable(List<MeshBuilderTriangle> meshBuidlerTriangles)
@@ -109,9 +136,14 @@ namespace MeshMaking
 
         private IEnumerable<IMeshContributor> GetMeshContributors(MainGrid grid)
         {
-            IMeshContributor[] groundContributor = grid.Points.Where(item => !item.DesignationCells[0].IsFilled).Select(item => new HorizontalMeshContributor(item)).ToArray();
-            IMeshContributor[] contributors = grid.FilledCells.Select(item => new CellMeshContributor(item)).ToArray();
+            IEnumerable<IMeshContributor> groundContributor = GetGroundContributors(grid);
+            IEnumerable<IMeshContributor> contributors = grid.FilledCells.Select(item => new CellMeshContributor(item));
             return groundContributor.Concat(contributors);
+        }
+
+        private IEnumerable<IMeshContributor> GetGroundContributors(MainGrid grid)
+        {
+            return grid.Points.Where(item => !item.DesignationCells[0].IsFilled).Select(item => new HorizontalMeshContributor(item));
         }
     }
 }

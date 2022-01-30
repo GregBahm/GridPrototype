@@ -135,7 +135,7 @@ namespace GameGrid
 
         public void DoEase()
         {
-            foreach (GroundPoint point in Points)
+            foreach (GroundPoint point in Points.Where(item => !item.IsBorder))
             {
                 DoEasePoint(point, 1);
             }

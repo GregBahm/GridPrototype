@@ -61,6 +61,7 @@ public class InteractionManager : MonoBehaviour
             if (Input.GetMouseButtonUp(0))
             {
                 gameMain.MainGrid.AddToMesh(expander.Points, expander.Edges);
+                gameMain.UpdateBaseGrid();
                 gameMain.UpdateInteractionGrid();
             }
         }
@@ -122,9 +123,7 @@ public class InteractionManager : MonoBehaviour
         if(Input.GetMouseButton(1)) // Holding right mouse button
         {
             gameMain.MainGrid.DoEase();
-        }
-        if(Input.GetMouseButtonUp(1)) // Released right mouse button
-        {
+            gameMain.UpdateBaseGrid();
             gameMain.UpdateInteractionGrid();
         }
     }

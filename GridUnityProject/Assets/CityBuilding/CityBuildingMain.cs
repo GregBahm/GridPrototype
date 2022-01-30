@@ -62,10 +62,9 @@ public class CityBuildingMain : MonoBehaviour
 
     private void Initialize()
     {
-        InteractionMesh = new InteractionMesh(new Mesh());
+        InteractionMesh = new InteractionMesh();
         UpdateInteractionGrid();
-        InteractionMeshObject.GetComponent<MeshFilter>().mesh = InteractionMesh.Mesh;
-        BaseGridVisual.GetComponent<MeshFilter>().mesh = CloneInteractionMesh();
+        UpdateBaseGrid();
         optionsSource = new VisualOptionsByDesignation(Blueprints);
         visualsManager = new VoxelVisualsManager(optionsSource);
         solver = new VisualsSolver(MainGrid, optionsSource);
@@ -85,15 +84,6 @@ public class CityBuildingMain : MonoBehaviour
         //AssetDatabase.CreateAsset(blueprint, path);
         //AssetDatabase.Refresh();
 #endif
-    }
-
-    private Mesh CloneInteractionMesh()
-    {
-        Mesh ret = new Mesh();
-        ret.vertices = InteractionMesh.Mesh.vertices;
-        ret.triangles = InteractionMesh.Mesh.triangles;
-        ret.uv = InteractionMesh.Mesh.uv;
-        return ret;
     }
 
     private void Update()
@@ -143,6 +133,12 @@ public class CityBuildingMain : MonoBehaviour
             visualsManager.UpdateDebugObject(item.Component);
         }
         solver.ReadyToDisplayVoxels.Clear();
+    }
+
+    public void UpdateBaseGrid()
+    {
+        InteractionMesh.UpdateGroundMesh(MainGrid);
+        BaseGridVisual.GetComponent<MeshFilter>().mesh = InteractionMesh.BaseGridMesh;
     }
 
     public void UpdateInteractionGrid()
