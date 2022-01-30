@@ -52,7 +52,7 @@ namespace MeshMaking
 
         public void UpdateGroundMesh(MainGrid grid)
         {
-            IEnumerable<IMeshContributor> meshContributors = GetGroundContributors(grid).ToArray();
+            IEnumerable<IMeshContributor> meshContributors = grid.Points.Select(item => new HorizontalMeshContributor(item));
             VertTable vertTable = new VertTable(meshContributors);
 
             BaseGridMesh.Clear();
@@ -136,14 +136,9 @@ namespace MeshMaking
 
         private IEnumerable<IMeshContributor> GetMeshContributors(MainGrid grid)
         {
-            IEnumerable<IMeshContributor> groundContributor = GetGroundContributors(grid);
+            IEnumerable<IMeshContributor> groundContributor = grid.Points.Where(item => !item.DesignationCells[0].IsFilled).Select(item => new HorizontalMeshContributor(item));
             IEnumerable<IMeshContributor> contributors = grid.FilledCells.Select(item => new CellMeshContributor(item));
             return groundContributor.Concat(contributors);
-        }
-
-        private IEnumerable<IMeshContributor> GetGroundContributors(MainGrid grid)
-        {
-            return grid.Points.Where(item => !item.DesignationCells[0].IsFilled).Select(item => new HorizontalMeshContributor(item));
         }
     }
 }

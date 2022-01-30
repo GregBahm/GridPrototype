@@ -27,7 +27,8 @@ public class VoxelVisualsManager
             gameObjects.Obj.name = GetObjName(component);
             if (component.Contents.Materials != null)
                 gameObjects.Renderer.materials = component.Contents.Materials.Select(item => new Material(item)).ToArray();
-            component.SetMaterialProperties(gameObjects.Renderer);
+
+            component.UpdateForBaseGridModification(gameObjects.Renderer);
         }
         else
         {
