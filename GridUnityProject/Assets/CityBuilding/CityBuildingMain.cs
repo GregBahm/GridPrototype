@@ -7,6 +7,8 @@ using System.Linq;
 
 public class CityBuildingMain : MonoBehaviour
 {
+    public UndoManager UndoManager { get; private set; }
+
     public bool LoadLastSave;
     public bool TestSave;
     public bool TestLoad;
@@ -39,6 +41,7 @@ public class CityBuildingMain : MonoBehaviour
 
     private void Start()
     {
+        UndoManager = new UndoManager();
         if(LoadLastSave)
         {
             GameSaveState state = GameSaveState.Load();

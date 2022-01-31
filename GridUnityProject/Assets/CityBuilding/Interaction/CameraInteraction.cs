@@ -16,7 +16,6 @@ namespace Interaction
         [SerializeField]
         private float panSpeed = 0.1f;
 
-        private static readonly Vector3 screenCenter = new Vector3(.5f, .5f, 0);
         private Vector3 orbitScreenStart;
         private Vector3 orbitStartAngle;
         private Transform orbitPoint;

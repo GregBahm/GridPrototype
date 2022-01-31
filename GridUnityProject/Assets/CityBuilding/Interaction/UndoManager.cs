@@ -3,16 +3,11 @@ using System.Linq;
 
 public class UndoManager
 {
-    private readonly InteractionManager interactor;
     private readonly List<UndoableOperation> stack = new List<UndoableOperation>();
 
     public bool CanUndo
     {
         get { return stack.Any(); }
-    }
-    public UndoManager(InteractionManager interactor)
-    {
-        this.interactor = interactor;
     }
 
     public void Undo()
@@ -22,7 +17,7 @@ public class UndoManager
         last.Undo();
     }
 
-    public void RegisterDesignationPlacement(DesignationCell cell)
+    public void RegisterDesignationPlacement(ExteriorsInteractionManager interactor, DesignationCell cell)
     {
         DesignationPlacementOperation operation = new DesignationPlacementOperation(interactor, cell);
         stack.Add(operation);
@@ -35,12 +30,12 @@ public class UndoManager
 
     public class DesignationPlacementOperation : UndoableOperation
     {
-        private readonly InteractionManager interactor;
+        private readonly ExteriorsInteractionManager interactor;
         private readonly VoxelDesignationType oldContents;
         private readonly DesignationCell cell;
 
         public DesignationPlacementOperation(
-            InteractionManager interactor,
+            ExteriorsInteractionManager interactor,
             DesignationCell cell)
         {
             this.interactor = interactor;

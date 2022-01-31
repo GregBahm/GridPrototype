@@ -1,7 +1,4 @@
-﻿using Assets.GameGrid;
-using Interaction;
-using MeshMaking;
-using System;
+﻿using Interaction;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,131 +6,107 @@ using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.UI;
 
-[RequireComponent(typeof(CityBuildingMain))]
-[RequireComponent(typeof(CameraInteraction))]
 public class InteractionManager : MonoBehaviour
 {
-    private static readonly Plane groundPlane = new Plane(Vector3.up, 0);
-
     [SerializeField]
     private float dragStartDistance = 2;
 
-    [SerializeField]
-    private ConstructionCursor cursor;
-
     private CameraInteraction cameraInteraction;
     private CityBuildingMain gameMain;
+    private ExteriorsInteractionManager exteriorsInteractor;
+    private InteriorsInteractionManager interiorsInteractor;
+    private FoundationInteractionManager foundationInteractor;
 
     private DragDetector leftDragDetector;
     private DragDetector rightDragDetector;
 
     public bool GroundModificationMode;
 
-    public int GridExpansions;
-    public float GridExpansionDistance = 1;
-
-    public VoxelDesignationType FillType;
-
-    private readonly UndoManager undoManager;
+    public Toggle ExteriorsTabButton;
+    public Toggle InteriorsTabButton;
+    public Toggle FoundationTabButton;
+    public GameObject ExteriorsTab;
+    public GameObject InteriorsTab;
+    public GameObject FoundationTab;
 
     public Button UndoButton;
-    public InteractionManager()
+
+    public UiTab SelectedTab;
+    public enum UiTab
     {
-        undoManager = new UndoManager(this);
+        Exteriors,
+        Interiors,
+        Foundation
     }
 
     private void Start()
     {
         gameMain = GetComponent<CityBuildingMain>();
         cameraInteraction = GetComponent<CameraInteraction>();
+        exteriorsInteractor = GetComponent<ExteriorsInteractionManager>();
+        interiorsInteractor = GetComponent<InteriorsInteractionManager>();
+        foundationInteractor = GetComponent<FoundationInteractionManager>();
         leftDragDetector = new DragDetector(dragStartDistance);
         rightDragDetector = new DragDetector(dragStartDistance);
     }
 
     private void Update()
     {
-        if (GroundModificationMode)
+        bool wasDragging = leftDragDetector.IsDragging || rightDragDetector.IsDragging;
+        ManageTabs();
+        UndoButton.interactable = gameMain.UndoManager.CanUndo;
+        UndoButton.gameObject.SetActive(gameMain.UndoManager.CanUndo);
+
+        if(UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject != null)
         {
-            HandleEasing();
-            GridExpander expander = new GridExpander(gameMain.MainGrid, GridExpansions, GridExpansionDistance);
-            expander.Update(GetGridSpaceCursorPosition());
-            expander.PreviewExpansion();
-            if (Input.GetMouseButtonUp(0))
-            {
-                gameMain.MainGrid.AddToMesh(expander.Points, expander.Edges);
-                gameMain.UpdateBaseGrid();
-                gameMain.UpdateInteractionGrid();
-            }
+            return;
         }
-        else
-        {
-            MeshHitTarget potentialMeshInteraction = GetPotentialMeshInteraction();
-            UpdateCursor(potentialMeshInteraction);
-            HandleRightMeshClicks(potentialMeshInteraction);
-            HandleLeftMeshClicks(potentialMeshInteraction);
-        }
-        UpdateCursorHighlight();
         HandleOrbit();
         HandlePan();
         cameraInteraction.HandleMouseScrollwheel();
-        UndoButton.interactable = undoManager.CanUndo;
-        UndoButton.gameObject.SetActive(undoManager.CanUndo);
+        switch (SelectedTab)
+        {
+            case UiTab.Exteriors:
+                exteriorsInteractor.ProceedWithUpdate(wasDragging);
+                break;
+            case UiTab.Interiors:
+                interiorsInteractor.ProceedWithUpdate();
+                break;
+            case UiTab.Foundation:
+            default:
+                foundationInteractor.ProceedWithUpdate();
+                break;
+        }
     }
 
-    private Vector2 GetGridSpaceCursorPosition()
+
+    public void SetTabToExteriors()
     {
-        Plane plane = new Plane(Vector3.up, 0);
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        float distance;
-        plane.Raycast(ray, out distance);
-        Vector3 planePosition = ray.GetPoint(distance);
-        return new Vector2(planePosition.x, planePosition.z);
+        if (ExteriorsTabButton.isOn)
+            SelectedTab = UiTab.Exteriors;
+    }
+    public void SetTabToInteriors()
+    {
+        if (InteriorsTabButton.isOn)
+            SelectedTab = UiTab.Interiors;
+    }
+    public void SetTabToFoundation()
+    {
+        if (FoundationTabButton.isOn)
+            SelectedTab = UiTab.Foundation;
     }
 
-    public void SetFillToWalkableRoof()
+    private void ManageTabs()
     {
-        FillType = VoxelDesignationType.WalkableRoof;
-    }
-
-    public void SetFillToSlantedRoof()
-    {
-        FillType = VoxelDesignationType.SlantedRoof;
-    }
-
-    public void SetFillToPlatform()
-    {
-        FillType = VoxelDesignationType.Platform;
+        ExteriorsTab.SetActive(SelectedTab == UiTab.Exteriors);
+        InteriorsTab.SetActive(SelectedTab == UiTab.Interiors);
+        FoundationTab.SetActive(SelectedTab == UiTab.Foundation);
     }
 
     public void Undo()
     {
-        undoManager.Undo();
+        gameMain.UndoManager.Undo();
     }
-
-    private void UpdateCursor(MeshHitTarget potentialMeshInteraction)
-    {
-        ConstructionCursor.MouseState state = Input.GetMouseButton(0) ? ConstructionCursor.MouseState.LeftClickDown
-            : (Input.GetMouseButton(1) ? ConstructionCursor.MouseState.RightClickDown : ConstructionCursor.MouseState.Hovering);
-
-        cursor.UpdateCursor(potentialMeshInteraction, state);
-    }
-
-    private void HandleEasing()
-    {
-        if(Input.GetMouseButton(1)) // Holding right mouse button
-        {
-            gameMain.MainGrid.DoEase();
-            gameMain.UpdateBaseGrid();
-            gameMain.UpdateInteractionGrid();
-        }
-    }
-
-    private void UpdateCursorHighlight()
-    {
-        Vector3 cursorPos = GetGroundPositionAtScreenpoint(Input.mousePosition);
-        Shader.SetGlobalVector("_DistToCursor", cursorPos);
-    }
-
     private void HandlePan()
     {
         if (Input.GetMouseButton(1))
@@ -187,65 +160,6 @@ public class InteractionManager : MonoBehaviour
             leftDragDetector.IsDragging = false;
         }
     }
-
-    private MeshHitTarget GetPotentialMeshInteraction()
-    {
-        if(rightDragDetector.IsDragging ||
-            leftDragDetector.IsDragging)
-        {
-            return null;
-        }
-
-        RaycastHit hit;
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(ray, out hit))
-        {
-            return gameMain.InteractionMesh.GetHitTarget(hit.triangleIndex);
-        }
-        return null;
-    }
-
-    private void HandleRightMeshClicks(MeshHitTarget hitInfo)
-    {
-        if (Input.GetMouseButtonUp(1) && hitInfo != null && hitInfo.SourceCell != null)
-        {
-            RegisterDesignationUndo(hitInfo.SourceCell);
-            SetDesignation(hitInfo.SourceCell, VoxelDesignationType.Empty);
-        }
-    }
-
-    private void RegisterDesignationUndo(DesignationCell cell)
-    {
-        undoManager.RegisterDesignationPlacement(cell);
-    }
-
-    private void HandleLeftMeshClicks(MeshHitTarget hitInfo)
-    {
-        if (Input.GetMouseButtonUp(0) 
-            && hitInfo != null 
-            && hitInfo.TargetCell != null
-            && !hitInfo.TargetCell.GroundPoint.IsBorder)
-        {
-            RegisterDesignationUndo(hitInfo.TargetCell);
-            SetDesignation(hitInfo.TargetCell, FillType);
-        }
-    }
-
-    public void SetDesignation(DesignationCell cell, VoxelDesignationType type)
-    {
-        cell.Designation = type;
-        gameMain.UpdateInteractionGrid();
-        gameMain.UpdateVoxelVisuals(cell);
-    }
-
-    public static Vector3 GetGroundPositionAtScreenpoint(Vector3 screenPoint)
-    {
-        Ray ray = Camera.main.ScreenPointToRay(screenPoint);
-        float enter;
-        groundPlane.Raycast(ray, out enter);
-        return ray.GetPoint(enter);
-    }
-
     private class DragDetector
     {
         public Vector3 DragStartPos { get; set; }
