@@ -207,21 +207,14 @@
                   ret *= boxLighting + .5;
                   ret = lerp(ret * float3(0, .25, .5), ret, ssao);
                   ret *= lerp(ret * float3(.5, .75, 1), ret, shadow);
+
+                  float bounceLight = saturate(1 - i.worldPos.y * .5);
+                  bounceLight = pow(bounceLight, 5) * .5;
+                  bounceLight *= shadow;
+                  ret += float3(1, .75, -.5) * bounceLight;
+
                   return float4(ret, 1);
               }
-              //float4 frag(v2f i) : SV_Target
-              //{
-              //    float3 boxLighting = GetBoxLighting(i.worldPos);
-              //    float baseShade = GetBaseShade(i.normal);
-              //    float ssao = GetSsao(i.vertex);
-              //    half shadow = MainLightRealtimeShadow(TransformWorldToShadowCoord(i.worldPos));
-              //    float3 ret = _Color;
-              //    ret *= baseShade;
-              //    ret *= boxLighting + .5;
-              //    ret = lerp(ret * float3(0, .25, .5), ret, ssao);
-              //    ret *= lerp(ret * float3(.5, .75, 1), ret, shadow);
-              //    return float4(ret, 1);
-              //}
               ENDHLSL
           }
           Pass// DepthOnly
