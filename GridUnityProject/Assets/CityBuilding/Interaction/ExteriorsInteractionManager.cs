@@ -3,7 +3,6 @@ using UnityEngine;
 
 public class ExteriorsInteractionManager : MonoBehaviour
 {
-    private static readonly Plane groundPlane = new Plane(Vector3.up, 0);
 
     private CityBuildingMain gameMain;
 
@@ -17,8 +16,10 @@ public class ExteriorsInteractionManager : MonoBehaviour
         gameMain = GetComponent<CityBuildingMain>();
     }
 
-    public void ProceedWithUpdate(bool wasDragging)
+    public void ProceedWithUpdate(bool wasDragging, bool uiHovered)
     {
+        if (uiHovered)
+            return; // TODO: update the cursor to outro when UI hovering
         MeshHitTarget potentialMeshInteraction = GetPotentialMeshInteraction();
         UpdateCursor(potentialMeshInteraction);
         if(!wasDragging)
@@ -26,7 +27,6 @@ public class ExteriorsInteractionManager : MonoBehaviour
             HandleRightMeshClicks(potentialMeshInteraction);
             HandleLeftMeshClicks(potentialMeshInteraction);
         }
-        UpdateCursorHighlight();
     }
 
     public void SetFillToWalkableRoof() { FillType = VoxelDesignationType.WalkableRoof; }
@@ -64,22 +64,6 @@ public class ExteriorsInteractionManager : MonoBehaviour
             : (Input.GetMouseButton(1) ? ConstructionCursor.MouseState.RightClickDown : ConstructionCursor.MouseState.Hovering);
 
         cursor.UpdateCursor(potentialMeshInteraction, state);
-    }
-
-
-
-    private void UpdateCursorHighlight()
-    {
-        Vector3 cursorPos = GetGroundPositionAtScreenpoint(Input.mousePosition);
-        Shader.SetGlobalVector("_DistToCursor", cursorPos);
-    }
-
-    public static Vector3 GetGroundPositionAtScreenpoint(Vector3 screenPoint)
-    {
-        Ray ray = Camera.main.ScreenPointToRay(screenPoint);
-        float enter;
-        groundPlane.Raycast(ray, out enter);
-        return ray.GetPoint(enter);
     }
 
 

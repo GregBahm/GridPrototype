@@ -40,6 +40,8 @@ public class InteractionManager : MonoBehaviour
         Foundation
     }
 
+    private static readonly Plane groundPlane = new Plane(Vector3.up, 0);
+
     private void Start()
     {
         gameMain = GetComponent<CityBuildingMain>();
@@ -66,25 +68,26 @@ public class InteractionManager : MonoBehaviour
         ManageTabs();
         UndoButton.interactable = gameMain.UndoManager.CanUndo;
         UndoButton.gameObject.SetActive(gameMain.UndoManager.CanUndo);
+        UpdateCursorHighlight();
+        bool uiHovered = UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject();
 
-        if(UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
+        if(!uiHovered)
         {
-            return;
-        }
-        HandleOrbit();
-        HandlePan();
-        cameraInteraction.HandleMouseScrollwheel();
+            HandleOrbit();
+            HandlePan();
+            cameraInteraction.HandleMouseScrollwheel();
+        }    
         switch (SelectedTab)
         {
             case UiTab.Exteriors:
-                exteriorsInteractor.ProceedWithUpdate(wasDragging);
+                exteriorsInteractor.ProceedWithUpdate(wasDragging, uiHovered);
                 break;
             case UiTab.Interiors:
                 interiorsInteractor.ProceedWithUpdate();
                 break;
             case UiTab.Foundation:
             default:
-                foundationInteractor.ProceedWithUpdate(wasDragging);
+                foundationInteractor.ProceedWithUpdate(wasDragging, uiHovered);
                 break;
         }
     }
@@ -142,6 +145,22 @@ public class InteractionManager : MonoBehaviour
         {
             rightDragDetector.IsDragging = false;
         }
+    }
+
+
+
+    private void UpdateCursorHighlight()
+    {
+        Vector3 cursorPos = GetGroundPositionAtScreenpoint(Input.mousePosition);
+        Shader.SetGlobalVector("_DistToCursor", cursorPos);
+    }
+
+    public static Vector3 GetGroundPositionAtScreenpoint(Vector3 screenPoint)
+    {
+        Ray ray = Camera.main.ScreenPointToRay(screenPoint);
+        float enter;
+        groundPlane.Raycast(ray, out enter);
+        return ray.GetPoint(enter);
     }
 
     private void HandleOrbit()

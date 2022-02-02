@@ -12,12 +12,9 @@ public class FoundationInteractionManager : MonoBehaviour
     private float gridExpansionDistance = 1;
 
     [SerializeField]
-    private Tool selectedTool;
-
-    [SerializeField]
     private Toggle expandButton;
     [SerializeField]
-    private Toggle smoothButton;
+    private Button smoothButton;
     [SerializeField]
     private Slider ExpansionsSlider;
 
@@ -26,43 +23,31 @@ public class FoundationInteractionManager : MonoBehaviour
 
     private CityBuildingMain gameMain;
 
-    public enum Tool
-    {
-        ExpandTool,
-        SmoothTool
-    }
-
     private void Start()
     {
         gameMain = GetComponent<CityBuildingMain>();
-        expandButton.onValueChanged.AddListener(val => ToolToggleValueChanged(val, Tool.ExpandTool));
-        smoothButton.onValueChanged.AddListener(val => ToolToggleValueChanged(val, Tool.SmoothTool));
     }
 
-    private void ToolToggleValueChanged(bool value, Tool tool)
+    public void ProceedWithUpdate(bool wasDragging, bool uiHovered)
     {
-        if (value)
-            selectedTool = tool;
-    }
-
-    public void ProceedWithUpdate(bool wasDragging)
-    {
-        if (wasDragging)
+        if (uiHovered)
         {
             expansionCursor.gameObject.SetActive(false);
+            if(IsSmoothPressed())
+            {
+                DoSmoothing();
+            }
             return;
         }
-        if(selectedTool == Tool.SmoothTool)
-        {
-            expansionCursor.gameObject.SetActive(false);
-            HandleSmoothing();
-            return;
-        }
-        if(selectedTool == Tool.ExpandTool)
-        {
-            expansionCursor.gameObject.SetActive(true);
+        expansionCursor.gameObject.SetActive(true);
+        if(!wasDragging)
             HandleExpansion();
-        }
+    }
+
+    private bool IsSmoothPressed()
+    {
+        return Input.GetMouseButton(0) &&
+            UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject == smoothButton.gameObject;
     }
 
     private void HandleExpansion()
@@ -93,14 +78,11 @@ public class FoundationInteractionManager : MonoBehaviour
         return new Vector2(planePosition.x, planePosition.z);
     }
 
-    private void HandleSmoothing()
+    private void DoSmoothing()
     {
-        if (Input.GetMouseButton(0)) 
-        {
-            //TODO: handle smoothing undo
-            gameMain.MainGrid.DoEase();
-            gameMain.UpdateBaseGrid();
-            gameMain.UpdateInteractionGrid();
-        }
+        //TODO: handle smoothing undo
+        gameMain.MainGrid.DoEase();
+        gameMain.UpdateBaseGrid();
+        gameMain.UpdateInteractionGrid();
     }
 }
