@@ -1,4 +1,5 @@
 ﻿using Interaction;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -48,6 +49,15 @@ public class InteractionManager : MonoBehaviour
         foundationInteractor = GetComponent<FoundationInteractionManager>();
         leftDragDetector = new DragDetector(dragStartDistance);
         rightDragDetector = new DragDetector(dragStartDistance);
+
+        SetInitialTab();
+    }
+
+    private void SetInitialTab()
+    {
+        ExteriorsTabButton.isOn = SelectedTab == UiTab.Exteriors;
+        InteriorsTabButton.isOn = SelectedTab == UiTab.Interiors;
+        FoundationTabButton.isOn = SelectedTab == UiTab.Foundation;
     }
 
     private void Update()
@@ -57,7 +67,7 @@ public class InteractionManager : MonoBehaviour
         UndoButton.interactable = gameMain.UndoManager.CanUndo;
         UndoButton.gameObject.SetActive(gameMain.UndoManager.CanUndo);
 
-        if(UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject != null)
+        if(UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
         {
             return;
         }
@@ -74,7 +84,7 @@ public class InteractionManager : MonoBehaviour
                 break;
             case UiTab.Foundation:
             default:
-                foundationInteractor.ProceedWithUpdate();
+                foundationInteractor.ProceedWithUpdate(wasDragging);
                 break;
         }
     }

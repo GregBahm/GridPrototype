@@ -1,26 +1,82 @@
 ﻿using Assets.GameGrid;
+using System;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class FoundationInteractionManager : MonoBehaviour
 {
-    public int GridExpansions;
-    public float GridExpansionDistance = 1;
+    [SerializeField]
+    private int gridExpansions;
+
+    [SerializeField]
+    private float gridExpansionDistance = 1;
+
+    [SerializeField]
+    private Tool selectedTool;
+
+    [SerializeField]
+    private Toggle expandButton;
+    [SerializeField]
+    private Toggle smoothButton;
+    [SerializeField]
+    private Slider ExpansionsSlider;
+
+    [SerializeField]
+    private ExpansionCursor expansionCursor;
 
     private CityBuildingMain gameMain;
+
+    public enum Tool
+    {
+        ExpandTool,
+        SmoothTool
+    }
 
     private void Start()
     {
         gameMain = GetComponent<CityBuildingMain>();
+        expandButton.onValueChanged.AddListener(val => ToolToggleValueChanged(val, Tool.ExpandTool));
+        smoothButton.onValueChanged.AddListener(val => ToolToggleValueChanged(val, Tool.SmoothTool));
     }
 
-    public void ProceedWithUpdate()
+    private void ToolToggleValueChanged(bool value, Tool tool)
     {
-        HandleEasing();
-        GridExpander expander = new GridExpander(gameMain.MainGrid, GridExpansions, GridExpansionDistance);
+        if (value)
+            selectedTool = tool;
+    }
+
+    public void ProceedWithUpdate(bool wasDragging)
+    {
+        if (wasDragging)
+        {
+            expansionCursor.gameObject.SetActive(false);
+            return;
+        }
+        if(selectedTool == Tool.SmoothTool)
+        {
+            expansionCursor.gameObject.SetActive(false);
+            HandleSmoothing();
+            return;
+        }
+        if(selectedTool == Tool.ExpandTool)
+        {
+            expansionCursor.gameObject.SetActive(true);
+            HandleExpansion();
+        }
+    }
+
+    private void HandleExpansion()
+    {
+        gridExpansions = (int)(ExpansionsSlider.value * gameMain.MainGrid.BorderEdges.Count);
+        GridExpander expander = new GridExpander(gameMain.MainGrid, gridExpansions, gridExpansionDistance);
         expander.Update(GetGridSpaceCursorPosition());
-        expander.PreviewExpansion();
+        if(!Input.GetMouseButton(0))
+        {
+            expansionCursor.PreviewExpansion(expander);
+        }
         if (Input.GetMouseButtonUp(0))
         {
+            // TODO: Handle expansion undo
             gameMain.MainGrid.AddToMesh(expander.Points, expander.Edges);
             gameMain.UpdateBaseGrid();
             gameMain.UpdateInteractionGrid();
@@ -37,10 +93,11 @@ public class FoundationInteractionManager : MonoBehaviour
         return new Vector2(planePosition.x, planePosition.z);
     }
 
-    private void HandleEasing()
+    private void HandleSmoothing()
     {
-        if (Input.GetMouseButton(1)) // Holding right mouse button
+        if (Input.GetMouseButton(0)) 
         {
+            //TODO: handle smoothing undo
             gameMain.MainGrid.DoEase();
             gameMain.UpdateBaseGrid();
             gameMain.UpdateInteractionGrid();

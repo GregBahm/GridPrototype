@@ -18,8 +18,8 @@ namespace Assets.GameGrid
         public int VertExpansionCount { get; }
         public float ExpansionDistance { get; }
 
-        public IEnumerable<GroundPointBuilder> Points { get; private set; }
-        public IEnumerable<GroundEdgeBuilder> Edges { get; private set; }
+        public IReadOnlyList<GroundPointBuilder> Points { get; private set; }
+        public IReadOnlyList<GroundEdgeBuilder> Edges { get; private set; }
 
         public GridExpander(MainGrid grid, int vertExpansionCount, float expansionDistance)
         {
