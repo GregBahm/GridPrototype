@@ -782,7 +782,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f587faec0a76214b93e49c82cd457d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  LoadLastSave: 1
+  NewGridMaxHeight: 40
+  LoadLastSave: 0
   TestSave: 0
   TestLoad: 0
   DefaultGridFile: {fileID: 4900000, guid: b9f4e34b83d6e4445a1c083578daf6bf, type: 3}
@@ -884,7 +885,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: cb1a9af049d049643a2946797c8cf5c3, type: 2}
   - {fileID: 11400000, guid: 5ff16e240de8c6449b469cc3d190ca15, type: 2}
   - {fileID: 11400000, guid: 36edf81f86f44dd42b0a8bee8344cc5a, type: 2}
-  - {fileID: 11400000, guid: 8d65dfb81427ea74c807db86819d5f25, type: 2}
   - {fileID: 11400000, guid: cbf2e0c27b1dd864e91782d836613b89, type: 2}
   - {fileID: 11400000, guid: 1aa2e066f157dc548ba9f9b5bde7b29a, type: 2}
   - {fileID: 11400000, guid: 5f78fe06c6696a341a02b496fd64d902, type: 2}
@@ -1114,7 +1114,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   dragStartDistance: 2
-  GroundModificationMode: 0
   ExteriorsTabButton: {fileID: 1967176909}
   InteriorsTabButton: {fileID: 96458360}
   FoundationTabButton: {fileID: 132022262}
@@ -1122,7 +1121,7 @@ MonoBehaviour:
   InteriorsTab: {fileID: 1211910452}
   FoundationTab: {fileID: 1885678491}
   UndoButton: {fileID: 7699474284198047079}
-  SelectedTab: 2
+  SelectedTab: 0
 --- !u!114 &536624981
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1446,7 +1445,7 @@ PrefabInstance:
     - target: {fileID: 4308267787087259333, guid: c1532d38e2a896c40bb5572a72f9129f,
         type: 3}
       propertyPath: onValueChanged.m_PersistentCalls.m_Calls.Array.size
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4308267787087259333, guid: c1532d38e2a896c40bb5572a72f9129f,
         type: 3}
@@ -2433,7 +2432,7 @@ PrefabInstance:
     - target: {fileID: 4308267787087259333, guid: c1532d38e2a896c40bb5572a72f9129f,
         type: 3}
       propertyPath: onValueChanged.m_PersistentCalls.m_Calls.Array.size
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4308267787087259333, guid: c1532d38e2a896c40bb5572a72f9129f,
         type: 3}
@@ -3702,7 +3701,7 @@ PrefabInstance:
     - target: {fileID: 4308267787087259333, guid: c1532d38e2a896c40bb5572a72f9129f,
         type: 3}
       propertyPath: onValueChanged.m_PersistentCalls.m_Calls.Array.size
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4308267787087259333, guid: c1532d38e2a896c40bb5572a72f9129f,
         type: 3}

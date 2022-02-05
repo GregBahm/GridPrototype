@@ -39,7 +39,7 @@ public class DesignationCell : IDesignationCell
     {
         get
         {
-            if (Height == MainGrid.MaxHeight - 1) return null;
+            if (Height == grid.MaxHeight - 1) return null;
             return GroundPoint.DesignationCells[Height + 1];
         }
     }
@@ -59,7 +59,7 @@ public class DesignationCell : IDesignationCell
 
         visuals.AddRange(GroundPoint.PolyConnections.Select(item => grid.GetVisualCell(item, Height)));
 
-        if (Height < MainGrid.MaxHeight - 1)
+        if (Height < grid.MaxHeight - 1)
         {
             visuals.AddRange(GroundPoint.PolyConnections.Select(item => grid.GetVisualCell(item, Height + 1)));
         }

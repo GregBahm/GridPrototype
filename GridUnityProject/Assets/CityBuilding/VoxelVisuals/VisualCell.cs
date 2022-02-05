@@ -135,7 +135,7 @@ public class VisualCell
 
     private VisualCell GetUpNeighbor()
     {
-        if (Height > MainGrid.MaxHeight - 2)
+        if (Height > grid.MaxHeight - 2)
             return null;
         return grid.GetVisualCell(Quad, Height + 1);
     }

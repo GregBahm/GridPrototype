@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 public class VisualOptionsByDesignation
 {
-    private Dictionary<string, VisualCellOption[]> optionsByDesignationKey;
+    private Dictionary<string, VisualCellOptions> optionsByDesignationKey;
     private readonly VoxelBlueprint[] blueprints;
     public VisualOptionsByDesignation(VoxelBlueprint[] blueprints)
     {
@@ -17,17 +18,8 @@ public class VisualOptionsByDesignation
         optionsByDesignationKey = GetOptionsByDesignationKey(allOptions);
     }
 
-    public VisualCellOption[] GetOptions(VoxelDesignation designation)
+    public VisualCellOptions GetOptions(VoxelDesignation designation)
     {
-        if (!optionsByDesignationKey.ContainsKey(designation.Key))
-        {
-            SetOptions();
-        }
-            if (!optionsByDesignationKey.ContainsKey(designation.Key))
-        {
-            UnityEngine.Debug.LogError("Wanted but couldn't find this key:\n" + designation.Key);
-            CityBuildingMain.Instance.StubMissingBlueprint(designation);
-        }
         return optionsByDesignationKey[designation.Key];
     }
 
@@ -43,26 +35,33 @@ public class VisualOptionsByDesignation
         }
     }
 
-    private Dictionary<string, VisualCellOption[]> GetOptionsByDesignationKey(VisualCellOption[] allOptions)
+    private Dictionary<string, VisualCellOptions> GetOptionsByDesignationKey(VisualCellOption[] allOptions)
     {
-        Dictionary<string, List<VisualCellOption>> lists = new Dictionary<string, List<VisualCellOption>>();
-        foreach (VisualCellOption option in allOptions)
+        Dictionary<string, VisualCellOptions> ret = new Dictionary<string, VisualCellOptions>();
+        IEnumerable<IGrouping<string, VisualCellOption>> groups = allOptions.GroupBy(item => item.GetDesignationKey());
+        foreach (IGrouping<string, VisualCellOption> group in groups)
         {
-            string key = option.GetDesignationKey();
-            if (lists.ContainsKey(key))
+            VisualCellOption[] asArray = group.ToArray();
+            if(asArray.Length > 2)
             {
-                lists[key].Add(option);
+                throw new Exception("More than two options for " + group.Key);
             }
-            else
+            VisualCellOptions options = new VisualCellOptions();
+            foreach (VisualCellOption item in asArray)
             {
-                lists.Add(key, new List<VisualCellOption>() { option });
+                if (item.Connections.Up == VoxelConnectionType.BigStrut)
+                    options.UpStrutOption = item;
+                else
+                    options.DefaultOption = item;
             }
-        }
-        Dictionary<string, VisualCellOption[]> ret = new Dictionary<string, VisualCellOption[]>();
-        foreach (var item in lists)
-        {
-            ret.Add(item.Key, item.Value.ToArray());
+            ret.Add(group.Key, options);
         }
         return ret;
     }
+}
+
+public class VisualCellOptions
+{
+    public VisualCellOption DefaultOption { get; set; }
+    public VisualCellOption UpStrutOption { get; set; }
 }

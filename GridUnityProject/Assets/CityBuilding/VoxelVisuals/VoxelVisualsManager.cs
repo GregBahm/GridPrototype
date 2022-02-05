@@ -7,12 +7,14 @@ using UnityEngine;
 
 public class VoxelVisualsManager
 {
+    private readonly CityBuildingMain cityMain;
     private readonly Transform piecesRoot;
     private readonly VisualOptionsByDesignation optionsSource;
     private readonly Dictionary<VisualCell, VisualCellGameobjects> voxelObjects = new Dictionary<VisualCell, VisualCellGameobjects>();
 
-    public VoxelVisualsManager(VisualOptionsByDesignation optionsSource)
+    public VoxelVisualsManager(CityBuildingMain cityMain, VisualOptionsByDesignation optionsSource)
     {
+        this.cityMain = cityMain;
         piecesRoot = new GameObject("Pieces Root").transform;
         this.optionsSource = optionsSource;
     }
@@ -53,6 +55,31 @@ public class VoxelVisualsManager
         }
     }
 
+    public void UpdateColumn(GroundQuad column)
+    {
+        bool yesStrut = false;
+        for (int i = cityMain.MainGrid.MaxHeight - 1; i >= 0; i--) // Top to bottom
+        {
+            VisualCell cell = cityMain.MainGrid.GetVisualCell(column, i);
+            VoxelDesignation designation = cell.GetCurrentDesignation();
+            VisualCellOptions option = optionsSource.GetOptions(designation);
+            VisualCellOption oldOption = cell.Contents;
+            if(yesStrut)
+            {
+                cell.Contents = option.UpStrutOption;
+            }
+            else
+            {
+                cell.Contents = option.DefaultOption;
+            }
+            if(oldOption != cell.Contents)
+            {
+                UpdateDebugObject(cell);
+            }
+            yesStrut = cell.Contents.Connections.Down == VoxelConnectionType.BigStrut;
+        }
+    }
+
     private static readonly Bounds ComponentBounds = new Bounds(Vector3.zero, Vector3.one* 2);
 
     private void UpdateMeshBounds(MeshFilter filter)
@@ -80,22 +107,6 @@ public class VoxelVisualsManager
             ret += " " + component.Contents.Rotations.ToString() + " rotations";
         }
         return ret;
-    }
-
-    internal void DoImmediateUpdate(DesignationCell toggledCell)
-    {
-        UpdateVoxel(toggledCell);
-    }
-
-    private void UpdateVoxel(DesignationCell targetCell)
-    {
-        foreach (VisualCell component in targetCell.Visuals)
-        {
-            VoxelDesignation designation = component.GetCurrentDesignation();
-            VisualCellOption option = optionsSource.GetOptions(designation).First();
-            component.Contents = option;
-            UpdateDebugObject(component);
-        }
     }
 
     internal void UpdateForBaseGridModification()

@@ -10,7 +10,23 @@ using UnityEngine.UI;
 public class InteractionManager : MonoBehaviour
 {
     [SerializeField]
-    private float dragStartDistance = 2;
+    private float dragStartDistance = 1;
+    [SerializeField]
+    private Toggle ExteriorsTabButton;
+    [SerializeField]
+    private Toggle InteriorsTabButton;
+    [SerializeField]
+    private Toggle FoundationTabButton;
+    [SerializeField]
+    private GameObject ExteriorsTab;
+    [SerializeField]
+    private GameObject InteriorsTab;
+    [SerializeField]
+    private GameObject FoundationTab;
+    [SerializeField]
+    private Button UndoButton;
+
+    public UiTab SelectedTab;
 
     private CameraInteraction cameraInteraction;
     private CityBuildingMain gameMain;
@@ -21,18 +37,8 @@ public class InteractionManager : MonoBehaviour
     private DragDetector leftDragDetector;
     private DragDetector rightDragDetector;
 
-    public bool GroundModificationMode;
+    private TabComponentGroup[] tabComponents;
 
-    public Toggle ExteriorsTabButton;
-    public Toggle InteriorsTabButton;
-    public Toggle FoundationTabButton;
-    public GameObject ExteriorsTab;
-    public GameObject InteriorsTab;
-    public GameObject FoundationTab;
-
-    public Button UndoButton;
-
-    public UiTab SelectedTab;
     public enum UiTab
     {
         Exteriors,
@@ -51,8 +57,16 @@ public class InteractionManager : MonoBehaviour
         foundationInteractor = GetComponent<FoundationInteractionManager>();
         leftDragDetector = new DragDetector(dragStartDistance);
         rightDragDetector = new DragDetector(dragStartDistance);
-
+        tabComponents = GetTabComponents();
         SetInitialTab();
+    }
+
+    private TabComponentGroup[] GetTabComponents()
+    {
+        TabComponentGroup foundationGroup = new TabComponentGroup(this, UiTab.Foundation, FoundationTabButton, FoundationTab);
+        TabComponentGroup interiorGroup = new TabComponentGroup(this, UiTab.Interiors, InteriorsTabButton, InteriorsTab);
+        TabComponentGroup exteriorGroup = new TabComponentGroup(this, UiTab.Exteriors, ExteriorsTabButton, ExteriorsTab);
+        return new TabComponentGroup[] { foundationGroup, interiorGroup, exteriorGroup };
     }
 
     private void SetInitialTab()
@@ -90,23 +104,6 @@ public class InteractionManager : MonoBehaviour
                 foundationInteractor.ProceedWithUpdate(wasDragging, uiHovered);
                 break;
         }
-    }
-
-
-    public void SetTabToExteriors()
-    {
-        if (ExteriorsTabButton.isOn)
-            SelectedTab = UiTab.Exteriors;
-    }
-    public void SetTabToInteriors()
-    {
-        if (InteriorsTabButton.isOn)
-            SelectedTab = UiTab.Interiors;
-    }
-    public void SetTabToFoundation()
-    {
-        if (FoundationTabButton.isOn)
-            SelectedTab = UiTab.Foundation;
     }
 
     private void ManageTabs()
@@ -147,8 +144,6 @@ public class InteractionManager : MonoBehaviour
         }
     }
 
-
-
     private void UpdateCursorHighlight()
     {
         Vector3 cursorPos = GetGroundPositionAtScreenpoint(Input.mousePosition);
@@ -161,6 +156,14 @@ public class InteractionManager : MonoBehaviour
         float enter;
         groundPlane.Raycast(ray, out enter);
         return ray.GetPoint(enter);
+    }
+
+    private void UpdateTabsContent()
+    {
+        foreach (var item in tabComponents)
+        {
+            item.UpdateTabContent();
+        }
     }
 
     private void HandleOrbit()
@@ -203,6 +206,41 @@ public class InteractionManager : MonoBehaviour
         public void UpdateIsDragging()
         {
             IsDragging = (DragStartPos - Input.mousePosition).magnitude > dragStartDistance;
+        }
+    }
+
+    private class TabComponentGroup
+    {
+        private readonly InteractionManager interactionManager;
+        private readonly UiTab tabType;
+        private readonly Toggle toggleButton;
+        private readonly GameObject tabContent;
+
+        public TabComponentGroup(
+            InteractionManager interactionManager,
+            UiTab tabType, 
+            Toggle toggleButton, 
+            GameObject tabContent)
+        {
+            this.interactionManager = interactionManager;
+            this.tabType = tabType;
+            this.toggleButton = toggleButton;
+            this.tabContent = tabContent;
+
+            toggleButton.onValueChanged.AddListener(OnToggled);
+        }
+        private void OnToggled(bool val)
+        {
+            if (val)
+            {
+                interactionManager.SelectedTab = tabType;
+                interactionManager.UpdateTabsContent();
+            }
+        }
+
+        public void UpdateTabContent()
+        {
+            tabContent.SetActive(interactionManager.SelectedTab == tabType);
         }
     }
 }

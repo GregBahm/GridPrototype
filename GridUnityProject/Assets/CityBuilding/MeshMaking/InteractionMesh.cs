@@ -137,7 +137,7 @@ namespace MeshMaking
         private IEnumerable<IMeshContributor> GetMeshContributors(MainGrid grid)
         {
             IEnumerable<IMeshContributor> groundContributor = grid.Points.Where(item => !item.DesignationCells[0].IsFilled).Select(item => new HorizontalMeshContributor(item));
-            IEnumerable<IMeshContributor> contributors = grid.FilledCells.Select(item => new CellMeshContributor(item));
+            IEnumerable<IMeshContributor> contributors = grid.FilledCells.Select(item => new CellMeshContributor(grid, item));
             return groundContributor.Concat(contributors);
         }
     }

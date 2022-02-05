@@ -12,7 +12,7 @@ public class DesignationsSaveState
         List<DesignationCellSaveState> designationStates = new List<DesignationCellSaveState>();
         foreach (GroundPoint point in grid.Points)
         {
-            for (int height = 0; height < MainGrid.MaxHeight; height++)
+            for (int height = 0; height < grid.MaxHeight; height++)
             {
                 VoxelDesignationType designation = point.DesignationCells[height].Designation;
                 if(designation != VoxelDesignationType.Empty)

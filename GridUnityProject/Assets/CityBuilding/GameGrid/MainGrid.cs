@@ -7,7 +7,7 @@ namespace GameGrid
 {
     public class MainGrid
     {
-        public static int MaxHeight { get; } = 50;
+        public int MaxHeight { get; }
 
         private List<GroundPoint> points = new List<GroundPoint>();
         public IReadOnlyList<GroundPoint> Points { get { return points; } }
@@ -44,8 +44,9 @@ namespace GameGrid
         private readonly HashSet<DesignationCell> filledCells = new HashSet<DesignationCell>();
         public IEnumerable<DesignationCell> FilledCells { get { return filledCells; } }
 
-        public MainGrid(IEnumerable<GroundPointBuilder> points, IEnumerable<GroundEdgeBuilder> edges)
+        public MainGrid(int maxHeight, IEnumerable<GroundPointBuilder> points, IEnumerable<GroundEdgeBuilder> edges)
         {
+            MaxHeight = maxHeight;
             AddToMesh(points, edges);
         }
 

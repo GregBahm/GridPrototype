@@ -9,12 +9,16 @@ namespace GameGrid
     [Serializable]
     public class GroundSaveState
     {
+        public const int DefaultMaxHeight = 40;
+        public int MaxHeight;
+
         public GroundPointBuilder[] Points;
 
         public GroundEdgeBuilder[] Edges;
 
         public GroundSaveState(MainGrid grid)
         {
+            MaxHeight = grid.MaxHeight;
             GroundPointBuilder[] points = grid.Points.Select(item => new GroundPointBuilder(item)).ToArray();
             GroundEdgeBuilder[] edges = grid.Edges.Select(item => new GroundEdgeBuilder(item)).ToArray();
             Points = points.ToArray();
@@ -45,7 +49,7 @@ namespace GameGrid
                 GroundEdgeBuilder edgeA = new GroundEdgeBuilder(points[startIndex].Index, points[endIndex].Index);
                 edges.Add(edgeA);
             }
-            return new MainGrid(points, edges);
+            return new MainGrid(DefaultMaxHeight, points, edges);
         }
     }
 }

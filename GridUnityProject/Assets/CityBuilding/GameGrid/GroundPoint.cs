@@ -29,8 +29,8 @@ namespace GameGrid
 
         private DesignationCell[] GetDesignationCells()
         {
-            DesignationCell[] ret = new DesignationCell[MainGrid.MaxHeight];
-            for (int i = 0; i < MainGrid.MaxHeight; i++)
+            DesignationCell[] ret = new DesignationCell[grid.MaxHeight];
+            for (int i = 0; i < grid.MaxHeight; i++)
             {
                 ret[i] = new DesignationCell(grid, this, i);
             }

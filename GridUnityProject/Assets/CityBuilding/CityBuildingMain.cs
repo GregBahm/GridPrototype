@@ -1,12 +1,13 @@
 ﻿using GameGrid;
 using MeshMaking;
-using VisualsSolving;
 using UnityEngine;
 using UnityEditor;
 using System.Linq;
+using System.Collections.Generic;
 
 public class CityBuildingMain : MonoBehaviour
 {
+    public int NewGridMaxHeight = 40;
     public UndoManager UndoManager { get; private set; }
 
     public bool LoadLastSave;
@@ -28,8 +29,6 @@ public class CityBuildingMain : MonoBehaviour
     private VoxelVisualsManager visualsManager;
     private VisualOptionsByDesignation optionsSource;
 
-    private VisualsSolver solver;
-
     public VoxelBlueprint[] Blueprints;
 
     public static CityBuildingMain Instance;
@@ -44,15 +43,23 @@ public class CityBuildingMain : MonoBehaviour
         UndoManager = new UndoManager();
         if(LoadLastSave)
         {
-            GameSaveState state = GameSaveState.Load();
-            MainGrid = new MainGrid(state.Ground.Points, state.Ground.Edges);
+            GameSaveState saveState = GameSaveState.Load();
+            MainGrid = new MainGrid(NewGridMaxHeight, saveState.Ground.Points, saveState.Ground.Edges);
             Initialize();
-            foreach (var item in state.Designations.DesignationStates)
+            HashSet<GroundQuad> columnsToUpdate = new HashSet<GroundQuad>();
+            foreach (var item in saveState.Designations.DesignationStates)
             {
                 DesignationCell cell = MainGrid.Points[item.GroundPointIndex].DesignationCells[item.Height];
                 cell.Designation = item.Designation;
-                visualsManager.DoImmediateUpdate(cell);
-                solver = new VisualsSolver(MainGrid, optionsSource);
+
+                foreach (GroundQuad column in MainGrid.GetConnectedQuads(cell.GroundPoint))
+                {
+                    columnsToUpdate.Add(column);
+                }
+            }
+            foreach (GroundQuad quad in columnsToUpdate)
+            {
+                visualsManager.UpdateColumn(quad);
             }
             UpdateInteractionGrid();
         }
@@ -69,24 +76,7 @@ public class CityBuildingMain : MonoBehaviour
         UpdateInteractionGrid();
         UpdateBaseGrid();
         optionsSource = new VisualOptionsByDesignation(Blueprints);
-        visualsManager = new VoxelVisualsManager(optionsSource);
-        solver = new VisualsSolver(MainGrid, optionsSource);
-    }
-
-    public void StubMissingBlueprint(VoxelDesignation designation)
-    {
-#if UNITY_EDITOR
-        //GameObject gameObj = Instantiate(BlueprintViewerPrefab);
-        //gameObj.transform.position = new Vector3(0, 5, 0);
-        //BlueprintViewer viewer = gameObj.GetComponent<BlueprintViewer>();
-        //VoxelBlueprint blueprint = ScriptableObject.CreateInstance<VoxelBlueprint>();
-        //blueprint.Designations = DesignationGrid.FromDesignation(designation);
-        //viewer.Blueprint = blueprint;
-
-        //string path = VoxelBlueprint.GetBlueprintAssetPath(blueprint);
-        //AssetDatabase.CreateAsset(blueprint, path);
-        //AssetDatabase.Refresh();
-#endif
+        visualsManager = new VoxelVisualsManager(this, optionsSource);
     }
 
     private void Update()
@@ -101,41 +91,18 @@ public class CityBuildingMain : MonoBehaviour
         if(TestLoad)
         {
             TestLoad = false;
+            // TODO: loading
             //MainGrid = GroundSaveState.Load();
             Debug.Log("Grid Loaded");
         }
-        HandleSolver();
-    }
+    }   
 
-    private const double solverWaitTime = (double)1 / 30;
-
-    private void HandleSolver()
+    public void UpdateVoxelVisuals(DesignationCell cell)
     {
-        if (!solver.SolveComplete)
+        foreach(GroundQuad quad in MainGrid.GetConnectedQuads(cell.GroundPoint))
         {
-            double startTime = Time.realtimeSinceStartupAsDouble;
-            bool keepGoing = true;
-            while(keepGoing && !solver.SolveComplete)
-            {
-                double currentTime = Time.realtimeSinceStartupAsDouble;
-                if (currentTime - startTime > solverWaitTime)
-                {
-                    keepGoing = false;
-                }
-                solver.StepForward();
-            }
+            visualsManager.UpdateColumn(quad);
         }
-        UpdateSolvedVoxelVisuals();
-    }
-
-    private void UpdateSolvedVoxelVisuals()
-    {
-        foreach (CellState item in solver.ReadyToDisplayVoxels)
-        {
-            item.Component.Contents = item.RemainingOptions[0];
-            visualsManager.UpdateDebugObject(item.Component);
-        }
-        solver.ReadyToDisplayVoxels.Clear();
     }
 
     public void UpdateBaseGrid()
@@ -153,11 +120,5 @@ public class CityBuildingMain : MonoBehaviour
         InteractionMesh.UpdateMesh(MainGrid);
         InteractionMeshObject.GetComponent<MeshCollider>().sharedMesh = null; // Hack to force update
         InteractionMeshObject.GetComponent<MeshCollider>().sharedMesh = InteractionMesh.Mesh;
-    }
-
-    internal void UpdateVoxelVisuals(DesignationCell changedCell)
-    {
-        visualsManager.DoImmediateUpdate(changedCell);
-        solver = new VisualsSolver(MainGrid, optionsSource);
     }
 }
