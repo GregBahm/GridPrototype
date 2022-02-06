@@ -1,9 +1,12 @@
 ﻿using System;
 using UnityEngine;
 
-public class InteriorsInteractionManager : MonoBehaviour
+namespace Interaction
 {
-    public void ProceedWithUpdate()
+    public class InteriorsInteractionManager : MonoBehaviour
     {
+        public void ProceedWithUpdate()
+        {
+        }
     }
 }

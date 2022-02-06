@@ -157,10 +157,8 @@ namespace GameGrid
                 positionAverage += connection;
             }
             positionAverage /= borderConnections.Count();
-            if(positionAverage.sqrMagnitude > point.Position.sqrMagnitude)
-            {
-                point.Position = positionAverage;
-            }
+            positionAverage = positionAverage.normalized * point.Position.magnitude;
+            point.Position = positionAverage;
         }
 
         private void DoEaseInteriorPoint(GroundPoint point)

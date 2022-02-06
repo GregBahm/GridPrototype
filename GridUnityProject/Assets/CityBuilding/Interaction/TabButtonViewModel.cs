@@ -3,18 +3,21 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class TabButtonViewModel : MonoBehaviour
+namespace Interaction
 {
-    public GameObject InactiveBackground;
-    private Toggle toggle;
-
-    private void Start()
+    public class TabButtonViewModel : MonoBehaviour
     {
-        toggle = GetComponent<Toggle>();
-    }
+        public GameObject InactiveBackground;
+        private Toggle toggle;
 
-    void Update()
-    {
-        InactiveBackground.SetActive(!toggle.isOn);
+        private void Start()
+        {
+            toggle = GetComponent<Toggle>();
+        }
+
+        void Update()
+        {
+            InactiveBackground.SetActive(!toggle.isOn);
+        }
     }
 }
