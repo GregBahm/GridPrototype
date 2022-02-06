@@ -1,6 +1,4 @@
-﻿using GameGrid;
-using JetBrains.Annotations;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -9,9 +7,9 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace Assets.GameGrid
+namespace GameGrid
 {   
-    class GridExpander
+    public class GridExpander
     {
         private readonly MainGrid grid;
 

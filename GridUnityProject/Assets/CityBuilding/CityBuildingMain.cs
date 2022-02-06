@@ -7,22 +7,21 @@ using System.Collections.Generic;
 
 public class CityBuildingMain : MonoBehaviour
 {
-    public int NewGridMaxHeight = 40;
+    [SerializeField]
+    private GameObject interactionMeshObject;
+    [SerializeField]
+    private GameObject baseGridVisual;
+    [SerializeField]
+    private LightingManager lightingManager;
+    [SerializeField]
+    public int newGridMaxHeight = 20;
     public UndoManager UndoManager { get; private set; }
 
     public bool LoadLastSave;
     public bool TestSave;
     public bool TestLoad;
 
-    [SerializeField]
-    private TextAsset DefaultGridFile;
-
     public InteractionMesh InteractionMesh { get; private set; }
-
-    [SerializeField]
-    private GameObject InteractionMeshObject;
-    [SerializeField]
-    private GameObject BaseGridVisual;
 
     public MainGrid MainGrid { get; private set; }
 
@@ -44,7 +43,7 @@ public class CityBuildingMain : MonoBehaviour
         if(LoadLastSave)
         {
             GameSaveState saveState = GameSaveState.Load();
-            MainGrid = new MainGrid(NewGridMaxHeight, saveState.Ground.Points, saveState.Ground.Edges);
+            MainGrid = new MainGrid(newGridMaxHeight, saveState.Ground.Points, saveState.Ground.Edges);
             Initialize();
             HashSet<GroundQuad> columnsToUpdate = new HashSet<GroundQuad>();
             foreach (var item in saveState.Designations.DesignationStates)
@@ -108,17 +107,23 @@ public class CityBuildingMain : MonoBehaviour
     public void UpdateBaseGrid()
     {
         InteractionMesh.UpdateGroundMesh(MainGrid);
-        BaseGridVisual.GetComponent<MeshFilter>().mesh = InteractionMesh.BaseGridMesh;
-        if(visualsManager != null)
+        baseGridVisual.GetComponent<MeshFilter>().mesh = InteractionMesh.BaseGridMesh;
+        if (visualsManager != null)
         {
             visualsManager.UpdateForBaseGridModification();
         }
+        lightingManager.UpdatePostion(MainGrid);
+    }
+    public void UpdateBaseGrid(GridExpander expander)
+    {
+        MainGrid.AddToMesh(expander.Points, expander.Edges);
+        UpdateBaseGrid();
     }
 
     public void UpdateInteractionGrid()
     {
         InteractionMesh.UpdateMesh(MainGrid);
-        InteractionMeshObject.GetComponent<MeshCollider>().sharedMesh = null; // Hack to force update
-        InteractionMeshObject.GetComponent<MeshCollider>().sharedMesh = InteractionMesh.Mesh;
+        interactionMeshObject.GetComponent<MeshCollider>().sharedMesh = null; // Hack to force update
+        interactionMeshObject.GetComponent<MeshCollider>().sharedMesh = InteractionMesh.Mesh;
     }
 }

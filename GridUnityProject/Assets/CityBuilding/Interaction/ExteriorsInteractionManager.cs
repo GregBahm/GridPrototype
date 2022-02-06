@@ -5,6 +5,7 @@ public class ExteriorsInteractionManager : MonoBehaviour
 {
 
     private CityBuildingMain gameMain;
+    private InteractionManager interactionMain;
 
     public VoxelDesignationType FillType;
 
@@ -14,12 +15,16 @@ public class ExteriorsInteractionManager : MonoBehaviour
     private void Start()
     {
         gameMain = GetComponent<CityBuildingMain>();
+        interactionMain = GetComponent<InteractionManager>();
     }
 
     public void ProceedWithUpdate(bool wasDragging, bool uiHovered)
     {
-        if (uiHovered)
-            return; // TODO: update the cursor to outro when UI hovering
+        if (uiHovered || interactionMain.SelectedTab != InteractionManager.UiTab.Exteriors)
+        {
+            UpdateCursor(null);
+            return;
+        }
         MeshHitTarget potentialMeshInteraction = GetPotentialMeshInteraction();
         UpdateCursor(potentialMeshInteraction);
         if(!wasDragging)
@@ -60,8 +65,8 @@ public class ExteriorsInteractionManager : MonoBehaviour
 
     private void UpdateCursor(MeshHitTarget potentialMeshInteraction)
     {
-        ConstructionCursor.MouseState state = Input.GetMouseButton(0) ? ConstructionCursor.MouseState.LeftClickDown
-            : (Input.GetMouseButton(1) ? ConstructionCursor.MouseState.RightClickDown : ConstructionCursor.MouseState.Hovering);
+        ConstructionCursor.CurorState state = Input.GetMouseButton(0) ? ConstructionCursor.CurorState.LeftClickDown
+            : (Input.GetMouseButton(1) ? ConstructionCursor.CurorState.RightClickDown : ConstructionCursor.CurorState.Hovering);
 
         cursor.UpdateCursor(potentialMeshInteraction, state);
     }

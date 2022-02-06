@@ -21,16 +21,15 @@ public class VoxelVisualsManager
 
     public void UpdateDebugObject(VisualCell component)
     {
+        VisualCellGameobjects gameObjects;
         if (voxelObjects.ContainsKey(component))
         {
-            VisualCellGameobjects gameObjects = voxelObjects[component];
+            gameObjects = voxelObjects[component];
             gameObjects.Filter.mesh = component.Contents.Mesh;
             UpdateMeshBounds(gameObjects.Filter);
             gameObjects.Obj.name = GetObjName(component);
             if (component.Contents.Materials != null)
                 gameObjects.Renderer.materials = component.Contents.Materials.Select(item => new Material(item)).ToArray();
-
-            component.UpdateForBaseGridModification(gameObjects.Renderer);
         }
         else
         {
@@ -49,10 +48,11 @@ public class VoxelVisualsManager
             
             filter.mesh = component.Contents.Mesh;
             obj.transform.position = component.ContentPosition;
-            VisualCellGameobjects gameObjects = new VisualCellGameobjects(obj, filter, renderer);
+            gameObjects = new VisualCellGameobjects(obj, filter, renderer);
             voxelObjects.Add(component, gameObjects);
             obj.transform.SetParent(piecesRoot, true);
         }
+        component.UpdateForBaseGridModification(gameObjects.Renderer);
     }
 
     public void UpdateColumn(GroundQuad column)

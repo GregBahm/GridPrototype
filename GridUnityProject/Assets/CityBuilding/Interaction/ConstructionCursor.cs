@@ -19,8 +19,7 @@ public class ConstructionCursor : MonoBehaviour
 
     private LineRenderer lineRenderer;
 
-    private bool hideCursor;
-    private MouseState mouseState;
+    private CurorState mouseState;
 
     private void Start()
     {
@@ -43,7 +42,7 @@ public class ConstructionCursor : MonoBehaviour
             Vector3 newPos = Vector3.Lerp(currentPos, posTarget, UpdateSpeed * Time.deltaTime * 100);
             lineRenderer.SetPosition(i, newPos);
         }
-        float widthMultiplierTarget = hideCursor ? 0 : baseLineWidth;
+        float widthMultiplierTarget = (mouseState == CurorState.HideCursor) ? 0 : baseLineWidth;
         lineRenderer.widthMultiplier = Mathf.Lerp(lineRenderer.widthMultiplier, widthMultiplierTarget, UpdateSpeed * Time.deltaTime * 100);
     }
 
@@ -51,7 +50,7 @@ public class ConstructionCursor : MonoBehaviour
     {
         Vector3 ret = GetMouseModifiedPosTarget(rawTarget);
         ret = Vector3.Lerp(targetCenter, ret, ShrinkAmount);
-        float lineOffset = hideCursor ? LineOffset * 3 : LineOffset;
+        float lineOffset = (mouseState == CurorState.HideCursor) ? LineOffset * 3 : LineOffset;
         ret += normal * lineOffset;
         return ret;
     }
@@ -60,21 +59,22 @@ public class ConstructionCursor : MonoBehaviour
     {
         switch (mouseState)
         {
-            case MouseState.LeftClickDown:
+            case CurorState.LeftClickDown:
                 return rawTarget + (targetCenter - rawTarget) * .1f;
-            case MouseState.RightClickDown:
+            case CurorState.RightClickDown:
                 return rawTarget + (rawTarget - targetCenter) * .1f;
-            case MouseState.Hovering:
+            case CurorState.Hovering:
             default:
                 return rawTarget;
         }
     }
 
-    public void UpdateCursor(MeshMaking.MeshHitTarget meshHitTarget, MouseState mouseState)
+    public void UpdateCursor(MeshMaking.MeshHitTarget meshHitTarget, CurorState mouseState)
     {
+        if (meshHitTarget == null)
+            mouseState = CurorState.HideCursor;
         this.mouseState = mouseState;
-        hideCursor = meshHitTarget == null;
-        if(!hideCursor)
+        if(mouseState != CurorState.HideCursor)
         {
             PlaceCursor(meshHitTarget);
         }
@@ -99,8 +99,9 @@ public class ConstructionCursor : MonoBehaviour
         } 
     }
 
-    public enum MouseState
+    public enum CurorState
     {
+        HideCursor,
         Hovering,
         LeftClickDown,
         RightClickDown,

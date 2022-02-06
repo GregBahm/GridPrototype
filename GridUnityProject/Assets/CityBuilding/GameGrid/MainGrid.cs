@@ -35,6 +35,8 @@ namespace GameGrid
             }
         }
 
+        public event EventHandler GridChanged;
+
         private readonly Dictionary<GroundPoint, List<GroundEdge>> edgesTable = new Dictionary<GroundPoint, List<GroundEdge>>();
         private readonly Dictionary<GroundPoint, List<GroundQuad>> polyTable = new Dictionary<GroundPoint, List<GroundQuad>>();
         private readonly Dictionary<GroundEdge, List<GroundQuad>> bordersTable = new Dictionary<GroundEdge, List<GroundQuad>>();
@@ -97,6 +99,7 @@ namespace GameGrid
             }
 
             UpdateVoxelVisuals();
+            GridChanged?.Invoke(this, EventArgs.Empty);
         }
 
         // new points must start at the beginning of the current index and increment up from there

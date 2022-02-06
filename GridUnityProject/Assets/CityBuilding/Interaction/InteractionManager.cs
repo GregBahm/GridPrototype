@@ -90,20 +90,10 @@ public class InteractionManager : MonoBehaviour
             HandleOrbit();
             HandlePan();
             cameraInteraction.HandleMouseScrollwheel();
-        }    
-        switch (SelectedTab)
-        {
-            case UiTab.Exteriors:
-                exteriorsInteractor.ProceedWithUpdate(wasDragging, uiHovered);
-                break;
-            case UiTab.Interiors:
-                interiorsInteractor.ProceedWithUpdate();
-                break;
-            case UiTab.Foundation:
-            default:
-                foundationInteractor.ProceedWithUpdate(wasDragging, uiHovered);
-                break;
         }
+        exteriorsInteractor.ProceedWithUpdate(wasDragging, uiHovered);
+        interiorsInteractor.ProceedWithUpdate();
+        foundationInteractor.ProceedWithUpdate(wasDragging, uiHovered);
     }
 
     private void ManageTabs()

@@ -187,7 +187,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 5
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &96458360 stripped
 MonoBehaviour:
@@ -271,7 +271,7 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 94d1e3678d9d9fd4f868c96448376891,
         type: 3}
       propertyPath: m_RootOrder
-      value: 6
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 94d1e3678d9d9fd4f868c96448376891,
         type: 3}
@@ -562,7 +562,7 @@ RectTransform:
   - {fileID: 7699474284198047076}
   - {fileID: 457786633}
   m_Father: {fileID: 0}
-  m_RootOrder: 4
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -687,7 +687,7 @@ MonoBehaviour:
     m_SelectOnRight: {fileID: 0}
   m_Transition: 1
   m_Colors:
-    m_NormalColor: {r: 0, g: 0.45882353, b: 1, a: 0}
+    m_NormalColor: {r: 0, g: 0.45882353, b: 1, a: 1}
     m_HighlightedColor: {r: 0, g: 0.45882353, b: 1, a: 1}
     m_PressedColor: {r: 0.6745098, g: 0.9647059, b: 1, a: 1}
     m_SelectedColor: {r: 0, g: 0.75686276, b: 1, a: 1}
@@ -782,13 +782,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f587faec0a76214b93e49c82cd457d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  NewGridMaxHeight: 40
-  LoadLastSave: 0
+  interactionMeshObject: {fileID: 1421543770}
+  baseGridVisual: {fileID: 579425808}
+  lightingManager: {fileID: 1133595419}
+  newGridMaxHeight: 20
+  LoadLastSave: 1
   TestSave: 0
   TestLoad: 0
-  DefaultGridFile: {fileID: 4900000, guid: b9f4e34b83d6e4445a1c083578daf6bf, type: 3}
-  InteractionMeshObject: {fileID: 1421543770}
-  BaseGridVisual: {fileID: 579425808}
   Blueprints:
   - {fileID: 11400000, guid: dfb762ff39679d841b1d8ad2d6b4ebc7, type: 2}
   - {fileID: 11400000, guid: 61b3a45bc2fe1ad4bb49289cf4e60c10, type: 2}
@@ -1098,6 +1098,7 @@ Transform:
   - {fileID: 579425811}
   - {fileID: 1616632274}
   - {fileID: 1806378653}
+  - {fileID: 1133595423}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1790,7 +1791,7 @@ GameObject:
   - component: {fileID: 1133595420}
   - component: {fileID: 1133595419}
   m_Layer: 0
-  m_Name: LightingBox
+  m_Name: LightingManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1830,12 +1831,12 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1133595418}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 5, z: 0}
   m_LocalScale: {x: 10, y: 10, z: 10}
   m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_Father: {fileID: 536624979}
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1211910452
 GameObject:
@@ -4182,7 +4183,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 490, y: 0}
+  m_AnchoredPosition: {x: 482, y: 0}
   m_SizeDelta: {x: 40, y: 40}
   m_Pivot: {x: 0, y: 1}
 --- !u!1 &7699474284198047077

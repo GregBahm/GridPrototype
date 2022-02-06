@@ -1,10 +1,13 @@
-﻿using Assets.GameGrid;
+﻿using GameGrid;
 using System;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class FoundationInteractionManager : MonoBehaviour
 {
+    private CityBuildingMain gameMain;
+    private InteractionManager interactionMain;
+
     [SerializeField]
     private int gridExpansions;
 
@@ -21,11 +24,10 @@ public class FoundationInteractionManager : MonoBehaviour
     [SerializeField]
     private ExpansionCursor expansionCursor;
 
-    private CityBuildingMain gameMain;
-
     private void Start()
     {
         gameMain = GetComponent<CityBuildingMain>();
+        interactionMain = GetComponent<InteractionManager>();
     }
 
     public void ProceedWithUpdate(bool wasDragging, bool uiHovered)
@@ -39,8 +41,9 @@ public class FoundationInteractionManager : MonoBehaviour
             }
             return;
         }
-        expansionCursor.gameObject.SetActive(true);
-        if(!wasDragging)
+        bool isFoundation = (interactionMain.SelectedTab == InteractionManager.UiTab.Foundation);
+        expansionCursor.gameObject.SetActive(isFoundation);
+        if(!wasDragging && isFoundation)
             HandleExpansion();
     }
 
@@ -62,8 +65,7 @@ public class FoundationInteractionManager : MonoBehaviour
         if (Input.GetMouseButtonUp(0))
         {
             // TODO: Handle expansion undo
-            gameMain.MainGrid.AddToMesh(expander.Points, expander.Edges);
-            gameMain.UpdateBaseGrid();
+            gameMain.UpdateBaseGrid(expander);
             gameMain.UpdateInteractionGrid();
         }
     }
