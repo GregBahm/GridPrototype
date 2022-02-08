@@ -33,7 +33,6 @@ public class InteractionManager : MonoBehaviour
     private ExteriorsInteractionManager exteriorsInteractor;
     private InteriorsInteractionManager interiorsInteractor;
     private FoundationInteractionManager foundationInteractor;
-    private SettingsManager settings;
 
     private DragDetector leftDragDetector;
     private DragDetector rightDragDetector;
@@ -56,7 +55,6 @@ public class InteractionManager : MonoBehaviour
         exteriorsInteractor = GetComponent<ExteriorsInteractionManager>();
         interiorsInteractor = GetComponent<InteriorsInteractionManager>();
         foundationInteractor = GetComponent<FoundationInteractionManager>();
-        settings = GetComponent<SettingsManager>();
         leftDragDetector = new DragDetector(dragStartDistance);
         rightDragDetector = new DragDetector(dragStartDistance);
         tabComponents = GetTabComponents();
@@ -94,7 +92,7 @@ public class InteractionManager : MonoBehaviour
             cameraInteraction.HandleMouseScrollwheel();
         }
         exteriorsInteractor.ProceedWithUpdate(wasDragging, uiHovered);
-        interiorsInteractor.ProceedWithUpdate();
+        interiorsInteractor.ProceedWithUpdate(wasDragging, uiHovered);
         foundationInteractor.ProceedWithUpdate(wasDragging, uiHovered);
     }
 

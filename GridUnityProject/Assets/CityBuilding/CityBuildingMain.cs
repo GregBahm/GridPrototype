@@ -10,7 +10,7 @@ public class CityBuildingMain : MonoBehaviour
     [SerializeField]
     private GameObject interactionMeshObject;
     [SerializeField]
-    private GameObject baseGridVisual;
+    private GameObject groundMesh;
     [SerializeField]
     private LightingManager lightingManager;
     [SerializeField]
@@ -22,6 +22,7 @@ public class CityBuildingMain : MonoBehaviour
     public bool TestLoad;
 
     public InteractionMesh InteractionMesh { get; private set; }
+    public GroundMesh GroundMesh { get; private set; }
 
     public MainGrid MainGrid { get; private set; }
 
@@ -72,8 +73,9 @@ public class CityBuildingMain : MonoBehaviour
     private void Initialize()
     {
         InteractionMesh = new InteractionMesh();
+        GroundMesh = new GroundMesh();
         UpdateInteractionGrid();
-        UpdateBaseGrid();
+        UpdateGroundMesh();
         optionsSource = new VisualOptionsByDesignation(Blueprints);
         visualsManager = new VoxelVisualsManager(this, optionsSource);
     }
@@ -104,20 +106,20 @@ public class CityBuildingMain : MonoBehaviour
         }
     }
 
-    public void UpdateBaseGrid()
+    public void UpdateGroundMesh()
     {
-        InteractionMesh.UpdateGroundMesh(MainGrid);
-        baseGridVisual.GetComponent<MeshFilter>().mesh = InteractionMesh.BaseGridMesh;
+        GroundMesh.UpdateGroundMesh(MainGrid);
+        groundMesh.GetComponent<MeshFilter>().mesh = GroundMesh.BaseGridMesh;
         if (visualsManager != null)
         {
             visualsManager.UpdateForBaseGridModification();
         }
         lightingManager.UpdatePostion(MainGrid);
     }
-    public void UpdateBaseGrid(GridExpander expander)
+    public void UpdateMainGrid(GridExpander expander)
     {
         MainGrid.AddToMesh(expander.Points, expander.Edges);
-        UpdateBaseGrid();
+        UpdateGroundMesh();
     }
 
     public void UpdateInteractionGrid()

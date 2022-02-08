@@ -24,6 +24,8 @@ public class DesignationCell : IDesignationCell
         }
     }
 
+    public Interior AssignedInterior { get; set; }
+
     public bool IsFilled { get { return designation != VoxelDesignationType.Empty; } }
 
     public DesignationCell CellBelow

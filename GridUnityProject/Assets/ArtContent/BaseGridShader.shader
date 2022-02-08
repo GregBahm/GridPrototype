@@ -107,7 +107,7 @@
 
             void ApplyToTristream(v2g p[3], inout TriangleStream<g2f> triStream, float dist, float offset)
             {
-              float windOffset = cos(_Time.z + p[0].worldPos.x) * dist * 0.01;
+              float windOffset = cos(_Time.z + p[0].worldPos.x) * dist * 0.02;
               float4 vertOffset = float4(windOffset.x, offset, 0, 0);
               g2f o;
               o.dist = dist;
@@ -157,9 +157,10 @@
             float4 frag(g2f i) : SV_Target
             {
                 float4 noiseA = SAMPLE_TEXTURE2D(_NoiseMap, sampler_NoiseMap, i.worldPos.xz * .2);
-                float4 noiseB = SAMPLE_TEXTURE2D(_NoiseMap, sampler_NoiseMap, i.worldPos.xz * 1);
+                float4 noiseB = SAMPLE_TEXTURE2D(_NoiseMap, sampler_NoiseMap, i.worldPos.xz * -.12);
+                float4 noiseC = SAMPLE_TEXTURE2D(_NoiseMap, sampler_NoiseMap, i.worldPos.xz * .5);
 
-                float noise = lerp(noiseA.x, noiseB.x, .5);
+                float noise = lerp(noiseA.x, max(noiseB.x ,noiseC.x), .5);
                 float alphaNoise = pow(noise, 1.1);
 
                 float3 ret = _Color;

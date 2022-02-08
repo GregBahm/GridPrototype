@@ -67,7 +67,7 @@ namespace Interaction
             if (Input.GetMouseButtonUp(0))
             {
                 // TODO: Handle expansion undo
-                gameMain.UpdateBaseGrid(expander);
+                gameMain.UpdateMainGrid(expander);
                 gameMain.UpdateInteractionGrid();
             }
         }
@@ -86,7 +86,7 @@ namespace Interaction
         {
             //TODO: handle smoothing undo
             gameMain.MainGrid.DoEase();
-            gameMain.UpdateBaseGrid();
+            gameMain.UpdateGroundMesh();
             gameMain.UpdateInteractionGrid();
         }
     }
