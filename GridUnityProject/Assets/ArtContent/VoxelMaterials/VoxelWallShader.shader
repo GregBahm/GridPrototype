@@ -25,9 +25,15 @@
           #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 
           CBUFFER_START(UnityPerMaterial)
-            float4 _BaseMap_ST;
-            float4 _BaseColor;
-            float _Cutoff;
+          float4 _BaseMap_ST;
+          float4 _BaseColor;
+          float _Cutoff;
+          float3 _AnchorA;
+          float3 _AnchorB;
+          float3 _AnchorC;
+          float3 _AnchorD;
+          float3 _Color;
+          float _Cull;
           CBUFFER_END
         ENDHLSL
 
@@ -62,13 +68,6 @@
                   float3 normal : NORMAL;
               };
 
-              float3 _AnchorA;
-              float3 _AnchorB;
-              float3 _AnchorC;
-              float3 _AnchorD;
-              float3 _Color;
-
-              float _Cull;
               float4x4 _LightBoxTransform;
 
               TEXTURE2D(_NoiseMap);
@@ -242,13 +241,6 @@
                 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/SurfaceInput.hlsl"
                 #include "Packages/com.unity.render-pipelines.universal/Shaders/DepthOnlyPass.hlsl"
 
-                float3 _AnchorA;
-                float3 _AnchorB;
-                float3 _AnchorC;
-                float3 _AnchorD;
-                float _Cull;
-
-
                 float2 GetRemapped(float2 toRemap, float2 x1y1, float2 x0y1, float2 x0y0, float2 x1y0)
                 {
                   float2 y0 = lerp(x0y0, x1y0, toRemap.x);
@@ -304,13 +296,6 @@
                 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/CommonMaterial.hlsl"
                 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/SurfaceInput.hlsl"
                 #include "Packages/com.unity.render-pipelines.universal/Shaders/DepthNormalsPass.hlsl"
-
-                float3 _AnchorA;
-                float3 _AnchorB;
-                float3 _AnchorC;
-                float3 _AnchorD;
-                float _Cull;
-
 
                 float2 GetRemapped(float2 toRemap, float2 x1y1, float2 x0y1, float2 x0y0, float2 x1y0)
                 {
@@ -391,11 +376,6 @@
                 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/CommonMaterial.hlsl"
                 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/SurfaceInput.hlsl"
                 #include "Packages/com.unity.render-pipelines.universal/Shaders/ShadowCasterPass.hlsl"
-
-                float3 _AnchorA;
-                float3 _AnchorB;
-                float3 _AnchorC;
-                float3 _AnchorD;
 
                 float3 GetTransformedBaseVert(float3 vert)
                 {
