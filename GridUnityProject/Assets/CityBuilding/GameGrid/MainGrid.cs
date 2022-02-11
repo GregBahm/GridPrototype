@@ -158,18 +158,20 @@ namespace GameGrid
             }
             positionAverage /= borderConnections.Count();
             positionAverage = positionAverage.normalized * point.Position.magnitude;
-            point.Position = positionAverage;
+            //point.Position = positionAverage;
         }
 
         private void DoEaseInteriorPoint(GroundPoint point)
         {
-            Vector2 positionAverage = Vector2.zero;
+            Vector2 positionOffset = Vector2.zero;
             foreach(GroundPoint connection in point.DirectConnections)
             {
-                positionAverage += connection.Position;
+                Vector2 toPosition = point.Position - connection.Position;//connection.Position - point.Position;
+                float weight = Mathf.Abs(toPosition.magnitude - 1f);
+                weight = Mathf.Pow(weight, 5);
+                positionOffset += toPosition.normalized * weight;
             }
-            positionAverage /= point.DirectConnections.Count();
-            point.Position = positionAverage;
+            point.Position += positionOffset;
         }
 
         private void AddEdgesAndQuads(IEnumerable<GroundEdge> newEdges)

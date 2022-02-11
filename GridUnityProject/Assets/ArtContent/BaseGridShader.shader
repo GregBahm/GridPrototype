@@ -175,6 +175,7 @@
 
                 float grid = 1 - i.uv.x;
                 grid = AdjustGridLine(grid);
+                return grid;
                 ret = lerp(ret * _ShadowColor, ret, i.dist);
 
                 float cursorPower = (1 - i.distToCursor / 40);
