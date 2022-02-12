@@ -49,20 +49,20 @@ public class CityBuildingMain : MonoBehaviour
             MainGrid = new MainGrid(newGridMaxHeight, saveState.Ground.Points, saveState.Ground.Edges);
             Initialize();
             HashSet<GroundQuad> columnsToUpdate = new HashSet<GroundQuad>();
-            //foreach (var item in saveState.Designations.DesignationStates) // Turn back on after working out the grid
-            //{
-            //    DesignationCell cell = MainGrid.Points[item.GroundPointIndex].DesignationCells[item.Height];
-            //    cell.Designation = item.Designation;
+            foreach (var item in saveState.Designations.DesignationStates) // Turn back on after working out the grid
+            {
+                DesignationCell cell = MainGrid.Points[item.GroundPointIndex].DesignationCells[item.Height];
+                cell.Designation = item.Designation;
 
-            //    foreach (GroundQuad column in MainGrid.GetConnectedQuads(cell.GroundPoint))
-            //    {
-            //        columnsToUpdate.Add(column);
-            //    }
-            //}
-            //foreach (GroundQuad quad in columnsToUpdate)
-            //{
-            //    visualsManager.UpdateColumn(quad);
-            //}
+                foreach (GroundQuad column in MainGrid.GetConnectedQuads(cell.GroundPoint))
+                {
+                    columnsToUpdate.Add(column);
+                }
+            }
+            foreach (GroundQuad quad in columnsToUpdate)
+            {
+                visualsManager.UpdateColumn(quad);
+            }
             UpdateInteractionGrid();
         }
         else
