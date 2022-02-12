@@ -788,6 +788,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f587faec0a76214b93e49c82cd457d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DefaultSave: {fileID: 4900000, guid: 36285ddb1aacecc499cbb59bcf7feffb, type: 3}
   interactionMeshObject: {fileID: 1421543770}
   groundMesh: {fileID: 579425808}
   lightingManager: {fileID: 1133595419}
@@ -1129,7 +1130,7 @@ MonoBehaviour:
   InteriorsTab: {fileID: 1211910452}
   FoundationTab: {fileID: 1885678491}
   UndoButton: {fileID: 7699474284198047079}
-  SelectedTab: 0
+  SelectedTab: 2
 --- !u!114 &536624981
 MonoBehaviour:
   m_ObjectHideFlags: 0

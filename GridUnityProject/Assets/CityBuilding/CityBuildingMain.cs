@@ -4,9 +4,11 @@ using UnityEngine;
 using System.Linq;
 using System.Collections.Generic;
 using Interaction;
+using System.IO;
 
 public class CityBuildingMain : MonoBehaviour
 {
+    public TextAsset DefaultSave;
     [SerializeField]
     private GameObject interactionMeshObject;
     [SerializeField]
@@ -43,24 +45,24 @@ public class CityBuildingMain : MonoBehaviour
         UndoManager = new UndoManager();
         if(LoadLastSave)
         {
-            GameSaveState saveState = GameSaveState.Load();
+            GameSaveState saveState = GameSaveState.Load(DefaultSave.ToString());
             MainGrid = new MainGrid(newGridMaxHeight, saveState.Ground.Points, saveState.Ground.Edges);
             Initialize();
             HashSet<GroundQuad> columnsToUpdate = new HashSet<GroundQuad>();
-            foreach (var item in saveState.Designations.DesignationStates)
-            {
-                DesignationCell cell = MainGrid.Points[item.GroundPointIndex].DesignationCells[item.Height];
-                cell.Designation = item.Designation;
+            //foreach (var item in saveState.Designations.DesignationStates) // Turn back on after working out the grid
+            //{
+            //    DesignationCell cell = MainGrid.Points[item.GroundPointIndex].DesignationCells[item.Height];
+            //    cell.Designation = item.Designation;
 
-                foreach (GroundQuad column in MainGrid.GetConnectedQuads(cell.GroundPoint))
-                {
-                    columnsToUpdate.Add(column);
-                }
-            }
-            foreach (GroundQuad quad in columnsToUpdate)
-            {
-                visualsManager.UpdateColumn(quad);
-            }
+            //    foreach (GroundQuad column in MainGrid.GetConnectedQuads(cell.GroundPoint))
+            //    {
+            //        columnsToUpdate.Add(column);
+            //    }
+            //}
+            //foreach (GroundQuad quad in columnsToUpdate)
+            //{
+            //    visualsManager.UpdateColumn(quad);
+            //}
             UpdateInteractionGrid();
         }
         else

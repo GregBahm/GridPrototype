@@ -5,7 +5,7 @@ using UnityEngine;
 [Serializable]
 public class GameSaveState
 {
-    private const string SaveFilePath = "TheSaveFile";
+    public const string SaveFilePath = "TheSaveFile";
 
     public GroundSaveState Ground;
     public DesignationsSaveState Designations;
@@ -31,6 +31,11 @@ public class GameSaveState
             Debug.Log("No save data found. Loading default grid");
             return null;
         }
-        return JsonUtility.FromJson<GameSaveState>(data);
+        return Load(data);
+    }
+
+    public static GameSaveState Load(string saveState)
+    {
+        return JsonUtility.FromJson<GameSaveState>(saveState);
     }
 }
