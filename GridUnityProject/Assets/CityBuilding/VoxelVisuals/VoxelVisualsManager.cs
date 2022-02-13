@@ -29,7 +29,7 @@ public class VoxelVisualsManager
             UpdateMeshBounds(gameObjects.Filter);
             gameObjects.Obj.name = GetObjName(component);
             if (component.Contents.Materials != null)
-                gameObjects.Renderer.materials = component.Contents.Materials.Select(item => new Material(item)).ToArray();
+                gameObjects.Renderer.sharedMaterials = component.Contents.Materials;
         }
         else
         {
@@ -43,7 +43,7 @@ public class VoxelVisualsManager
             MeshFilter filter = obj.GetComponent<MeshFilter>();
             UpdateMeshBounds(filter);
             MeshRenderer renderer = obj.GetComponent<MeshRenderer>();
-            renderer.materials = component.Contents.Materials.Select(item => new Material(item)).ToArray();
+            renderer.sharedMaterials = component.Contents.Materials;
             component.SetMaterialProperties(renderer);
             
             filter.mesh = component.Contents.Mesh;

@@ -74,6 +74,7 @@
                 float4 vertex : SV_POSITION;
                 float distToCursor : TEXCOORD1;
                 float3 worldPos : TEXCOORD3;
+                float3 normal : NORMAL;
             };
 
             struct g2f
@@ -83,6 +84,7 @@
                 float distToCursor : TEXCOORD1;
                 float3 worldPos : TEXCOORD3;
                 float dist : TEXCOORD2;
+                float3 normal : NORMAL;
             };
 
             float3 GetBoxLighting(float3 worldPos)
@@ -100,6 +102,7 @@
                 float3 worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
                 o.distToCursor = length(worldPos - _DistToCursor);
                 o.worldPos = worldPos;
+                o.normal = float3(0, 1, 0);
                 return o;
             }
 
@@ -110,6 +113,7 @@
               float windOffset = cos(_Time.z + p[0].worldPos.x) * dist * 0.02;
               float4 vertOffset = float4(windOffset.x, offset, 0, 0);
               g2f o;
+              o.normal = float3(0, 1, 0);
               o.dist = dist;
               o.uv = p[0].uv;
               o.distToCursor = p[0].distToCursor;
@@ -164,19 +168,18 @@
                 float alphaNoise = pow(noise, 1.1);
 
                 float3 ret = _Color;
-                float3 boxLighting = GetBoxLighting(i.worldPos) + .5;
+                float3 boxLighting = GetBoxLighting(i.worldPos);
                 half shadow = MainLightRealtimeShadow(TransformWorldToShadowCoord(i.worldPos));
                 float ssao = GetSsao(i.vertex);
                 ret *= boxLighting;
                 ret = lerp(ret * _ShadowColor, ret, shadow);
-                ret *= ssao;
+                ret = lerp(ret * float3(0, 0, 1), ret, ssao);
 
-                ret += float3(1, 1, 0) * pow(noise, 2) * .5 * shadow;
+                ret += float3(.5, 1, 0) * pow(noise, 2) * .5 * shadow;
+                ret = lerp(ret * float3(1, 1, 0), ret, i.dist);
 
                 float grid = 1 - i.uv.x;
                 grid = AdjustGridLine(grid);
-                ret = lerp(ret * _ShadowColor, ret, i.dist);
-
                 float cursorPower = (1 - i.distToCursor / 40);
                 cursorPower = pow(saturate(cursorPower), 20);
                 float3 lineVal = lerp(ret, ret * 2, cursorPower * 1);
@@ -197,7 +200,7 @@
               ZTest LEqual
 
               HLSLPROGRAM
-                #pragma vertex DisplacedDepthNormalsVertex
+                #pragma vertex DepthNormalsVertex
                 #pragma fragment DepthNormalsFragment
 
               // Material Keywords
@@ -213,17 +216,6 @@
               #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/SurfaceInput.hlsl"
               #include "Packages/com.unity.render-pipelines.universal/Shaders/DepthNormalsPass.hlsl"
 
-          Varyings DisplacedDepthNormalsVertex(Attributes input)
-          {
-            Varyings output = (Varyings)0;
-            UNITY_SETUP_INSTANCE_ID(input);
-            UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
-
-            output.positionCS = TransformObjectToHClip(input.positionOS.xyz);
-            VertexNormalInputs normalInput = GetVertexNormalInputs(float3(0, 1, 0), input.tangentOS);
-              output.normalWS = NormalizeNormalPerVertex(normalInput.normalWS);
-            return output;
-          }
 
             ENDHLSL
             }
@@ -237,7 +229,7 @@
                 ZTest LEqual
 
                 HLSLPROGRAM
-                #pragma vertex DisplacedDepthOnlyVertex
+                #pragma vertex DepthOnlyVertex
                 #pragma fragment DepthOnlyFragment
 
               // Material Keywords
@@ -252,42 +244,33 @@
               #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/SurfaceInput.hlsl"
               #include "Packages/com.unity.render-pipelines.universal/Shaders/DepthOnlyPass.hlsl"
 
-              float3 _AnchorA;
-              float3 _AnchorB;
-              float3 _AnchorC;
-              float3 _AnchorD;
-              float _Cull;
-
-
-              float2 GetRemapped(float2 toRemap, float2 x1y1, float2 x0y1, float2 x0y0, float2 x1y0)
-              {
-                float2 y0 = lerp(x0y0, x1y0, toRemap.x);
-                float2 y1 = lerp(x0y1, x1y1, toRemap.x);
-                return lerp(y0, y1, toRemap.y);
-              }
-
-              float3 GetTransformedBaseVert(float3 vert)
-              {
-                float2 toRemap = float2(vert.x + .5, 1 - (vert.z + .5));
-                float2 remapped = GetRemapped(toRemap, _AnchorA.xz, _AnchorB.xz, _AnchorC.xz, _AnchorD.xz);
-                return float3(remapped.x, vert.y, remapped.y);
-              }
-
-              Varyings DisplacedDepthOnlyVertex(Attributes input)
-              {
-                Varyings output = (Varyings)0;
-                UNITY_SETUP_INSTANCE_ID(input);
-                UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
-
-                // Example Displacement
-                input.position.xyz = GetTransformedBaseVert(input.position.xyz);
-
-                output.uv = TRANSFORM_TEX(input.texcoord, _BaseMap);
-                output.positionCS = TransformObjectToHClip(input.position.xyz);
-                return output;
-              }
-
             ENDHLSL
+            }
+              Pass // ShadowCaster, for casting shadows
+            {
+                Name "ShadowCaster"
+                Tags { "LightMode" = "ShadowCaster" }
+
+                ZWrite On
+                ZTest LEqual
+
+                HLSLPROGRAM
+                #pragma vertex  ShadowPassVertex
+                #pragma fragment ShadowPassFragment
+
+              // Material Keywords
+              #pragma shader_feature_local_fragment _ALPHATEST_ON
+              #pragma shader_feature_local_fragment _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
+
+              // GPU Instancing
+              #pragma multi_compile_instancing
+              //#pragma multi_compile _ DOTS_INSTANCING_ON
+
+              #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/CommonMaterial.hlsl"
+              #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/SurfaceInput.hlsl"
+              #include "Packages/com.unity.render-pipelines.universal/Shaders/ShadowCasterPass.hlsl"
+
+              ENDHLSL
             }
     }
 }

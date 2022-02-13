@@ -9,11 +9,21 @@ public class LightingManager : MonoBehaviour
 {
     public Texture TopLighting;
     public Texture Bottomlighting;
+    public bool ConstantlyUpdateTextures;
 
     private void Start()
     {
         Shader.SetGlobalTexture("_BottomLighting", Bottomlighting);
         Shader.SetGlobalTexture("_TopLighting", TopLighting);
+    }
+
+    private void Update()
+    {
+        if(ConstantlyUpdateTextures)
+        {
+            Shader.SetGlobalTexture("_BottomLighting", Bottomlighting);
+            Shader.SetGlobalTexture("_TopLighting", TopLighting);
+        }
     }
 
     public void UpdatePostion(MainGrid grid)

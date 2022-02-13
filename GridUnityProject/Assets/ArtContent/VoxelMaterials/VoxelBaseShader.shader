@@ -155,11 +155,24 @@
                 float baseShade = GetBaseShade(i.normal);
                 float ssao = GetSsao(i.vertex);
                 half shadow = MainLightRealtimeShadow(TransformWorldToShadowCoord(i.worldPos));
-                float3 ret = _Color;
-                ret *= baseShade;
-                ret *= boxLighting + .5;
-                ret = lerp(ret * float3(0, .25, .5), ret, ssao);
-                ret *= lerp(ret * float3(.5, .75, 1), ret, shadow);
+                float3 ret = _Color * 1.25;
+                ret *= lerp(boxLighting * .75, 1, .5);
+                //ret *= baseShade;
+                //return ssao;
+                //ret = lerp(ret * boxLighting, ret, saturate(ssao ));
+                ret *= lerp(ret * float3(0.3, .6, 1), ret, shadow);
+                float shadedSsao = lerp(pow(ssao, 2), pow(ssao, .5), shadow);
+                ret *= shadedSsao;
+//                return shadedSsao;
+
+
+                float bounceLight = saturate(1 - i.worldPos.y * .25);
+                bounceLight = pow(bounceLight, 5) * .5;
+                float bottomOcclude = 1 -  pow(saturate(1 - i.worldPos.y * .5), 40);
+                //bounceLight *= shadow;
+                //ret += bounceLight * .2;
+                ret *= bottomOcclude;
+
                 return float4(ret, 1);
             }
             ENDHLSL
