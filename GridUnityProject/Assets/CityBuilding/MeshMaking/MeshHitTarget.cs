@@ -9,22 +9,22 @@ namespace MeshMaking
 {
     public class MeshHitTarget
     {
-        public DesignationCell TargetCell { get; }
-        public DesignationCell SourceCell { get; }
+        public DesignationCell CellAboveCursor { get; }
+        public DesignationCell CellUnderCursor { get; }
         public Vector3[] FaceVerts { get; }
         public Vector3 Center { get; }
         public Vector3 Normal { get; }
 
-        internal MeshHitTarget(DesignationCell targetCell, DesignationCell sourceCell, IEnumerable<MeshBuilderTriangle> tris)
+        internal MeshHitTarget(DesignationCell cellAboveCursor, DesignationCell cellUnderCursor, IEnumerable<MeshBuilderTriangle> tris)
         {
-            TargetCell = targetCell;
-            SourceCell = sourceCell;
+            CellAboveCursor = cellAboveCursor;
+            CellUnderCursor = cellUnderCursor;
             Vector3[] unsortedFaceVerts = GetUnsortedFaceVerts(tris).ToArray();
             Center = Average(unsortedFaceVerts);
             FaceVerts = GetSortedFaceVerts(tris, unsortedFaceVerts).ToArray();
-            if(TargetCell != null && SourceCell != null)
+            if(CellAboveCursor != null && CellUnderCursor != null)
             {
-                Normal = (TargetCell.Position - SourceCell.Position).normalized;
+                Normal = (CellAboveCursor.Position - CellUnderCursor.Position).normalized;
             }
             else
             {

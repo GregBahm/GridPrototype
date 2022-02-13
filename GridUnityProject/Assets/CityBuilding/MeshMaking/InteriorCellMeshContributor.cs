@@ -4,13 +4,13 @@ using System.Linq;
 
 namespace MeshMaking
 {
-    internal class CellMeshContributor : IMeshContributor
+    internal class InteriorCellMeshContributor : IMeshContributor
     {
         private readonly DesignationCell cell;
         public IEnumerable<IMeshBuilderPoint> Points { get; }
         public IEnumerable<MeshBuilderTriangle> Triangles { get; }
 
-        public CellMeshContributor(DesignationCell cell)
+        public InteriorCellMeshContributor(DesignationCell cell)
         {
             this.cell = cell;
 
@@ -36,18 +36,24 @@ namespace MeshMaking
             foreach (GroundEdge edge in cell.GroundPoint.Edges)
             {
                 DesignationCell connectedCell = edge.GetOtherPoint(cell.GroundPoint).DesignationCells[cell.Height];
-                yield return new VerticalMeshContributor(cell, edge, connectedCell);
+                bool take = connectedCell.AssignedInterior == cell.AssignedInterior;
+                yield return new VerticalMeshContributor(cell, edge, connectedCell, take);
             }
         }
 
         private bool GetDoesHaveTop()
         {
-            return !cell.GroundPoint.DesignationCells[cell.Height + 1].IsFilled;
+            DesignationCell cellAbove = cell.GroundPoint.DesignationCells[cell.Height + 1];
+            return cellAbove.AssignedInterior != cell.AssignedInterior;
         }
 
         private bool GetDoesHaveBottom()
         {
-            return cell.Height != 0 && !cell.GroundPoint.DesignationCells[cell.Height - 1].IsFilled;
+            if (cell.Height == 0)
+                return false;
+
+            DesignationCell cellBelow = cell.GroundPoint.DesignationCells[cell.Height - 1];
+            return cellBelow.AssignedInterior != cell.AssignedInterior;
         }
     }
 }

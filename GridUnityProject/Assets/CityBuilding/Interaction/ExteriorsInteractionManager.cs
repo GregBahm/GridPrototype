@@ -59,7 +59,7 @@ namespace Interaction
         {
             RaycastHit hit;
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            if (Physics.Raycast(ray, out hit))
+            if (gameMain.InteractionMesh.Collider.Raycast(ray, out hit, float.MaxValue))
             {
                 return gameMain.InteractionMesh.GetHitTarget(hit.triangleIndex);
             }
@@ -79,11 +79,11 @@ namespace Interaction
         {
             if (Input.GetMouseButtonUp(0)
                 && hitInfo != null
-                && hitInfo.TargetCell != null
-                && !hitInfo.TargetCell.GroundPoint.IsBorder)
+                && hitInfo.CellAboveCursor != null
+                && !hitInfo.CellAboveCursor.GroundPoint.IsBorder)
             {
-                RegisterDesignationUndo(hitInfo.TargetCell);
-                SetDesignation(hitInfo.TargetCell, FillType);
+                RegisterDesignationUndo(hitInfo.CellAboveCursor);
+                SetDesignation(hitInfo.CellAboveCursor, FillType);
             }
         }
 
@@ -91,10 +91,10 @@ namespace Interaction
         {
             if (Input.GetMouseButtonUp(1)
                 && hitInfo != null
-                && hitInfo.SourceCell != null)
+                && hitInfo.CellUnderCursor != null)
             {
-                RegisterDesignationUndo(hitInfo.SourceCell);
-                SetDesignation(hitInfo.SourceCell, VoxelDesignationType.Empty);
+                RegisterDesignationUndo(hitInfo.CellUnderCursor);
+                SetDesignation(hitInfo.CellUnderCursor, VoxelDesignationType.Empty);
             }
         }
     }

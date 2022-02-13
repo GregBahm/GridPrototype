@@ -12,20 +12,20 @@ namespace MeshMaking
         private readonly List<MeshBuilderTriangle> triangles = new List<MeshBuilderTriangle>();
         public IEnumerable<MeshBuilderTriangle> Triangles { get { return triangles; } }
 
-        public VerticalMeshContributor(DesignationCell sourceCell, GroundEdge edge, DesignationCell connectedCell)
+        public VerticalMeshContributor(DesignationCell sourceCell, GroundEdge edge, DesignationCell connectedCell, bool take)
         {
             DesignationCell baseAbove = sourceCell.CellAbove;
             DesignationCell connectedAbove = connectedCell.CellAbove;
             MeshBuilderConnectionPoint edgePoint = new MeshBuilderConnectionPoint(sourceCell, connectedCell);
             MeshBuilderConnectionPoint edgeAbovePoint = new MeshBuilderConnectionPoint(baseAbove, connectedAbove);
 
-            if(!connectedCell.IsFilled || edge.IsBorder)
+            if(!take || edge.IsBorder)
             {
                 points.Add(edgePoint);
                 points.Add(edgeAbovePoint);
             }
 
-            if (!connectedCell.IsFilled)
+            if (!take)
             {
                 foreach (GroundQuad quad in edge.Quads)
                 {

@@ -28,8 +28,10 @@ namespace Interaction
             {
                 if(addButton.isOn)
                 {
-                    selectedInterior = null;
-                    HandleAddRoom();
+                    if (selectedInterior == null)
+                        HandleAddRoom();
+                    else
+                        HandleExpandSelectedRoom();
                 }
                 else
                 {
@@ -42,15 +44,42 @@ namespace Interaction
             }
         }
 
-
-
-        private MeshHitTarget GetPotentialMeshInteraction()
+        private void HandleExpandSelectedRoom()
+        {
+            MeshHitTarget meshHitTarget = GetExpandedInteriorTarget();
+            bool canExpandRoom = CanExpandRoom(meshHitTarget);
+            if (canExpandRoom)
+            {
+                UpdateCursor(meshHitTarget);
+                if (Input.GetMouseButtonUp(0))
+                {
+                    DoExpandRoom(meshHitTarget.CellAboveCursor);
+                }
+            }
+            else
+                UpdateCursor(null);
+        }
+        private MeshHitTarget GetNewRoomTarget()
         {
             RaycastHit hit;
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            if (Physics.Raycast(ray, out hit))
+
+            if (gameMain.InteractionMesh.Collider.Raycast(ray, out hit, float.MaxValue))
             {
                 return gameMain.InteractionMesh.GetHitTarget(hit.triangleIndex);
+            }
+            return null;
+        }
+
+        private MeshHitTarget GetExpandedInteriorTarget()
+        {
+            RaycastHit hit;
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+            InteriorInteractionMesh mesh = gameMain.Interiors.GetMeshFor(selectedInterior);
+            if (mesh.Collider.Raycast(ray, out hit, float.MaxValue))
+            {
+                return mesh.GetHitTarget(hit.triangleIndex);
             }
             return null;
         }
@@ -67,14 +96,14 @@ namespace Interaction
         {
             // In this case, filled designation cells without interiors can be clicked on to start a new room.
             // Right clicking cells with interiors clears the interior
-            MeshHitTarget meshHitTarget = GetPotentialMeshInteraction();
+            MeshHitTarget meshHitTarget = GetNewRoomTarget();
             bool canAddNewRoom = CanAddNewRoom(meshHitTarget);
             if (canAddNewRoom)
             {
                 UpdateCursor(meshHitTarget);
                 if(Input.GetMouseButtonUp(0))
                 {
-                    DoAddNewRoom(meshHitTarget.SourceCell);
+                    DoAddNewRoom(meshHitTarget.CellUnderCursor);
                 }
             }
             else
@@ -86,11 +115,30 @@ namespace Interaction
             Interior newInterior = new Interior(gameMain.MainGrid.Interiors);
             cell.AssignedInterior = newInterior;
             gameMain.Interiors.UpdateInteractionMesh(newInterior);
+            selectedInterior = newInterior;
+        }
+
+        private void DoExpandRoom(DesignationCell sourceCell)
+        {
+            sourceCell.AssignedInterior = selectedInterior;
+            gameMain.Interiors.UpdateInteractionMesh(selectedInterior);
+        }
+
+        bool CanExpandRoom(MeshHitTarget meshHitTarget)
+        {
+            DesignationCell cell = meshHitTarget?.CellAboveCursor;
+            if (cell != null)
+            {
+                bool isInteriorable = cell.Designation == VoxelDesignationType.SlantedRoof ||
+                    cell.Designation == VoxelDesignationType.WalkableRoof;
+                return isInteriorable && cell.AssignedInterior == null;
+            }
+            return false;
         }
 
         bool CanAddNewRoom(MeshHitTarget meshHitTarget)
         {
-            DesignationCell cell = meshHitTarget?.SourceCell;
+            DesignationCell cell = meshHitTarget?.CellUnderCursor;
             if(cell != null)
             {
                 bool isInteriorable = cell.Designation == VoxelDesignationType.SlantedRoof ||

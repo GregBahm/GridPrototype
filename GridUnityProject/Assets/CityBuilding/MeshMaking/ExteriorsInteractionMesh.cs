@@ -7,11 +7,11 @@ namespace MeshMaking
 {
     public class ExteriorsInteractionMesh : InteractionMesh
     {
-        private readonly MeshCollider collider;
+        public MeshCollider Collider { get; }
 
         public ExteriorsInteractionMesh(GameObject interactionMeshObject)
         {
-            collider = interactionMeshObject.GetComponent<MeshCollider>();
+            Collider = interactionMeshObject.GetComponent<MeshCollider>();
         }
 
         public void UpdateMesh(MainGrid grid)
@@ -19,13 +19,13 @@ namespace MeshMaking
             IEnumerable<IMeshContributor> meshContributors = GetMeshContributors(grid).ToArray();
             UpdateMesh(meshContributors);
 
-            collider.sharedMesh = null; // Hack to force update
-            collider.sharedMesh = Mesh;
+            Collider.sharedMesh = null; // Hack to force update
+            Collider.sharedMesh = Mesh;
         }
         private IEnumerable<IMeshContributor> GetMeshContributors(MainGrid grid)
         {
             IEnumerable<IMeshContributor> groundContributor = grid.Points.Where(item => !item.DesignationCells[0].IsFilled).Select(item => new HorizontalMeshContributor(item));
-            IEnumerable<IMeshContributor> contributors = grid.FilledCells.Select(item => new CellMeshContributor(item));
+            IEnumerable<IMeshContributor> contributors = grid.FilledCells.Select(item => new ExteriorCellMeshContributor(item));
             return groundContributor.Concat(contributors);
         }
     }
