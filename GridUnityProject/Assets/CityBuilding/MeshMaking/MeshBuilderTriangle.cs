@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace MeshMaking
 {
-    class MeshBuilderTriangle
+    public class MeshBuilderTriangle
     {
         public IMeshBuilderPoint PointA { get; }
         public IMeshBuilderPoint PointB { get; }

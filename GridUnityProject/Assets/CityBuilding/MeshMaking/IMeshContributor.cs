@@ -2,7 +2,7 @@
 
 namespace MeshMaking
 {
-    interface IMeshContributor
+    public interface IMeshContributor
     {
         IEnumerable<IMeshBuilderPoint> Points { get; }
 

@@ -5,12 +5,15 @@ using System.Linq;
 using System.Collections.Generic;
 using Interaction;
 using System.IO;
+using Interiors;
 
 public class CityBuildingMain : MonoBehaviour
 {
     public TextAsset DefaultSave;
     [SerializeField]
     private GameObject interactionMeshObject;
+    [SerializeField]
+    private GameObject interiorMeshPrefab;
     [SerializeField]
     private GameObject groundMesh;
     [SerializeField]
@@ -23,29 +26,24 @@ public class CityBuildingMain : MonoBehaviour
     public bool TestSave;
     public bool TestLoad;
 
-    public InteractionMesh InteractionMesh { get; private set; }
+    public ExteriorsInteractionMesh InteractionMesh { get; private set; }
     public GroundMesh GroundMesh { get; private set; }
 
     public MainGrid MainGrid { get; private set; }
 
     private VoxelVisualsManager visualsManager;
+    public InteriorsManager Interiors { get; private set; }
+    
     private VisualOptionsByDesignation optionsSource;
 
     public VoxelBlueprint[] Blueprints;
-
-    public static CityBuildingMain Instance;
-
-    private void Awake()
-    {
-        Instance = this;
-    }
 
     private void Start()
     {
         UndoManager = new UndoManager();
         if(LoadLastSave)
         {
-            GameSaveState saveState = GameSaveState.Load(DefaultSave.ToString());
+            GameSaveState saveState = GameSaveState.Load();
             MainGrid = new MainGrid(newGridMaxHeight, saveState.Ground.Points, saveState.Ground.Edges);
             Initialize();
             HashSet<GroundQuad> columnsToUpdate = new HashSet<GroundQuad>();
@@ -74,12 +72,13 @@ public class CityBuildingMain : MonoBehaviour
 
     private void Initialize()
     {
-        InteractionMesh = new InteractionMesh();
+        InteractionMesh = new ExteriorsInteractionMesh(interactionMeshObject);
         GroundMesh = new GroundMesh();
         UpdateInteractionGrid();
         UpdateGroundMesh();
         optionsSource = new VisualOptionsByDesignation(Blueprints);
         visualsManager = new VoxelVisualsManager(this, optionsSource);
+        Interiors = new InteriorsManager(interiorMeshPrefab);
     }
 
     private void Update()
@@ -110,8 +109,8 @@ public class CityBuildingMain : MonoBehaviour
 
     public void UpdateGroundMesh()
     {
-        GroundMesh.UpdateGroundMesh(MainGrid);
-        groundMesh.GetComponent<MeshFilter>().mesh = GroundMesh.BaseGridMesh;
+        GroundMesh.UpdateMesh(MainGrid);
+        groundMesh.GetComponent<MeshFilter>().mesh = GroundMesh.Mesh;
         if (visualsManager != null)
         {
             visualsManager.UpdateForBaseGridModification();
@@ -127,7 +126,5 @@ public class CityBuildingMain : MonoBehaviour
     public void UpdateInteractionGrid()
     {
         InteractionMesh.UpdateMesh(MainGrid);
-        interactionMeshObject.GetComponent<MeshCollider>().sharedMesh = null; // Hack to force update
-        interactionMeshObject.GetComponent<MeshCollider>().sharedMesh = InteractionMesh.Mesh;
     }
 }

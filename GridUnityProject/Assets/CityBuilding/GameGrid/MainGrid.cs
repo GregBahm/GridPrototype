@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Interiors;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -7,7 +8,6 @@ namespace GameGrid
 {
     public class MainGrid
     {
-
         public int MaxHeight { get; }
 
         private List<GroundPoint> points = new List<GroundPoint>();
@@ -35,8 +35,7 @@ namespace GameGrid
                 }
             }
         }
-
-        public event EventHandler GridChanged;
+        public GridInteriors Interiors { get; }
 
         private readonly Dictionary<GroundPoint, List<GroundEdge>> edgesTable = new Dictionary<GroundPoint, List<GroundEdge>>();
         private readonly Dictionary<GroundPoint, List<GroundQuad>> polyTable = new Dictionary<GroundPoint, List<GroundQuad>>();
@@ -51,6 +50,7 @@ namespace GameGrid
         {
             MaxHeight = maxHeight;
             AddToMesh(points, edges);
+            Interiors = new GridInteriors();
         }
 
         public void SetCellFilled(DesignationCell designationCell, bool value)
@@ -100,10 +100,9 @@ namespace GameGrid
             }
 
             UpdateVoxelVisuals();
-            GridChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        // new points must start at the beginning of the current index and increment up from there
+        // New points must start at the beginning of the current index and increment up from there
         private void ValidatePointIndicies(GroundPointBuilder[] sortedNewPoints)
         {
             int startingIndex = Points.Count;
@@ -148,19 +147,6 @@ namespace GameGrid
                 quad.Points[2].Position = Vector2.Lerp(squarifier.OutputC, quad.Points[2].Position, .5f);
                 quad.Points[3].Position = Vector2.Lerp(squarifier.OutputD, quad.Points[3].Position, .5f);
             }
-        }
-
-        private void DoEaseInteriorPoint(GroundPoint point)
-        {
-            Vector2 positionOffset = Vector2.zero;
-            foreach(GroundPoint connection in point.DirectConnections)
-            {
-                Vector2 toPosition = point.Position - connection.Position;//connection.Position - point.Position;
-                float weight = Mathf.Abs(toPosition.magnitude - 1f);
-                weight = Mathf.Pow(weight, 5);
-                positionOffset += toPosition.normalized * weight;
-            }
-            point.Position += positionOffset;
         }
 
         private void AddEdgesAndQuads(IEnumerable<GroundEdge> newEdges)

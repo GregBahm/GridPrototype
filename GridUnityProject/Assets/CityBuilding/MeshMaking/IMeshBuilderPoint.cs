@@ -2,7 +2,7 @@
 
 namespace MeshMaking
 {
-    interface IMeshBuilderPoint
+    public interface IMeshBuilderPoint
     {
         string Key { get; }
         Vector3 Position { get; }

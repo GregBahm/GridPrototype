@@ -6,14 +6,12 @@ namespace MeshMaking
 {
     internal class CellMeshContributor : IMeshContributor
     {
-        private readonly MainGrid grid;
         private readonly DesignationCell cell;
         public IEnumerable<IMeshBuilderPoint> Points { get; }
         public IEnumerable<MeshBuilderTriangle> Triangles { get; }
 
-        public CellMeshContributor(MainGrid grid, DesignationCell cell)
+        public CellMeshContributor(DesignationCell cell)
         {
-            this.grid = grid;
             this.cell = cell;
 
             List<IMeshContributor> subContributors = new List<IMeshContributor>();
@@ -44,7 +42,7 @@ namespace MeshMaking
 
         private bool GetDoesHaveTop()
         {
-            return (cell.Height == grid.MaxHeight - 1) || !cell.GroundPoint.DesignationCells[cell.Height + 1].IsFilled;
+            return !cell.GroundPoint.DesignationCells[cell.Height + 1].IsFilled;
         }
 
         private bool GetDoesHaveBottom()

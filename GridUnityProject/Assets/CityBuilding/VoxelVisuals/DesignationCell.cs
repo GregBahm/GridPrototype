@@ -1,4 +1,5 @@
 ﻿using GameGrid;
+using Interiors;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,7 +25,11 @@ public class DesignationCell : IDesignationCell
         }
     }
 
-    public Interior AssignedInterior { get; set; }
+    public Interior AssignedInterior
+    {
+        get { return grid.Interiors.GetFor(this); }
+        set { grid.Interiors.SetInterior(this, value); }
+    }
 
     public bool IsFilled { get { return designation != VoxelDesignationType.Empty; } }
 
