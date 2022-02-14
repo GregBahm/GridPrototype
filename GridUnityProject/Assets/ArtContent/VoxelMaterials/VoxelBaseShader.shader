@@ -45,7 +45,8 @@
         HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
-
+          
+            #pragma multi_compile _ _MAIN_LIGHT_SHADOWS
             #pragma multi_compile _ _MAIN_LIGHT_SHADOWS_CASCADE
             #pragma multi_compile _ _SHADOWS_SOFT
             #pragma multi_compile _ _SCREEN_SPACE_OCCLUSION

@@ -1165,7 +1165,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   scrollSpeed: 0.1
   minZoom: 1
-  maxZoom: 100
+  maxZoom: 45
   orbitSpeed: 0.5
   panSpeed: 0.03
 --- !u!114 &536624982
