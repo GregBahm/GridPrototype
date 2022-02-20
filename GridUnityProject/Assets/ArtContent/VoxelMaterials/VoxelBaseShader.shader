@@ -28,9 +28,17 @@
           float4 _BaseColor;
           float _Cutoff;
           float3 _AnchorA;
+          float2 _AnchorAXNorm;
+          float2 _AnchorAZNorm;
           float3 _AnchorB;
+          float2 _AnchorBXNorm;
+          float2 _AnchorBZNorm;
           float3 _AnchorC;
+          float2 _AnchorCXNorm;
+          float2 _AnchorCZNorm;
           float3 _AnchorD;
+          float2 _AnchorDXNorm;
+          float2 _AnchorDZNorm;
           float3 _Color;
           float _Cull;
         CBUFFER_END

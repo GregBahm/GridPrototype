@@ -16,7 +16,13 @@ public class VoxelVisualsManager
     {
         this.cityMain = cityMain;
         piecesRoot = new GameObject("Pieces Root").transform;
+        this.anchoringPoints = GetAnchoringPoints();
         this.optionsSource = optionsSource;
+    }
+
+    private Dictionary<GroundPoint, PointAnchoring> GetAnchoringPoints()
+    {
+        cityMain.MainGrid.Points
     }
 
     public void UpdateDebugObject(VisualCell component)
@@ -26,7 +32,6 @@ public class VoxelVisualsManager
         {
             gameObjects = voxelObjects[component];
             gameObjects.Filter.mesh = component.Contents.Mesh;
-            UpdateMeshBounds(gameObjects.Filter);
             gameObjects.Obj.name = GetObjName(component);
             if (component.Contents.Materials != null)
                 gameObjects.Renderer.sharedMaterials = component.Contents.Materials;
@@ -41,7 +46,6 @@ public class VoxelVisualsManager
             obj.name = GetObjName(component);
             GameObject.Destroy(obj.GetComponent<BoxCollider>());
             MeshFilter filter = obj.GetComponent<MeshFilter>();
-            UpdateMeshBounds(filter);
             MeshRenderer renderer = obj.GetComponent<MeshRenderer>();
             renderer.sharedMaterials = component.Contents.Materials;
             component.SetMaterialProperties(renderer);
@@ -77,16 +81,6 @@ public class VoxelVisualsManager
                 UpdateDebugObject(cell);
             }
             yesStrut = cell.Contents.Connections.Down == VoxelConnectionType.BigStrut;
-        }
-    }
-
-    private static readonly Bounds ComponentBounds = new Bounds(Vector3.zero, Vector3.one* 2);
-
-    private void UpdateMeshBounds(MeshFilter filter)
-    {
-        if(filter.mesh != null)
-        {
-            filter.mesh.bounds = ComponentBounds;
         }
     }
 
@@ -129,5 +123,43 @@ public class VoxelVisualsManager
             Filter = filter;
             Renderer = renderer;
         }
+    }
+}
+
+public class PointAnchoringTable
+{
+    private readonly Dictionary<GroundPoint, PointAnchoring> table;
+
+    public PointAnchoringTable(MainGrid grid)
+    {
+        table = new Dictionary<GroundPoint, PointAnchoring>();
+        foreach (GroundPoint point in grid.Points)
+        {
+            GroundPoint[] connections = point.DirectConnections.ToArray();
+            PointAnchoring anchoring = GetAnchoring(point, connections);
+            table.Add(point, anchoring);
+        }
+    }
+
+    private PointAnchoring GetAnchoring(GroundPoint point, GroundPoint[] connections)
+    {
+        int half = connections.Length / 2;
+        for (int i = 0; i < half; i++)
+        {
+            Vector2 norm = (connections[i].Position - point.Position).normalized;
+            if((i + 2) < connections.Length - 1)
+            {
+                Vector2 otherNorm = (connections[i + 2].Position - point.Position).normalized;
+                norm = (norm + otherNorm) / 2;
+            }
+        }
+
+    }
+
+    private class PointAnchoring
+    {
+        public Vector2 BasePos { get; set; }
+        public Vector2 XNormal { get; set; }
+        public Vector2 ZNormal { get; set; }
     }
 }
