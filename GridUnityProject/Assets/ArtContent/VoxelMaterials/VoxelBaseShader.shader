@@ -151,28 +151,17 @@
 
             float4 frag(v2f i) : SV_Target
             {
-              return float4(i.normal.x, 0, i.normal.y, 1);
                 float3 boxLighting = GetBoxLighting(i.worldPos);
                 float baseShade = GetBaseShade(i.normal);
-//                  return baseShade; 
                 float ssao = GetSsao(i.vertex);
                 half shadow = MainLightRealtimeShadow(TransformWorldToShadowCoord(i.worldPos));
                 shadow = saturate(shadow *  5);
                 shadow = min(shadow, baseShade);
-                //return shadow;
                 float3 ret = _Color * 1.25;
                 ret *= lerp(boxLighting * .75, 1, .5);
                 ret *= lerp(ret * float3(0.3, .6, 1), ret, shadow);
                 float shadedSsao = lerp(pow(ssao, 2), pow(ssao, .5), shadow);
                 ret *= shadedSsao;
-
-
-                float bounceLight = saturate(1 - i.worldPos.y * .25);
-                bounceLight = pow(bounceLight, 5) * .5;
-                float bottomOcclude = 1 -  pow(saturate(1 - i.worldPos.y * .5), 40);
-                //bounceLight *= shadow;
-                //ret += bounceLight * .2;
-                ret *= bottomOcclude;
 
                 return float4(ret, 1);
             }
