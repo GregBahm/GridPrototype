@@ -43,7 +43,7 @@ public class CityBuildingMain : MonoBehaviour
         UndoManager = new UndoManager();
         if(LoadLastSave)
         {
-            GameSaveState saveState = GameSaveState.Load();
+            GameSaveState saveState = GameSaveState.Load(DefaultSave);
             MainGrid = new MainGrid(newGridMaxHeight, saveState.Ground.Points, saveState.Ground.Edges);
             Initialize();
             HashSet<GroundQuad> columnsToUpdate = new HashSet<GroundQuad>();

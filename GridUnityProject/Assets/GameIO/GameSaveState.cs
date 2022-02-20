@@ -23,13 +23,13 @@ public class GameSaveState
         PlayerPrefs.Save();
     }
 
-    public static GameSaveState Load()
+    public static GameSaveState Load(TextAsset defaultSave)
     {
         string data = PlayerPrefs.GetString(SaveFilePath);
         if (string.IsNullOrWhiteSpace(data))
         {
-            Debug.Log("No save data found. Loading default grid");
-            return null;
+            Debug.Log("No save data found. Loading default save");
+            return Load(defaultSave.text);
         }
         return Load(data);
     }

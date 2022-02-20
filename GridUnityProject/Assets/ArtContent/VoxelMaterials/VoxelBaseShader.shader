@@ -87,8 +87,7 @@
             float GetBaseShade(float3 worldNormal)
             {
                 float baseShade = dot(worldNormal.xyz, _MainLightPosition.xyz);
-                baseShade = saturate(baseShade);
-                baseShade = lerp(baseShade, 1, .9);
+                baseShade = saturate(baseShade * 5);
                 return baseShade;
             }
 
@@ -152,19 +151,20 @@
 
             float4 frag(v2f i) : SV_Target
             {
+              return float4(i.normal.x, 0, i.normal.y, 1);
                 float3 boxLighting = GetBoxLighting(i.worldPos);
                 float baseShade = GetBaseShade(i.normal);
+//                  return baseShade; 
                 float ssao = GetSsao(i.vertex);
                 half shadow = MainLightRealtimeShadow(TransformWorldToShadowCoord(i.worldPos));
+                shadow = saturate(shadow *  5);
+                shadow = min(shadow, baseShade);
+                //return shadow;
                 float3 ret = _Color * 1.25;
                 ret *= lerp(boxLighting * .75, 1, .5);
-                //ret *= baseShade;
-                //return ssao;
-                //ret = lerp(ret * boxLighting, ret, saturate(ssao ));
                 ret *= lerp(ret * float3(0.3, .6, 1), ret, shadow);
                 float shadedSsao = lerp(pow(ssao, 2), pow(ssao, .5), shadow);
                 ret *= shadedSsao;
-//                return shadedSsao;
 
 
                 float bounceLight = saturate(1 - i.worldPos.y * .25);
