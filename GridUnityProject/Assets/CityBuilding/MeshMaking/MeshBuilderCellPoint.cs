@@ -1,5 +1,6 @@
 ﻿using GameGrid;
 using UnityEngine;
+using VoxelVisuals;
 
 namespace MeshMaking
 {

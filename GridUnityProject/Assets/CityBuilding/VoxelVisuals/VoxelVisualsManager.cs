@@ -5,129 +5,132 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class VoxelVisualsManager
+namespace VoxelVisuals
 {
-    private readonly CityBuildingMain cityMain;
-    private readonly Transform piecesRoot;
-    private readonly VisualOptionsByDesignation optionsSource;
-    private readonly Dictionary<VisualCell, VisualCellGameobjects> voxelObjects = new Dictionary<VisualCell, VisualCellGameobjects>();
-
-    public VoxelVisualsManager(CityBuildingMain cityMain, VisualOptionsByDesignation optionsSource)
+    public class VoxelVisualsManager
     {
-        this.cityMain = cityMain;
-        piecesRoot = new GameObject("Pieces Root").transform;
-        this.optionsSource = optionsSource;
-    }
+        private readonly CityBuildingMain cityMain;
+        private readonly Transform piecesRoot;
+        private readonly VisualOptionsByDesignation optionsSource;
+        private readonly Dictionary<VisualCell, VisualCellGameobjects> voxelObjects = new Dictionary<VisualCell, VisualCellGameobjects>();
 
-    public void UpdateDebugObject(VisualCell component)
-    {
-        VisualCellGameobjects gameObjects;
-        if (voxelObjects.ContainsKey(component))
+        public VoxelVisualsManager(CityBuildingMain cityMain, VisualOptionsByDesignation optionsSource)
         {
-            gameObjects = voxelObjects[component];
-            gameObjects.Filter.mesh = component.Contents.Mesh;
-            UpdateMeshBounds(gameObjects.Filter);
-            gameObjects.Obj.name = GetObjName(component);
-            if (component.Contents.Materials != null)
-                gameObjects.Renderer.sharedMaterials = component.Contents.Materials;
+            this.cityMain = cityMain;
+            piecesRoot = new GameObject("Pieces Root").transform;
+            this.optionsSource = optionsSource;
         }
-        else
-        {
-            if (component.Contents == null || component.Contents.Mesh == null)
-            {
-                return;
-            }
-            GameObject obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            obj.name = GetObjName(component);
-            GameObject.Destroy(obj.GetComponent<BoxCollider>());
-            MeshFilter filter = obj.GetComponent<MeshFilter>();
-            UpdateMeshBounds(filter);
-            MeshRenderer renderer = obj.GetComponent<MeshRenderer>();
-            renderer.sharedMaterials = component.Contents.Materials;
-            component.SetMaterialProperties(renderer);
-            
-            filter.mesh = component.Contents.Mesh;
-            obj.transform.position = component.ContentPosition;
-            gameObjects = new VisualCellGameobjects(obj, filter, renderer);
-            voxelObjects.Add(component, gameObjects);
-            obj.transform.SetParent(piecesRoot, true);
-        }
-        component.UpdateForBaseGridModification(gameObjects.Renderer);
-    }
 
-    public void UpdateColumn(GroundQuad column)
-    {
-        bool yesStrut = false;
-        for (int i = cityMain.MainGrid.MaxHeight - 1; i >= 0; i--) // Top to bottom
+        public void UpdateDebugObject(VisualCell component)
         {
-            VisualCell cell = cityMain.MainGrid.GetVisualCell(column, i);
-            VoxelDesignation designation = cell.GetCurrentDesignation();
-            VisualCellOptions option = optionsSource.GetOptions(designation);
-            VisualCellOption oldOption = cell.Contents;
-            if(yesStrut)
+            VisualCellGameobjects gameObjects;
+            if (voxelObjects.ContainsKey(component))
             {
-                cell.Contents = option.UpStrutOption;
+                gameObjects = voxelObjects[component];
+                gameObjects.Filter.mesh = component.Contents.Mesh;
+                UpdateMeshBounds(gameObjects.Filter);
+                gameObjects.Obj.name = GetObjName(component);
+                if (component.Contents.Materials != null)
+                    gameObjects.Renderer.sharedMaterials = component.Contents.Materials;
             }
             else
             {
-                cell.Contents = option.DefaultOption;
+                if (component.Contents == null || component.Contents.Mesh == null)
+                {
+                    return;
+                }
+                GameObject obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                obj.name = GetObjName(component);
+                GameObject.Destroy(obj.GetComponent<BoxCollider>());
+                MeshFilter filter = obj.GetComponent<MeshFilter>();
+                UpdateMeshBounds(filter);
+                MeshRenderer renderer = obj.GetComponent<MeshRenderer>();
+                renderer.sharedMaterials = component.Contents.Materials;
+                component.SetMaterialProperties(renderer);
+
+                filter.mesh = component.Contents.Mesh;
+                obj.transform.position = component.ContentPosition;
+                gameObjects = new VisualCellGameobjects(obj, filter, renderer);
+                voxelObjects.Add(component, gameObjects);
+                obj.transform.SetParent(piecesRoot, true);
             }
-            if(oldOption != cell.Contents)
+            component.UpdateForBaseGridModification(gameObjects.Renderer);
+        }
+
+        public void UpdateColumn(GroundQuad column)
+        {
+            bool yesStrut = false;
+            for (int i = cityMain.MainGrid.MaxHeight - 1; i >= 0; i--) // Top to bottom
             {
-                UpdateDebugObject(cell);
+                VisualCell cell = cityMain.MainGrid.GetVisualCell(column, i);
+                VoxelDesignation designation = cell.GetCurrentDesignation();
+                VisualCellOptions option = optionsSource.GetOptions(designation);
+                VisualCellOption oldOption = cell.Contents;
+                if (yesStrut)
+                {
+                    cell.Contents = option.UpStrutOption;
+                }
+                else
+                {
+                    cell.Contents = option.DefaultOption;
+                }
+                if (oldOption != cell.Contents)
+                {
+                    UpdateDebugObject(cell);
+                }
+                yesStrut = cell.Contents.Connections.Down == VoxelConnectionType.BigStrut;
             }
-            yesStrut = cell.Contents.Connections.Down == VoxelConnectionType.BigStrut;
         }
-    }
 
-    private static readonly Bounds ComponentBounds = new Bounds(Vector3.zero, Vector3.one* 2);
+        private static readonly Bounds ComponentBounds = new Bounds(Vector3.zero, Vector3.one * 2);
 
-    private void UpdateMeshBounds(MeshFilter filter)
-    {
-        if(filter.mesh != null)
+        private void UpdateMeshBounds(MeshFilter filter)
         {
-            filter.mesh.bounds = ComponentBounds;
+            if (filter.mesh != null)
+            {
+                filter.mesh.bounds = ComponentBounds;
+            }
         }
-    }
 
-    private string GetObjName(VisualCell component)
-    {
-        string ret = "(" + component.Quad.ToString() + "), " + component.Height + " ";
-        if (component.Contents == null || component.Contents.Mesh == null)
+        private string GetObjName(VisualCell component)
         {
-            return ret + " (empty)";
+            string ret = "(" + component.Quad.ToString() + "), " + component.Height + " ";
+            if (component.Contents == null || component.Contents.Mesh == null)
+            {
+                return ret + " (empty)";
+            }
+            ret += component.Contents.Mesh.name;
+            if (component.Contents.Flipped)
+            {
+                ret += " flipped";
+            }
+            if (component.Contents.Rotations > 0)
+            {
+                ret += " " + component.Contents.Rotations.ToString() + " rotations";
+            }
+            return ret;
         }
-        ret += component.Contents.Mesh.name;
-        if (component.Contents.Flipped)
-        {
-            ret += " flipped";
-        }
-        if (component.Contents.Rotations > 0)
-        {
-            ret += " " + component.Contents.Rotations.ToString() + " rotations";
-        }
-        return ret;
-    }
 
-    internal void UpdateForBaseGridModification()
-    {
-        foreach (KeyValuePair<VisualCell, VisualCellGameobjects> item in voxelObjects)
+        internal void UpdateForBaseGridModification()
         {
-            item.Key.UpdateForBaseGridModification(item.Value.Renderer);
+            foreach (KeyValuePair<VisualCell, VisualCellGameobjects> item in voxelObjects)
+            {
+                item.Key.UpdateForBaseGridModification(item.Value.Renderer);
+            }
         }
-    }
 
-    private class VisualCellGameobjects
-    {
-        public GameObject Obj { get; }
-        public MeshFilter Filter { get; }
-        public MeshRenderer Renderer { get; }
-
-        public VisualCellGameobjects(GameObject obj, MeshFilter filter, MeshRenderer renderer)
+        private class VisualCellGameobjects
         {
-            Obj = obj;
-            Filter = filter;
-            Renderer = renderer;
+            public GameObject Obj { get; }
+            public MeshFilter Filter { get; }
+            public MeshRenderer Renderer { get; }
+
+            public VisualCellGameobjects(GameObject obj, MeshFilter filter, MeshRenderer renderer)
+            {
+                Obj = obj;
+                Filter = filter;
+                Renderer = renderer;
+            }
         }
     }
 }

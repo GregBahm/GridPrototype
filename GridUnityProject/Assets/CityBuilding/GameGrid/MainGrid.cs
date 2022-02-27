@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using VoxelVisuals;
 
 namespace GameGrid
 {
@@ -46,11 +47,17 @@ namespace GameGrid
         private readonly HashSet<DesignationCell> filledCells = new HashSet<DesignationCell>();
         public IEnumerable<DesignationCell> FilledCells { get { return filledCells; } }
 
+        private Dictionary<GroundPoint, GroundPointAnchors> anchorsDictionary;
+
         public MainGrid(int maxHeight, IEnumerable<GroundPointBuilder> points, IEnumerable<GroundEdgeBuilder> edges)
         {
             MaxHeight = maxHeight;
             AddToMesh(points, edges);
             Interiors = new GridInteriors();
+        }
+        public GroundPointAnchors GetAnchorsFor(GroundPoint point)
+        {
+            return anchorsDictionary[point];
         }
 
         public void SetCellFilled(DesignationCell designationCell, bool value)
@@ -85,6 +92,8 @@ namespace GameGrid
             {
                 throw new Exception("Malformed data. Ensure all point and edges form quads.");
             }
+
+            UpdateAnchorsDictionary();
 
             foreach (GroundQuad groundQuad in Quads)
             {
@@ -147,6 +156,12 @@ namespace GameGrid
                 quad.Points[2].Position = Vector2.Lerp(squarifier.OutputC, quad.Points[2].Position, .5f);
                 quad.Points[3].Position = Vector2.Lerp(squarifier.OutputD, quad.Points[3].Position, .5f);
             }
+            UpdateAnchorsDictionary();
+        }
+
+        private void UpdateAnchorsDictionary()
+        {
+            anchorsDictionary = points.ToDictionary(item => item, item => new GroundPointAnchors(item));
         }
 
         private void AddEdgesAndQuads(IEnumerable<GroundEdge> newEdges)

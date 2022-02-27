@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Interaction;
 using System.IO;
 using Interiors;
+using VoxelVisuals;
 
 public class CityBuildingMain : MonoBehaviour
 {
@@ -31,7 +32,7 @@ public class CityBuildingMain : MonoBehaviour
 
     public MainGrid MainGrid { get; private set; }
 
-    private VoxelVisualsManager visualsManager;
+    public VoxelVisualsManager VisualsManager { get; private set; }
     public InteriorsManager Interiors { get; private set; }
     
     private VisualOptionsByDesignation optionsSource;
@@ -59,7 +60,7 @@ public class CityBuildingMain : MonoBehaviour
             }
             foreach (GroundQuad quad in columnsToUpdate)
             {
-                visualsManager.UpdateColumn(quad);
+                VisualsManager.UpdateColumn(quad);
             }
             UpdateInteractionGrid();
         }
@@ -77,7 +78,7 @@ public class CityBuildingMain : MonoBehaviour
         UpdateInteractionGrid();
         UpdateGroundMesh();
         optionsSource = new VisualOptionsByDesignation(Blueprints);
-        visualsManager = new VoxelVisualsManager(this, optionsSource);
+        VisualsManager = new VoxelVisualsManager(this, optionsSource);
         Interiors = new InteriorsManager(interiorMeshPrefab);
     }
 
@@ -103,7 +104,7 @@ public class CityBuildingMain : MonoBehaviour
     {
         foreach(GroundQuad quad in MainGrid.GetConnectedQuads(cell.GroundPoint))
         {
-            visualsManager.UpdateColumn(quad);
+            VisualsManager.UpdateColumn(quad);
         }
     }
 
@@ -111,9 +112,9 @@ public class CityBuildingMain : MonoBehaviour
     {
         GroundMesh.UpdateMesh(MainGrid);
         groundMesh.GetComponent<MeshFilter>().mesh = GroundMesh.Mesh;
-        if (visualsManager != null)
+        if (VisualsManager != null)
         {
-            visualsManager.UpdateForBaseGridModification();
+            VisualsManager.UpdateForBaseGridModification();
         }
         lightingManager.UpdatePostion(MainGrid);
     }
