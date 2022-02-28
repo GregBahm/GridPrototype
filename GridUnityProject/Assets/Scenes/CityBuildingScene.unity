@@ -431,7 +431,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 313656609}
   m_LocalRotation: {x: -0.4446411, y: -0.24116522, z: 0.12564953, w: -0.8534318}
-  m_LocalPosition: {x: -2.914295, y: 7.964036, z: -4.74479}
+  m_LocalPosition: {x: -4.65, y: 12.71, z: -7.57}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1150,7 +1150,7 @@ MonoBehaviour:
   InteriorsTab: {fileID: 1211910452}
   FoundationTab: {fileID: 1885678491}
   UndoButton: {fileID: 7699474284198047079}
-  SelectedTab: 2
+  SelectedTab: 1
 --- !u!114 &536624981
 MonoBehaviour:
   m_ObjectHideFlags: 0
