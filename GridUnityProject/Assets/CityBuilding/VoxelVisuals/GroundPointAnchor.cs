@@ -2,7 +2,7 @@
 
 namespace VoxelVisuals
 {
-    public class GroundPointAnchor
+    public struct GroundPointAnchor
     {
         public Vector2 AbsolutePosition { get; }
         public Vector2 XNormal { get; }

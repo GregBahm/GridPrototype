@@ -239,10 +239,18 @@ namespace VoxelVisuals
 
         private void SetAnchors(GroundPointAnchor[] adjustedAnchors, Material mat)
         {
-            mat.SetVector("_AnchorA", GetRelativeAnchorPosition(adjustedAnchors[0]));
-            mat.SetVector("_AnchorB", GetRelativeAnchorPosition(adjustedAnchors[1]));
-            mat.SetVector("_AnchorC", GetRelativeAnchorPosition(adjustedAnchors[2]));
-            mat.SetVector("_AnchorD", GetRelativeAnchorPosition(adjustedAnchors[3]));
+            mat.SetVector("_AAnchor", GetRelativeAnchorPosition(adjustedAnchors[0]));
+            mat.SetVector("_BAnchor", GetRelativeAnchorPosition(adjustedAnchors[1]));
+            mat.SetVector("_CAnchor", GetRelativeAnchorPosition(adjustedAnchors[2]));
+            mat.SetVector("_DAnchor", GetRelativeAnchorPosition(adjustedAnchors[3]));
+        }
+
+        private void SetAnchoring(GroundPointAnchor anchor, string letter, Material mat)
+        {
+            Vector3 baseAnchorPosition = GetRelativeAnchorPosition(anchor);
+            mat.SetVector("_" + letter + "Anchor", baseAnchorPosition);
+            mat.SetVector("_" + letter + "Xnorm", anchor.XNormal);
+            mat.SetVector("_" + letter + "Znorm", anchor.YNormal);
         }
 
         private Vector3 GetRelativeAnchorPosition(GroundPointAnchor anchor)

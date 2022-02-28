@@ -5,10 +5,10 @@
     _Color("Color", Color) = (1, 1, 1, 1)
         _BaseMap("Base Map", 2D) = "white"
     [Enum(UnityEngine.Rendering.CullMode)] _Cull("Cull", Float) = 2
-    [HideInInspector]_AnchorA("Anchor A", Vector) = (0, 0, 0, 0)
-    [HideInInspector]_AnchorB("Anchor B", Vector) = (1, 0, 0, 0)
-    [HideInInspector]_AnchorC("Anchor C", Vector) = (0, 0, 1, 0)
-    [HideInInspector]_AnchorD("Anchor D", Vector) = (1, 0, 1, 0)
+    [HideInInspector]_AAnchor("Anchor A", Vector) = (.5, 0, -.5, 0)
+    [HideInInspector]_BAnchor("Anchor B", Vector) = (-.5, 0, -.5, 0)
+    [HideInInspector]_CAnchor("Anchor C", Vector) = (-.5, 0, .5, 0)
+    [HideInInspector]_DAnchor("Anchor D", Vector) = (.5, 0, .5, 0)
   }
     SubShader
   {
@@ -17,7 +17,7 @@
           "RenderType" = "Opaque"
           "RenderPipeline" = "UniversalRenderPipeline" 
       }
-      Cull[_Cull]
+      //Cull[_Cull]
 
       HLSLINCLUDE
         #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
@@ -27,10 +27,22 @@
           float4 _BaseMap_ST;
           float4 _BaseColor;
           float _Cutoff;
-          float3 _AnchorA;
-          float3 _AnchorB;
-          float3 _AnchorC;
-          float3 _AnchorD;
+          float3 _AAnchor;
+          float2 _AXnorm;
+          float2 _AZnorm;
+
+          float3 _BAnchor;
+          float2 _BXnorm;
+          float2 _BZnorm;
+
+          float3 _CAnchor;
+          float2 _CXnorm;
+          float2 _CZnorm;
+
+          float3 _DAnchor;
+          float2 _DXnorm;
+          float2 _DZnorm;
+
           float3 _Color;
           float _Cull;
         CBUFFER_END
@@ -101,28 +113,23 @@
             float3 GetTransformedBaseVert(float3 vert)
             {
                 float2 toRemap = float2(vert.x + .5, 1 - (vert.z + .5));
-                float2 remapped = GetRemapped(toRemap, _AnchorA.xz, _AnchorB.xz, _AnchorC.xz, _AnchorD.xz);
+                float2 remapped = GetRemapped(toRemap, _AAnchor.xz, _BAnchor.xz, _CAnchor.xz, _DAnchor.xz);
                 return float3(remapped.x, vert.y, remapped.y);
             }
 
             float3 GetTransformedNormal(float3 vert, float3 normal)
             {
-              float2 toRemap = float2(vert.x + .5, 1 - (vert.z + .5));
+                float2 toRemap = float2(vert.x + .5, 1 - (vert.z + .5));
+                float2 xNorm = GetRemapped(toRemap, _AXnorm, _BXnorm, _CXnorm, _DXnorm);
+                float2 zNorm = GetRemapped(toRemap, _AZnorm, _BZnorm, _CZnorm, _DZnorm);
 
-                float2 bc = normalize(_AnchorB.xz - _AnchorC.xz);
-                float2 ad = normalize(_AnchorA.xz - _AnchorD.xz);
-                float2 ab = normalize(_AnchorA.xz - _AnchorB.xz);
-                float2 dc = normalize(_AnchorD.xz - _AnchorC.xz);
+                float2 a = 0;
+                float2 b = xNorm;
+                float2 c = xNorm + zNorm;
+                float2 d = zNorm;
+                float2 remapped = 0;
+                remapped = GetRemapped(normal.xz, c, b, a, d);
 
-                float2 newZ = lerp(bc, ad, toRemap.x);
-                float2 newX = lerp(ab, dc, toRemap.y);
-
-                float2 a = newX + newZ;
-                float2 b = newZ;
-                float2 c = 0;
-                float2 d = newX;
-
-                float2 remapped = GetRemapped(normal.xz, a, d, c, b);
                 if (_Cull < 2)
                   remapped *= -1;
                 return float3(-remapped.y, normal.y, remapped.x);
@@ -132,7 +139,7 @@
             {
                 v2f o;
                 float3 transformedVert = GetTransformedBaseVert(v.vertex);
-                o.vertex = TransformObjectToHClip(transformedVert);
+                o.vertex = TransformObjectToHClip(v.vertex);//TransformObjectToHClip(transformedVert);
                 o.uv = v.uv;
                 o.baseVert = v.vertex;
                 o.col = v.col;
@@ -151,6 +158,9 @@
 
             float4 frag(v2f i) : SV_Target
             {
+                i.normal = normalize(i.normal);
+            //return i.normal.z;
+            //    return float4(i.normal, 1);
                 float3 boxLighting = GetBoxLighting(i.worldPos);
                 float baseShade = GetBaseShade(i.normal);
                 float ssao = GetSsao(i.vertex);
@@ -203,7 +213,7 @@
           float3 GetTransformedBaseVert(float3 vert)
           {
             float2 toRemap = float2(vert.x + .5, 1 - (vert.z + .5));
-            float2 remapped = GetRemapped(toRemap, _AnchorA.xz, _AnchorB.xz, _AnchorC.xz, _AnchorD.xz);
+            float2 remapped = GetRemapped(toRemap, _AAnchor.xz, _BAnchor.xz, _CAnchor.xz, _DAnchor.xz);
             return float3(remapped.x, vert.y, remapped.y);
           }
 
@@ -260,7 +270,7 @@
             float3 GetTransformedBaseVert(float3 vert)
             {
               float2 toRemap = float2(vert.x + .5, 1 - (vert.z + .5));
-              float2 remapped = GetRemapped(toRemap, _AnchorA.xz, _AnchorB.xz, _AnchorC.xz, _AnchorD.xz);
+              float2 remapped = GetRemapped(toRemap, _AAnchor.xz, _BAnchor.xz, _CAnchor.xz, _DAnchor.xz);
               return float3(remapped.x, vert.y, remapped.y);
             }
 
@@ -268,10 +278,10 @@
             {
               float2 toRemap = float2(vert.x + .5, 1 - (vert.z + .5));
 
-              float2 bc = normalize(_AnchorB.xz - _AnchorC.xz);
-              float2 ad = normalize(_AnchorA.xz - _AnchorD.xz);
-              float2 ab = normalize(_AnchorA.xz - _AnchorB.xz);
-              float2 dc = normalize(_AnchorD.xz - _AnchorC.xz);
+              float2 bc = normalize(_BAnchor.xz - _CAnchor.xz);
+              float2 ad = normalize(_AAnchor.xz - _DAnchor.xz);
+              float2 ab = normalize(_AAnchor.xz - _BAnchor.xz);
+              float2 dc = normalize(_DAnchor.xz - _CAnchor.xz);
 
               float2 newZ = lerp(bc, ad, toRemap.x);
               float2 newX = lerp(ab, dc, toRemap.y);
@@ -333,8 +343,8 @@
             float3 GetTransformedBaseVert(float3 vert)
             {
                 vert.xz += .5;
-                float3 anchorStart = lerp(_AnchorB, _AnchorA, vert.x);
-                float3 anchorEnd = lerp(_AnchorC, _AnchorD, vert.x);
+                float3 anchorStart = lerp(_BAnchor, _AAnchor, vert.x);
+                float3 anchorEnd = lerp(_CAnchor, _DAnchor, vert.x);
                 float3 flatPosition = lerp(anchorStart, anchorEnd, vert.z);
                 return float3(flatPosition.x, vert.y, flatPosition.z);
             }
