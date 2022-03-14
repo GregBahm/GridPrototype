@@ -1,5 +1,9 @@
 Shader "Voxel/ProceduralVoxelShader"
 {
+  Properties
+  {
+    _Color("Color", Color) = (1, 1, 1, 1)
+  }
   SubShader{
 
       Pass {
@@ -17,9 +21,7 @@ Shader "Voxel/ProceduralVoxelShader"
           #include "UnityLightingCommon.cginc"
           #include "AutoLight.cginc"
 
-      #if SHADER_TARGET >= 45
           StructuredBuffer<float4> positionBuffer;
-      #endif
 
           struct v2f
           {
@@ -32,11 +34,7 @@ Shader "Voxel/ProceduralVoxelShader"
 
           v2f vert(appdata_full v, uint instanceID : SV_InstanceID)
           {
-          #if SHADER_TARGET >= 45
               float4 data = positionBuffer[instanceID];
-          #else
-              float4 data = 0;
-          #endif
 
               float3 localPosition = v.vertex.xyz * data.w;
               float3 worldPosition = data.xyz + localPosition;
@@ -67,7 +65,6 @@ Shader "Voxel/ProceduralVoxelShader"
               UNITY_APPLY_FOG(i.fogCoord, output);
               return output;
           }
-
           ENDCG
       }
   }
