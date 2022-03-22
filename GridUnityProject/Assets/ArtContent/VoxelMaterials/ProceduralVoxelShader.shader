@@ -163,7 +163,7 @@ Shader "Voxel/ProceduralVoxelShader"
 
               float3 halfAngle = normalize(normalize(i.viewDir) + _WorldSpaceLightPos0.xyz);
               float spec = pow(saturate(dot(halfAngle, i.normal)), 50) * 2;
-              ret = lerp(ret * (spec + .5), ret * (spec + 1), saturate(shadow));
+              ret = lerp(ret * (-spec * .3 + 1), ret * (spec * .3 + 1), saturate(shadow));
               float fog = saturate(i.pos.z * 200 - 0);
               ret = lerp(float3(0, .33, 1), ret,  fog);
               return float4(ret, 1);
