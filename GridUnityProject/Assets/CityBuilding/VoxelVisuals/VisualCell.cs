@@ -213,10 +213,11 @@ public class VisualCell
         Vector3[] adjustedAnchors = GetAdjustedAnchors();
         float flipNormal = Contents.Flipped ? -1 : 1;
         return new VoxelRenderData(
-            adjustedAnchors[0],
-            adjustedAnchors[1],
-            adjustedAnchors[2],
-            adjustedAnchors[3],
+            new Vector2(adjustedAnchors[0].x, adjustedAnchors[0].z),
+            new Vector2(adjustedAnchors[1].x, adjustedAnchors[1].z),
+            new Vector2(adjustedAnchors[2].x, adjustedAnchors[2].z),
+            new Vector2(adjustedAnchors[3].x, adjustedAnchors[3].z),
+            Height,
             flipNormal);
     }
 }

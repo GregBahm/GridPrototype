@@ -170,7 +170,7 @@ class ProceduralMeshRenderer
 
     private ComputeBuffer renderDataBuffer;
     private int renderBufferLength = 1024; // TODO: Lower this and then make it dynamic
-    private ComputeBuffer argsBuffer;
+    private ComputeBuffer[] argsBuffers;
     private const int PositionsBufferStride = VoxelRenderData.Stride;
 
     public ProceduralMeshRenderer(Mesh mesh, Material[] materials)
@@ -178,16 +178,27 @@ class ProceduralMeshRenderer
         Mesh = mesh;
         this.materials = materials.Select(item => new Material(item)).ToArray();
         renderDataBuffer = new ComputeBuffer(renderBufferLength, PositionsBufferStride);
-        argsBuffer = new ComputeBuffer(1, 5 * sizeof(uint), ComputeBufferType.IndirectArguments);
+        argsBuffers = InitializeArgsBuffers();
         cellsToRender = new HashSet<VisualCell>();
+    }
+
+    private ComputeBuffer[] InitializeArgsBuffers()
+    {
+        ComputeBuffer[] ret = new ComputeBuffer[materials.Length];
+        for (int i = 0; i < materials.Length; i++)
+        {
+            ret[i] = new ComputeBuffer(1, 5 * sizeof(uint), ComputeBufferType.IndirectArguments);
+        }
+        return ret;
     }
 
     public void Dispose()
     {
         renderDataBuffer.Dispose();
-        renderDataBuffer = null;
-        argsBuffer.Dispose();
-        argsBuffer = null;
+        foreach (ComputeBuffer buffer in argsBuffers)
+        {
+            buffer.Dispose();
+        }
     }
 
     public void Add(VisualCell cell)
@@ -204,7 +215,10 @@ class ProceduralMeshRenderer
 
     public void UpdateBuffers()
     {
-        UpdateArgsBuffer();
+        for (int i = 0; i < materials.Length; i++)
+        {
+            UpdateArgsBuffer(i);
+        }
         UpdatePositionsBuffer();
     }
 
@@ -218,14 +232,14 @@ class ProceduralMeshRenderer
         renderDataBuffer.SetData(rendereData);
     }
 
-    private void UpdateArgsBuffer()
+    private void UpdateArgsBuffer(int subMeshIndex)
     {
         uint[] args = new uint[5] { 0, 0, 0, 0, 0 };
-        args[0] = Mesh.GetIndexCount(0);
+        args[0] = Mesh.GetIndexCount(subMeshIndex);
         args[1] = (uint)cellsToRender.Count;
-        args[2] = Mesh.GetIndexStart(0);
-        args[3] = Mesh.GetBaseVertex(0);
-        argsBuffer.SetData(args);
+        args[2] = Mesh.GetIndexStart(subMeshIndex);
+        args[3] = Mesh.GetBaseVertex(subMeshIndex);
+        argsBuffers[subMeshIndex].SetData(args);
     }
 
     public void Render()
@@ -234,7 +248,7 @@ class ProceduralMeshRenderer
         {
             Material mat = materials[i];
             mat.SetBuffer("_RenderDataBuffer", renderDataBuffer);
-            Graphics.DrawMeshInstancedIndirect(Mesh, i, mat, Bounds, argsBuffer);
+            Graphics.DrawMeshInstancedIndirect(Mesh, i, mat, Bounds, argsBuffers[i]);
         }
     }
 }
@@ -242,24 +256,28 @@ class ProceduralMeshRenderer
 public struct VoxelRenderData
 {
     public const int Stride = sizeof(float) * 2 * 4  // Anchors
+        + sizeof(float) // Height
         + sizeof(float); // FlipNormal
 
     public Vector2 AnchorA { get; }
     public Vector2 AnchorB { get; }
     public Vector2 AnchorC { get; }
     public Vector2 AnchorD { get; }
+    public float Height { get; }
     public float FlipNormal { get; }
 
     public VoxelRenderData(Vector2 anchorA,
         Vector2 anchorB,
         Vector2 anchorC,
         Vector2 anchorD,
+        float height,
         float flipNormal)
     {
         AnchorA = anchorA;
         AnchorB = anchorB;
         AnchorC = anchorC;
         AnchorD = anchorD;
+        Height = height;
         FlipNormal = flipNormal;
     }
 }
