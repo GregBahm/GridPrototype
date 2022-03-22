@@ -3,6 +3,7 @@ using MeshMaking;
 using System;
 using UnityEngine;
 using UnityEngine.UI;
+using VoxelVisuals;
 
 namespace Interaction
 {

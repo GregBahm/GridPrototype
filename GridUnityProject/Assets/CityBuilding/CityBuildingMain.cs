@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Interaction;
 using System.IO;
 using Interiors;
+using VoxelVisuals;
 
 public class CityBuildingMain : MonoBehaviour
 {

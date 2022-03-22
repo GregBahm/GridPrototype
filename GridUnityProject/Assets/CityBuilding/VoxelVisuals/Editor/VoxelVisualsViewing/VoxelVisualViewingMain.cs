@@ -5,6 +5,7 @@ using System.Linq;
 using TMPro;
 using UnityEditor;
 using UnityEngine;
+using VoxelVisuals;
 
 public class VoxelVisualViewingMain : MonoBehaviour
 {

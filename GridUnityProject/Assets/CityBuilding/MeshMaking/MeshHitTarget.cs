@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using System.Collections.ObjectModel;
+using VoxelVisuals;
 
 namespace MeshMaking
 {

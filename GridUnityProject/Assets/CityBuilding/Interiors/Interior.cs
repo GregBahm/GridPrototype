@@ -1,5 +1,6 @@
 ﻿using MeshMaking;
 using System.Collections.Generic;
+using VoxelVisuals;
 
 namespace Interiors
 {
