@@ -8,13 +8,26 @@ public class VisualCell
 {
     private readonly MainGrid grid;
 
-    public VisualCellOption Contents { get; set; }
+    private VisualCellOption contents;
+    public VisualCellOption Contents 
+    { 
+        get => contents; 
+        set
+        {
+            if(value != contents)
+            {
+                VisualCellOption oldOption = contents;
+                contents = value;
+                var handler = ContentsChanged;
+                VisualCellChangedEventArg args = new VisualCellChangedEventArg(this, oldOption);
+                handler?.Invoke(this, args);
+            }
+        }
+    }
 
     public GroundQuad Quad { get; }
 
     private readonly IDesignationCell[,,] designationCells;
-
-    public Vector3 ContentPosition { get; private set; }
 
     public NeighborComponents Neighbors { get; private set; }
 
@@ -22,7 +35,7 @@ public class VisualCell
 
     private Vector3[] anchors;
 
-    public Vector3[] BoundyBoxPoints { get; private set; }
+    public static event EventHandler<VisualCellChangedEventArg> ContentsChanged;
 
     public VisualCell(MainGrid grid, GroundQuad quad, int height)
     {
@@ -30,55 +43,29 @@ public class VisualCell
         Quad = quad;
         Height = height;
         designationCells = GetDesignationCells();
-        BoundyBoxPoints = GetBoundyPoints().ToArray();
-        ContentPosition = GetContentPosition();
         anchors = GetAnchors();
     }
 
-    public void UpdateForBaseGridModification(MeshRenderer renderer)
+    public void UpdateForBaseGridModification()
     {
-        BoundyBoxPoints = GetBoundyPoints().ToArray();
-        ContentPosition = GetContentPosition();
         anchors = GetAnchors();
-        SetMaterialProperties(renderer);
-        renderer.transform.position = ContentPosition;
     }
 
     private Vector3[] GetAnchors()
     {
         return new Vector3[]
            {
-            designationCells[1, 1, 0].Position - ContentPosition,
-            designationCells[0, 1, 0].Position - ContentPosition,
-            designationCells[0, 1, 1].Position - ContentPosition,
-            designationCells[1, 1, 1].Position - ContentPosition,
+            designationCells[1, 1, 0].Position,
+            designationCells[0, 1, 0].Position,
+            designationCells[0, 1, 1].Position,
+            designationCells[1, 1, 1].Position,
            };
-    }
-
-    private IEnumerable<Vector3> GetBoundyPoints()
-    {
-        yield return designationCells[0, 0, 0].Position;
-        yield return designationCells[0, 0, 1].Position;
-        yield return designationCells[1, 0, 1].Position;
-        yield return designationCells[1, 0, 0].Position;
-    }
-
-    private Vector3 GetContentPosition()
-    {
-        float maxX = BoundyBoxPoints.Max(item => item.x);
-        float maxZ = BoundyBoxPoints.Max(item => item.z);
-        float minX = BoundyBoxPoints.Max(item => item.x);
-        float minZ = BoundyBoxPoints.Max(item => item.z);
-
-        float x = (maxX + minX) / 2;
-        float z = (maxZ + minZ) / 2;
-        return new Vector3(x, Height, z);
     }
 
     private IDesignationCell[,,] GetDesignationCells()
     {
         IDesignationCell[,,] ret = new IDesignationCell[2, 2, 2];
-        if(Height == 0)
+        if (Height == 0)
         {
             ret[0, 0, 0] = new GroundDesignationCell(Quad.Points[0]);
             ret[0, 0, 1] = new GroundDesignationCell(Quad.Points[1]);
@@ -119,7 +106,7 @@ public class VisualCell
         IEnumerable<GroundQuad> quads = cellA.GroundPoint.PolyConnections
             .Where(item => item.Points.Contains(cellB.GroundPoint));
         GroundQuad neighborQuad = quads.FirstOrDefault(item => item != Quad);
-        if(neighborQuad == null)
+        if (neighborQuad == null)
         {
             return null;
         }
@@ -164,11 +151,11 @@ public class VisualCell
         {
             for (int z = 0; z < 2; z++)
             {
-                if(description[x, 1, z] == VoxelDesignationType.Platform)
+                if (description[x, 1, z] == VoxelDesignationType.Platform)
                 {
                     description[x, 1, z] = VoxelDesignationType.Empty;
                 }
-                if(description[x, 0, z] == VoxelDesignationType.Platform 
+                if (description[x, 0, z] == VoxelDesignationType.Platform
                     && description[x, 1, z] != VoxelDesignationType.Empty)
                 {
                     description[x, 0, z] = VoxelDesignationType.Empty;
@@ -184,10 +171,10 @@ public class VisualCell
         {
             for (int z = 0; z < 2; z++)
             {
-                if(IsFill(designation[x, 1, z]))
+                if (IsFill(designation[x, 1, z]))
                 {
                     designation[x, 1, z] = VoxelDesignationType.AnyFilled;
-                    if(IsFill(designation[x, 0, z]))
+                    if (IsFill(designation[x, 0, z]))
                     {
                         designation[x, 0, z] = VoxelDesignationType.AnyFilled;
                     }
@@ -199,19 +186,6 @@ public class VisualCell
     private bool IsFill(VoxelDesignationType slotType)
     {
         return slotType == VoxelDesignationType.SlantedRoof || slotType == VoxelDesignationType.WalkableRoof;
-    }
-
-    public void SetMaterialProperties(MeshRenderer renderer)
-    {
-        if (Contents != null)
-        {
-            Vector3[] adjustedAnchors = GetAdjustedAnchors();
-            foreach (Material mat in renderer.materials)
-            {
-                SetAnchors(adjustedAnchors, mat);
-                mat.SetFloat("_Cull", Contents.Flipped ? 1 : 2);
-            }
-        }
     }
 
     private Vector3[] GetAdjustedAnchors()
@@ -234,11 +208,15 @@ public class VisualCell
         return ret;
     }
 
-    private void SetAnchors(Vector3[] adjustedAnchors, Material mat)
+    public VoxelRenderData GetRenderData()
     {
-        mat.SetVector("_AnchorA", adjustedAnchors[0]);
-        mat.SetVector("_AnchorB", adjustedAnchors[1]);
-        mat.SetVector("_AnchorC", adjustedAnchors[2]);
-        mat.SetVector("_AnchorD", adjustedAnchors[3]);
+        Vector3[] adjustedAnchors = GetAdjustedAnchors();
+        float flipNormal = Contents.Flipped ? -1 : 1;
+        return new VoxelRenderData(
+            adjustedAnchors[0],
+            adjustedAnchors[1],
+            adjustedAnchors[2],
+            adjustedAnchors[3],
+            flipNormal);
     }
 }

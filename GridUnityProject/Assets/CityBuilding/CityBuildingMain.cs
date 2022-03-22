@@ -97,6 +97,7 @@ public class CityBuildingMain : MonoBehaviour
             //MainGrid = GroundSaveState.Load();
             Debug.Log("Grid Loaded");
         }
+        visualsManager.Update();
     }   
 
     public void UpdateVoxelVisuals(DesignationCell cell)
@@ -117,6 +118,7 @@ public class CityBuildingMain : MonoBehaviour
         }
         lightingManager.UpdatePostion(MainGrid);
     }
+
     public void UpdateMainGrid(GridExpander expander)
     {
         MainGrid.AddToMesh(expander.Points, expander.Edges);
@@ -126,5 +128,14 @@ public class CityBuildingMain : MonoBehaviour
     public void UpdateInteractionGrid()
     {
         InteractionMesh.UpdateMesh(MainGrid);
+    }
+
+    private void OnDestroy()
+    {
+        if(visualsManager != null)
+        {
+            visualsManager.Dispose();
+            visualsManager = null;
+        }
     }
 }
