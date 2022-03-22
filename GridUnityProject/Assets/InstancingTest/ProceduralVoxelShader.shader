@@ -25,6 +25,9 @@ Shader "Voxel/ProceduralVoxelShader"
           #include "AutoLight.cginc"
           
           fixed4 _Color;
+          sampler2D _BottomLighting;
+          sampler2D _TopLighting;
+          float4x4 _LightBoxTransform;
 
           struct VoxelRenderData
           {
@@ -39,10 +42,10 @@ Shader "Voxel/ProceduralVoxelShader"
           struct v2f
           {
               float4 pos : SV_POSITION;
-              float3 ambient : TEXCOORD1;
-              float3 diffuse : TEXCOORD2;
-              float3 color : TEXCOORD3;
-              SHADOW_COORDS(4)
+              float2 uv : TEXCOORD0;
+              float3 normal : NORMAL;
+              float3 worldPos : TEXCOORD1;
+              SHADOW_COORDS(3)
           };
 
           StructuredBuffer<VoxelRenderData> _RenderDataBuffer;
@@ -115,28 +118,50 @@ Shader "Voxel/ProceduralVoxelShader"
                 data.AnchorD,
                 data.FlipNormal);
 
-              float3 ndotl = saturate(dot(worldNormal, _WorldSpaceLightPos0.xyz));
-              float3 ambient = ShadeSH9(float4(worldNormal, 1.0f));
-              float3 diffuse = (ndotl * _LightColor0.rgb);
-              float3 color = _Color;
-
               v2f o;
               o.pos = mul(UNITY_MATRIX_VP, float4(worldPosition, 1.0f));
-              o.ambient = ambient;
-              o.diffuse = diffuse;
-              o.color = color;
+              o.normal = worldNormal;
+              o.uv = v.texcoord;
+              o.worldPos = worldPosition;
               TRANSFER_SHADOW(o)
               return o;
           }
 
+          float GetBaseShade(float3 worldNormal)
+          {
+            float baseShade = dot(worldNormal.xyz, _WorldSpaceLightPos0.xyz);
+            baseShade = saturate(baseShade * 5);
+            return baseShade;
+          }
+
+          float3 GetBoxLighting(float3 worldPos)
+          {
+            float3 boxPos = mul(_LightBoxTransform, float4(worldPos, 1));
+            boxPos += .5;
+            float3 bottomSample = tex2D(_BottomLighting, boxPos.xz).rgb;
+            float3 topSample = tex2D(_TopLighting, boxPos.xz).rgb;
+            float3 ret = lerp(bottomSample, topSample, boxPos.y);
+            return ret;
+          }
+
           fixed4 frag(v2f i) : SV_Target
           {
+              float3 boxLighting = GetBoxLighting(i.worldPos);
+              //return float4(boxLighting, 1);
+              float baseShade = GetBaseShade(i.normal);
+              float ssao = 1;// GetSsao(i.vertex);
               fixed shadow = SHADOW_ATTENUATION(i);
-          //return shadow;
-              fixed4 albedo = 1;
-              float3 lighting = i.diffuse * shadow + i.ambient;
-              fixed4 output = fixed4(albedo.rgb * i.color * lighting, albedo.w);
-              return output; 
+              shadow = saturate(shadow * 5);
+              shadow = min(shadow, baseShade);
+              float3 ret = _Color * 1.25;
+              ret *= lerp(boxLighting * .75, 1, .5);
+              ret *= lerp(ret * float3(0.3, .6, 1), ret, shadow);
+              float shadedSsao = lerp(pow(ssao, 2), pow(ssao, .5), shadow);
+              ret *= shadedSsao;
+
+
+
+              return float4(ret, 1);
           }
           ENDCG
       }
