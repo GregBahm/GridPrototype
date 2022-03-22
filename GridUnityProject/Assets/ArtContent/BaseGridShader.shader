@@ -14,25 +14,26 @@
     {
       Tags
       {
-          "RenderType" = "Opaque"
+          "LightMode" = "ForwardBase"
       }
         LOD 100
 
         Pass
         {
             Name "ForwardLit"
-            Tags { "Queue"="Transparent"}
             //Blend SrcAlpha OneMinusSrcAlpha
             //ZWrite Off
             CGPROGRAM
             #pragma vertex vert
             #pragma geometry geo
             #pragma fragment frag
+            #pragma multi_compile_fwdbase
+          #pragma target 4.5
 
-            #pragma multi_compile _ _MAIN_LIGHT_SHADOWS
-            #pragma multi_compile _ _MAIN_LIGHT_SHADOWS_CASCADE
-            #pragma multi_compile _ _SHADOWS_SOFT
-            #pragma multi_compile _ _SCREEN_SPACE_OCCLUSION
+
+          #include "UnityCG.cginc"
+          #include "UnityLightingCommon.cginc"
+          #include "AutoLight.cginc"
 
             float4 _BaseMap_ST;
             float4 _BaseColor;
@@ -65,18 +66,19 @@
                 float2 uv : TEXCOORD0;
                 float4 vertex : SV_POSITION;
                 float distToCursor : TEXCOORD1;
-                float3 worldPos : TEXCOORD3;
+                float3 worldPos : TEXCOORD2;
                 float3 normal : NORMAL;
             };
 
             struct g2f
             {
                 float2 uv : TEXCOORD0;
-                float4 vertex : SV_POSITION;
+                float4 pos : SV_POSITION;
                 float distToCursor : TEXCOORD1;
-                float3 worldPos : TEXCOORD3;
-                float dist : TEXCOORD2;
+                float3 worldPos : TEXCOORD2;
+                float dist : TEXCOORD3;
                 float3 normal : NORMAL;
+                SHADOW_COORDS(4)
             };
 
             float3 GetBoxLighting(float3 worldPos)
@@ -110,19 +112,22 @@
               o.uv = p[0].uv;
               o.distToCursor = p[0].distToCursor;
               o.worldPos = p[0].worldPos;
-              o.vertex = UnityObjectToClipPos(p[0].vertex + vertOffset);
+              o.pos = UnityObjectToClipPos(p[0].vertex + vertOffset);
+              TRANSFER_SHADOW(o)
               triStream.Append(o);
 
               o.uv = p[1].uv;
               o.distToCursor = p[1].distToCursor;
               o.worldPos = p[1].worldPos;
-              o.vertex = UnityObjectToClipPos(p[1].vertex + vertOffset);
+              o.pos = UnityObjectToClipPos(p[1].vertex + vertOffset);
+              TRANSFER_SHADOW(o)
               triStream.Append(o);
 
               o.uv = p[2].uv;
               o.distToCursor = p[2].distToCursor;
               o.worldPos = p[2].worldPos;
-              o.vertex = UnityObjectToClipPos(p[2].vertex + vertOffset);
+              o.pos = UnityObjectToClipPos(p[2].vertex + vertOffset);
+              TRANSFER_SHADOW(o)
               triStream.Append(o);
             }
 
@@ -161,7 +166,7 @@
                 
                 float3 ret = _Color;
                 float3 boxLighting = GetBoxLighting(i.worldPos);
-                half shadow = 1;// MainLightRealtimeShadow(TransformWorldToShadowCoord(i.worldPos));
+                half shadow = SHADOW_ATTENUATION(i);
                 float ssao = 1;// GetSsao(i.vertex);
                 ret *= boxLighting;
                 ret = lerp(ret * _ShadowColor, ret, shadow);
@@ -181,6 +186,25 @@
                   clip(alphaNoise - .5);
                 return float4(ret, 1);
             }
+            ENDCG
+        }
+        Pass
+        {
+            Name "ShadowCaster"
+            Tags { "LightMode" = "ShadowCaster" }
+
+            ZWrite On ZTest LEqual
+
+            CGPROGRAM
+            #pragma target 2.0
+
+            #pragma multi_compile_shadowcaster
+
+            #pragma vertex vertShadowCaster
+            #pragma fragment fragShadowCaster
+
+            #include "UnityStandardShadow.cginc"
+
             ENDCG
         }
     }

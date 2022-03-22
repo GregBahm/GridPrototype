@@ -1,23 +1,22 @@
-Shader "Voxel/ProceduralVoxelShader"
+Shader "Voxel/ProceduralStandardVoxelShader"
 {
   Properties
   {
     _Color("Color", Color) = (1, 1, 1, 1)
   }
-  SubShader
-  {
-
-      Cull Off
+  SubShader{
 
       Pass {
 
-          Tags {"LightMode" = "ForwardBase"}
+    Tags { "RenderType" = "Opaque" }
+
+          Cull Off
 
           CGPROGRAM
 
           #pragma vertex vert
           #pragma fragment frag
-          #pragma multi_compile_fwdbase
+          #pragma multi_compile_fwdbase nolightmap nodirlightmap nodynlightmap novertexlight
           #pragma target 4.5
 
           #include "UnityCG.cginc"
@@ -138,64 +137,6 @@ Shader "Voxel/ProceduralVoxelShader"
               fixed4 output = fixed4(albedo.rgb * i.color * lighting, albedo.w);
               return output; 
           }
-          ENDCG
-      }
-
-      Pass
-      {
-          Tags{ "LightMode" = "ShadowCaster" }
-          CGPROGRAM
-          #pragma vertex VSMain
-          #pragma fragment PSMain
-
-          struct VoxelRenderData
-          {
-              float2 AnchorA;
-              float2 AnchorB;
-              float2 AnchorC;
-              float2 AnchorD;
-              float Height;
-              float FlipNormal;
-          };
-
-          StructuredBuffer<VoxelRenderData> _RenderDataBuffer;
-
-          float2 GetRemapped(float2 toRemap, float2 x1y1, float2 x0y1, float2 x0y0, float2 x1y0)
-          {
-            float2 y0 = lerp(x0y0, x1y0, toRemap.x);
-            float2 y1 = lerp(x0y1, x1y1, toRemap.x);
-            return lerp(y0, y1, toRemap.y);
-          }
-
-          float3 GetTransformedBaseVert(float3 vert,
-            float2 anchorA,
-            float2 anchorB,
-            float2 anchorC,
-            float2 anchorD)
-          {
-            float2 toRemap = float2(vert.x + .5, 1 - (vert.z + .5));
-            float2 remapped = GetRemapped(toRemap, anchorA, anchorB, anchorC, anchorD);
-            return float3(remapped.x, vert.y, remapped.y);
-          }
-
-          float4 VSMain(float4 vertex:POSITION, uint instanceID : SV_InstanceID) : SV_POSITION
-          {
-              VoxelRenderData data = _RenderDataBuffer[instanceID];
-              float3 localPosition = vertex.xyz;
-              float3 worldPosition = GetTransformedBaseVert(localPosition,
-                data.AnchorA,
-                data.AnchorB,
-                data.AnchorC,
-                data.AnchorD);
-              worldPosition.y += data.Height;
-              return mul(UNITY_MATRIX_VP, float4(worldPosition, 1.0f));
-          }
-
-          float4 PSMain(float4 vertex:SV_POSITION) : SV_TARGET
-          {
-              return 0;
-          }
-
           ENDCG
       }
   }
