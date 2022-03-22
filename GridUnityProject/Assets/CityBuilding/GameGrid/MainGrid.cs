@@ -23,7 +23,7 @@ namespace GameGrid
 
         public IReadOnlyList<GroundEdge> BorderEdges { get; private set; }
 
-        public IEnumerable<DesignationCell> Voxels
+        public IEnumerable<DesignationCell> DesignationCells
         {
             get
             {
@@ -118,7 +118,7 @@ namespace GameGrid
 
         private void UpdateVoxelVisuals()
         {
-            foreach (DesignationCell voxel in Voxels)
+            foreach (DesignationCell voxel in DesignationCells)
             {
                 voxel.PopulateVisuals();
             }

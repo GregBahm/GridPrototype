@@ -53,6 +53,17 @@ namespace VoxelVisuals
             anchors = GetAnchors();
         }
 
+        public Vector3 GetCenter()
+        {
+            Vector3 ret = Vector3.zero;
+            foreach (Vector3 anchor in anchors)
+            {
+                ret += anchor;
+            }
+            ret /= 8;
+            return ret;
+        }
+
         private Vector3[] GetAnchors()
         {
             return new Vector3[]

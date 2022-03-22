@@ -109,6 +109,14 @@ public class CityBuildingMain : MonoBehaviour
         }
     }
 
+    public void UpdateAllVisuals()
+    {
+        foreach (GroundQuad quad in MainGrid.Quads)
+        {
+            visualsManager.UpdateColumn(quad);
+        }
+    }
+
     public void UpdateGroundMesh()
     {
         GroundMesh.UpdateMesh(MainGrid);

@@ -132,7 +132,7 @@ MonoBehaviour:
     value: 1
   color:
     overrideState: 1
-    value: {r: 0, g: 0.3233118, b: 1, a: 1}
+    value: {r: 0, g: 0.33, b: 1, a: 1}
   ambientOnly:
     overrideState: 0
     value: 1
@@ -169,7 +169,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 556797029e73b2347956b6579e77e05b, type: 3}
   m_Name: DepthOfField
   m_EditorClassIdentifier: 
-  active: 1
+  active: 0
   enabled:
     overrideState: 1
     value: 1
