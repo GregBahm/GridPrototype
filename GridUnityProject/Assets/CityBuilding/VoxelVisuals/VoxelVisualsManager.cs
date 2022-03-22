@@ -8,51 +8,20 @@ using UnityEngine;
 public class VoxelVisualsManager
 {
     private readonly CityBuildingMain cityMain;
-    private readonly Transform piecesRoot;
     private readonly VisualOptionsByDesignation optionsSource;
-    private readonly Dictionary<VisualCell, VisualCellGameobjects> voxelObjects = new Dictionary<VisualCell, VisualCellGameobjects>();
+
+    private readonly Dictionary<VisualCell, VisualCellOption> toRemove;
+    private readonly Dictionary<VisualCell, VisualCellOption> toAdd;
+    private Dictionary<Mesh, ProceduralMeshRenderer> renderers;
 
     public VoxelVisualsManager(CityBuildingMain cityMain, VisualOptionsByDesignation optionsSource)
     {
         this.cityMain = cityMain;
-        piecesRoot = new GameObject("Pieces Root").transform;
         this.optionsSource = optionsSource;
-    }
-
-    public void UpdateDebugObject(VisualCell component)
-    {
-        VisualCellGameobjects gameObjects;
-        if (voxelObjects.ContainsKey(component))
-        {
-            gameObjects = voxelObjects[component];
-            gameObjects.Filter.mesh = component.Contents.Mesh;
-            UpdateMeshBounds(gameObjects.Filter);
-            gameObjects.Obj.name = GetObjName(component);
-            if (component.Contents.Materials != null)
-                gameObjects.Renderer.sharedMaterials = component.Contents.Materials;
-        }
-        else
-        {
-            if (component.Contents == null || component.Contents.Mesh == null)
-            {
-                return;
-            }
-            GameObject obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            obj.name = GetObjName(component);
-            GameObject.Destroy(obj.GetComponent<BoxCollider>());
-            MeshFilter filter = obj.GetComponent<MeshFilter>();
-            UpdateMeshBounds(filter);
-            MeshRenderer renderer = obj.GetComponent<MeshRenderer>();
-            renderer.sharedMaterials = component.Contents.Materials;
-            component.SetMaterialProperties(renderer);
-            
-            filter.mesh = component.Contents.Mesh;
-            obj.transform.position = component.ContentPosition;
-            gameObjects = new VisualCellGameobjects(obj, filter, renderer);
-            voxelObjects.Add(component, gameObjects);
-            obj.transform.SetParent(piecesRoot, true);
-        }
-        component.UpdateForBaseGridModification(gameObjects.Renderer);
+        toRemove = new Dictionary<VisualCell, VisualCellOption>();
+        toAdd = new Dictionary<VisualCell, VisualCellOption>();
+        renderers = GetRenderers(optionsSource);
+        VisualCell.ContentsChanged += OnVoxelOptionChange;
     }
 
     public void UpdateColumn(GroundQuad column)
@@ -63,8 +32,7 @@ public class VoxelVisualsManager
             VisualCell cell = cityMain.MainGrid.GetVisualCell(column, i);
             VoxelDesignation designation = cell.GetCurrentDesignation();
             VisualCellOptions option = optionsSource.GetOptions(designation);
-            VisualCellOption oldOption = cell.Contents;
-            if(yesStrut)
+            if (yesStrut)
             {
                 cell.Contents = option.UpStrutOption;
             }
@@ -72,62 +40,244 @@ public class VoxelVisualsManager
             {
                 cell.Contents = option.DefaultOption;
             }
-            if(oldOption != cell.Contents)
-            {
-                UpdateDebugObject(cell);
-            }
             yesStrut = cell.Contents.Connections.Down == VoxelConnectionType.BigStrut;
         }
     }
 
-    private static readonly Bounds ComponentBounds = new Bounds(Vector3.zero, Vector3.one* 2);
-
-    private void UpdateMeshBounds(MeshFilter filter)
+    public void UpdateForBaseGridModification()
     {
-        if(filter.mesh != null)
-        {
-            filter.mesh.bounds = ComponentBounds;
-        }
+        // TODO: Implement this. It just needs to roll through and update all anchors for all renderers
     }
 
-    private string GetObjName(VisualCell component)
+    private Dictionary<Mesh, ProceduralMeshRenderer> GetRenderers(VisualOptionsByDesignation optionsSource)
     {
-        string ret = "(" + component.Quad.ToString() + "), " + component.Height + " ";
-        if (component.Contents == null || component.Contents.Mesh == null)
+        Dictionary<Mesh, ProceduralMeshRenderer> ret = new Dictionary<Mesh, ProceduralMeshRenderer>();
+        IEnumerable<VoxelBlueprint> blueprints = optionsSource.Blueprints.Where(item => item.ArtContent != null);
+        foreach (VoxelBlueprint item in blueprints)
         {
-            return ret + " (empty)";
-        }
-        ret += component.Contents.Mesh.name;
-        if (component.Contents.Flipped)
-        {
-            ret += " flipped";
-        }
-        if (component.Contents.Rotations > 0)
-        {
-            ret += " " + component.Contents.Rotations.ToString() + " rotations";
+            ProceduralMeshRenderer renderer = new ProceduralMeshRenderer(item.ArtContent, item.Materials);
+            ret.Add(item.ArtContent, renderer);
         }
         return ret;
     }
 
-    internal void UpdateForBaseGridModification()
+    private void OnVoxelOptionChange(object sender, VisualCellChangedEventArg args)
     {
-        foreach (KeyValuePair<VisualCell, VisualCellGameobjects> item in voxelObjects)
+        RegisterRemoval(args);
+        RegisterAdd(args);
+    }
+
+    public void Update()
+    {
+        ProcessAllToRemoves();
+        ProcessAllToAdds();
+        UpdateBuffers();
+        Render();
+    }
+
+    private void Render()
+    {
+        foreach (ProceduralMeshRenderer item in renderers.Values.Where(item => item.CellsToRender > 0))
         {
-            item.Key.UpdateForBaseGridModification(item.Value.Renderer);
+            item.Render();
         }
     }
 
-    private class VisualCellGameobjects
+    private void UpdateBuffers()
     {
-        public GameObject Obj { get; }
-        public MeshFilter Filter { get; }
-        public MeshRenderer Renderer { get; }
-
-        public VisualCellGameobjects(GameObject obj, MeshFilter filter, MeshRenderer renderer)
+        foreach (ProceduralMeshRenderer item in renderers.Values.Where(item => item.IsDirty))
         {
-            Obj = obj;
-            Filter = filter;
-            Renderer = renderer;
+            item.UpdateBuffers();
         }
+    }
+
+    private void ProcessAllToRemoves()
+    {
+        foreach (var item in toRemove)
+        {
+            ProceduralMeshRenderer renderer = renderers[item.Value.Mesh];
+            renderer.Remove(item.Key);
+        }
+        toRemove.Clear();
+    }
+
+    private void ProcessAllToAdds()
+    {
+        foreach (var item in toAdd)
+        {
+            ProceduralMeshRenderer renderer = renderers[item.Value.Mesh];
+            renderer.Add(item.Key);
+        }
+        toAdd.Clear();
+    }
+
+    private void RegisterRemoval(VisualCellChangedEventArg args)
+    {
+        if (args.OldOption == null || args.OldOption.Mesh == null)
+            return;
+        if (!toRemove.ContainsKey(args.Cell)) // Discard each change after the first as they were never applied
+        {
+            toRemove.Add(args.Cell, args.OldOption);
+        }
+    }
+
+    private void RegisterAdd(VisualCellChangedEventArg args)
+    {
+        if (args.Cell.Contents.Mesh == null)
+            return;
+        if (toAdd.ContainsKey(args.Cell))
+        {
+            toAdd[args.Cell] = args.Cell.Contents;
+        }
+        else
+        {
+            toAdd.Add(args.Cell, args.Cell.Contents);
+        }
+    }
+
+    public void Dispose()
+    {
+        foreach (ProceduralMeshRenderer item in renderers.Values)
+        {
+            item.Dispose();
+        }
+    }
+}
+
+public class VisualCellChangedEventArg : EventArgs
+{
+    public VisualCell Cell { get; }
+    public VisualCellOption OldOption { get; }
+
+    public VisualCellChangedEventArg(VisualCell cell, VisualCellOption oldOption)
+    {
+        Cell = cell;
+        OldOption = oldOption;
+    }
+}
+
+class ProceduralMeshRenderer
+{
+    private static Bounds Bounds { get; } = new Bounds(Vector3.zero, new Vector3(100.0f, 100.0f, 100.0f));
+
+    public Mesh Mesh { get; }
+    private readonly Material[] materials;
+
+    public bool IsDirty { get; private set; }
+
+    private readonly HashSet<VisualCell> cellsToRender;
+    public int CellsToRender { get { return cellsToRender.Count; } }
+
+    private ComputeBuffer renderDataBuffer;
+    private int renderBufferLength = 1024; // TODO: Lower this and then make it dynamic
+    private ComputeBuffer[] argsBuffers;
+    private const int PositionsBufferStride = VoxelRenderData.Stride;
+
+    public ProceduralMeshRenderer(Mesh mesh, Material[] materials)
+    {
+        Mesh = mesh;
+        this.materials = materials.Select(item => new Material(item)).ToArray();
+        renderDataBuffer = new ComputeBuffer(renderBufferLength, PositionsBufferStride);
+        argsBuffers = InitializeArgsBuffers();
+        cellsToRender = new HashSet<VisualCell>();
+    }
+
+    private ComputeBuffer[] InitializeArgsBuffers()
+    {
+        ComputeBuffer[] ret = new ComputeBuffer[materials.Length];
+        for (int i = 0; i < materials.Length; i++)
+        {
+            ret[i] = new ComputeBuffer(1, 5 * sizeof(uint), ComputeBufferType.IndirectArguments);
+        }
+        return ret;
+    }
+
+    public void Dispose()
+    {
+        renderDataBuffer.Dispose();
+        foreach (ComputeBuffer buffer in argsBuffers)
+        {
+            buffer.Dispose();
+        }
+    }
+
+    public void Add(VisualCell cell)
+    {
+        cellsToRender.Add(cell);
+        IsDirty = true;
+    }
+
+    public void Remove(VisualCell cell)
+    {
+        cellsToRender.Remove(cell);
+        IsDirty = true;
+    }
+
+    public void UpdateBuffers()
+    {
+        for (int i = 0; i < materials.Length; i++)
+        {
+            UpdateArgsBuffer(i);
+        }
+        UpdatePositionsBuffer();
+    }
+
+    private void UpdatePositionsBuffer()
+    {
+        VoxelRenderData[] rendereData = cellsToRender.Select(item => item.GetRenderData()).ToArray();
+        if (rendereData.Length > renderBufferLength)
+        {
+            throw new NotImplementedException("Need to handle growth of render data buffers");
+        }
+        renderDataBuffer.SetData(rendereData);
+    }
+
+    private void UpdateArgsBuffer(int subMeshIndex)
+    {
+        uint[] args = new uint[5] { 0, 0, 0, 0, 0 };
+        args[0] = Mesh.GetIndexCount(subMeshIndex);
+        args[1] = (uint)cellsToRender.Count;
+        args[2] = Mesh.GetIndexStart(subMeshIndex);
+        args[3] = Mesh.GetBaseVertex(subMeshIndex);
+        argsBuffers[subMeshIndex].SetData(args);
+    }
+
+    public void Render()
+    {
+        for (int i = 0; i < materials.Length; i++)
+        {
+            Material mat = materials[i];
+            mat.SetBuffer("_RenderDataBuffer", renderDataBuffer);
+            Graphics.DrawMeshInstancedIndirect(Mesh, i, mat, Bounds, argsBuffers[i]);
+        }
+    }
+}
+
+public struct VoxelRenderData
+{
+    public const int Stride = sizeof(float) * 2 * 4  // Anchors
+        + sizeof(float) // Height
+        + sizeof(float); // FlipNormal
+
+    public Vector2 AnchorA { get; }
+    public Vector2 AnchorB { get; }
+    public Vector2 AnchorC { get; }
+    public Vector2 AnchorD { get; }
+    public float Height { get; }
+    public float FlipNormal { get; }
+
+    public VoxelRenderData(Vector2 anchorA,
+        Vector2 anchorB,
+        Vector2 anchorC,
+        Vector2 anchorD,
+        float height,
+        float flipNormal)
+    {
+        AnchorA = anchorA;
+        AnchorB = anchorB;
+        AnchorC = anchorC;
+        AnchorD = anchorD;
+        Height = height;
+        FlipNormal = flipNormal;
     }
 }

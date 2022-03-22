@@ -6,6 +6,8 @@ public class VisualOptionsByDesignation
 {
     private Dictionary<string, VisualCellOptions> optionsByDesignationKey;
     private readonly VoxelBlueprint[] blueprints;
+    public IEnumerable<VoxelBlueprint> Blueprints { get { return blueprints; } }
+
     public VisualOptionsByDesignation(VoxelBlueprint[] blueprints)
     {
         this.blueprints = blueprints;
