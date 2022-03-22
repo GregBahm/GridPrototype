@@ -8,13 +8,14 @@ using VoxelVisuals;
 
 public class DomeTestScript : MonoBehaviour
 {
-    public SphereCollider Sphere;
+    private SphereCollider sphere;
+    [SerializeField]
+    private CityBuildingMain main;
 
     public bool DoIt;
-    private CityBuildingMain main;
     private void Start()
     {
-        main = GetComponent<CityBuildingMain>();
+        sphere = GetComponent<SphereCollider>();
     }
 
     private void Update()
@@ -36,7 +37,7 @@ public class DomeTestScript : MonoBehaviour
             }
             else
             {
-                Vector3 spherePos = Sphere.ClosestPoint(item.Position);
+                Vector3 spherePos = sphere.ClosestPoint(item.Position);
                 bool isInside = !((spherePos - item.Position).magnitude > float.Epsilon);
                 item.Designation = isInside ? VoxelDesignationType.WalkableRoof : VoxelDesignationType.Empty;
             }

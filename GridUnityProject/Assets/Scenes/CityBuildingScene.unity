@@ -848,7 +848,6 @@ GameObject:
   - component: {fileID: 536624983}
   - component: {fileID: 536624982}
   - component: {fileID: 536624985}
-  - component: {fileID: 536624986}
   m_Layer: 0
   m_Name: AllScripts
   m_TagString: Untagged
@@ -1292,20 +1291,6 @@ MonoBehaviour:
   SettingsCloserButton: {fileID: 2081527861}
   SettingsPanel: {fileID: 1682685667}
   MainHud: {fileID: 1323467039}
---- !u!114 &536624986
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 536624977}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4a804653bca2003459ce095705ca7b0c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Sphere: {fileID: 911878581}
-  DoIt: 0
 --- !u!1 &559599377
 GameObject:
   m_ObjectHideFlags: 0
@@ -2068,8 +2053,9 @@ GameObject:
   - component: {fileID: 911878583}
   - component: {fileID: 911878582}
   - component: {fileID: 911878581}
+  - component: {fileID: 911878585}
   m_Layer: 0
-  m_Name: Sphere
+  m_Name: DomeSphere
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2153,6 +2139,20 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &911878585
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 911878580}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4a804653bca2003459ce095705ca7b0c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  main: {fileID: 536624978}
+  DoIt: 0
 --- !u!1 &914631272
 GameObject:
   m_ObjectHideFlags: 0
