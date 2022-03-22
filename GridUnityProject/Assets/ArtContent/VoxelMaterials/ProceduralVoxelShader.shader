@@ -45,6 +45,7 @@ Shader "Voxel/ProceduralVoxelShader"
               float2 uv : TEXCOORD0;
               float3 normal : NORMAL;
               float3 worldPos : TEXCOORD1;
+              float3 viewDir : VIEWDIR;
               SHADOW_COORDS(3)
           };
 
@@ -94,7 +95,9 @@ Shader "Voxel/ProceduralVoxelShader"
 
             float2 remapped = GetRemapped(normal.xz, a, d, c, b);
             remapped *= flipNormal;
-            return float3(-remapped.y, normal.y, remapped.x);
+            float3 ret = float3(-remapped.y, normal.y, remapped.x);
+            ret = normalize(ret);
+            return ret;
           }
 
           v2f vert(appdata_full v, uint instanceID : SV_InstanceID)
@@ -123,6 +126,7 @@ Shader "Voxel/ProceduralVoxelShader"
               o.normal = worldNormal;
               o.uv = v.texcoord;
               o.worldPos = worldPosition;
+              o.viewDir = _WorldSpaceCameraPos.xyz - worldPosition;
               TRANSFER_SHADOW(o)
               return o;
           }
@@ -144,23 +148,24 @@ Shader "Voxel/ProceduralVoxelShader"
             return ret;
           }
 
+
           fixed4 frag(v2f i) : SV_Target
           {
+            //return float4(i.normal, 1);
               float3 boxLighting = GetBoxLighting(i.worldPos);
-              //return float4(boxLighting, 1);
               float baseShade = GetBaseShade(i.normal);
-              float ssao = 1;// GetSsao(i.vertex);
               fixed shadow = SHADOW_ATTENUATION(i);
               shadow = saturate(shadow * 5);
               shadow = min(shadow, baseShade);
               float3 ret = _Color * 1.25;
               ret *= lerp(boxLighting * .75, 1, .5);
               ret *= lerp(ret * float3(0.3, .6, 1), ret, shadow);
-              float shadedSsao = lerp(pow(ssao, 2), pow(ssao, .5), shadow);
-              ret *= shadedSsao;
 
-
-
+              float3 halfAngle = normalize(normalize(i.viewDir) + _WorldSpaceLightPos0.xyz);
+              float spec = pow(saturate(dot(halfAngle, i.normal)), 50) * 2;
+              ret = lerp(ret * (spec + .5), ret * (spec + 1), saturate(shadow));
+              float fog = saturate(i.pos.z * 200 - 0);
+              ret = lerp(float3(0, .33, 1), ret,  fog);
               return float4(ret, 1);
           }
           ENDCG
