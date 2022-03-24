@@ -142,7 +142,7 @@ namespace GameGrid
         {
             foreach (GroundQuad quad in Quads)
             {
-                Squarifier squarifier = new Squarifier(quad, .5f);
+                Squarifier squarifier = new Squarifier(quad, 1);
                 quad.Points[0].Position = Vector2.Lerp(squarifier.OutputA, quad.Points[0].Position, .5f);
                 quad.Points[1].Position = Vector2.Lerp(squarifier.OutputB, quad.Points[1].Position, .5f);
                 quad.Points[2].Position = Vector2.Lerp(squarifier.OutputC, quad.Points[2].Position, .5f);

@@ -71,7 +71,7 @@ namespace VoxelVisuals
             UpdatePositionsBuffer();
         }
 
-        private void UpdatePositionsBuffer()
+        public void UpdatePositionsBuffer()
         {
             VoxelRenderData[] rendereData = cellsToRender.Select(item => item.GetRenderData()).ToArray();
             if (rendereData.Length > renderBufferLength)

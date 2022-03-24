@@ -182,9 +182,8 @@
                 float3 lineVal = lerp(ret, ret * 2, cursorPower * 1);
                 ret = lerp(ret, lineVal, grid);
 
-                float fog = saturate(i.pos.z * 200 - 0);
+                float fog = saturate(i.pos.z * 300 - 0);
                 ret = lerp(float3(0, .33, 1), ret, fog);
-                
                 if(i.dist > 0)
                   clip(alphaNoise - .5);
                 return float4(ret, 1);

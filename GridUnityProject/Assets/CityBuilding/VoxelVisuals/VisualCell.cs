@@ -35,8 +35,6 @@ namespace VoxelVisuals
 
         public int Height { get; }
 
-        private Vector3[] anchors;
-
         public static event EventHandler<VisualCellChangedEventArg> ContentsChanged;
 
         public VisualCell(MainGrid grid, GroundQuad quad, int height)
@@ -45,18 +43,12 @@ namespace VoxelVisuals
             Quad = quad;
             Height = height;
             designationCells = GetDesignationCells();
-            anchors = GetAnchors();
-        }
-
-        public void UpdateForBaseGridModification()
-        {
-            anchors = GetAnchors();
         }
 
         public Vector3 GetCenter()
         {
             Vector3 ret = Vector3.zero;
-            foreach (Vector3 anchor in anchors)
+            foreach (Vector3 anchor in GetAnchors())
             {
                 ret += anchor;
             }
@@ -203,6 +195,7 @@ namespace VoxelVisuals
 
         private Vector3[] GetAdjustedAnchors()
         {
+            Vector3[] anchors = GetAnchors();
             Vector3[] ret = new Vector3[4];
             for (int i = 0; i < 4; i++)
             {

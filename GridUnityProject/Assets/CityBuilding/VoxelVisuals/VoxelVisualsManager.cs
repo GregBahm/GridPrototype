@@ -48,7 +48,10 @@ namespace VoxelVisuals
 
         public void UpdateForBaseGridModification()
         {
-            // TODO: Implement this. It just needs to roll through and update all anchors for all renderers
+            foreach (ProceduralMeshRenderer item in renderers.Values.Where(item => item.CellsToRender > 0))
+            {
+                item.UpdatePositionsBuffer();
+            }
         }
 
         private Dictionary<Mesh, ProceduralMeshRenderer> GetRenderers(VisualOptionsByDesignation optionsSource)

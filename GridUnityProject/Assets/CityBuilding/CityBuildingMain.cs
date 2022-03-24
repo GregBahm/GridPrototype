@@ -20,7 +20,7 @@ public class CityBuildingMain : MonoBehaviour
     [SerializeField]
     private LightingManager lightingManager;
     [SerializeField]
-    public int newGridMaxHeight = 20;
+    public int newGridMaxHeight = 30;
     public UndoManager UndoManager { get; private set; }
 
     public bool LoadLastSave;
@@ -48,7 +48,8 @@ public class CityBuildingMain : MonoBehaviour
             MainGrid = new MainGrid(newGridMaxHeight, saveState.Ground.Points, saveState.Ground.Edges);
             Initialize();
             HashSet<GroundQuad> columnsToUpdate = new HashSet<GroundQuad>();
-            foreach (var item in saveState.Designations.DesignationStates) // Turn back on after working out the grid
+            foreach (var item in saveState.Designations.DesignationStates
+                .Where(item => item.Height < newGridMaxHeight - 1))
             {
                 DesignationCell cell = MainGrid.Points[item.GroundPointIndex].DesignationCells[item.Height];
                 cell.Designation = item.Designation;
