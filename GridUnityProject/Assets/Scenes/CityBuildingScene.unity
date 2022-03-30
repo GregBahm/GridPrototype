@@ -1211,7 +1211,7 @@ MonoBehaviour:
   InteriorsTab: {fileID: 1211910452}
   FoundationTab: {fileID: 1885678491}
   UndoButton: {fileID: 7699474284198047079}
-  SelectedTab: 0
+  SelectedTab: 1
 --- !u!114 &536624981
 MonoBehaviour:
   m_ObjectHideFlags: 0

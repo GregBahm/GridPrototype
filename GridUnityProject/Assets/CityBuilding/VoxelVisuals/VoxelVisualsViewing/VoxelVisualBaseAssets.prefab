@@ -27,6 +27,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -25.860104, y: -0.7656896, z: -5.010891}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -48,7 +49,7 @@ MonoBehaviour:
   SlantedRoof: {r: 0.83921576, g: 0.36078432, b: 0.25882354, a: 0.4745098}
   Platform: {r: 0.5411765, g: 0.92549026, b: 1, a: 0.5176471}
   Ground: {r: 0.16862746, g: 0.16862746, b: 0.16862746, a: 0.49803922}
-  WallMat: {fileID: 2100000, guid: 9f17b7ea90d37e34fb8432e5dd89c294, type: 2}
-  StrutMat: {fileID: 2100000, guid: 0d6966f96b9de2a4ca7e36d3f84fed26, type: 2}
-  SlantedRoofMat: {fileID: 2100000, guid: 0977880ba7e5b4e4db9034d7b600fcd0, type: 2}
-  PlatformMat: {fileID: 2100000, guid: 9a8dce79f38daa14593880a47068152f, type: 2}
+  WallMat: {fileID: 2100000, guid: 0e039fc0b2bfde44587d859ec9f03ee5, type: 2}
+  StrutMat: {fileID: 2100000, guid: a38ff843f3d4e204abf1113f910907f2, type: 2}
+  SlantedRoofMat: {fileID: 2100000, guid: 1964f054009c16845bd5373117bf7042, type: 2}
+  PlatformMat: {fileID: 2100000, guid: b258cc8468662a443ab52ddd08e7b2a0, type: 2}

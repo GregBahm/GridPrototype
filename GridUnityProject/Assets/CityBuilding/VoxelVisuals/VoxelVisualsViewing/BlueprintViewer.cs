@@ -39,7 +39,7 @@ public class BlueprintViewer : MonoBehaviour
 
         MeshFilter.mesh = Blueprint.ArtContent;
         if(Blueprint.Materials != null)
-            MeshRenderer.materials = Blueprint.Materials;
+            Mesh Renderer.materials = Blueprint.Materials;
         SetDesignationDisplay();
         name = GeneratedName + (Blueprint.ArtContent == null ? (Blueprint.ArtContentless ? " (Contentless)" : "  (Missing Art)") : "");
         HandleCommands();
