@@ -361,7 +361,7 @@ public class VoxelVisualViewingMain : MonoBehaviour
             VoxelDesignationType[][] mixedCombos = GetMixedComboDesignations();
             for (int i = 0; i < mixedCombos.Length; i++)
             {
-                VoxelBlueprint blueprint = new VoxelBlueprint();
+                VoxelBlueprint blueprint = ScriptableObject.CreateInstance<VoxelBlueprint>();
                 DesignationGrid grid = DesignationGrid.FromFlatArray(mixedCombos[i]);
                 blueprint.Designations = grid;
                 yield return GetForBlueprint(blueprint);
@@ -397,7 +397,7 @@ public class VoxelVisualViewingMain : MonoBehaviour
             Dictionary<string, VoxelDesignationType[]> dictionary = new Dictionary<string, VoxelDesignationType[]>();
             foreach (VoxelDesignationType[] designation in onlyMixed)
             {
-                VoxelBlueprint blueprint = new VoxelBlueprint();
+                VoxelBlueprint blueprint = ScriptableObject.CreateInstance<VoxelBlueprint>();
                 blueprint.Designations = DesignationGrid.FromFlatArray(designation);
                 string key = GetInvariantKey(blueprint);
                 if(!dictionary.ContainsKey(key))
@@ -437,7 +437,7 @@ public class VoxelVisualViewingMain : MonoBehaviour
                 }
             }
             DesignationGrid newGrid = DesignationGrid.FromFlatArray(baseSet);
-            VoxelBlueprint ret = new VoxelBlueprint();
+            VoxelBlueprint ret = ScriptableObject.CreateInstance<VoxelBlueprint>();
             ret.Designations = newGrid;
             return ret;
         }
@@ -477,7 +477,7 @@ public class VoxelVisualViewingMain : MonoBehaviour
 
         private BlueprintContainer TryFindStrut(Dictionary<string, VoxelBlueprint> allPieces)
         {
-            VoxelBlueprint strutVersion = new VoxelBlueprint();
+            VoxelBlueprint strutVersion = ScriptableObject.CreateInstance<VoxelBlueprint>();
             strutVersion.Up = VoxelConnectionType.BigStrut;
             if (BasePiece.HypotheticalBlueprint.Designations.ToFlatArray().All(item => item == VoxelDesignationType.Platform || item == VoxelDesignationType.Empty))
                 strutVersion.Down = VoxelConnectionType.BigStrut;

@@ -39,31 +39,45 @@ public class BlueprintViewer : MonoBehaviour
 
         MeshFilter.mesh = Blueprint.ArtContent;
         if(Blueprint.Materials != null)
-            Mesh Renderer.materials = Blueprint.Materials;
+        {
+            string[] matNames = Blueprint.Materials.Select(item => item.name).ToArray();
+            MeshRenderer.materials = GetViewerMaterials(matNames).ToArray();
+        }
         SetDesignationDisplay();
         name = GeneratedName + (Blueprint.ArtContent == null ? (Blueprint.ArtContentless ? " (Contentless)" : "  (Missing Art)") : "");
         HandleCommands();
     }
 
+    private IEnumerable<Material> GetViewerMaterials(string[] materialNames)
+    {
+        foreach (string name in materialNames)
+        {
+            switch (name)
+            {
+                case "PlatformMat":
+                    yield return VoxelVisualBaseAssets.Instance.PlatformMat;
+                    break;
+                case "SlantedRoofMat":
+                    yield return VoxelVisualBaseAssets.Instance.SlantedRoofMat;
+                    break;
+                case "WallMat":
+                    yield return VoxelVisualBaseAssets.Instance.WallMat;
+                    break;
+                case "StrutMat":
+                    yield return VoxelVisualBaseAssets.Instance.StrutMat;
+                    break;
+                default:
+                    throw new Exception("Never heard of " + name + " material");
+            }
+        }
+    }
+
     private IEnumerable<Material> FindMaterials()
     {
         string assetPath = VoxelBlueprint.BlueprintsFolderPath + GeneratedName + ".fbx";
-        
         GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(assetPath);
         string[] materialNames = prefab.GetComponent<MeshRenderer>().sharedMaterials.Select(item => item.name).ToArray();
-        Dictionary<string, Material> mats = VoxelVisualBaseAssets.Instance.Materials.ToDictionary(item => item.name, item => item);
-        foreach (string item in materialNames)
-        {
-            if(mats.ContainsKey(item))
-            {
-                yield return mats[item];
-            }
-            else
-            {
-                Debug.LogError("Can't find material named " + item);
-                yield return null;
-            }
-        }
+        return GetViewerMaterials(materialNames);
     }
 
     private void HandleCommands()
