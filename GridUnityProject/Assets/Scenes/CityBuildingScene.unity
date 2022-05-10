@@ -872,7 +872,7 @@ MonoBehaviour:
   interiorMeshPrefab: {fileID: 0}
   groundMesh: {fileID: 579425808}
   lightingManager: {fileID: 1133595419}
-  newGridMaxHeight: 20
+  newGridMaxHeight: 40
   LoadLastSave: 1
   TestSave: 0
   TestLoad: 0
@@ -1211,7 +1211,7 @@ MonoBehaviour:
   InteriorsTab: {fileID: 1211910452}
   FoundationTab: {fileID: 1885678491}
   UndoButton: {fileID: 7699474284198047079}
-  SelectedTab: 1
+  SelectedTab: 0
 --- !u!114 &536624981
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4138,7 +4138,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1706052510}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 536624985}
+        m_TargetAssemblyTypeName: Interaction.SettingsManager, Assembly-CSharp
+        m_MethodName: Quit
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1706052510
 MonoBehaviour:
   m_ObjectHideFlags: 0

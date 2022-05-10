@@ -3,14 +3,17 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
-using UnityEditor;
 using UnityEngine;
 using VoxelVisuals;
 
 public class VoxelVisualViewingMain : MonoBehaviour
 {
+#if (UNITY_EDITOR) 
     public static VoxelVisualViewingMain Instance { get; private set; }
     public GameObject BlueprintViewerPrefab;
+
+    [SerializeField]
+    private VoxelBlueprint[] allBlueprints;
 
     private List<BlueprintViewer> blueprintViewers;
 
@@ -23,21 +26,12 @@ public class VoxelVisualViewingMain : MonoBehaviour
 
     private void Start()
     {
-        IEnumerable<VoxelBlueprint> allBlueprints = GetAllBlueprints();
         OrganizedBlueprints visuals = new OrganizedBlueprints(this, allBlueprints);
         blueprintViewers = new List<BlueprintViewer>();
         visuals.InstantiateGameObjects();
         Report();
 
         //PrepareTheMegastub(visuals);
-    }
-
-    public static VoxelBlueprint[] GetAllBlueprints()
-    {
-        string[] guids = AssetDatabase.FindAssets("t: VoxelBlueprint", new[] { VoxelBlueprint.BlueprintsFolderPath });
-        List<VoxelBlueprint> ret = guids.Select(item => AssetDatabase.LoadAssetAtPath<VoxelBlueprint>(AssetDatabase.GUIDToAssetPath(item))).ToList();
-        //ret.Reverse();
-        return ret.ToArray();
     }
 
     private void PrepareTheMegastub(OrganizedBlueprints visuals)
@@ -81,19 +75,19 @@ public class VoxelVisualViewingMain : MonoBehaviour
     }
 
 
-    //This code doesn't work right. It seems to create changes that it shouldn't create.
-    private void SaveAllBlueprints()
-    {
-        foreach (BlueprintViewer viewer in blueprintViewers)
-        {
-            string path = viewer.GetCorrectAssetPath();
-            string[] foundAsset = AssetDatabase.FindAssets(path);
-            if(foundAsset.Length == 0)
-            {
-                viewer.StubBlueprintFromCurrent();
-            }
-        }
-    }
+    ////This code doesn't work right. It seems to create changes that it shouldn't create.
+    //private void SaveAllBlueprints()
+    //{
+    //    foreach (BlueprintViewer viewer in blueprintViewers)
+    //    {
+    //        string path = viewer.GetCorrectAssetPath();
+    //        string[] foundAsset = AssetDatabase.FindAssets(path);
+    //        if(foundAsset.Length == 0)
+    //        {
+    //            viewer.StubBlueprintFromCurrent();
+    //        }
+    //    }
+    //}
 
     private void Report()
     {
@@ -499,12 +493,5 @@ public class VoxelVisualViewingMain : MonoBehaviour
                 && BasePiece.BestBlueprint.Designations.X1Y1Z1 != VoxelDesignationType.AnyFilled;
         }
     }
-
-    [MenuItem("Blueprints/Populate Blueprints")]
-    static void PopulateBlueprints()
-    {
-        VoxelBlueprint[] blueprints = GetAllBlueprints();
-        GameObject obj = Selection.activeGameObject;
-        obj.GetComponent<CityBuildingMain>().Blueprints = blueprints;
-    }
+#endif
 }

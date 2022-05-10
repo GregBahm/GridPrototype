@@ -4,9 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Assets.CityBuilding.VoxelVisuals.VoxelVisualsViewing
+class CombinationSolver
 {
-    class ObjExporterScript
-    {
-    }
+
+}
+
+class VoxelVisualTemplate
+{
+    // 
 }

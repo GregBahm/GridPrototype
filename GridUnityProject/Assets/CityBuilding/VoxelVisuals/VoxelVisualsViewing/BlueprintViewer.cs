@@ -5,8 +5,9 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
-public class BlueprintViewer : MonoBehaviour
+public partial class BlueprintViewer : MonoBehaviour
 {
+#if (UNITY_EDITOR) 
     public VoxelBlueprint Blueprint;
     public Mesh CurrentMesh;
 
@@ -38,7 +39,7 @@ public class BlueprintViewer : MonoBehaviour
         GeneratedName = Blueprint.GetCorrectAssetName();
 
         MeshFilter.mesh = Blueprint.ArtContent;
-        if(Blueprint.Materials != null)
+        if (Blueprint.Materials != null)
         {
             string[] matNames = Blueprint.Materials.Select(item => item.name).ToArray();
             MeshRenderer.materials = GetViewerMaterials(matNames).ToArray();
@@ -151,4 +152,5 @@ public class BlueprintViewer : MonoBehaviour
         X1Y1Z0Display.UpdateDisplayContent(Blueprint.Designations.X1Y1Z0);
         X1Y1Z1Display.UpdateDisplayContent(Blueprint.Designations.X1Y1Z1);
     }
+#endif
 }

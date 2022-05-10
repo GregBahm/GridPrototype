@@ -31,5 +31,10 @@ namespace Interaction
             SettingsPanel.SetActive(false);
             MainHud.SetActive(true);
         }
+
+        public void Quit()
+        {
+            Application.Quit();
+        }
     }
 }

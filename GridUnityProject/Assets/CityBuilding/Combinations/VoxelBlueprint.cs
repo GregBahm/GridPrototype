@@ -5,7 +5,6 @@ using UnityEditor;
 using UnityEngine;
 using VoxelVisuals;
 
-[CreateAssetMenu(menuName = "VoxelDefinition/VoxelBlueprint")]
 public class VoxelBlueprint : ScriptableObject
 {
     public const string BlueprintsFolderPath = "Assets/CityBuilding/VoxelBlueprints/";
