@@ -34,7 +34,7 @@ namespace Interaction
         public class DesignationPlacementOperation : UndoableOperation
         {
             private readonly ExteriorsInteractionManager interactor;
-            private readonly VoxelDesignationType oldContents;
+            private readonly VoxelDesignation oldContents;
             private readonly DesignationCell cell;
 
             public DesignationPlacementOperation(

@@ -22,7 +22,7 @@ namespace VoxelVisuals
             optionsByDesignationKey = GetOptionsByDesignationKey(allOptions);
         }
 
-        public VisualCellOptions GetOptions(VoxelDesignation designation)
+        public VisualCellOptions GetOptions(VoxelVisualDesignation designation)
         {
             return optionsByDesignationKey[designation.Key];
         }

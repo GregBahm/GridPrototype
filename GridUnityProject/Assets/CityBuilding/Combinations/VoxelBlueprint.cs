@@ -22,7 +22,7 @@ public class VoxelBlueprint : ScriptableObject
     {
         VisualCellConnections baseConnections = new VisualCellConnections(Up, Down);
 
-        VoxelDesignation baseDesignation = new VoxelDesignation(Designations.ToFlatArray());
+        VoxelVisualDesignation baseDesignation = new VoxelVisualDesignation(Designations.ToFlatArray());
         int priority = 0;
         yield return new VisualCellOption(ArtContent, Materials, baseDesignation.Description, false, 0, priority, baseConnections);
         IEnumerable<GeneratedVoxelDesignation> variants = baseDesignation.GetUniqueVariants().ToArray();
@@ -52,42 +52,42 @@ public class VoxelBlueprint : ScriptableObject
                 blueprint.Up.ToString();
     }
 
-    private static string GetNameComponent(VoxelDesignationType slotType)
+    private static string GetNameComponent(VoxelDesignation slotType)
     {
         switch (slotType)
         {
-            case VoxelDesignationType.Empty:
+            case VoxelDesignation.Empty:
                 return "E";
-            case VoxelDesignationType.AnyFilled:
+            case VoxelDesignation.AnyFilled:
                 return "A";
-            case VoxelDesignationType.SlantedRoof:
+            case VoxelDesignation.SlantedRoof:
                 return "S";
-            case VoxelDesignationType.WalkableRoof:
+            case VoxelDesignation.WalkableRoof:
                 return "W";
-            case VoxelDesignationType.Platform:
+            case VoxelDesignation.Platform:
                 return "P";
-            case VoxelDesignationType.Ground:
+            case VoxelDesignation.Ground:
             default:
                 return "G";
         }
     }
 
-    public static VoxelDesignationType GetSlotFromName(string firstLetter)
+    public static VoxelDesignation GetSlotFromName(string firstLetter)
     {
         switch (firstLetter)
         {
             case "E":
-                return VoxelDesignationType.Empty;
+                return VoxelDesignation.Empty;
             case "A":
-                return VoxelDesignationType.AnyFilled;
+                return VoxelDesignation.AnyFilled;
             case "S":
-                return VoxelDesignationType.SlantedRoof;
+                return VoxelDesignation.SlantedRoof;
             case "W":
-                return VoxelDesignationType.WalkableRoof;
+                return VoxelDesignation.WalkableRoof;
             case "P":
-                return VoxelDesignationType.Platform;
+                return VoxelDesignation.Platform;
             case "G":
-                return VoxelDesignationType.Ground;
+                return VoxelDesignation.Ground;
             default:
                 throw new Exception("No slot startting with letter \"" + firstLetter + "\"");
         }
@@ -103,18 +103,18 @@ public class VoxelBlueprint : ScriptableObject
 [Serializable]
 public class DesignationGrid
 {
-    public VoxelDesignationType X0Y0Z0;
-    public VoxelDesignationType X0Y0Z1;
-    public VoxelDesignationType X0Y1Z0;
-    public VoxelDesignationType X0Y1Z1;
-    public VoxelDesignationType X1Y0Z0;
-    public VoxelDesignationType X1Y0Z1;
-    public VoxelDesignationType X1Y1Z0;
-    public VoxelDesignationType X1Y1Z1;
+    public VoxelDesignation X0Y0Z0;
+    public VoxelDesignation X0Y0Z1;
+    public VoxelDesignation X0Y1Z0;
+    public VoxelDesignation X0Y1Z1;
+    public VoxelDesignation X1Y0Z0;
+    public VoxelDesignation X1Y0Z1;
+    public VoxelDesignation X1Y1Z0;
+    public VoxelDesignation X1Y1Z1;
 
-    public VoxelDesignationType[] ToFlatArray()
+    public VoxelDesignation[] ToFlatArray()
     {
-        return new VoxelDesignationType[]
+        return new VoxelDesignation[]
         {
             X0Y0Z0,
             X0Y0Z1,
@@ -127,7 +127,7 @@ public class DesignationGrid
         };
     }
 
-    public static DesignationGrid FromDesignation(VoxelDesignation designation)
+    public static DesignationGrid FromDesignation(VoxelVisualDesignation designation)
     {
         DesignationGrid ret = new DesignationGrid();
         ret.X0Y0Z0 = designation.Description[0, 0, 0];
@@ -141,7 +141,7 @@ public class DesignationGrid
         return ret;
     }
 
-    internal static DesignationGrid FromCubeArray(VoxelDesignationType[,,] values)
+    internal static DesignationGrid FromCubeArray(VoxelDesignation[,,] values)
     {
         DesignationGrid ret = new DesignationGrid();
         ret.X0Y0Z0 = values[0, 0, 0];
@@ -155,7 +155,7 @@ public class DesignationGrid
         return ret;
     }
 
-    public static DesignationGrid FromFlatArray(VoxelDesignationType[] values)
+    public static DesignationGrid FromFlatArray(VoxelDesignation[] values)
     {
         DesignationGrid ret = new DesignationGrid();
         ret.X0Y0Z0 = values[0];
@@ -169,9 +169,9 @@ public class DesignationGrid
         return ret;
     }
 
-    public VoxelDesignationType[,,] ToCubedArray()
+    public VoxelDesignation[,,] ToCubedArray()
     {
-        VoxelDesignationType[,,] ret = new VoxelDesignationType[2, 2, 2];
+        VoxelDesignation[,,] ret = new VoxelDesignation[2, 2, 2];
         ret[0, 0, 0] = X0Y0Z0;
         ret[0, 0, 1] = X0Y0Z1;
         ret[0, 1, 0] = X0Y1Z0;

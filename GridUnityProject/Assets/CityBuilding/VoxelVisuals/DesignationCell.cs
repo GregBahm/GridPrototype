@@ -16,14 +16,14 @@ namespace VoxelVisuals
 
         public int Height { get; }
 
-        private VoxelDesignationType designation;
-        public VoxelDesignationType Designation
+        private VoxelDesignation designation;
+        public VoxelDesignation Designation
         {
             get => designation;
             set
             {
                 designation = value;
-                grid.SetCellFilled(this, value != VoxelDesignationType.Empty);
+                grid.SetCellFilled(this, value != VoxelDesignation.Empty);
             }
         }
 
@@ -33,7 +33,7 @@ namespace VoxelVisuals
             set { grid.Interiors.SetInterior(this, value); }
         }
 
-        public bool IsFilled { get { return designation != VoxelDesignationType.Empty; } }
+        public bool IsFilled { get { return designation != VoxelDesignation.Empty; } }
 
         public DesignationCell CellBelow
         {

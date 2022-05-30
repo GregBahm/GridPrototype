@@ -38,7 +38,7 @@ public class VoxelVisualViewingMain : MonoBehaviour
     {
         GameObject gameObjectRoot = new GameObject("MEGASTUB");
         foreach (BlueprintViewer viewer in blueprintViewers.Where(item => item.Blueprint.ArtContent != null
-            && !item.Blueprint.Designations.ToFlatArray().Any(item => item == VoxelDesignationType.Platform)
+            && !item.Blueprint.Designations.ToFlatArray().Any(item => item == VoxelDesignation.Platform)
             ))
         {
             viewer.MeshFilter.gameObject.name = viewer.Blueprint.name;
@@ -149,8 +149,8 @@ public class VoxelVisualViewingMain : MonoBehaviour
         {
             foreach (VoxelBlueprint blueprint in allBlueprints.Where(item => item.Up != VoxelConnectionType.BigStrut))
             {
-                VoxelDesignationType[] designations = blueprint.Designations.ToFlatArray();
-                if (designations.Any(item => item == VoxelDesignationType.Platform))
+                VoxelDesignation[] designations = blueprint.Designations.ToFlatArray();
+                if (designations.Any(item => item == VoxelDesignation.Platform))
                 {
                     BlueprintContainer container = new BlueprintContainer(blueprint, blueprint);
                     PotentialStrutPair pair = new PotentialStrutPair(container, pieceDictionary);
@@ -163,10 +163,10 @@ public class VoxelVisualViewingMain : MonoBehaviour
         {
             foreach (VoxelBlueprint blueprint in allBlueprints.Where(item => item.Up != VoxelConnectionType.BigStrut))
             {
-                VoxelDesignationType[] designations = blueprint.Designations.ToFlatArray();
-                if (designations.All(item => item != VoxelDesignationType.SlantedRoof 
-                        && item != VoxelDesignationType.WalkableRoof
-                        && item != VoxelDesignationType.Platform))
+                VoxelDesignation[] designations = blueprint.Designations.ToFlatArray();
+                if (designations.All(item => item != VoxelDesignation.SlantedRoof 
+                        && item != VoxelDesignation.WalkableRoof
+                        && item != VoxelDesignation.Platform))
                 {
                     BlueprintContainer container = new BlueprintContainer(blueprint, blueprint);
                     PotentialStrutPair pair = new PotentialStrutPair(container, pieceDictionary);
@@ -190,9 +190,9 @@ public class VoxelVisualViewingMain : MonoBehaviour
             List<PotentialStrutPair> withNeither = new List<PotentialStrutPair>();
             foreach (PotentialStrutPair item in platformBlueprints)
             {
-                IEnumerable<VoxelDesignationType> designations = item.BasePiece.BestBlueprint.Designations.ToFlatArray();
-                bool hasSlanted = designations.Any(item => item == VoxelDesignationType.SlantedRoof);
-                bool hasWalkable = designations.Any(item => item == VoxelDesignationType.WalkableRoof);
+                IEnumerable<VoxelDesignation> designations = item.BasePiece.BestBlueprint.Designations.ToFlatArray();
+                bool hasSlanted = designations.Any(item => item == VoxelDesignation.SlantedRoof);
+                bool hasWalkable = designations.Any(item => item == VoxelDesignation.WalkableRoof);
                 if (hasSlanted && hasWalkable)
                     withBoth.Add(item);
                 else if (hasSlanted)
@@ -236,10 +236,10 @@ public class VoxelVisualViewingMain : MonoBehaviour
         {
             foreach (VoxelBlueprint blueprint in allBlueprints.Where(item => item.Up != VoxelConnectionType.BigStrut))
             {
-                IEnumerable<VoxelDesignationType> slots = blueprint.Designations.ToFlatArray();
-                if (slots.Any(item => item == VoxelDesignationType.SlantedRoof) 
-                    && !slots.Any(item => item == VoxelDesignationType.WalkableRoof)
-                    && !slots.Any(item => item == VoxelDesignationType.Platform))
+                IEnumerable<VoxelDesignation> slots = blueprint.Designations.ToFlatArray();
+                if (slots.Any(item => item == VoxelDesignation.SlantedRoof) 
+                    && !slots.Any(item => item == VoxelDesignation.WalkableRoof)
+                    && !slots.Any(item => item == VoxelDesignation.Platform))
                     yield return blueprint;
             }
         }
@@ -286,12 +286,12 @@ public class VoxelVisualViewingMain : MonoBehaviour
         private string MakeNonPlatformKey()
         {
             VoxelBlueprint blueprintForKey = new VoxelBlueprint();
-            VoxelDesignationType[] baseDesignations = PlatformBlueprint.Designations.ToFlatArray();
+            VoxelDesignation[] baseDesignations = PlatformBlueprint.Designations.ToFlatArray();
             for (int i = 0; i < baseDesignations.Length; i++)
             {
-                if(baseDesignations[i] == VoxelDesignationType.Platform)
+                if(baseDesignations[i] == VoxelDesignation.Platform)
                 {
-                    baseDesignations[i] = VoxelDesignationType.Empty;
+                    baseDesignations[i] = VoxelDesignation.Empty;
                 }
             }
             blueprintForKey.Designations = DesignationGrid.FromFlatArray(baseDesignations);
@@ -313,7 +313,7 @@ public class VoxelVisualViewingMain : MonoBehaviour
             {
                 for (int z = 0; z < 2; z++)
                 {
-                    if(designations[x, 0, z] == VoxelDesignationType.Platform)
+                    if(designations[x, 0, z] == VoxelDesignation.Platform)
                     {
                         AddCube(ret, x, z);
                     }
@@ -352,7 +352,7 @@ public class VoxelVisualViewingMain : MonoBehaviour
 
         private IEnumerable<PotentialStrutPair> GetComboPieces()
         {
-            VoxelDesignationType[][] mixedCombos = GetMixedComboDesignations();
+            VoxelDesignation[][] mixedCombos = GetMixedComboDesignations();
             for (int i = 0; i < mixedCombos.Length; i++)
             {
                 VoxelBlueprint blueprint = ScriptableObject.CreateInstance<VoxelBlueprint>();
@@ -377,19 +377,19 @@ public class VoxelVisualViewingMain : MonoBehaviour
             return new PotentialStrutPair(container, allPieces);
         }
 
-        private VoxelDesignationType[][] GetMixedComboDesignations()
+        private VoxelDesignation[][] GetMixedComboDesignations()
         {
-            VoxelDesignationType[] baseDesignation = SlantedPiece.BasePiece.BestBlueprint.Designations.ToFlatArray();
-            IEnumerable<VoxelDesignationType[]> allCombos = GetAllPossibleDesignationKeys(baseDesignation, 0);
-            IEnumerable<VoxelDesignationType[]> onlyMixed = allCombos.Where(set => set.Any(item => item == VoxelDesignationType.SlantedRoof) && set.Any(item => item == VoxelDesignationType.WalkableRoof)).ToArray();
-            IEnumerable<VoxelDesignationType[]> onlyUnique = GetOnlyUniqueDesignations(onlyMixed);
+            VoxelDesignation[] baseDesignation = SlantedPiece.BasePiece.BestBlueprint.Designations.ToFlatArray();
+            IEnumerable<VoxelDesignation[]> allCombos = GetAllPossibleDesignationKeys(baseDesignation, 0);
+            IEnumerable<VoxelDesignation[]> onlyMixed = allCombos.Where(set => set.Any(item => item == VoxelDesignation.SlantedRoof) && set.Any(item => item == VoxelDesignation.WalkableRoof)).ToArray();
+            IEnumerable<VoxelDesignation[]> onlyUnique = GetOnlyUniqueDesignations(onlyMixed);
             return onlyUnique.ToArray();
         }
 
-        private IEnumerable<VoxelDesignationType[]> GetOnlyUniqueDesignations(IEnumerable<VoxelDesignationType[]> onlyMixed)
+        private IEnumerable<VoxelDesignation[]> GetOnlyUniqueDesignations(IEnumerable<VoxelDesignation[]> onlyMixed)
         {
-            Dictionary<string, VoxelDesignationType[]> dictionary = new Dictionary<string, VoxelDesignationType[]>();
-            foreach (VoxelDesignationType[] designation in onlyMixed)
+            Dictionary<string, VoxelDesignation[]> dictionary = new Dictionary<string, VoxelDesignation[]>();
+            foreach (VoxelDesignation[] designation in onlyMixed)
             {
                 VoxelBlueprint blueprint = ScriptableObject.CreateInstance<VoxelBlueprint>();
                 blueprint.Designations = DesignationGrid.FromFlatArray(designation);
@@ -403,15 +403,15 @@ public class VoxelVisualViewingMain : MonoBehaviour
         }
 
         // For every "Slanted" slot, yield a version that is is also walkable in that slot  
-        private static IEnumerable<VoxelDesignationType[]> GetAllPossibleDesignationKeys(VoxelDesignationType[] currentDesignation, int iStart)
+        private static IEnumerable<VoxelDesignation[]> GetAllPossibleDesignationKeys(VoxelDesignation[] currentDesignation, int iStart)
         {
             for (int i = iStart; i < 8; i++)
             {
-                if (currentDesignation[i] == VoxelDesignationType.SlantedRoof)
+                if (currentDesignation[i] == VoxelDesignation.SlantedRoof)
                 {
-                    VoxelDesignationType[] cloned = currentDesignation.Clone() as VoxelDesignationType[];
-                    cloned[i] = VoxelDesignationType.WalkableRoof;
-                    foreach (VoxelDesignationType[] item in GetAllPossibleDesignationKeys(cloned, i + 1))
+                    VoxelDesignation[] cloned = currentDesignation.Clone() as VoxelDesignation[];
+                    cloned[i] = VoxelDesignation.WalkableRoof;
+                    foreach (VoxelDesignation[] item in GetAllPossibleDesignationKeys(cloned, i + 1))
                     {
                         yield return item;
                     }
@@ -422,12 +422,12 @@ public class VoxelVisualViewingMain : MonoBehaviour
 
         private VoxelBlueprint GetWalkablePieceKey()
         {
-            VoxelDesignationType[] baseSet = SlantedPiece.BasePiece.ExistantBlueprint.Designations.ToFlatArray();
+            VoxelDesignation[] baseSet = SlantedPiece.BasePiece.ExistantBlueprint.Designations.ToFlatArray();
             for (int i = 0; i < 8; i++)
             {
-                if(baseSet[i] == VoxelDesignationType.SlantedRoof)
+                if(baseSet[i] == VoxelDesignation.SlantedRoof)
                 {
-                    baseSet[i] = VoxelDesignationType.WalkableRoof;
+                    baseSet[i] = VoxelDesignation.WalkableRoof;
                 }
             }
             DesignationGrid newGrid = DesignationGrid.FromFlatArray(baseSet);
@@ -473,7 +473,7 @@ public class VoxelVisualViewingMain : MonoBehaviour
         {
             VoxelBlueprint strutVersion = ScriptableObject.CreateInstance<VoxelBlueprint>();
             strutVersion.Up = VoxelConnectionType.BigStrut;
-            if (BasePiece.HypotheticalBlueprint.Designations.ToFlatArray().All(item => item == VoxelDesignationType.Platform || item == VoxelDesignationType.Empty))
+            if (BasePiece.HypotheticalBlueprint.Designations.ToFlatArray().All(item => item == VoxelDesignation.Platform || item == VoxelDesignation.Empty))
                 strutVersion.Down = VoxelConnectionType.BigStrut;
             strutVersion.Designations = BasePiece.HypotheticalBlueprint.Designations;
 
@@ -487,10 +487,10 @@ public class VoxelVisualViewingMain : MonoBehaviour
         // A piece needs a strut when none of the designations on the top half are filled
         private bool GetNeedsStrut()
         {
-            return BasePiece.BestBlueprint.Designations.X0Y1Z0 != VoxelDesignationType.AnyFilled
-                && BasePiece.BestBlueprint.Designations.X0Y1Z1 != VoxelDesignationType.AnyFilled
-                && BasePiece.BestBlueprint.Designations.X1Y1Z0 != VoxelDesignationType.AnyFilled
-                && BasePiece.BestBlueprint.Designations.X1Y1Z1 != VoxelDesignationType.AnyFilled;
+            return BasePiece.BestBlueprint.Designations.X0Y1Z0 != VoxelDesignation.AnyFilled
+                && BasePiece.BestBlueprint.Designations.X0Y1Z1 != VoxelDesignation.AnyFilled
+                && BasePiece.BestBlueprint.Designations.X1Y1Z0 != VoxelDesignation.AnyFilled
+                && BasePiece.BestBlueprint.Designations.X1Y1Z1 != VoxelDesignation.AnyFilled;
         }
     }
 #endif

@@ -32,7 +32,7 @@ namespace VoxelVisuals
             for (int i = cityMain.MainGrid.MaxHeight - 1; i >= 0; i--) // Top to bottom
             {
                 VisualCell cell = cityMain.MainGrid.GetVisualCell(column, i);
-                VoxelDesignation designation = cell.GetCurrentDesignation();
+                VoxelVisualDesignation designation = cell.GetCurrentDesignation();
                 VisualCellOptions option = optionsSource.GetOptions(designation);
                 if (yesStrut)
                 {

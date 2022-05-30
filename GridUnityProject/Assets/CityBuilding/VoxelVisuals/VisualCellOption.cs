@@ -7,7 +7,7 @@ namespace VoxelVisuals
     {
         public Mesh Mesh { get; }
         public Material[] Materials { get; }
-        private readonly VoxelDesignationType[,,] designation;
+        private readonly VoxelDesignation[,,] designation;
 
         public int Priority { get; }
 
@@ -18,7 +18,7 @@ namespace VoxelVisuals
 
         public VisualCellOption(Mesh mesh,
             Material[] materials,
-            VoxelDesignationType[,,] designation,
+            VoxelDesignation[,,] designation,
             bool flipped,
             int rotations,
             int priority,
@@ -35,7 +35,7 @@ namespace VoxelVisuals
 
         public string GetDesignationKey()
         {
-            return VoxelDesignation.GetDesignationKey(designation);
+            return VoxelVisualDesignation.GetDesignationKey(designation);
         }
 
         public override string ToString()

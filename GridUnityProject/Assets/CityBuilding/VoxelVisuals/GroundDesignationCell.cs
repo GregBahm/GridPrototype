@@ -5,7 +5,7 @@ namespace VoxelVisuals
 {
     public class GroundDesignationCell : IDesignationCell
     {
-        public VoxelDesignationType Designation => VoxelDesignationType.Ground;
+        public VoxelDesignation Designation => VoxelDesignation.Ground;
 
         public Vector3 Position { get; }
 

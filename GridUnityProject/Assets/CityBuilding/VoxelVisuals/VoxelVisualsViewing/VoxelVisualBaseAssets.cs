@@ -34,20 +34,20 @@ public class VoxelVisualBaseAssets : MonoBehaviour
         Instance = this;
     }
 
-    public Color GetColorFor(VoxelDesignationType slotType)
+    public Color GetColorFor(VoxelDesignation slotType)
     {
         switch (slotType)
         {
-            case VoxelDesignationType.AnyFilled:
+            case VoxelDesignation.AnyFilled:
                 return AnyFilled;
-            case VoxelDesignationType.SlantedRoof:
+            case VoxelDesignation.SlantedRoof:
                 return SlantedRoof;
-            case VoxelDesignationType.WalkableRoof:
+            case VoxelDesignation.WalkableRoof:
                 return WalkableRoof;
-            case VoxelDesignationType.Platform:
+            case VoxelDesignation.Platform:
                 return Platform;
-            case VoxelDesignationType.Empty:
-            case VoxelDesignationType.Ground:
+            case VoxelDesignation.Empty:
+            case VoxelDesignation.Ground:
             default:
                 return Ground;
         }

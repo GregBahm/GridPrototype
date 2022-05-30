@@ -130,8 +130,8 @@ namespace Interaction
             DesignationCell cell = meshHitTarget?.CellAboveCursor;
             if (cell != null)
             {
-                bool isInteriorable = cell.Designation == VoxelDesignationType.SlantedRoof ||
-                    cell.Designation == VoxelDesignationType.WalkableRoof;
+                bool isInteriorable = cell.Designation == VoxelDesignation.SlantedRoof ||
+                    cell.Designation == VoxelDesignation.WalkableRoof;
                 return isInteriorable && cell.AssignedInterior == null;
             }
             return false;
@@ -142,8 +142,8 @@ namespace Interaction
             DesignationCell cell = meshHitTarget?.CellUnderCursor;
             if(cell != null)
             {
-                bool isInteriorable = cell.Designation == VoxelDesignationType.SlantedRoof ||
-                    cell.Designation == VoxelDesignationType.WalkableRoof;
+                bool isInteriorable = cell.Designation == VoxelDesignation.SlantedRoof ||
+                    cell.Designation == VoxelDesignation.WalkableRoof;
                 return isInteriorable && cell.AssignedInterior == null;
             }
             return false;

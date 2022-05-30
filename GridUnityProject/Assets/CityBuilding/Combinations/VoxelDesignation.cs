@@ -1,112 +1,57 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
-using System;
-
-[Serializable]
-public class VoxelDesignation
+﻿public abstract class VoxelDesignation
 {
-    [SerializeField]
-    private readonly VoxelDesignationType[,,] description = new VoxelDesignationType[2, 2, 2];
-    public VoxelDesignationType[,,] Description => description;
+}
 
-    public string Key { get { return ToString(); } }
-
-    public VoxelDesignation()
-    {}
-
-    public VoxelDesignation(VoxelDesignationType[] values)
-    {
-        Description[0, 0, 0] = values[0];
-        Description[0, 0, 1] = values[1];
-        Description[0, 1, 0] = values[2];
-        Description[0, 1, 1] = values[3];
-        Description[1, 0, 0] = values[4];
-        Description[1, 0, 1] = values[5];
-        Description[1, 1, 0] = values[6];
-        Description[1, 1, 1] = values[7];
-    }
-    public static string GetDesignationKey(VoxelDesignationType[,,] description)
-    {
-        return "X0Y0Z0: " + description[0, 0, 0].ToString() + "\n" +
-               "X0Y0Z1: " + description[0, 0, 1].ToString() + "\n" +
-               "X0Y1Z0: " + description[0, 1, 0].ToString() + "\n" +
-               "X0Y1Z1: " + description[0, 1, 1].ToString() + "\n" +
-               "X1Y0Z0: " + description[1, 0, 0].ToString() + "\n" +
-               "X1Y0Z1: " + description[1, 0, 1].ToString() + "\n" +
-               "X1Y1Z0: " + description[1, 1, 0].ToString() + "\n" +
-               "X1Y1Z1: " + description[1, 1, 1].ToString();
-    }
-
+public class EmptyDesignation : VoxelDesignation
+{
     public override string ToString()
     {
-        return GetDesignationKey(this.description);
+        return "Empty";
     }
+}
 
-    public GeneratedVoxelDesignation GetFlipped()
+public class ShellDesignation : VoxelDesignation { }
+
+public class AquaductDesignation : VoxelDesignation { }
+
+public class BuildingDesignation : VoxelDesignation
+{
+    public DesignationBuildingRoof Roof { get; }
+    public DesignationBuildingWall Wall { get; }
+
+    public BuildingDesignation(DesignationBuildingRoof roof, DesignationBuildingWall wall)
     {
-        GeneratedVoxelDesignation ret = new GeneratedVoxelDesignation(true, 0);
-        for (int y = 0; y < 2; y++)
-        {
-            for (int z = 0; z < 2; z++)
-            {
-                VoxelDesignationType left = Description[0, y, z];
-                VoxelDesignationType right = Description[1, y, z];
-                ret.Description[0, y, z] = right;
-                ret.Description[1, y, z] = left;
-            }
-        }
-        return ret;
+        Roof = roof;
+        Wall = wall;
     }
+}
 
-    public GeneratedVoxelDesignation GetRotated(int rotationCount, bool wasFlipped)
+public class PlatformDesignation : VoxelDesignation
+{
+    public DesignationPlatformType Type { get; }
+
+    public PlatformDesignation(DesignationPlatformType type)
     {
-        GeneratedVoxelDesignation ret = new GeneratedVoxelDesignation(wasFlipped, rotationCount);
-        for (int y = 0; y < 2; y++)
-        {
-            VoxelDesignationType one = Description[0, y, 0];
-            VoxelDesignationType two = Description[1, y, 0];
-            VoxelDesignationType three = Description[1, y, 1];
-            VoxelDesignationType four = Description[0, y, 1];
-
-            ret.Description[0, y, 0] = two;
-            ret.Description[1, y, 0] = three;
-            ret.Description[1, y, 1] = four;
-            ret.Description[0, y, 1] = one;
-        }
-        return ret;
+        Type = type;
     }
+}
 
-    public IEnumerable<GeneratedVoxelDesignation> GetUniqueVariants()
-    {
-        GeneratedVoxelDesignation rotated = GetRotated(1, false);
-        GeneratedVoxelDesignation rotatedTwice = rotated.GetRotated(2, false);
+public enum DesignationPlatformType
+{
+    Uncovered,
+    Grass,
+    Covered,
+}
 
-        GeneratedVoxelDesignation flipped = GetFlipped();
-        GeneratedVoxelDesignation flippedRotated = flipped.GetRotated(1, true);
-        GeneratedVoxelDesignation flippedRotatedTwice = flippedRotated.GetRotated(2, true);
+public enum DesignationBuildingRoof
+{
+    Grass,
+    Stone,
+    Slanted,
+}
 
-        GeneratedVoxelDesignation[] rawVariants = new GeneratedVoxelDesignation[]
-        {
-            rotated,
-            rotatedTwice,
-            rotatedTwice.GetRotated(3, false),
-
-            flipped,
-            flippedRotated,
-            flippedRotatedTwice,
-            flippedRotatedTwice.GetRotated(3, true)
-        };
-
-        HashSet<string> uniquenessCheck = new HashSet<string>
-        {
-            ToString()
-        };
-        foreach (GeneratedVoxelDesignation rawVariant in rawVariants)
-        {
-            if(uniquenessCheck.Add(rawVariant.ToString()))
-            {
-                yield return rawVariant;
-            }
-        }
-    }
+public enum DesignationBuildingWall
+{
+    Cornered,
+    Rounded,
 }

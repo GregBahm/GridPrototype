@@ -132,9 +132,9 @@ namespace VoxelVisuals
             return grid.GetVisualCell(Quad, Height + 1);
         }
 
-        public VoxelDesignation GetCurrentDesignation()
+        public VoxelVisualDesignation GetCurrentDesignation()
         {
-            VoxelDesignation ret = new VoxelDesignation(new VoxelDesignationType[]{
+            VoxelVisualDesignation ret = new VoxelVisualDesignation(new VoxelDesignation[]{
             designationCells[0,0,0].Designation,
             designationCells[0,0,1].Designation,
             designationCells[0,1,0].Designation,
@@ -150,27 +150,27 @@ namespace VoxelVisuals
         }
 
         // If has a platform designation on the top half, or is under a non-empty slot, set that designation to empty instead.
-        private void SetIncompletePlatformsToEmpty(VoxelDesignationType[,,] description)
+        private void SetIncompletePlatformsToEmpty(VoxelDesignation[,,] description)
         {
             for (int x = 0; x < 2; x++)
             {
                 for (int z = 0; z < 2; z++)
                 {
-                    if (description[x, 1, z] == VoxelDesignationType.Platform)
+                    if (description[x, 1, z] == VoxelDesignation.Platform)
                     {
-                        description[x, 1, z] = VoxelDesignationType.Empty;
+                        description[x, 1, z] = VoxelDesignation.Empty;
                     }
-                    if (description[x, 0, z] == VoxelDesignationType.Platform
-                        && description[x, 1, z] != VoxelDesignationType.Empty)
+                    if (description[x, 0, z] == VoxelDesignation.Platform
+                        && description[x, 1, z] != VoxelDesignation.Empty)
                     {
-                        description[x, 0, z] = VoxelDesignationType.Empty;
+                        description[x, 0, z] = VoxelDesignation.Empty;
                     }
                 }
             }
         }
 
         // If a column or top half of a designation is SlantedRoof of WalkableRoof, set it to AnyFill.
-        private void SetAnyFills(VoxelDesignationType[,,] designation)
+        private void SetAnyFills(VoxelDesignation[,,] designation)
         {
             for (int x = 0; x < 2; x++)
             {
@@ -178,19 +178,19 @@ namespace VoxelVisuals
                 {
                     if (IsFill(designation[x, 1, z]))
                     {
-                        designation[x, 1, z] = VoxelDesignationType.AnyFilled;
+                        designation[x, 1, z] = VoxelDesignation.AnyFilled;
                         if (IsFill(designation[x, 0, z]))
                         {
-                            designation[x, 0, z] = VoxelDesignationType.AnyFilled;
+                            designation[x, 0, z] = VoxelDesignation.AnyFilled;
                         }
                     }
                 }
             }
         }
 
-        private bool IsFill(VoxelDesignationType slotType)
+        private bool IsFill(VoxelDesignation slotType)
         {
-            return slotType == VoxelDesignationType.SlantedRoof || slotType == VoxelDesignationType.WalkableRoof;
+            return slotType == VoxelDesignation.SlantedRoof || slotType == VoxelDesignation.WalkableRoof;
         }
 
         private Vector3[] GetAdjustedAnchors()

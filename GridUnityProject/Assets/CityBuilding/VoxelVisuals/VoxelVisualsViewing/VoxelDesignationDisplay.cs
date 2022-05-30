@@ -8,9 +8,9 @@ public class VoxelDesignationDisplay : MonoBehaviour
 {
     public MeshRenderer Content;
 
-    public void UpdateDisplayContent(VoxelDesignationType slotType)
+    public void UpdateDisplayContent(VoxelDesignation slotType)
     {
-        Content.enabled = slotType != VoxelDesignationType.Empty;
+        Content.enabled = slotType != VoxelDesignation.Empty;
         Color color = VoxelVisualBaseAssets.Instance.GetColorFor(slotType);
         Content.material.SetColor("_Color", color);
     }
