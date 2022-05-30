@@ -9,8 +9,8 @@ class CombinationSolver
 {
     public CombinationSolver()
     {
-        var uniqueCombinations = GetAllUniqueCombinations().ToArray();
-        Console.WriteLine(uniqueCombinations.Count());
+        //VoxelVisualDesignation[] uniqueCombinations = GetAllUniqueCombinations().ToArray();
+        CornerCombination[] cornerCombinations = GetAllCornerCombinations().ToArray();
     }
 
     private IEnumerable<VoxelDesignation> GetUniqueComponents()
@@ -26,6 +26,16 @@ class CombinationSolver
 
         yield return new CoveredPlatformDesignation();
         yield return new UncoveredPlatformDesignation();
+    }
+
+    private IEnumerable<VoxelDesignation> GetBottomComponents()
+    {
+        return  GetUniqueComponents().Where(item => item.CanFillTopHalf).ToArray();
+    }
+
+    private IEnumerable<VoxelDesignation> GetTopComponents()
+    {
+        return GetUniqueComponents().Where(item => item.CanFillBottomHalf).ToArray();
     }
 
     private IEnumerable<VoxelVisualDesignation> GetAllUniqueCombinations()
@@ -71,5 +81,87 @@ class CombinationSolver
             }
         }
         return result.Values;
+    }
+
+    private IEnumerable<CornerCombination> GetAllCornerCombinations()
+    {
+        VoxelDesignation[] topComponents = GetTopComponents().ToArray();
+        VoxelDesignation[] bottomComponents = GetBottomComponents().ToArray();
+        Dictionary<string, CornerCombination> result = new Dictionary<string, CornerCombination>();
+        long counter = 0;
+        foreach(VoxelDesignation corner in topComponents.Where(item => !item.IsEmpty))
+        {
+            foreach (VoxelDesignation y in bottomComponents)
+            {
+                foreach (VoxelDesignation x in topComponents)
+                {
+                    foreach(VoxelDesignation z in topComponents)
+                    {
+                        CornerCombination combo = new CornerCombination(corner, y, x, z, true);
+                        CornerCombination mirror = combo.GetMirrored();
+                        if (!result.ContainsKey(combo.Key) && !result.ContainsKey(mirror.Key))
+                            result.Add(combo.Key, combo);
+                        counter++;
+
+                    }
+                }
+            }
+        }
+        foreach (VoxelDesignation corner in bottomComponents)
+        {
+            foreach (VoxelDesignation y in topComponents.Where(item => !item.IsEmpty && !item.IsShell))
+            {
+                foreach (VoxelDesignation x in bottomComponents)
+                {
+                    foreach (VoxelDesignation z in bottomComponents)
+                    {
+                        CornerCombination combo = new CornerCombination(corner, y, x, z, true);
+                        CornerCombination mirror = combo.GetMirrored();
+                        if (!result.ContainsKey(combo.Key) && !result.ContainsKey(mirror.Key))
+                            result.Add(combo.Key, combo);
+                        counter++;
+                    }
+                }
+            }
+        }
+        return result.Values;
+    }
+}
+class CornerCombination
+{
+    public VoxelDesignation Corner { get; }
+    public VoxelDesignation YConnection { get; }
+    public VoxelDesignation XConnection { get; }
+    public VoxelDesignation ZConnection { get; }
+
+    public bool IsTop { get; }
+
+    public string Key { get; }
+
+    public CornerCombination(VoxelDesignation corner, 
+        VoxelDesignation yConnection, 
+        VoxelDesignation xConnection, 
+        VoxelDesignation zConnection, 
+        bool isTop)
+    {
+        Corner = corner;
+        YConnection = yConnection;
+        XConnection = xConnection;
+        ZConnection = zConnection;
+        IsTop = isTop;
+        Key = Corner.Key + " "
+            + YConnection.Key + " "
+            + XConnection.Key + " "
+            + ZConnection.Key + " "
+            + IsTop.ToString();
+    }
+
+    public CornerCombination GetMirrored()
+    {
+        return new CornerCombination(Corner,
+            YConnection,
+            ZConnection,
+            XConnection,
+            IsTop);
     }
 }
