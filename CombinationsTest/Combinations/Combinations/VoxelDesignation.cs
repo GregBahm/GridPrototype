@@ -1,93 +1,63 @@
-﻿public enum TopDesignations
+﻿
+public class Designation
 {
-    Empty,
-    Shell,
-    RoundedBuilding,
-    SquaredBuilding,
-}
+    public string Name { get; }
+    public Designation(string name)
+    {
+        Name = name;
+    }
 
-public enum BottomDesignations
-{
-    Empty,
-    Shell,
-    RoundedWalkableRoof,
-    SquaredWalkableRoof,
-    RoundedSlantedRoof,
-    SquaredSlantedRoof,
-    Platform,
-    Aquaduct
-}
-public abstract class VoxelDesignation
-{
-    public abstract string Key { get; }
-    public abstract bool CanFillTopHalf { get; }
-    public abstract bool CanFillBottomHalf { get; }
-    public virtual bool IsEmpty => false;
-    public virtual bool IsShell => false;
-}
+    public static Designation Empty { get; } = new Designation("Empty");
+    public static Designation Shell { get; } = new Designation("Shell");
+    public static Designation RoundedBuilding { get; } = new Designation("RoundedBuilding");
+    public static Designation SquaredBuilding { get; } = new Designation("SquaredBuilding");
+    public static Designation RoundedWalkableRoof { get; } = new Designation("RoundedWalkableRoof");
+    public static Designation SquaredWalkableRoof { get; } = new Designation("SquaredWalkableRoof");
+    public static Designation RoundedSlantedRoof { get; } = new Designation("RoundedSlantedRoof");
+    public static Designation SquaredSlantedRoof { get; } = new Designation("SquaredSlantedRoof");
+    public static Designation Platform { get; } = new Designation("Platform");
+    public static Designation Aquaduct { get; } = new Designation("Aquaduct");
+    public static IEnumerable<Designation> TopCores { get; }
+    public static IEnumerable<Designation> TopHorizontalNeighbors { get; }
+    public static IEnumerable<Designation> TopYConnections { get; }
 
-public class EmptyDesignation : VoxelDesignation
-{
-    public override string Key => "E";
-    public override bool CanFillTopHalf => true;
-    public override bool CanFillBottomHalf => true;
-    public override bool IsEmpty => true;
-}
+    public static IEnumerable<Designation> BottomHorizontalNeighbors { get; }
+    static Designation()
+    {
+        TopCores = new Designation[]
+        {
+            Empty,
+            Shell,
+            RoundedBuilding,
+            SquaredBuilding
+        };
 
-// Shells cannot exist on top of components, but they can exist below and to the sides of components
-public class ShellDesignation : VoxelDesignation
-{
-    public override string Key => "S";
-    public override bool CanFillTopHalf => true;
-    public override bool CanFillBottomHalf => true;
-    public override bool IsShell => true;
-}
+        TopHorizontalNeighbors = new Designation[]
+        {
+            Empty,
+            Shell,
+            RoundedBuilding,
+            SquaredBuilding
+        };
 
-public class AquaductDesignation : VoxelDesignation
-{
-    public override string Key => "A";
-    public override bool CanFillTopHalf => false;
-    public override bool CanFillBottomHalf => true;
-}
+        TopYConnections = new Designation[]
+        {
+            Empty,
+            Shell,
+            RoundedBuilding,
+            SquaredBuilding
+        };
 
-public abstract class BuildingDesignation : VoxelDesignation
-{
-    public override bool CanFillTopHalf => true;
-    public override bool CanFillBottomHalf => true;
-}
-
-public class CorneredWalkableRoofDesignation : BuildingDesignation
-{
-    public override string Key => "CW";
-}
-
-public class CorneredSlantedRoofDesignation : BuildingDesignation
-{
-    public override string Key => "CS";
-}
-
-public class RoundedWalkableRoofDesignation : BuildingDesignation
-{
-    public override string Key => "RW";
-}
-
-public class RoundedSlantedRoofDesignation : BuildingDesignation
-{
-    public override string Key => "RS";
-}
-
-public abstract class PlatformDesignation :VoxelDesignation
-{
-    public override bool CanFillTopHalf => false;
-    public override bool CanFillBottomHalf => true;
-}
-
-public class CoveredPlatformDesignation : PlatformDesignation
-{
-    public override string Key => "CP";
-    public override bool CanFillTopHalf => true;
-}
-public class UncoveredPlatformDesignation : PlatformDesignation
-{
-    public override string Key => "UP";
+        BottomHorizontalNeighbors = new Designation[]
+        {
+            Empty,
+            Shell,
+            RoundedWalkableRoof, // Only exists if top designation is empty
+            SquaredWalkableRoof, // Only exists if top designation is empty
+            RoundedSlantedRoof, // Only exists if top designation is empty
+            SquaredSlantedRoof, // Only exists if top designation is empty
+            Platform,
+            Aquaduct,
+        };
+    }
 }
