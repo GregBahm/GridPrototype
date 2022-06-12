@@ -10,7 +10,7 @@ namespace Interaction
         private CityBuildingMain gameMain;
         private InteractionManager interactionMain;
 
-        public VoxelDesignation FillType;
+        public Designation FillWith;
 
         [SerializeField]
         private ConstructionCursor cursor;
@@ -37,12 +37,12 @@ namespace Interaction
             }
         }
 
-        public void SetFillToWalkableRoof() { FillType = VoxelDesignation.WalkableRoof; }
-        public void SetFillToSlantedRoof() { FillType = VoxelDesignation.SlantedRoof; }
-        public void SetFillToPlatform() { FillType = VoxelDesignation.Platform; }
+        public void SetFillToWalkableRoof() { FillWith = Designation.SquaredWalkableRoof; }
+        public void SetFillToSlantedRoof() { FillWith = Designation.SquaredSlantedRoof; }
+        public void SetFillToPlatform() { FillWith = Designation.Platform; }
 
 
-        public void SetDesignation(DesignationCell cell, VoxelDesignation type)
+        public void SetDesignation(DesignationCell cell, Designation type)
         {
             cell.Designation = type;
             gameMain.UpdateInteractionGrid();
@@ -83,7 +83,7 @@ namespace Interaction
                 && !hitInfo.CellAboveCursor.GroundPoint.IsBorder)
             {
                 RegisterDesignationUndo(hitInfo.CellAboveCursor);
-                SetDesignation(hitInfo.CellAboveCursor, FillType);
+                SetDesignation(hitInfo.CellAboveCursor, FillWith);
             }
         }
 
@@ -94,7 +94,7 @@ namespace Interaction
                 && hitInfo.CellUnderCursor != null)
             {
                 RegisterDesignationUndo(hitInfo.CellUnderCursor);
-                SetDesignation(hitInfo.CellUnderCursor, VoxelDesignation.Empty);
+                SetDesignation(hitInfo.CellUnderCursor, Designation.Empty);
             }
         }
     }

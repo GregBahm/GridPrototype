@@ -14,8 +14,8 @@ public class DesignationsSaveState
         {
             for (int height = 0; height < grid.MaxHeight; height++)
             {
-                VoxelDesignation designation = point.DesignationCells[height].Designation;
-                if(designation != VoxelDesignation.Empty)
+                Designation designation = point.DesignationCells[height].Designation;
+                if(designation != Designation.Empty)
                 {
                     DesignationCellSaveState state = new DesignationCellSaveState();
                     state.GroundPointIndex = point.Index;
@@ -33,6 +33,6 @@ public class DesignationsSaveState
     {
         public int GroundPointIndex;
         public int Height;
-        public VoxelDesignation Designation;
+        public Designation Designation;
     }
 }

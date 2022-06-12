@@ -128,23 +128,20 @@ namespace Interaction
         bool CanExpandRoom(MeshHitTarget meshHitTarget)
         {
             DesignationCell cell = meshHitTarget?.CellAboveCursor;
-            if (cell != null)
-            {
-                bool isInteriorable = cell.Designation == VoxelDesignation.SlantedRoof ||
-                    cell.Designation == VoxelDesignation.WalkableRoof;
-                return isInteriorable && cell.AssignedInterior == null;
-            }
-            return false;
+            return CanBecomeRoom(cell);
         }
 
         bool CanAddNewRoom(MeshHitTarget meshHitTarget)
         {
             DesignationCell cell = meshHitTarget?.CellUnderCursor;
-            if(cell != null)
+            return CanBecomeRoom(cell);
+        }
+
+        private bool CanBecomeRoom(DesignationCell cell)
+        {
+            if (cell != null)
             {
-                bool isInteriorable = cell.Designation == VoxelDesignation.SlantedRoof ||
-                    cell.Designation == VoxelDesignation.WalkableRoof;
-                return isInteriorable && cell.AssignedInterior == null;
+                return cell.Designation.IsBuilding && cell.AssignedInterior == null;
             }
             return false;
         }

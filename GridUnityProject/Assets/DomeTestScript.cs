@@ -33,13 +33,13 @@ public class DomeTestScript : MonoBehaviour
         {
             if(item.GroundPoint.IsBorder)
             {
-                item.Designation = VoxelDesignation.Empty;
+                item.Designation = Designation.Empty;
             }
             else
             {
                 Vector3 spherePos = sphere.ClosestPoint(item.Position);
                 bool isInside = !((spherePos - item.Position).magnitude > float.Epsilon);
-                item.Designation = isInside ? VoxelDesignation.WalkableRoof : VoxelDesignation.Empty;
+                item.Designation = isInside ? Designation.Shell : Designation.Empty;
             }
         }
         main.UpdateInteractionGrid();

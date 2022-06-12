@@ -9,6 +9,7 @@ using VoxelVisuals;
 public class VoxelVisualViewingMain : MonoBehaviour
 {
 #if (UNITY_EDITOR) 
+    /*
     public static VoxelVisualViewingMain Instance { get; private set; }
     public GameObject BlueprintViewerPrefab;
 
@@ -73,21 +74,6 @@ public class VoxelVisualViewingMain : MonoBehaviour
             yield return platformPiece.CreateStubVisual();
         }
     }
-
-
-    ////This code doesn't work right. It seems to create changes that it shouldn't create.
-    //private void SaveAllBlueprints()
-    //{
-    //    foreach (BlueprintViewer viewer in blueprintViewers)
-    //    {
-    //        string path = viewer.GetCorrectAssetPath();
-    //        string[] foundAsset = AssetDatabase.FindAssets(path);
-    //        if(foundAsset.Length == 0)
-    //        {
-    //            viewer.StubBlueprintFromCurrent();
-    //        }
-    //    }
-    //}
 
     private void Report()
     {
@@ -493,5 +479,6 @@ public class VoxelVisualViewingMain : MonoBehaviour
                 && BasePiece.BestBlueprint.Designations.X1Y1Z1 != VoxelDesignation.AnyFilled;
         }
     }
+    */
 #endif
 }

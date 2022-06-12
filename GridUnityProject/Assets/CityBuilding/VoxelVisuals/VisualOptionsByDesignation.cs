@@ -7,18 +7,18 @@ namespace VoxelVisuals
     public class VisualOptionsByDesignation
     {
         private Dictionary<string, VisualCellOptions> optionsByDesignationKey;
-        private readonly VoxelBlueprint[] blueprints;
-        public IEnumerable<VoxelBlueprint> Blueprints { get { return blueprints; } }
+        private readonly VoxelVisualComponentSet[] componentSets;
+        public IEnumerable<VoxelVisualComponentSet> ComponentSets { get { return componentSets; } }
 
-        public VisualOptionsByDesignation(VoxelBlueprint[] blueprints)
+        public VisualOptionsByDesignation(VoxelVisualComponentSet[] blueprints)
         {
-            this.blueprints = blueprints;
+            this.componentSets = blueprints;
             SetOptions();
         }
 
         private void SetOptions()
         {
-            VisualCellOption[] allOptions = GetAllOptions(blueprints).ToArray();
+            VisualCellOption[] allOptions = GetAllOptions(componentSets).ToArray();
             optionsByDesignationKey = GetOptionsByDesignationKey(allOptions);
         }
 
@@ -27,11 +27,11 @@ namespace VoxelVisuals
             return optionsByDesignationKey[designation.Key];
         }
 
-        private IEnumerable<VisualCellOption> GetAllOptions(VoxelBlueprint[] blueprints)
+        private IEnumerable<VisualCellOption> GetAllOptions(VoxelVisualComponentSet[] componetSets)
         {
-            foreach (VoxelBlueprint blueprint in blueprints)
+            foreach (VoxelVisualComponentSet componentSet in componetSets)
             {
-                IEnumerable<VisualCellOption> options = blueprint.GenerateVisualOptions();
+                IEnumerable<VisualCellOption> options = componentSet.GetAllPermutations();
                 foreach (VisualCellOption option in options)
                 {
                     yield return option;

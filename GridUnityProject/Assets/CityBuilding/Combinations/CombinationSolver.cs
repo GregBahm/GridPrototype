@@ -7,55 +7,59 @@ using System.Threading.Tasks;
 
 class CombinationSolver
 {
-    private readonly ReadOnlyCollection<VoxelDesignation> designations;
-    private readonly ReadOnlyCollection<VoxelVisualDesignation> allUniqueCombinations;
-
     public CombinationSolver()
     {
-        designations = GetDesignations().ToList().AsReadOnly();
-        allUniqueCombinations = GetAllUniqueCombinations();
+        VoxelVisualDesignation[] combos = GetAllUniqueCombinations().ToArray();
+        Console.WriteLine(combos.Length);
     }
 
-    private IEnumerable<VoxelDesignation> GetDesignations()
+
+    private IEnumerable<VoxelVisualDesignation> GetAllUniqueCombinations()
     {
-        yield return new EmptyDesignation();
-        yield return new ShellDesignation();
-        yield return new AquaductDesignation();
-
-        yield return new BuildingDesignation(DesignationBuildingRoof.Grass, DesignationBuildingWall.Cornered);
-        yield return new BuildingDesignation(DesignationBuildingRoof.Grass, DesignationBuildingWall.Rounded);
-        yield return new BuildingDesignation(DesignationBuildingRoof.Stone, DesignationBuildingWall.Cornered);
-        yield return new BuildingDesignation(DesignationBuildingRoof.Stone, DesignationBuildingWall.Rounded);
-        yield return new BuildingDesignation(DesignationBuildingRoof.Slanted, DesignationBuildingWall.Cornered);
-        yield return new BuildingDesignation(DesignationBuildingRoof.Slanted, DesignationBuildingWall.Rounded);
-
-        yield return new PlatformDesignation(DesignationPlatformType.Uncovered);
-        yield return new PlatformDesignation(DesignationPlatformType.Grass);
-        yield return new PlatformDesignation(DesignationPlatformType.Covered);
-    }
-
-    private ReadOnlyCollection<VoxelVisualDesignation> GetAllUniqueCombinations()
-    {
-        VoxelDesignation[,,] currentDescription = new VoxelDesignation[2, 2, 2];
-
-        currentDescription[0, 0, 0] = designations[0];
-        currentDescription[0, 0, 1] = designations[0];
-        currentDescription[0, 1, 0] = designations[0];
-        currentDescription[0, 1, 1] = designations[0];
-        currentDescription[1, 0, 0] = designations[0];
-        currentDescription[1, 0, 1] = designations[0];
-        currentDescription[1, 1, 0] = designations[0];
-        currentDescription[1, 1, 1] = designations[0];
-
-        for (int x = 0; x < 2; x++)
+        Designation[] components = Designation.AllBaseDesignations.ToArray();
+        Dictionary<string, VoxelVisualDesignation> result = new Dictionary<string, VoxelVisualDesignation>(); ;
+        for (int x0y0z0 = 0; x0y0z0 < components.Length; x0y0z0++)
         {
-            for (int y = 0; y < 2; y++)
+            for (int x0y0z1 = 0; x0y0z1 < components.Length; x0y0z1++)
             {
-                for (int z = 0; z < 2; z++)
+                for (int x0y1z0 = 0; x0y1z0 < components.Length; x0y1z0++)
                 {
+                    for (int x0y1z1 = 0; x0y1z1 < components.Length; x0y1z1++)
+                    {
+                        for (int x1y0z0 = 0; x1y0z0 < components.Length; x1y0z0++)
+                        {
+                            for (int x1y0z1 = 0; x1y0z1 < components.Length; x1y0z1++)
+                            {
+                                for (int x1y1z0 = 0; x1y1z0 < components.Length; x1y1z0++)
+                                {
+                                    for (int x1y1z1 = 0; x1y1z1 < components.Length; x1y1z1++)
+                                    {
+                                        Designation[] description = new Designation[8];
+                                        description[0] = components[x0y0z0];
+                                        description[1] = components[x0y0z1];
+                                        description[2] = components[x0y1z0];
+                                        description[3] = components[x0y1z1];
+                                        description[4] = components[x1y0z0];
+                                        description[5] = components[x1y0z1];
+                                        description[6] = components[x1y1z0];
+                                        description[7] = components[x1y1z1];
 
+                                        VoxelVisualDesignation designation = new VoxelVisualDesignation(description);
+                                        if (designation.IsValidDescription)
+                                        {
+                                            VoxelVisualDesignation master = designation.GetMasterVariant();
+                                            if (!result.ContainsKey(master.Key))
+                                                result.Add(master.Key, master);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
+                Console.WriteLine(x0y0z0);
             }
         }
+        return result.Values;
     }
 }

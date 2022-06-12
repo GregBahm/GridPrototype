@@ -34,7 +34,7 @@ namespace Interaction
         public class DesignationPlacementOperation : UndoableOperation
         {
             private readonly ExteriorsInteractionManager interactor;
-            private readonly VoxelDesignation oldContents;
+            private readonly Designation oldContents;
             private readonly DesignationCell cell;
 
             public DesignationPlacementOperation(
@@ -43,7 +43,7 @@ namespace Interaction
             {
                 this.interactor = interactor;
                 this.cell = cell;
-                this.oldContents = cell.Designation;
+                oldContents = cell.Designation;
             }
 
             public override void Undo()

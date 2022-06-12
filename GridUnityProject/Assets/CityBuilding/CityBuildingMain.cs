@@ -37,7 +37,7 @@ public class CityBuildingMain : MonoBehaviour
     
     private VisualOptionsByDesignation optionsSource;
 
-    public VoxelBlueprint[] Blueprints;
+    public VoxelVisualComponentSet[] ComponentSets;
 
     private void Start()
     {
@@ -78,7 +78,7 @@ public class CityBuildingMain : MonoBehaviour
         GroundMesh = new GroundMesh();
         UpdateInteractionGrid();
         UpdateGroundMesh();
-        optionsSource = new VisualOptionsByDesignation(Blueprints);
+        optionsSource = new VisualOptionsByDesignation(ComponentSets);
         visualsManager = new VoxelVisualsManager(this, optionsSource);
         Interiors = new InteriorsManager(interiorMeshPrefab);
     }

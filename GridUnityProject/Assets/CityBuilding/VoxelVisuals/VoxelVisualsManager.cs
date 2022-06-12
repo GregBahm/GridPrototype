@@ -57,11 +57,12 @@ namespace VoxelVisuals
         private Dictionary<Mesh, ProceduralMeshRenderer> GetRenderers(VisualOptionsByDesignation optionsSource)
         {
             Dictionary<Mesh, ProceduralMeshRenderer> ret = new Dictionary<Mesh, ProceduralMeshRenderer>();
-            IEnumerable<VoxelBlueprint> blueprints = optionsSource.Blueprints.Where(item => item.ArtContent != null);
-            foreach (VoxelBlueprint item in blueprints)
+            foreach (VoxelVisualComponent component in optionsSource.ComponentSets
+                .SelectMany(item => item.Components)
+                .Select(item => item.Component))
             {
-                ProceduralMeshRenderer renderer = new ProceduralMeshRenderer(item.ArtContent, item.Materials);
-                ret.Add(item.ArtContent, renderer);
+                ProceduralMeshRenderer renderer = new ProceduralMeshRenderer(component.ArtContent, component.Materials);
+                ret.Add(component.ArtContent, renderer);
             }
             return ret;
         }

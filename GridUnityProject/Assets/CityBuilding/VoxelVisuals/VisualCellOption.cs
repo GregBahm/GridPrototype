@@ -7,7 +7,7 @@ namespace VoxelVisuals
     {
         public Mesh Mesh { get; }
         public Material[] Materials { get; }
-        private readonly VoxelDesignation[,,] designation;
+        private readonly Designation[,,] designation;
 
         public int Priority { get; }
 
@@ -18,7 +18,7 @@ namespace VoxelVisuals
 
         public VisualCellOption(Mesh mesh,
             Material[] materials,
-            VoxelDesignation[,,] designation,
+            Designation[,,] designation,
             bool flipped,
             int rotations,
             int priority,

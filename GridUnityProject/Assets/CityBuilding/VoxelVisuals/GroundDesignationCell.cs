@@ -3,15 +3,15 @@ using UnityEngine;
 
 namespace VoxelVisuals
 {
-    public class GroundDesignationCell : IDesignationCell
+    public class ShellDesignationCell : IDesignationCell
     {
-        public VoxelDesignation Designation => VoxelDesignation.Ground;
+        public Designation Designation => Designation.Shell;
 
         public Vector3 Position { get; }
 
         public GroundPoint GroundPoint { get; }
 
-        public GroundDesignationCell(GroundPoint groundPoint)
+        public ShellDesignationCell(GroundPoint groundPoint)
         {
             GroundPoint = groundPoint;
             Position = new Vector3(groundPoint.Position.x, -1f, groundPoint.Position.y);

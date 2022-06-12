@@ -5,7 +5,7 @@ namespace VoxelVisuals
 {
     public interface IDesignationCell
     {
-        VoxelDesignation Designation { get; }
+        Designation Designation { get; }
         Vector3 Position { get; }
         GroundPoint GroundPoint { get; }
     }

@@ -7,16 +7,19 @@ public class VoxelVisualBaseAssets : MonoBehaviour
 {
     public static VoxelVisualBaseAssets Instance;
 
-    public Color AnyFilled;
-    public Color WalkableRoof;
+    public Color SquaredWalkableRoof;
+    public Color SquaredSlantedRoof;
     public Color SlantedRoof;
     public Color Platform;
-    public Color Ground;
+    public Color Shell;
+    public Color Aquaduct;
 
     public Material WallMat;
     public Material StrutMat;
     public Material SlantedRoofMat;
     public Material PlatformMat;
+
+    private Dictionary<Designation, Color> colorTable;
 
     public IEnumerable<Material> Materials
     {
@@ -34,22 +37,21 @@ public class VoxelVisualBaseAssets : MonoBehaviour
         Instance = this;
     }
 
-    public Color GetColorFor(VoxelDesignation slotType)
+    private void Start()
     {
-        switch (slotType)
+        colorTable = new Dictionary<Designation, Color>()
         {
-            case VoxelDesignation.AnyFilled:
-                return AnyFilled;
-            case VoxelDesignation.SlantedRoof:
-                return SlantedRoof;
-            case VoxelDesignation.WalkableRoof:
-                return WalkableRoof;
-            case VoxelDesignation.Platform:
-                return Platform;
-            case VoxelDesignation.Empty:
-            case VoxelDesignation.Ground:
-            default:
-                return Ground;
-        }
+            {Designation.Empty, Color.white },
+            {Designation.Shell, Shell },
+            {Designation.SquaredWalkableRoof, SquaredWalkableRoof },
+            {Designation.SquaredSlantedRoof, SlantedRoof },
+            {Designation.Platform, Platform },
+            {Designation.Aquaduct, Aquaduct }
+        };
+    }
+
+    public Color GetColorFor(Designation slotType)
+    {
+        return colorTable[slotType];
     }
 }
