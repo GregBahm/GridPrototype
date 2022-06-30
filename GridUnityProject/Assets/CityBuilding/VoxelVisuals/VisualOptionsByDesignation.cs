@@ -7,18 +7,29 @@ namespace VoxelVisuals
     public class VisualOptionsByDesignation
     {
         private Dictionary<string, VisualCellOptions> optionsByDesignationKey;
-        private readonly VoxelVisualComponentSet[] componentSets;
-        public IEnumerable<VoxelVisualComponentSet> ComponentSets { get { return componentSets; } }
+        public IEnumerable<VoxelVisualComponentSet> ComponentSets { get; }
+        public IEnumerable<VoxelVisualComponent> BaseComponents { get; }
 
         public VisualOptionsByDesignation(VoxelVisualComponentSet[] blueprints)
         {
-            this.componentSets = blueprints;
+            ComponentSets = blueprints;
+            BaseComponents = GetBaseComponents();
             SetOptions();
+        }
+
+        private IEnumerable<VoxelVisualComponent> GetBaseComponents()
+        {
+            HashSet<VoxelVisualComponent> ret = new HashSet<VoxelVisualComponent>();
+            foreach (ComponentInSet setComponent in ComponentSets.SelectMany(item => item.Components))
+            {
+                ret.Add(setComponent.Component);
+            }
+            return ret;
         }
 
         private void SetOptions()
         {
-            VisualCellOption[] allOptions = GetAllOptions(componentSets).ToArray();
+            VisualCellOption[] allOptions = GetAllOptions(ComponentSets).ToArray();
             optionsByDesignationKey = GetOptionsByDesignationKey(allOptions);
         }
 
@@ -27,7 +38,7 @@ namespace VoxelVisuals
             return optionsByDesignationKey[designation.Key];
         }
 
-        private IEnumerable<VisualCellOption> GetAllOptions(VoxelVisualComponentSet[] componetSets)
+        private IEnumerable<VisualCellOption> GetAllOptions(IEnumerable<VoxelVisualComponentSet> componetSets)
         {
             foreach (VoxelVisualComponentSet componentSet in componetSets)
             {
@@ -42,7 +53,7 @@ namespace VoxelVisuals
         private Dictionary<string, VisualCellOptions> GetOptionsByDesignationKey(VisualCellOption[] allOptions)
         {
             Dictionary<string, VisualCellOptions> ret = new Dictionary<string, VisualCellOptions>();
-            IEnumerable<IGrouping<string, VisualCellOption>> groups = allOptions.GroupBy(item => item.GetDesignationKey());
+            IEnumerable<IGrouping<string, VisualCellOption>> groups = allOptions.GroupBy(item => item.Designation.Key);
             foreach (IGrouping<string, VisualCellOption> group in groups)
             {
                 VisualCellOption[] asArray = group.ToArray();
@@ -53,7 +64,7 @@ namespace VoxelVisuals
                 VisualCellOptions options = new VisualCellOptions();
                 foreach (VisualCellOption item in asArray)
                 {
-                    if (item.Connections.Up == VoxelConnectionType.BigStrut)
+                    if (item.Up == VoxelConnectionType.BigStrut)
                         options.UpStrutOption = item;
                     else
                         options.DefaultOption = item;

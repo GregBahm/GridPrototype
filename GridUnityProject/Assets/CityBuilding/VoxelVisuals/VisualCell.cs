@@ -147,16 +147,16 @@ namespace VoxelVisuals
             return ret;
         }
 
-        private Vector3[] GetAdjustedAnchors()
+        private Vector3[] GetAdjustedAnchors(ComponentInSet component)
         {
             Vector3[] anchors = GetAnchors();
             Vector3[] ret = new Vector3[4];
             for (int i = 0; i < 4; i++)
             {
-                int rotatedIndex = (i + 4 + Contents.Rotations) % 4;
+                int rotatedIndex = (i + 4 + component.Rotations) % 4;
                 ret[i] = anchors[rotatedIndex];
             }
-            if (Contents.Flipped)
+            if (component.Flipped)
             {
                 Vector3 anchor0 = ret[0];
                 Vector3 anchor2 = ret[2];
@@ -168,10 +168,10 @@ namespace VoxelVisuals
             return ret;
         }
 
-        public VoxelRenderData GetRenderData()
+        public VoxelRenderData GetRenderData(ComponentInSet component)
         {
-            Vector3[] adjustedAnchors = GetAdjustedAnchors();
-            float flipNormal = Contents.Flipped ? -1 : 1;
+            Vector3[] adjustedAnchors = GetAdjustedAnchors(component);
+            float flipNormal = component.Flipped ? -1 : 1;
             return new VoxelRenderData(
                 new Vector2(adjustedAnchors[0].x, adjustedAnchors[0].z),
                 new Vector2(adjustedAnchors[1].x, adjustedAnchors[1].z),

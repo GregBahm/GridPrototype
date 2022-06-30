@@ -5,42 +5,24 @@ namespace VoxelVisuals
 {
     public class VisualCellOption
     {
-        public Mesh Mesh { get; }
-        public Material[] Materials { get; }
-        private readonly Designation[,,] designation;
-
-        public int Priority { get; }
-
-        public bool Flipped { get; }
-        public int Rotations { get; }
-
-        public VisualCellConnections Connections { get; }
-
-        public VisualCellOption(Mesh mesh,
-            Material[] materials,
-            Designation[,,] designation,
-            bool flipped,
-            int rotations,
-            int priority,
-            VisualCellConnections connections)
+        public VisualCellOption(
+            ComponentInSet[] components,
+            VoxelVisualDesignation designation,
+            VoxelConnectionType up,
+            VoxelConnectionType down)
         {
-            Mesh = mesh;
-            Materials = materials;
-            this.designation = designation;
-            Flipped = flipped;
-            Rotations = rotations;
-            Priority = priority;
-            Connections = connections;
+            this.Components = components;
+            this.Designation = designation;
+            this.Up = up;
+            this.Down = down;
         }
 
-        public string GetDesignationKey()
-        {
-            return VoxelVisualDesignation.GetDesignationKey(designation);
-        }
+        public ComponentInSet[] Components { get; }
 
-        public override string ToString()
-        {
-            return Mesh?.name;
-        }
+        public VoxelVisualDesignation Designation { get; }
+
+        public VoxelConnectionType Up { get; }
+
+        public VoxelConnectionType Down { get; }
     }
 }

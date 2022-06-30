@@ -42,7 +42,7 @@ namespace VoxelVisuals
                 {
                     cell.Contents = option.DefaultOption;
                 }
-                yesStrut = cell.Contents.Connections.Down == VoxelConnectionType.BigStrut;
+                yesStrut = cell.Contents.Down == VoxelConnectionType.BigStrut;
             }
         }
 
@@ -57,12 +57,10 @@ namespace VoxelVisuals
         private Dictionary<Mesh, ProceduralMeshRenderer> GetRenderers(VisualOptionsByDesignation optionsSource)
         {
             Dictionary<Mesh, ProceduralMeshRenderer> ret = new Dictionary<Mesh, ProceduralMeshRenderer>();
-            foreach (VoxelVisualComponent component in optionsSource.ComponentSets
-                .SelectMany(item => item.Components)
-                .Select(item => item.Component))
+            foreach (VoxelVisualComponent component in optionsSource.BaseComponents)
             {
-                ProceduralMeshRenderer renderer = new ProceduralMeshRenderer(component.ArtContent, component.Materials);
-                ret.Add(component.ArtContent, renderer);
+                ProceduralMeshRenderer renderer = new ProceduralMeshRenderer(component.Mesh, component.Materials);
+                ret.Add(component.Mesh, renderer);
             }
             return ret;
         }
@@ -99,28 +97,32 @@ namespace VoxelVisuals
 
         private void ProcessAllToRemoves()
         {
-            foreach (var item in toRemove)
+            foreach (KeyValuePair<VisualCell, VisualCellOption> item in toRemove)
             {
-                ProceduralMeshRenderer renderer = renderers[item.Value.Mesh];
-                renderer.Remove(item.Key);
+                foreach (ComponentInSet setComponent in item.Value.Components)
+                {
+                    ProceduralMeshRenderer renderer = renderers[setComponent.Component.Mesh];
+                    renderer.Remove(item.Key);
+                }
             }
             toRemove.Clear();
         }
 
         private void ProcessAllToAdds()
         {
-            foreach (var item in toAdd)
+            foreach (KeyValuePair<VisualCell, VisualCellOption> item in toAdd)
             {
-                ProceduralMeshRenderer renderer = renderers[item.Value.Mesh];
-                renderer.Add(item.Key);
+                foreach (ComponentInSet setComponent in item.Value.Components)
+                {
+                    ProceduralMeshRenderer renderer = renderers[setComponent.Component.Mesh];
+                    renderer.Add(item.Key);
+                }
             }
             toAdd.Clear();
         }
 
         private void RegisterRemoval(VisualCellChangedEventArg args)
         {
-            if (args.OldOption == null || args.OldOption.Mesh == null)
-                return;
             if (!toRemove.ContainsKey(args.Cell)) // Discard each change after the first as they were never applied
             {
                 toRemove.Add(args.Cell, args.OldOption);
@@ -129,8 +131,6 @@ namespace VoxelVisuals
 
         private void RegisterAdd(VisualCellChangedEventArg args)
         {
-            if (args.Cell.Contents.Mesh == null)
-                return;
             if (toAdd.ContainsKey(args.Cell))
             {
                 toAdd[args.Cell] = args.Cell.Contents;

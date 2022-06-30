@@ -73,6 +73,12 @@ namespace VoxelVisuals
 
         public void UpdatePositionsBuffer()
         {
+            // TODO: Fix this class to account for multiple components
+            // So currently, every time a mesh renders, it needs the render data which is the rotated and flipped anchors
+            // And the systme watches for cells that are rendering this, so that it can add and remove them
+            // That all works fine. The only thing you need is to find where the component in the cell matches this mesh
+            // Then get the render data, and set that. You will also need to update the logic for renderBuffersLength
+
             VoxelRenderData[] rendereData = cellsToRender.Select(item => item.GetRenderData()).ToArray();
             if (rendereData.Length > renderBufferLength)
             {

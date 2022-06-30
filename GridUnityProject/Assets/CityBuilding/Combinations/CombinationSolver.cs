@@ -7,10 +7,11 @@ using System.Threading.Tasks;
 
 class CombinationSolver
 {
+    public VoxelVisualDesignation[] Combos { get; }
+
     public CombinationSolver()
     {
-        VoxelVisualDesignation[] combos = GetAllUniqueCombinations().ToArray();
-        Console.WriteLine(combos.Length);
+        Combos = GetAllUniqueCombinations().ToArray();
     }
 
 

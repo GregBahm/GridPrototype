@@ -108,7 +108,6 @@ public class VoxelVisualDesignation
                 }
             }
         }
-        // A rounded Designation only exists on a convex or concave corner
     }
 
     public static string GetDesignationKey(Designation[,,] description)
