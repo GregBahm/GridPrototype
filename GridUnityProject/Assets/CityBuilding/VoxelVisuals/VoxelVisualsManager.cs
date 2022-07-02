@@ -59,7 +59,7 @@ namespace VoxelVisuals
             Dictionary<Mesh, ProceduralMeshRenderer> ret = new Dictionary<Mesh, ProceduralMeshRenderer>();
             foreach (VoxelVisualComponent component in optionsSource.BaseComponents)
             {
-                ProceduralMeshRenderer renderer = new ProceduralMeshRenderer(component.Mesh, component.Materials);
+                ProceduralMeshRenderer renderer = new ProceduralMeshRenderer(component);
                 ret.Add(component.Mesh, renderer);
             }
             return ret;
