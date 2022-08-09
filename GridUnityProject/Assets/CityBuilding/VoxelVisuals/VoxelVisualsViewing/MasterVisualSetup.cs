@@ -6,6 +6,7 @@ public class MasterVisualSetup : ScriptableObject
 {
     [SerializeField]
     private VoxelVisualComponentSet[] componentSets;
+    public VoxelVisualComponentSet[] ComponentSets => componentSets;
 
     public void SetInitialComponents()
     {
