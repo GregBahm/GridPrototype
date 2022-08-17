@@ -8,6 +8,25 @@ namespace VoxelVisuals
 {
     public class VisualCell
     {
+        private static VisualCellOption defaultEmptyContents = GetDefaultEmptyContents();
+
+        private static VisualCellOption GetDefaultEmptyContents()
+        {
+            Designation[] empty = new Designation[]
+            {
+                Designation.Empty,
+                Designation.Empty,
+                Designation.Empty,
+                Designation.Empty,
+                Designation.Empty,
+                Designation.Empty,
+                Designation.Empty,
+                Designation.Empty,
+            };
+            VoxelVisualDesignation emptyDesignation = new VoxelVisualDesignation(empty);
+            return new VisualCellOption(new ComponentInSet[0], emptyDesignation, VoxelConnectionType.None, VoxelConnectionType.None);
+        }
+
         private readonly MainGrid grid;
 
         private VisualCellOption contents;
@@ -43,6 +62,7 @@ namespace VoxelVisuals
             Quad = quad;
             Height = height;
             designationCells = GetDesignationCells();
+            contents = defaultEmptyContents;
         }
 
         public Vector3 GetCenter()

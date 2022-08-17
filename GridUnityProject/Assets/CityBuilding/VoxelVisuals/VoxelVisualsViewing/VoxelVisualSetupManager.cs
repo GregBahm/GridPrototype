@@ -27,36 +27,6 @@ public class VoxelVisualSetupManager : MonoBehaviour
     {
         //visualSetup.SetInitialComponents(); // Run To set initial components
         //ProceduralBinding();
-
-
-        int offenderCount = 0;
-        VisualCellOption[] options = GetAllOptions(visualSetup.ComponentSets).ToArray();
-        HashSet<string> keysHash = new HashSet<string>();
-        foreach (VisualCellOption option in options)
-        {
-            string key = option.Designation.Key;
-            if(!keysHash.Add(key))
-            {
-                Debug.Log("Offender: " + key);
-                offenderCount++;
-            }
-        }
-        Debug.Log("Total Permutations: " + options.Length);
-        Debug.Log("Total Offender Count: " + offenderCount);
-    }
-
-
-    private IEnumerable<VisualCellOption> GetAllOptions(IEnumerable<VoxelVisualComponentSet> componetSets)
-    {
-        foreach (VoxelVisualComponentSet componentSet in componetSets)
-        {
-            VisualCellOption[] options = componentSet.GetAllPermutations().ToArray();
-            string[] keys = options.Select(item => item.Designation.Key).ToArray();
-            foreach (VisualCellOption option in options)
-            {
-                yield return option;
-            }
-        }
     }
 
     private void ProceduralBinding()

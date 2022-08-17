@@ -157,6 +157,10 @@ namespace VoxelVisuals
 
         public VisualCellChangedEventArg(VisualCell cell, VisualCellOption oldOption)
         {
+            if (cell == null)
+                throw new ArgumentNullException("VisualCellChangedEventArg cell cannot be null");
+            if (oldOption == null)
+                throw new ArgumentNullException("VisualCellChangedEventArg oldOption cannot be null");
             Cell = cell;
             OldOption = oldOption;
         }
