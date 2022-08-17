@@ -37,11 +37,11 @@ public class VoxelVisualComponentSet
     internal IEnumerable<VisualCellOption> GetAllPermutations()
     {
         VoxelVisualDesignation realDesignation = designation.ToDesignation();
-        var variants = realDesignation.GetUniqueVariants();
+        IEnumerable<GeneratedVoxelDesignation> variants = realDesignation.GetUniqueVariants();
         foreach (var variant in variants)
         {
             ComponentInSet[] variantComponents = GetVariantComponents(variant.Rotations, variant.WasFlipped).ToArray();
-            yield return new VisualCellOption(variantComponents, realDesignation, up, down);
+            yield return new VisualCellOption(variantComponents, variant, up, down);
         }
     }
      
