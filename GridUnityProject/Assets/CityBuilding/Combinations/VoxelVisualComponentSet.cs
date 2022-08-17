@@ -14,6 +14,7 @@ public class VoxelVisualComponentSet
     private VoxelConnectionType down;
     [SerializeField]
     private SerializableVisualDesignation designation;
+    public SerializableVisualDesignation Designation => designation;
 
     [SerializeField]
     private ComponentInSet[] components;
@@ -43,7 +44,7 @@ public class VoxelVisualComponentSet
             yield return new VisualCellOption(variantComponents, realDesignation, up, down);
         }
     }
-
+     
     private IEnumerable<ComponentInSet> GetVariantComponents(int rotations, bool flipped)
     {
         foreach (ComponentInSet componentInSet in components)

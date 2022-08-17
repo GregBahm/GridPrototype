@@ -139,11 +139,8 @@ namespace Interaction
 
         private bool CanBecomeRoom(DesignationCell cell)
         {
-            if (cell != null)
-            {
-                return cell.Designation.IsBuilding && cell.AssignedInterior == null;
-            }
-            return false;
+            // TODO: This;
+            throw new NotImplementedException();
         }
 
         private void HandleSelectRoom()

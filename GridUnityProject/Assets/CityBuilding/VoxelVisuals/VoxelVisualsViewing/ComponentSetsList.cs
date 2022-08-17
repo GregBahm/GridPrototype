@@ -21,6 +21,8 @@ public class ComponentSetsList : MonoBehaviour
         {
             GameObject setUi = Instantiate(ComponentSetUiPrefab);
             setUi.transform.SetParent(ComponentSetUiGroup, false);
+            ComponentSetUiViewModel viewModel = setUi.GetComponent<ComponentSetUiViewModel>();
+            viewModel.Initialize(set);
         }
     }
 }

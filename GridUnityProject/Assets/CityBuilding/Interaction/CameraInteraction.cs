@@ -60,7 +60,6 @@ namespace Interaction
             panCameraStart = Camera.main.transform.localPosition;
         }
 
-
         public void ContinueOrbit()
         {
             Vector3 screenDelta = orbitScreenStart - Input.mousePosition;

@@ -5,12 +5,14 @@ using UnityEngine;
 
 public class VoxelVisualDesignation
 {
-    private readonly Designation[,,] description = new Designation[2, 2, 2];
+    private Designation[,,] description = new Designation[2, 2, 2];
     public Designation[,,] Description => description;
 
     public string Key { get { return ToString(); } }
 
     public bool IsValidDescription { get; }
+
+    private static HashSet<Designation> isBuildingTable = new HashSet<Designation>() { Designation.SquaredWalkableRoof, Designation.SquaredSlantedRoof };
 
     public VoxelVisualDesignation(Designation[] values)
     {
@@ -54,6 +56,11 @@ public class VoxelVisualDesignation
         return true;
     }
 
+    private bool IsBuilding(Designation designation)
+    {
+        return isBuildingTable.Contains(designation);
+    }
+
     private void CorrectValues()
     {
         // If has a platform designation on the top half, or is under a non-empty slot, set that designation to empty instead.
@@ -80,13 +87,13 @@ public class VoxelVisualDesignation
         {
             for (int z = 0; z < 2; z++)
             {
-                if (description[x, 1, z].IsBuilding)
+                if (IsBuilding(description[x, 1, z]))
                 {
                     description[x, 1, z] = Designation.SquaredWalkableRoof;
                 }
 
-                if (description[x, 0, z].IsBuilding
-                    && description[x, 1, z].IsBuilding)
+                if (IsBuilding(description[x, 0, z])
+                    && IsBuilding(description[x, 1, z]))
                 {
                     description[x, 0, z] = Designation.SquaredWalkableRoof;
                 }
@@ -97,13 +104,13 @@ public class VoxelVisualDesignation
         {
             for (int z = 0; z < 2; z++)
             {
-                if (description[x, 1, z].IsBuilding)
+                if (IsBuilding(description[x, 1, z]))
                 {
                     description[x, 1, z] = Designation.SquaredWalkableRoof;
                 }
 
-                if (description[x, 0, z].IsBuilding
-                    && description[x, 1, z].IsBuilding)
+                if (IsBuilding(description[x, 0, z])
+                    && IsBuilding(description[x, 1, z]))
                 {
                     description[x, 0, z] = Designation.SquaredWalkableRoof;
                 }
@@ -168,7 +175,7 @@ public class VoxelVisualDesignation
         return set.Concat(GetUniqueVariants()).OrderBy(item => item.Key).First();
     }
 
-    public IEnumerable<GeneratedVoxelDesignation> GetUniqueVariants()
+    public IEnumerable<GeneratedVoxelDesignation> GetUniqueVariants(bool includeOriginal = false)
     {
         GeneratedVoxelDesignation rotated = GetRotated(1, false);
         GeneratedVoxelDesignation rotatedTwice = rotated.GetRotated(2, false);
@@ -177,7 +184,7 @@ public class VoxelVisualDesignation
         GeneratedVoxelDesignation flippedRotated = flipped.GetRotated(1, true);
         GeneratedVoxelDesignation flippedRotatedTwice = flippedRotated.GetRotated(2, true);
 
-        GeneratedVoxelDesignation[] rawVariants = new GeneratedVoxelDesignation[]
+        List<GeneratedVoxelDesignation> rawVariants = new List<GeneratedVoxelDesignation>
         {
             rotated,
             rotatedTwice,
@@ -188,6 +195,13 @@ public class VoxelVisualDesignation
             flippedRotatedTwice,
             flippedRotatedTwice.GetRotated(3, true)
         };
+        if (includeOriginal)
+        {
+            GeneratedVoxelDesignation original = new GeneratedVoxelDesignation(false, 0);
+            original.description = Description;
+            rawVariants.Add(original);
+            yield return original;
+        }
 
         HashSet<string> uniquenessCheck = new HashSet<string>
         {
