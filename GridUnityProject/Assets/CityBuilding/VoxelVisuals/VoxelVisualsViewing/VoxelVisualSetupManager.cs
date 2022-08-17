@@ -26,7 +26,7 @@ public class VoxelVisualSetupManager : MonoBehaviour
     private void Start()
     {
         //visualSetup.SetInitialComponents(); // Run To set initial components
-        ProceduralBinding();
+        //ProceduralBinding();
 
     }
 
