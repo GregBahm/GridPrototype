@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using TMPro;
 using UnityEditor;
+using UnityEditor.ShaderGraph.Internal;
 using UnityEngine;
 using VoxelVisuals;
 
@@ -21,12 +22,36 @@ public class VoxelVisualSetupManager : MonoBehaviour
     [SerializeField]
     private Material[] componentMaterials;
 
+    [SerializeField]
+    private GameObject voxelVisualSetViewerPrefab;
     
 #if (UNITY_EDITOR) 
     private void Start()
     {
+        InstantiateSets();
         //visualSetup.SetInitialComponents(); // Run To set initial components
         //ProceduralBinding();
+    }
+
+    private void InstantiateSets()
+    {
+        int i = 0;
+        foreach (VoxelVisualComponentSet set in visualSetup.ComponentSets)
+        {
+            GameObject setGameObject = Instantiate(voxelVisualSetViewerPrefab);
+            VoxelVisualSetViewer viewer = setGameObject.GetComponent<VoxelVisualSetViewer>();
+            viewer.Initialize(set);
+            setGameObject.transform.position = GetSetPosition(i);
+            i++;
+        }
+    }
+
+    private Vector3 GetSetPosition(int i)
+    {
+        int rowLength = (int)Mathf.Sqrt(visualSetup.ComponentSets.Length);
+        float x = i % rowLength * 2;
+        float z = Mathf.FloorToInt(i / rowLength) * 2;
+        return new Vector3(x, 0, z);
     }
 
     private void ProceduralBinding()

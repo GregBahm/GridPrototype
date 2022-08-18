@@ -14,6 +14,15 @@ public class VoxelVisualDesignation
 
     private static HashSet<Designation> isBuildingTable = new HashSet<Designation>() { Designation.SquaredWalkableRoof, Designation.SquaredSlantedRoof };
 
+    public Designation X0Y0Z0 => description[0, 0, 0];
+    public Designation X0Y0Z1 => description[0, 0, 1];
+    public Designation X0Y1Z0 => description[0, 1, 0];
+    public Designation X0Y1Z1 => description[0, 1, 1];
+    public Designation X1Y0Z0 => description[1, 0, 0];
+    public Designation X1Y0Z1 => description[1, 0, 1];
+    public Designation X1Y1Z0 => description[1, 1, 0];
+    public Designation X1Y1Z1 => description[1, 1, 1];
+
     public VoxelVisualDesignation(Designation[] values)
     {
         Description[0, 0, 0] = values[0];
