@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class VoxelVisualSetViewer : MonoBehaviour
@@ -27,10 +28,14 @@ public class VoxelVisualSetViewer : MonoBehaviour
     [SerializeField]
     private Transform contents;
 
+    private List<GameObject> objectsUnderContents;
+
     public void Initialize(VoxelVisualComponentSet model)
     {
         this.model = model;
+        objectsUnderContents = new List<GameObject>();
         SetDesignationDisplay();
+        UpdateVisuals();
     }
 
     private void UpdateVisuals()
@@ -38,18 +43,39 @@ public class VoxelVisualSetViewer : MonoBehaviour
         ClearContents();
         foreach (ComponentInSet item in model.Components)
         {
-            AddComponent(item);
+            GameObject component = CreateComponent(item);
+            objectsUnderContents.Add(component);
         }
     }
 
-    private void AddComponent(ComponentInSet item)
+    private GameObject CreateComponent(ComponentInSet item)
     {
-        throw new NotImplementedException();
+        GameObject componentObj = new GameObject(item.Component.name);
+        componentObj.transform.SetParent(contents, false);
+        MeshFilter filter = componentObj.AddComponent<MeshFilter>();
+        filter.sharedMesh = item.Component.Mesh;
+        MeshRenderer renderer = componentObj.AddComponent<MeshRenderer>();
+        renderer.materials = GetComponentMaterials(item.Component.Materials).ToArray();
+        componentObj.transform.Rotate(0, 90 * item.Rotations, 0);
+        componentObj.transform.localScale = new Vector3(item.Flipped ? -1 : 1, 1, 1);
+        return componentObj;
+    }
+
+    private IEnumerable<Material> GetComponentMaterials(Material[] materials)
+    {
+        foreach (Material material in materials)
+        {
+            yield return VoxelVisualBaseAssets.Instance.GetMaterialFor(material);
+        }
     }
 
     private void ClearContents()
     {
-        throw new NotImplementedException();
+        foreach (GameObject obj in objectsUnderContents)
+        {
+            Destroy(obj);
+        }
+        objectsUnderContents.Clear();
     }
 
     private void SetDesignationDisplay()

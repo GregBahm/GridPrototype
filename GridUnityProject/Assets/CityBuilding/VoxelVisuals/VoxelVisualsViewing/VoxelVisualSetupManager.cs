@@ -38,11 +38,14 @@ public class VoxelVisualSetupManager : MonoBehaviour
         int i = 0;
         foreach (VoxelVisualComponentSet set in visualSetup.ComponentSets)
         {
-            GameObject setGameObject = Instantiate(voxelVisualSetViewerPrefab);
-            VoxelVisualSetViewer viewer = setGameObject.GetComponent<VoxelVisualSetViewer>();
-            viewer.Initialize(set);
-            setGameObject.transform.position = GetSetPosition(i);
-            i++;
+            if(set.Components.Any())
+            {
+                GameObject setGameObject = Instantiate(voxelVisualSetViewerPrefab);
+                VoxelVisualSetViewer viewer = setGameObject.GetComponent<VoxelVisualSetViewer>();
+                viewer.Initialize(set);
+                setGameObject.transform.position = GetSetPosition(i);
+                i++;
+            }
         }
     }
 

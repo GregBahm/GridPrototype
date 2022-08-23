@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 [Serializable]
@@ -32,6 +33,8 @@ public class VoxelVisualBaseAssets : MonoBehaviour
         }
     }
 
+    private Dictionary<string, Material> materialsTable;
+
     private void Awake()
     {
         Instance = this;
@@ -48,10 +51,22 @@ public class VoxelVisualBaseAssets : MonoBehaviour
             {Designation.Platform, Platform },
             {Designation.Aquaduct, Aquaduct }
         };
+        materialsTable = new Dictionary<string, Material>
+        {
+            {"WallMat", WallMat },
+            {"StrutMat", StrutMat },
+            {"SlantedRoofMat", SlantedRoofMat },
+            {"PlatformMat", PlatformMat },
+        };
     }
 
     public Color GetColorFor(Designation slotType)
     {
         return colorTable[slotType];
+    }
+
+    internal Material GetMaterialFor(Material material)
+    {
+        return materialsTable[material.name];
     }
 }
