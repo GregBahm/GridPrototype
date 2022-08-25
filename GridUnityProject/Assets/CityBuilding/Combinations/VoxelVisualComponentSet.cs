@@ -34,7 +34,7 @@ public class VoxelVisualComponentSet
         this.components = components;
     }
 
-    internal IEnumerable<VisualCellOption> GetAllPermutations()
+    public IEnumerable<VisualCellOption> GetAllPermutations()
     {
         VoxelVisualDesignation realDesignation = designation.ToDesignation();
         IEnumerable<GeneratedVoxelDesignation> variants = realDesignation.GetUniqueVariants(true);
@@ -44,13 +44,18 @@ public class VoxelVisualComponentSet
             yield return new VisualCellOption(variantComponents, variant, up, down);
         }
     }
-     
-    private IEnumerable<ComponentInSet> GetVariantComponents(int rotations, bool flipped)
+
+    public IEnumerable<ComponentInSet> GetVariantComponents(int rotations, bool flipped)
     {
         foreach (ComponentInSet componentInSet in components)
         {
             bool newFlipped = componentInSet.Flipped != flipped;
-            int newRotations = (rotations + componentInSet.Rotations) % 4;
+
+            int setRot = componentInSet.Flipped ? (4- componentInSet.Rotations) : componentInSet.Rotations;
+            int visualRot = !flipped ? (4- rotations) : rotations;
+            
+            int newRotations = (setRot + visualRot + 8) % 4;
+            //int newRotations = (componentInSet.Rotations + rotations) % 4;
             yield return new ComponentInSet(componentInSet.Component, newFlipped, newRotations);
         }
     }

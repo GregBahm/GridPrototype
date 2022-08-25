@@ -50,15 +50,17 @@ public class VoxelVisualSetViewer : MonoBehaviour
 
     private GameObject CreateComponent(ComponentInSet item)
     {
+        GameObject objRoot = new GameObject(item.Component.name);
+        objRoot.transform.SetParent(contents, false);
         GameObject componentObj = new GameObject(item.Component.name);
-        componentObj.transform.SetParent(contents, false);
+        componentObj.transform.SetParent(objRoot.transform, false);
         MeshFilter filter = componentObj.AddComponent<MeshFilter>();
         filter.sharedMesh = item.Component.Mesh;
         MeshRenderer renderer = componentObj.AddComponent<MeshRenderer>();
         renderer.materials = GetComponentMaterials(item.Component.Materials).ToArray();
         componentObj.transform.Rotate(0, 90 * item.Rotations, 0);
-        componentObj.transform.localScale = new Vector3(item.Flipped ? -1 : 1, 1, 1);
-        return componentObj;
+        objRoot.transform.localScale = new Vector3(item.Flipped ? -1 : 1, 1, 1);
+        return objRoot;
     }
 
     private IEnumerable<Material> GetComponentMaterials(Material[] materials)

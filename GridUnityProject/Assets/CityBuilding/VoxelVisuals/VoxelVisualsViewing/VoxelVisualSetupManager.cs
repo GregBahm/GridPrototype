@@ -28,9 +28,29 @@ public class VoxelVisualSetupManager : MonoBehaviour
 #if (UNITY_EDITOR) 
     private void Start()
     {
-        InstantiateSets();
+        //InstantiateSets();
         //visualSetup.SetInitialComponents(); // Run To set initial components
         //ProceduralBinding();
+        DebuggyBuddy();
+    }
+
+    private void DebuggyBuddy()
+    {
+        VoxelVisualComponentSet set = visualSetup.ComponentSets.First(item => item.Components.Any(item => item.Component.name == "None_W_S_E_E_W_E_E_E_None"));
+        VoxelVisualDesignation designation = set.Designation.ToDesignation();
+        IEnumerable<GeneratedVoxelDesignation> variants = designation.GetUniqueVariants(true);
+        int i = 0;
+        foreach (var variant in variants)
+        {
+            ComponentInSet[] variantComponents = set.GetVariantComponents(variant.Rotations, variant.WasFlipped).ToArray();
+            VoxelVisualComponentSet variantSet = new VoxelVisualComponentSet(VoxelConnectionType.None, VoxelConnectionType.None, variant, variantComponents);
+            GameObject setGameObject = Instantiate(voxelVisualSetViewerPrefab);
+            VoxelVisualSetViewer viewer = setGameObject.GetComponent<VoxelVisualSetViewer>();
+            viewer.Initialize(variantSet);
+            setGameObject.transform.position = new Vector3(i * 2, 0, 0);
+            setGameObject.name = "Designation Rotations " + variant.Rotations + (variant.WasFlipped ? ", Flipped" : "") + " Component Rotations : " + set.Components[0].Rotations + (set.Components[0].Flipped ? ", Flipped" : "");
+            i++;
+        }
     }
 
     private void InstantiateSets()

@@ -188,21 +188,25 @@ public class VoxelVisualDesignation
     {
         GeneratedVoxelDesignation rotated = GetRotated(1, false);
         GeneratedVoxelDesignation rotatedTwice = rotated.GetRotated(2, false);
+        GeneratedVoxelDesignation rotatedThrice = rotatedTwice.GetRotated(3, false);
 
         GeneratedVoxelDesignation flipped = GetFlipped();
+
         GeneratedVoxelDesignation flippedRotated = flipped.GetRotated(1, true);
         GeneratedVoxelDesignation flippedRotatedTwice = flippedRotated.GetRotated(2, true);
+        GeneratedVoxelDesignation flippedRotatedThrice = flippedRotatedTwice.GetRotated(3, true);
 
         List<GeneratedVoxelDesignation> rawVariants = new List<GeneratedVoxelDesignation>
         {
             rotated,
             rotatedTwice,
-            rotatedTwice.GetRotated(3, false),
+            rotatedThrice,
 
             flipped,
+
             flippedRotated,
             flippedRotatedTwice,
-            flippedRotatedTwice.GetRotated(3, true)
+            flippedRotatedThrice
         };
         if (includeOriginal)
         {
