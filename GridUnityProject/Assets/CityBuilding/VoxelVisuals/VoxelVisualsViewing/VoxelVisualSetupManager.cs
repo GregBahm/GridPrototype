@@ -29,14 +29,21 @@ public class VoxelVisualSetupManager : MonoBehaviour
     private void Start()
     {
         //InstantiateSets();
+
         //visualSetup.SetInitialComponents(); // Run To set initial components
         //ProceduralBinding();
-        DebuggyBuddy();
+
+        DebuggyBuddy("None_W_S_E_E_W_E_E_E_None", 0);
+        DebuggyBuddy("None_W_A_E_A_S_E_E_E_None", 1);
+        DebuggyBuddy("None_S_E_E_E_W_E_E_E_None", -1);
     }
 
-    private void DebuggyBuddy()
+
+    private void DebuggyBuddy(string componentName, float zOffset)
     {
-        VoxelVisualComponentSet set = visualSetup.ComponentSets.First(item => item.Components.Any(item => item.Component.name == "None_W_S_E_E_W_E_E_E_None"));
+        GameObject group = new GameObject(componentName);
+
+        VoxelVisualComponentSet set = visualSetup.ComponentSets.First(item => item.Components.Any(item => item.Component.name == componentName));
         VoxelVisualDesignation designation = set.Designation.ToDesignation();
         IEnumerable<GeneratedVoxelDesignation> variants = designation.GetUniqueVariants(true);
         int i = 0;
@@ -45,9 +52,10 @@ public class VoxelVisualSetupManager : MonoBehaviour
             ComponentInSet[] variantComponents = set.GetVariantComponents(variant.Rotations, variant.WasFlipped).ToArray();
             VoxelVisualComponentSet variantSet = new VoxelVisualComponentSet(VoxelConnectionType.None, VoxelConnectionType.None, variant, variantComponents);
             GameObject setGameObject = Instantiate(voxelVisualSetViewerPrefab);
+            setGameObject.transform.SetParent(group.transform, false);
             VoxelVisualSetViewer viewer = setGameObject.GetComponent<VoxelVisualSetViewer>();
             viewer.Initialize(variantSet);
-            setGameObject.transform.position = new Vector3(i * 2, 0, 0);
+            setGameObject.transform.position = new Vector3(i * 2, 0, zOffset * 2);
             setGameObject.name = "Designation Rotations " + variant.Rotations + (variant.WasFlipped ? ", Flipped" : "") + " Component Rotations : " + set.Components[0].Rotations + (set.Components[0].Flipped ? ", Flipped" : "");
             i++;
         }

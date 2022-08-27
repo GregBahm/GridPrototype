@@ -24,7 +24,7 @@ public class VoxelVisualComponentSet
     public ComponentInSet[] Components { get => components; set => components = value; }
 
     public VoxelVisualComponentSet(VoxelConnectionType up, 
-        VoxelConnectionType down, 
+        VoxelConnectionType down,  
         VoxelVisualDesignation designation, 
         ComponentInSet[] components)
     {
@@ -45,18 +45,17 @@ public class VoxelVisualComponentSet
         }
     }
 
-    public IEnumerable<ComponentInSet> GetVariantComponents(int rotations, bool flipped)
+    public IEnumerable<ComponentInSet> GetVariantComponents(int designationRot, bool designationFlipped)
     {
-        foreach (ComponentInSet componentInSet in components)
+        foreach (ComponentInSet component in components)
         {
-            bool newFlipped = componentInSet.Flipped != flipped;
+            bool newFlipped = component.Flipped != designationFlipped;
 
-            int setRot = componentInSet.Flipped ? (4- componentInSet.Rotations) : componentInSet.Rotations;
-            int visualRot = !flipped ? (4- rotations) : rotations;
-            
-            int newRotations = (setRot + visualRot + 8) % 4;
-            //int newRotations = (componentInSet.Rotations + rotations) % 4;
-            yield return new ComponentInSet(componentInSet.Component, newFlipped, newRotations);
+            int compRot = component.Rotations;
+            if (designationFlipped)
+                compRot = 4 - compRot;
+            int newRotations = (compRot + designationRot) % 4;
+            yield return new ComponentInSet(component.Component, newFlipped, newRotations);
         }
     }
 }
