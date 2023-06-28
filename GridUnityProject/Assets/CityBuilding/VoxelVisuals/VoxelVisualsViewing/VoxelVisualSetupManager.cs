@@ -20,6 +20,11 @@ public class VoxelVisualSetupManager : MonoBehaviour
     public VoxelVisualComponent[] SourceComponents => sourceComponents;
 
     [SerializeField]
+    private VoxelVisualComponent upStructComponent;
+    [SerializeField]
+    private VoxelVisualComponent downStructComponent;
+
+    [SerializeField]
     private Material[] componentMaterials;
 
     [SerializeField]
@@ -28,14 +33,14 @@ public class VoxelVisualSetupManager : MonoBehaviour
 #if (UNITY_EDITOR) 
     private void Start()
     {
-        //InstantiateSets();
 
         //visualSetup.SetInitialComponents(); // Run To set initial components
-        //ProceduralBinding();
+        ProceduralBinding();
+        InstantiateSets();
 
-        DebuggyBuddy("None_W_S_E_E_W_E_E_E_None", 0);
-        DebuggyBuddy("None_W_A_E_A_S_E_E_E_None", 1);
-        DebuggyBuddy("None_S_E_E_E_W_E_E_E_None", -1);
+        //DebuggyBuddy("None_W_S_E_E_W_E_E_E_None", 0);
+        //DebuggyBuddy("None_W_A_E_A_S_E_E_E_None", 1);
+        //DebuggyBuddy("None_S_E_E_E_W_E_E_E_None", -1);
     }
 
 
@@ -87,7 +92,10 @@ public class VoxelVisualSetupManager : MonoBehaviour
 
     private void ProceduralBinding()
     {
-        Dictionary<string, VoxelVisualComponentSet> setsByDesignationKey = visualSetup.ComponentSets.ToDictionary(item => GetComponentKey(item.Designation), item => item);
+        Dictionary<string, List<VoxelVisualComponentSet>> setsByDesignationKey = GetSetsByDesignation();
+
+        ComponentInSet upStructSetComponent = new ComponentInSet(upStructComponent, false, 0);
+        ComponentInSet downStructSetComponent = new ComponentInSet(downStructComponent, false, 0);
 
         // So the idea here is that I take my list of source components, and I determine the VisualSetup.Set that they belong to. Then I set them. That way, I can restore the build. Then more thoughtfully componetize, solve the ground set, and move forward.
         foreach (VoxelVisualComponent component in sourceComponents)
@@ -99,16 +107,44 @@ public class VoxelVisualSetupManager : MonoBehaviour
             {
                 if(setsByDesignationKey.ContainsKey(item.Key))
                 {
+                    //TODO: Loop through the sets, add their corrosponding component, and then add the struct piece
                     if (pairFound)
                         throw new Exception("One component satisfies two sets?");
                     ComponentInSet inSet = new ComponentInSet(component, item.WasFlipped, item.Rotations);
-                    setsByDesignationKey[item.Key].Components = new ComponentInSet[] { inSet};
+                    List<VoxelVisualComponentSet> sets = setsByDesignationKey[item.Key];
+                    foreach (VoxelVisualComponentSet set in sets)
+                    {
+                        List<ComponentInSet> components = new List<ComponentInSet> { inSet };
+                        if (set.Up == VoxelConnectionType.BigStrut)
+                        {
+                            components.Add(upStructSetComponent);
+                        }
+                        if(set.Down == VoxelConnectionType.BigStrut)
+                        {
+                            components.Add(downStructSetComponent);
+                        }
+                        set.Components = components.ToArray();
+                    }
                     pairFound = true;
                 }
             }
             if (!pairFound)
                 throw new Exception("Component " + component.name + " satisfies no sets");
         }
+    }
+
+    private Dictionary<string, List<VoxelVisualComponentSet>> GetSetsByDesignation()
+    {
+        var ret = new Dictionary<string, List<VoxelVisualComponentSet>>();
+        foreach (var item in visualSetup.ComponentSets)
+        {
+            string key = GetComponentKey(item.Designation);
+            if(ret.ContainsKey(key))
+                ret[key].Add(item);
+            else
+                ret.Add(key, new List<VoxelVisualComponentSet> { item });
+        }
+        return ret;
     }
 
     private string GetComponentKey(SerializableVisualDesignation designation)

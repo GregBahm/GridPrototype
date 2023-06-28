@@ -2173,6 +2173,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f231c4fb786f3946a6b90b886c48677, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_SendPointerHoverToParent: 1
   m_HorizontalAxis: Horizontal
   m_VerticalAxis: Vertical
   m_SubmitButton: Submit
@@ -2849,6 +2850,9 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7d9d090333847124aa00c11b2fa94cc0, type: 2}
   - {fileID: 11400000, guid: ff37fe0dceb2f0742a449e21d8c38e00, type: 2}
   - {fileID: 11400000, guid: e9ce3d86957ee224fb806f1e1ba86125, type: 2}
+  upStructComponent: {fileID: 11400000, guid: dcb0ba44a6929d242ad57504a985492b, type: 2}
+  downStructComponent: {fileID: 11400000, guid: cc7c387e0e055964a8ce00a331ea46cb,
+    type: 2}
   componentMaterials:
   - {fileID: 2100000, guid: 9f17b7ea90d37e34fb8432e5dd89c294, type: 2}
   - {fileID: 2100000, guid: 0977880ba7e5b4e4db9034d7b600fcd0, type: 2}

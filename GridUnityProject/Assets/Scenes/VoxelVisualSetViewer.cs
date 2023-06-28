@@ -36,6 +36,7 @@ public class VoxelVisualSetViewer : MonoBehaviour
         objectsUnderContents = new List<GameObject>();
         SetDesignationDisplay();
         UpdateVisuals();
+        gameObject.name = model.Designation.ToDesignation().Key;
     }
 
     private void UpdateVisuals()

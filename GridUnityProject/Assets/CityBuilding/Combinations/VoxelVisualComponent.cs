@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 [CreateAssetMenu(menuName = "VoxelVisualComponent")]
 public class VoxelVisualComponent : ScriptableObject
