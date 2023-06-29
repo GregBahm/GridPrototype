@@ -38,30 +38,6 @@ MonoBehaviour:
       X1Y1Z1: 0
     components: []
   - up: 0
-    down: 1
-    designation:
-      X0Y0Z0: 0
-      X0Y0Z1: 0
-      X0Y1Z0: 0
-      X0Y1Z1: 0
-      X1Y0Z0: 0
-      X1Y0Z1: 0
-      X1Y1Z0: 0
-      X1Y1Z1: 0
-    components: []
-  - up: 1
-    down: 1
-    designation:
-      X0Y0Z0: 0
-      X0Y0Z1: 0
-      X0Y1Z0: 0
-      X0Y1Z1: 0
-      X1Y0Z0: 0
-      X1Y0Z1: 0
-      X1Y1Z0: 0
-      X1Y1Z1: 0
-    components: []
-  - up: 0
     down: 0
     designation:
       X0Y0Z0: 0
@@ -77,24 +53,6 @@ MonoBehaviour:
       flipped: 0
       rotations: 2
   - up: 0
-    down: 1
-    designation:
-      X0Y0Z0: 0
-      X0Y0Z1: 0
-      X0Y1Z0: 0
-      X0Y1Z1: 0
-      X1Y0Z0: 0
-      X1Y0Z1: 0
-      X1Y1Z0: 0
-      X1Y1Z1: 2
-    components:
-    - component: {fileID: 11400000, guid: a7d0ea7d465b2e4449c4bc821db7505b, type: 2}
-      flipped: 0
-      rotations: 2
-    - component: {fileID: 11400000, guid: cc7c387e0e055964a8ce00a331ea46cb, type: 2}
-      flipped: 0
-      rotations: 0
-  - up: 0
     down: 0
     designation:
       X0Y0Z0: 0
@@ -109,24 +67,6 @@ MonoBehaviour:
     - component: {fileID: 11400000, guid: e60957d048a81a446b6d9d0d51912ed7, type: 2}
       flipped: 0
       rotations: 1
-  - up: 0
-    down: 1
-    designation:
-      X0Y0Z0: 0
-      X0Y0Z1: 0
-      X0Y1Z0: 0
-      X0Y1Z1: 0
-      X1Y0Z0: 0
-      X1Y0Z1: 0
-      X1Y1Z0: 2
-      X1Y1Z1: 2
-    components:
-    - component: {fileID: 11400000, guid: e60957d048a81a446b6d9d0d51912ed7, type: 2}
-      flipped: 0
-      rotations: 1
-    - component: {fileID: 11400000, guid: cc7c387e0e055964a8ce00a331ea46cb, type: 2}
-      flipped: 0
-      rotations: 0
   - up: 0
     down: 0
     designation:
@@ -413,24 +353,6 @@ MonoBehaviour:
       flipped: 0
       rotations: 0
   - up: 0
-    down: 1
-    designation:
-      X0Y0Z0: 0
-      X0Y0Z1: 0
-      X0Y1Z0: 0
-      X0Y1Z1: 2
-      X1Y0Z0: 0
-      X1Y0Z1: 0
-      X1Y1Z0: 2
-      X1Y1Z1: 0
-    components:
-    - component: {fileID: 11400000, guid: f761adb1b1938034a99ef285e222d17f, type: 2}
-      flipped: 0
-      rotations: 0
-    - component: {fileID: 11400000, guid: cc7c387e0e055964a8ce00a331ea46cb, type: 2}
-      flipped: 0
-      rotations: 0
-  - up: 0
     down: 0
     designation:
       X0Y0Z0: 0
@@ -445,24 +367,6 @@ MonoBehaviour:
     - component: {fileID: 11400000, guid: 385a652b2195ab74cb00810999747ce6, type: 2}
       flipped: 0
       rotations: 2
-  - up: 0
-    down: 1
-    designation:
-      X0Y0Z0: 0
-      X0Y0Z1: 0
-      X0Y1Z0: 0
-      X0Y1Z1: 2
-      X1Y0Z0: 0
-      X1Y0Z1: 0
-      X1Y1Z0: 2
-      X1Y1Z1: 2
-    components:
-    - component: {fileID: 11400000, guid: 385a652b2195ab74cb00810999747ce6, type: 2}
-      flipped: 0
-      rotations: 2
-    - component: {fileID: 11400000, guid: cc7c387e0e055964a8ce00a331ea46cb, type: 2}
-      flipped: 0
-      rotations: 0
   - up: 0
     down: 0
     designation:
@@ -746,24 +650,6 @@ MonoBehaviour:
       X1Y1Z1: 2
     components:
     - component: {fileID: 11400000, guid: 4ff459edaa1d1494ca369cba50efc6d7, type: 2}
-      flipped: 0
-      rotations: 0
-  - up: 0
-    down: 1
-    designation:
-      X0Y0Z0: 0
-      X0Y0Z1: 0
-      X0Y1Z0: 2
-      X0Y1Z1: 2
-      X1Y0Z0: 0
-      X1Y0Z1: 0
-      X1Y1Z0: 2
-      X1Y1Z1: 2
-    components:
-    - component: {fileID: 11400000, guid: 4ff459edaa1d1494ca369cba50efc6d7, type: 2}
-      flipped: 0
-      rotations: 0
-    - component: {fileID: 11400000, guid: cc7c387e0e055964a8ce00a331ea46cb, type: 2}
       flipped: 0
       rotations: 0
   - up: 0

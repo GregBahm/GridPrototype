@@ -28,27 +28,8 @@ public class MasterVisualSetup : ScriptableObject
     {
         yield return new VoxelVisualComponentSet(VoxelConnectionType.None, VoxelConnectionType.None, designation, new ComponentInSet[0]);
         bool strutUp = HasUpStrut(designation);
-        bool strutDown = HasDownStrut(designation);
         if(strutUp)
             yield return new VoxelVisualComponentSet(VoxelConnectionType.BigStrut, VoxelConnectionType.None, designation, new ComponentInSet[0]);
-        if(strutDown)
-            yield return new VoxelVisualComponentSet(VoxelConnectionType.None, VoxelConnectionType.BigStrut, designation, new ComponentInSet[0]);
-        if(strutUp && strutDown)
-            yield return new VoxelVisualComponentSet(VoxelConnectionType.BigStrut, VoxelConnectionType.BigStrut, designation, new ComponentInSet[0]);
-    }
-
-    private static bool HasDownStrut(VoxelVisualDesignation designation) // TODO: This logic is incorrect and needs to be fixed. 
-    {
-        for (int x = 0; x < 2; x++)
-        {
-            for (int z = 0; z < 2; z++)
-            {
-                Designation des = designation.Description[x, 0, z];
-                if (des != Designation.Empty)
-                    return false;
-            }
-        }
-        return true;
     }
 
     private static bool HasUpStrut(VoxelVisualDesignation designation)
