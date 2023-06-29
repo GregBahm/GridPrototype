@@ -22,8 +22,6 @@ class CombinationSolver
             Designation.Shell,
             Designation.SquaredWalkableRoof,
             Designation.SquaredSlantedRoof,
-            Designation.Platform,
-            Designation.Aquaduct
         };
         Dictionary<string, VoxelVisualDesignation> result = new Dictionary<string, VoxelVisualDesignation>(); ;
         for (int x0y0z0 = 0; x0y0z0 < components.Length; x0y0z0++)

@@ -7,6 +7,7 @@ using TMPro;
 using UnityEditor;
 using UnityEditor.ShaderGraph.Internal;
 using UnityEngine;
+using UnityEngine.UIElements;
 using VoxelVisuals;
 
 public class VoxelVisualSetupManager : MonoBehaviour
@@ -34,7 +35,7 @@ public class VoxelVisualSetupManager : MonoBehaviour
     private void Start()
     {
 
-        //visualSetup.SetInitialComponents(); // Run To set initial components
+        visualSetup.SetInitialComponents(); // Run To set initial components
         ProceduralBinding();
         InstantiateSets();
 
@@ -68,7 +69,7 @@ public class VoxelVisualSetupManager : MonoBehaviour
 
     private void InstantiateSets()
     {
-        int i = 0;
+        List<VoxelVisualSetViewer> viewers = new List<VoxelVisualSetViewer>();
         foreach (VoxelVisualComponentSet set in visualSetup.ComponentSets)
         {
             if(set.Components.Any())
@@ -76,18 +77,83 @@ public class VoxelVisualSetupManager : MonoBehaviour
                 GameObject setGameObject = Instantiate(voxelVisualSetViewerPrefab);
                 VoxelVisualSetViewer viewer = setGameObject.GetComponent<VoxelVisualSetViewer>();
                 viewer.Initialize(set);
-                setGameObject.transform.position = GetSetPosition(i);
-                i++;
+                viewers.Add(viewer);
             }
+        }
+        PlaceSets(viewers);
+    }
+
+    private void PlaceSets(List<VoxelVisualSetViewer> viewers)
+    {
+        List<VoxelVisualSetViewer> noRoofs = new List<VoxelVisualSetViewer>();
+        List<VoxelVisualSetViewer> flatRoofs = new List<VoxelVisualSetViewer>();
+        List<VoxelVisualSetViewer> slantedRoofs = new List<VoxelVisualSetViewer>();
+        List<VoxelVisualSetViewer> mixedRoofs = new List<VoxelVisualSetViewer>();
+
+        foreach (var item in viewers)
+        {
+            var designation = item.Model.Designation.ToDesignation();
+            bool hasFlatRoofs = GetDoesHaveRoofType(designation, Designation.SquaredWalkableRoof);
+            bool hasSlantedRoofs = GetDoesHaveRoofType(designation, Designation.SquaredSlantedRoof);
+            if(hasFlatRoofs)
+            {
+                if(hasSlantedRoofs)
+                {
+                    mixedRoofs.Add(item);
+                }
+                else
+                {
+                    flatRoofs.Add(item);
+                }
+            }
+            else if(hasSlantedRoofs)
+            {
+                slantedRoofs.Add(item);
+            }
+            else
+            {
+                noRoofs.Add(item);
+            }
+        }
+
+        PlaceRow(noRoofs, 0);
+        PlaceRow(flatRoofs, 1);
+        PlaceRow(slantedRoofs, 2);
+        PlaceRow(mixedRoofs, 3);
+    }
+
+    private void PlaceRow(List<VoxelVisualSetViewer> set, int xOffset)
+    {
+        VoxelVisualSetViewer[] orderedSet = set.OrderBy(item => GetRowVal(item)).ToArray();
+        for (int i = 0; i < orderedSet.Length; i++)
+        {
+            GameObject obj = orderedSet[i].gameObject;
+            obj.transform.position = new Vector3(i * 2, 0, xOffset * 2);
         }
     }
 
-    private Vector3 GetSetPosition(int i)
+    private int GetRowVal(VoxelVisualSetViewer item)
     {
-        int rowLength = (int)Mathf.Sqrt(visualSetup.ComponentSets.Length);
-        float x = i % rowLength * 2;
-        float z = Mathf.FloorToInt(i / rowLength) * 2;
-        return new Vector3(x, 0, z);
+        VoxelVisualDesignation des = item.Model.Designation.ToDesignation();
+        return des.FlatDescription.Count(item => item == Designation.Empty);
+    }
+
+    private bool GetDoesHaveRoofType(VoxelVisualDesignation designation, Designation roofType)
+    {
+        for (int x = 0; x < 2; x++)
+        {
+            for (int z = 0; z < 2; z++)
+            {
+                if(designation.Description[x, 1, z] == Designation.Empty)
+                {
+                    if (designation.Description[x, 0, z] == roofType)
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     private void ProceduralBinding()

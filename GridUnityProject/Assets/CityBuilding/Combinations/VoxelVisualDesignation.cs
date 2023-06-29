@@ -8,6 +8,21 @@ public class VoxelVisualDesignation
     private Designation[,,] description = new Designation[2, 2, 2];
     public Designation[,,] Description => description;
 
+    public IEnumerable<Designation> FlatDescription
+    {
+        get
+        {
+            yield return X0Y0Z0;
+            yield return X0Y0Z1;
+            yield return X0Y1Z0;
+            yield return X0Y1Z1;
+            yield return X1Y0Z0;
+            yield return X1Y0Z1;
+            yield return X1Y1Z0;
+            yield return X1Y1Z1;
+        }
+    }
+
     public string Key { get { return ToString(); } }
 
     public bool IsValidDescription { get; }
@@ -72,24 +87,6 @@ public class VoxelVisualDesignation
 
     private void CorrectValues()
     {
-        // If has a platform designation on the top half, or is under a non-empty slot, set that designation to empty instead.
-        for (int x = 0; x < 2; x++)
-        {
-            for (int z = 0; z < 2; z++)
-            {
-                if (description[x, 1, z] == Designation.Aquaduct
-                    || description[x, 1, z] == Designation.Platform)
-                {
-                    description[x, 1, z] = Designation.Empty;
-                }
-
-                if (description[x, 0, z] == Designation.Aquaduct
-                    || description[x, 0, z] == Designation.Platform)
-                {
-                    description[x, 1, z] = Designation.Empty;
-                }
-            }
-        }
 
         // If a column or top half of a designation is filled, set those to SquaredWalkableRoof (the default building). 
         for (int x = 0; x < 2; x++)

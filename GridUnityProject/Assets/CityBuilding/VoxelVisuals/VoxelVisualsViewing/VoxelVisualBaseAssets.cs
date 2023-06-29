@@ -9,11 +9,9 @@ public class VoxelVisualBaseAssets : MonoBehaviour
     public static VoxelVisualBaseAssets Instance;
 
     public Color SquaredWalkableRoof;
-    public Color SquaredSlantedRoof;
     public Color SlantedRoof;
     public Color Platform;
     public Color Shell;
-    public Color Aquaduct;
 
     public Material WallMat;
     public Material StrutMat;
@@ -48,8 +46,6 @@ public class VoxelVisualBaseAssets : MonoBehaviour
             {Designation.Shell, Shell },
             {Designation.SquaredWalkableRoof, SquaredWalkableRoof },
             {Designation.SquaredSlantedRoof, SlantedRoof },
-            {Designation.Platform, Platform },
-            {Designation.Aquaduct, Aquaduct }
         };
         materialsTable = new Dictionary<string, Material>
         {

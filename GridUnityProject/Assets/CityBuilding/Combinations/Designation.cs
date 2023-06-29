@@ -8,6 +8,4 @@ public enum Designation
     Shell = 1,
     SquaredWalkableRoof = 2,
     SquaredSlantedRoof = 3,
-    Platform = 4,
-    Aquaduct = 5
 }

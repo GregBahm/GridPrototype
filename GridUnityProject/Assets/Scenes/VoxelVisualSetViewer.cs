@@ -7,6 +7,7 @@ using UnityEngine;
 public class VoxelVisualSetViewer : MonoBehaviour
 {
     private VoxelVisualComponentSet model;
+    public VoxelVisualComponentSet Model { get { return model; } }
 
     [SerializeField]
     private VoxelDesignationDisplay X0Y0Z0Display;
@@ -36,7 +37,23 @@ public class VoxelVisualSetViewer : MonoBehaviour
         objectsUnderContents = new List<GameObject>();
         SetDesignationDisplay();
         UpdateVisuals();
-        gameObject.name = model.Designation.ToDesignation().Key;
+        gameObject.name = GetName();
+    }
+
+    private string GetName()
+    {
+        var description = model.Designation.ToDesignation().Description;
+        return model.Up.ToString() + " " +
+                    description[0, 0, 0].ToString().First() + " " +
+                    description[0, 0, 1].ToString().First() + " " +
+                    description[0, 1, 0].ToString().First() + " " +
+                    description[0, 1, 1].ToString().First() + " " +
+                    description[1, 0, 0].ToString().First() + " " +
+                    description[1, 0, 1].ToString().First() + " " +
+                    description[1, 1, 0].ToString().First() + " " +
+                    description[1, 1, 1].ToString().First() + " "
+                    + model.Down.ToString();
+        
     }
 
     private void UpdateVisuals()

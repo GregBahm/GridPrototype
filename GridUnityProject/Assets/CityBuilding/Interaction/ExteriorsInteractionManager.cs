@@ -39,7 +39,6 @@ namespace Interaction
 
         public void SetFillToWalkableRoof() { FillWith = Designation.SquaredWalkableRoof; }
         public void SetFillToSlantedRoof() { FillWith = Designation.SquaredSlantedRoof; }
-        public void SetFillToPlatform() { FillWith = Designation.Platform; }
 
 
         public void SetDesignation(DesignationCell cell, Designation type)
