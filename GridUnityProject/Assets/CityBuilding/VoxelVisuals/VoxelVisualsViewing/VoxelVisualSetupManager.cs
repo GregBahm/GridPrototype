@@ -9,6 +9,7 @@ using UnityEditor.ShaderGraph.Internal;
 using UnityEngine;
 using UnityEngine.UIElements;
 using VoxelVisuals;
+using static UnityEditor.Progress;
 
 public class VoxelVisualSetupManager : MonoBehaviour
 {
@@ -30,20 +31,19 @@ public class VoxelVisualSetupManager : MonoBehaviour
 
     [SerializeField]
     private GameObject voxelVisualSetViewerPrefab;
+
+    private List<VoxelVisualSetViewer> viewers;
     
 #if (UNITY_EDITOR) 
     private void Start()
     {
-
         visualSetup.SetInitialComponents(); // Run To set initial components
         ProceduralBinding();
-        InstantiateSets();
-
+        viewers = InstantiateSets();
         //DebuggyBuddy("None_W_S_E_E_W_E_E_E_None", 0);
         //DebuggyBuddy("None_W_A_E_A_S_E_E_E_None", 1);
         //DebuggyBuddy("None_S_E_E_E_W_E_E_E_None", -1);
     }
-
 
     private void DebuggyBuddy(string componentName, float zOffset)
     {
@@ -67,20 +67,18 @@ public class VoxelVisualSetupManager : MonoBehaviour
         }
     }
 
-    private void InstantiateSets()
+    private List<VoxelVisualSetViewer> InstantiateSets()
     {
         List<VoxelVisualSetViewer> viewers = new List<VoxelVisualSetViewer>();
         foreach (VoxelVisualComponentSet set in visualSetup.ComponentSets)
         {
-            if(set.Components.Any())
-            {
-                GameObject setGameObject = Instantiate(voxelVisualSetViewerPrefab);
-                VoxelVisualSetViewer viewer = setGameObject.GetComponent<VoxelVisualSetViewer>();
-                viewer.Initialize(set);
-                viewers.Add(viewer);
-            }
+            GameObject setGameObject = Instantiate(voxelVisualSetViewerPrefab);
+            VoxelVisualSetViewer viewer = setGameObject.GetComponent<VoxelVisualSetViewer>();
+            viewer.Initialize(set);
+            viewers.Add(viewer);
         }
         PlaceSets(viewers);
+        return viewers;
     }
 
     private void PlaceSets(List<VoxelVisualSetViewer> viewers)
@@ -163,39 +161,72 @@ public class VoxelVisualSetupManager : MonoBehaviour
         ComponentInSet upStructSetComponent = new ComponentInSet(upStructComponent, false, 0);
         ComponentInSet downStructSetComponent = new ComponentInSet(downStructComponent, false, 0);
 
-        // So the idea here is that I take my list of source components, and I determine the VisualSetup.Set that they belong to. Then I set them. That way, I can restore the build. Then more thoughtfully componetize, solve the ground set, and move forward.
         foreach (VoxelVisualComponent component in sourceComponents)
         {
-            bool pairFound = false;
-            VoxelVisualDesignation designation = new VoxelVisualDesignation(GetDesignationFromName(component));
-            GeneratedVoxelDesignation[] generatedDesignations = designation.GetUniqueVariants(true).ToArray();
-            foreach (GeneratedVoxelDesignation item in generatedDesignations)
+            ProceeduralBindingComponent bindingComponent = new ProceeduralBindingComponent(component);
+            bindingComponent.Bind(setsByDesignationKey, upStructSetComponent, downStructSetComponent);
+        }
+    }
+
+    private class ProceeduralBindingComponent
+    {
+        private VoxelVisualComponent component;
+        public VoxelVisualComponent Component { get { return component; } }
+        private VoxelVisualDesignation masterDesignation;
+        private GeneratedVoxelDesignation componentDesignation;
+        public GeneratedVoxelDesignation ComponentDesignation { get { return componentDesignation; } }
+
+        public ProceeduralBindingComponent(VoxelVisualComponent component)
+        {
+            this.component = component;
+            Designation[] description = GetDesignationFromName(component);
+            VoxelVisualDesignation baseDesignation = new VoxelVisualDesignation(description);
+            masterDesignation = baseDesignation.GetMasterVariant();
+            IEnumerable<GeneratedVoxelDesignation> variants = masterDesignation.GetUniqueVariants(true);
+            componentDesignation = variants.First(item => item.Key == baseDesignation.Key);
+        }
+
+        private Designation[] GetDesignationFromName(VoxelVisualComponent component)
+        {
+            string name = component.name;
+            string[] components = name.Replace("None_", "").Replace("_None", "").Replace("BigStrut_", "").Replace("_BigStrut", "").Split('_');
+            return components.Select(DesignationFromLetter).ToArray();
+        }
+
+        private Designation DesignationFromLetter(string letter)
+        {
+            switch (letter)
             {
-                if(setsByDesignationKey.ContainsKey(item.Key))
-                {
-                    //TODO: Loop through the sets, add their corrosponding component, and then add the struct piece
-                    if (pairFound)
-                        throw new Exception("One component satisfies two sets?");
-                    ComponentInSet inSet = new ComponentInSet(component, item.WasFlipped, item.Rotations);
-                    List<VoxelVisualComponentSet> sets = setsByDesignationKey[item.Key];
-                    foreach (VoxelVisualComponentSet set in sets)
-                    {
-                        List<ComponentInSet> components = new List<ComponentInSet> { inSet };
-                        if (set.Up == VoxelConnectionType.BigStrut)
-                        {
-                            components.Add(upStructSetComponent);
-                        }
-                        if(set.Down == VoxelConnectionType.BigStrut)
-                        {
-                            components.Add(downStructSetComponent);
-                        }
-                        set.Components = components.ToArray();
-                    }
-                    pairFound = true;
-                }
+                case "E":
+                    return Designation.Empty;
+                case "W":
+                case "A":
+                return Designation.SquaredWalkableRoof;
+                case "S":
+                    return Designation.SquaredSlantedRoof;
+                default:
+                    throw new Exception("typo in export?");
             }
-            if (!pairFound)
-                throw new Exception("Component " + component.name + " satisfies no sets");
+        }
+
+        public void Bind(Dictionary<string, List<VoxelVisualComponentSet>> setsByDesignationKey, ComponentInSet upStruct, ComponentInSet downStruct)
+        {
+            List<VoxelVisualComponentSet> sets = setsByDesignationKey[masterDesignation.Key];
+
+            foreach (VoxelVisualComponentSet set in sets)
+            {
+                ComponentInSet inSet = new ComponentInSet(component, componentDesignation.WasFlipped, componentDesignation.Rotations);
+                List<ComponentInSet> components = new List<ComponentInSet> { inSet };
+                if (set.Up == VoxelConnectionType.BigStrut)
+                {
+                    components.Add(upStruct);
+                }
+                if (set.Down == VoxelConnectionType.BigStrut)
+                {
+                    components.Add(downStruct);
+                }
+                set.Components = components.ToArray();
+            }
         }
     }
 
@@ -214,32 +245,8 @@ public class VoxelVisualSetupManager : MonoBehaviour
     }
 
     private string GetComponentKey(SerializableVisualDesignation designation)
-    {
+    { 
         return designation.ToDesignation().Key;
-    }
-
-    private Designation[] GetDesignationFromName(VoxelVisualComponent component)
-    {
-        string name = component.name;
-        string[] components = name.Replace("None_", "").Replace("_None", "").Split('_');
-        return components.Select(DesignationFromLetter).ToArray();
-    }
-
-    private Designation DesignationFromLetter(string letter)
-    {
-        switch (letter)
-        {
-            case "A":
-                return Designation.SquaredWalkableRoof;
-            case "E":
-                return Designation.Empty;
-            case "W":
-                return Designation.SquaredWalkableRoof;
-            case "S":
-                return Designation.SquaredSlantedRoof;
-            default:
-                throw new Exception("jigga what");
-        }
     }
 #endif
 }

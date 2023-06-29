@@ -44,14 +44,14 @@ public class VoxelVisualSetViewer : MonoBehaviour
     {
         var description = model.Designation.ToDesignation().Description;
         return model.Up.ToString() + " " +
-                    description[0, 0, 0].ToString().First() + " " +
-                    description[0, 0, 1].ToString().First() + " " +
-                    description[0, 1, 0].ToString().First() + " " +
-                    description[0, 1, 1].ToString().First() + " " +
-                    description[1, 0, 0].ToString().First() + " " +
-                    description[1, 0, 1].ToString().First() + " " +
-                    description[1, 1, 0].ToString().First() + " " +
-                    description[1, 1, 1].ToString().First() + " "
+                    DesignationToLetter(description[0, 0, 0]) + " " +
+                    DesignationToLetter(description[0, 0, 1]) + " " +
+                    DesignationToLetter(description[0, 1, 0]) + " " +
+                    DesignationToLetter(description[0, 1, 1]) + " " +
+                    DesignationToLetter(description[1, 0, 0]) + " " +
+                    DesignationToLetter(description[1, 0, 1]) + " " +
+                    DesignationToLetter(description[1, 1, 0]) + " " +
+                    DesignationToLetter(description[1, 1, 1]) + " "
                     + model.Down.ToString();
         
     }
@@ -76,7 +76,7 @@ public class VoxelVisualSetViewer : MonoBehaviour
         filter.sharedMesh = item.Component.Mesh;
         MeshRenderer renderer = componentObj.AddComponent<MeshRenderer>();
         renderer.materials = GetComponentMaterials(item.Component.Materials).ToArray();
-        objRoot.transform.Rotate(0, 90 * item.Rotations, 0);
+        objRoot.transform.Rotate(0, -90 * item.Rotations * (item.Flipped ? -1 : 1), 0);
         componentObj.transform.localScale = new Vector3(item.Flipped ? -1 : 1, 1, 1);
         return objRoot;
     }
@@ -109,5 +109,22 @@ public class VoxelVisualSetViewer : MonoBehaviour
         X1Y0Z1Display.UpdateDisplayContent(designation.X1Y0Z1);
         X1Y1Z0Display.UpdateDisplayContent(designation.X1Y1Z0);
         X1Y1Z1Display.UpdateDisplayContent(designation.X1Y1Z1);
+    }
+
+
+    private string DesignationToLetter(Designation designation)
+    {
+        switch(designation)
+        {
+            case Designation.Shell:
+                return "G";
+            case Designation.SquaredWalkableRoof:
+                return "W";
+            case Designation.SquaredSlantedRoof:
+                return "S";
+            case Designation.Empty:
+            default:
+                return "E";
+        }
     }
 }

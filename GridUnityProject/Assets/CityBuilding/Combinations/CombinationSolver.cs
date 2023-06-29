@@ -19,7 +19,7 @@ class CombinationSolver
     {
         Designation[] components = new[] {
             Designation.Empty,
-            Designation.Shell,
+            //Designation.Shell,
             Designation.SquaredWalkableRoof,
             Designation.SquaredSlantedRoof,
         };
@@ -63,7 +63,6 @@ class CombinationSolver
                         }
                     }
                 }
-                Console.WriteLine(x0y0z0);
             }
         }
         return result.Values;

@@ -37,7 +37,7 @@ public class MasterVisualSetup : ScriptableObject
             yield return new VoxelVisualComponentSet(VoxelConnectionType.BigStrut, VoxelConnectionType.BigStrut, designation, new ComponentInSet[0]);
     }
 
-    private static bool HasDownStrut(VoxelVisualDesignation designation)
+    private static bool HasDownStrut(VoxelVisualDesignation designation) // TODO: This logic is incorrect and needs to be fixed. 
     {
         for (int x = 0; x < 2; x++)
         {
