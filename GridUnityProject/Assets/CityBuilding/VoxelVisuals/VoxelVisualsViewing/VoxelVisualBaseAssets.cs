@@ -42,7 +42,7 @@ public class VoxelVisualBaseAssets : MonoBehaviour
     {
         colorTable = new Dictionary<Designation, Color>()
         {
-            {Designation.Empty, Color.white },
+            {Designation.Empty, Color.clear },
             {Designation.Shell, Shell },
             {Designation.SquaredWalkableRoof, SquaredWalkableRoof },
             {Designation.SquaredSlantedRoof, SlantedRoof },

@@ -4906,6 +4906,26 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2922883107044954646, guid: 94cf82d82d01688408c88a18ec00761f,
+        type: 3}
+      propertyPath: Shell.a
+      value: 0.6
+      objectReference: {fileID: 0}
+    - target: {fileID: 2922883107044954646, guid: 94cf82d82d01688408c88a18ec00761f,
+        type: 3}
+      propertyPath: Platform.a
+      value: 0.6
+      objectReference: {fileID: 0}
+    - target: {fileID: 2922883107044954646, guid: 94cf82d82d01688408c88a18ec00761f,
+        type: 3}
+      propertyPath: PlatformMat
+      value: 
+      objectReference: {fileID: 2100000, guid: 0e039fc0b2bfde44587d859ec9f03ee5, type: 2}
+    - target: {fileID: 2922883107044954646, guid: 94cf82d82d01688408c88a18ec00761f,
+        type: 3}
+      propertyPath: SlantedRoof.a
+      value: 0.6
+      objectReference: {fileID: 0}
     - target: {fileID: 3837993045852676454, guid: 94cf82d82d01688408c88a18ec00761f,
         type: 3}
       propertyPath: m_Name
