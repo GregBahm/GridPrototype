@@ -38,7 +38,7 @@ public class VoxelVisualSetupManager : MonoBehaviour
     private void Start()
     {
         //visualSetup.SetInitialComponents(); // Run To setup initial components. Will overwrite existing visual setup.
-        //ProceduralBinding();
+        ProceduralBinding();
         viewers = InstantiateSets();
     }
 

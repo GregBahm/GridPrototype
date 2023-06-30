@@ -101,14 +101,38 @@ public class VoxelVisualSetViewer : MonoBehaviour
     private void SetDesignationDisplay()
     {
         VoxelVisualDesignation designation = model.Designation.ToDesignation();
-        X0Y0Z0Display.UpdateDisplayContent(designation.X0Y0Z0, designation.X1Y0Z0, designation.X0Y1Z0, designation.X0Y0Z1);
-        X0Y0Z1Display.UpdateDisplayContent(designation.X0Y0Z1, designation.X1Y0Z1, designation.X0Y1Z1, designation.X0Y0Z0);
-        X0Y1Z0Display.UpdateDisplayContent(designation.X0Y1Z0, designation.X1Y1Z0, designation.X0Y0Z0, designation.X0Y1Z1);
-        X0Y1Z1Display.UpdateDisplayContent(designation.X0Y1Z1, designation.X1Y1Z1, designation.X0Y0Z1, designation.X0Y1Z0);
-        X1Y0Z0Display.UpdateDisplayContent(designation.X1Y0Z0, designation.X0Y0Z0, designation.X1Y1Z0, designation.X1Y0Z1);
-        X1Y0Z1Display.UpdateDisplayContent(designation.X1Y0Z1, designation.X0Y0Z1, designation.X1Y1Z1, designation.X1Y0Z0);
-        X1Y1Z0Display.UpdateDisplayContent(designation.X1Y1Z0, designation.X0Y1Z0, designation.X1Y0Z0, designation.X1Y1Z1);
-        X1Y1Z1Display.UpdateDisplayContent(designation.X1Y1Z1, designation.X0Y1Z1, designation.X1Y0Z1, designation.X1Y1Z0);
+        X0Y0Z0Display.UpdateDisplayContent(designation.X0Y0Z0,
+            designation.X1Y0Z0, designation.X0Y1Z0, designation.X0Y0Z1,
+            designation.X1Y1Z0, designation.X1Y0Z1, designation.X0Y1Z1
+            );
+        X0Y0Z1Display.UpdateDisplayContent(designation.X0Y0Z1,
+            designation.X1Y0Z1, designation.X0Y1Z1, designation.X0Y0Z0,
+            designation.X1Y1Z1, designation.X1Y0Z0, designation.X0Y1Z0
+            );
+        X0Y1Z0Display.UpdateDisplayContent(designation.X0Y1Z0,
+            designation.X1Y1Z0, designation.X0Y0Z0, designation.X0Y1Z1,
+            designation.X1Y0Z0, designation.X1Y1Z1, designation.X0Y0Z1
+            );
+        X0Y1Z1Display.UpdateDisplayContent(designation.X0Y1Z1,
+            designation.X1Y1Z1, designation.X0Y0Z1, designation.X0Y1Z0,
+            designation.X1Y0Z1, designation.X1Y1Z0, designation.X0Y0Z0
+            );
+        X1Y0Z0Display.UpdateDisplayContent(designation.X1Y0Z0,
+            designation.X0Y0Z0, designation.X1Y1Z0, designation.X1Y0Z1,
+            designation.X0Y1Z0, designation.X0Y0Z1, designation.X1Y1Z1
+            );
+        X1Y0Z1Display.UpdateDisplayContent(designation.X1Y0Z1,
+            designation.X0Y0Z1, designation.X1Y1Z1, designation.X1Y0Z0,
+            designation.X0Y1Z1, designation.X0Y0Z0, designation.X1Y1Z0
+            );
+        X1Y1Z0Display.UpdateDisplayContent(designation.X1Y1Z0,
+            designation.X0Y1Z0, designation.X1Y0Z0, designation.X1Y1Z1,
+            designation.X0Y0Z0, designation.X0Y1Z1, designation.X1Y0Z1
+            );
+        X1Y1Z1Display.UpdateDisplayContent(designation.X1Y1Z1,
+            designation.X0Y1Z1, designation.X1Y0Z1, designation.X1Y1Z0,
+            designation.X0Y0Z1, designation.X0Y1Z0, designation.X1Y0Z0
+            );
     }
 
 
