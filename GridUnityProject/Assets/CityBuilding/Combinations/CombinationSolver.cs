@@ -19,7 +19,7 @@ class CombinationSolver
     {
         Designation[] components = new[] {
             Designation.Empty,
-            //Designation.Shell,
+            Designation.Shell,
             Designation.SquaredWalkableRoof,
             Designation.SquaredSlantedRoof,
         };
@@ -51,7 +51,7 @@ class CombinationSolver
                                         description[7] = components[x1y1z1];
 
                                         VoxelVisualDesignation designation = new VoxelVisualDesignation(description);
-                                        if (designation.IsValidDescription)
+                                        if (designation.GetIsValid())
                                         {
                                             VoxelVisualDesignation master = designation.GetMasterVariant();
                                             if (!result.ContainsKey(master.Key))

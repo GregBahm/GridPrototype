@@ -37,34 +37,9 @@ public class VoxelVisualSetupManager : MonoBehaviour
 #if (UNITY_EDITOR) 
     private void Start()
     {
-        visualSetup.SetInitialComponents(); // Run To set initial components
-        ProceduralBinding();
+        //visualSetup.SetInitialComponents(); // Run To setup initial components. Will overwrite existing visual setup.
+        //ProceduralBinding();
         viewers = InstantiateSets();
-        //DebuggyBuddy("None_W_S_E_E_W_E_E_E_None", 0);
-        //DebuggyBuddy("None_W_A_E_A_S_E_E_E_None", 1);
-        //DebuggyBuddy("None_S_E_E_E_W_E_E_E_None", -1);
-    }
-
-    private void DebuggyBuddy(string componentName, float zOffset)
-    {
-        GameObject group = new GameObject(componentName);
-
-        VoxelVisualComponentSet set = visualSetup.ComponentSets.First(item => item.Components.Any(item => item.Component.name == componentName));
-        VoxelVisualDesignation designation = set.Designation.ToDesignation();
-        IEnumerable<GeneratedVoxelDesignation> variants = designation.GetUniqueVariants(true);
-        int i = 0;
-        foreach (var variant in variants)
-        {
-            ComponentInSet[] variantComponents = set.GetVariantComponents(variant.Rotations, variant.WasFlipped).ToArray();
-            VoxelVisualComponentSet variantSet = new VoxelVisualComponentSet(VoxelConnectionType.None, VoxelConnectionType.None, variant, variantComponents);
-            GameObject setGameObject = Instantiate(voxelVisualSetViewerPrefab);
-            setGameObject.transform.SetParent(group.transform, false);
-            VoxelVisualSetViewer viewer = setGameObject.GetComponent<VoxelVisualSetViewer>();
-            viewer.Initialize(variantSet);
-            setGameObject.transform.position = new Vector3(i * 2, 0, zOffset * 2);
-            setGameObject.name = "Designation Rotations " + variant.Rotations + (variant.WasFlipped ? ", Flipped" : "") + " Component Rotations : " + set.Components[0].Rotations + (set.Components[0].Flipped ? ", Flipped" : "");
-            i++;
-        }
     }
 
     private List<VoxelVisualSetViewer> InstantiateSets()
@@ -82,6 +57,21 @@ public class VoxelVisualSetupManager : MonoBehaviour
     }
 
     private void PlaceSets(List<VoxelVisualSetViewer> viewers)
+    {
+        List<VoxelVisualSetViewer> shell = new List<VoxelVisualSetViewer>();
+        List<VoxelVisualSetViewer> noShell = new List<VoxelVisualSetViewer>();
+        foreach (var item in viewers)
+        {
+            if(item.Model.Designation.ToDesignation().FlatDescription.Any(item => item == Designation.Shell))
+                shell.Add(item);
+            else
+                noShell.Add(item);
+        }
+        PlaceSets(shell, 0);
+        PlaceSets(noShell, 5);
+    }
+
+    private void PlaceSets(List<VoxelVisualSetViewer> viewers, int offset)
     {
         List<VoxelVisualSetViewer> noRoofs = new List<VoxelVisualSetViewer>();
         List<VoxelVisualSetViewer> flatRoofs = new List<VoxelVisualSetViewer>();
@@ -114,10 +104,10 @@ public class VoxelVisualSetupManager : MonoBehaviour
             }
         }
 
-        PlaceRow(noRoofs, 0);
-        PlaceRow(flatRoofs, 1);
-        PlaceRow(slantedRoofs, 2);
-        PlaceRow(mixedRoofs, 3);
+        PlaceRow(noRoofs, 0 + offset);
+        PlaceRow(flatRoofs, 1 + offset);
+        PlaceRow(slantedRoofs, 2 + offset);
+        PlaceRow(mixedRoofs, 3 + offset);
     }
 
     private void PlaceRow(List<VoxelVisualSetViewer> set, int xOffset)

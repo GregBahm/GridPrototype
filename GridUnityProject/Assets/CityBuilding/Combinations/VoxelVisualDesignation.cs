@@ -2,6 +2,7 @@
 using System;
 using System.Linq;
 using UnityEngine;
+using JetBrains.Annotations;
 
 public class VoxelVisualDesignation
 {
@@ -24,8 +25,6 @@ public class VoxelVisualDesignation
     }
 
     public string Key { get { return ToString(); } }
-
-    public bool IsValidDescription { get; }
 
     private static HashSet<Designation> isBuildingTable = new HashSet<Designation>() { Designation.SquaredWalkableRoof, Designation.SquaredSlantedRoof };
 
@@ -50,7 +49,6 @@ public class VoxelVisualDesignation
         Description[1, 1, 1] = values[7];
 
         CorrectValues();
-        IsValidDescription = GetIsValid();
     }
 
     private IEnumerable<Designation> GetTopDesignations()
@@ -70,16 +68,6 @@ public class VoxelVisualDesignation
 
     protected VoxelVisualDesignation() { }
 
-    private bool GetIsValid()
-    {
-        // A shell on the top side only exists if all bottom pieces are also shell
-        if(GetTopDesignations().Any(item => item == Designation.Shell))
-        {
-            return GetBottomDesignations().All(item => item == Designation.Shell);
-        }    
-        return true;
-    }
-
     private bool IsBuilding(Designation designation)
     {
         return isBuildingTable.Contains(designation);
@@ -87,8 +75,43 @@ public class VoxelVisualDesignation
 
     private void CorrectValues()
     {
+        CorrectEnclosedDesignations();
+        CorrectRoofDesignations();
+    }
 
-        // If a column or top half of a designation is filled, set those to SquaredWalkableRoof (the default building). 
+    // if a designation is enclosed on all sides (nothing open) set it to SquaredWalkableRoof (the default building). 
+    private void CorrectEnclosedDesignations()
+    {
+        for (int x = 0; x < 2; x++)
+        {
+            for (int y = 0; y < 2; y++)
+            {
+                for (int z = 0; z < 2; z++)
+                {
+                    IEnumerable<Designation> adjacentDesignations = GetAdjacentDesignations(x, y, z);
+                    if (description[x, y, z] != Designation.Empty
+                        && adjacentDesignations.All(item => item != Designation.Empty))
+                    {
+                        description[x, y, z] = Designation.SquaredWalkableRoof;
+                    }
+                }
+            }
+        }
+    }
+
+    private IEnumerable<Designation> GetAdjacentDesignations(int x, int y, int z)
+    {
+        int adjacentX = x == 0 ? 1 : 0;
+        int adjacentY = y == 0 ? 1 : 0;
+        int adjacentZ = z == 0 ? 1 : 0;
+        yield return Description[adjacentX, y, z];
+        yield return Description[x, adjacentY, z];
+        yield return Description[x, y, adjacentZ];
+    }
+
+    // If a column or top half of a designation is filled, set those to SquaredWalkableRoof (the default building). 
+    private void CorrectRoofDesignations()
+    {
         for (int x = 0; x < 2; x++)
         {
             for (int z = 0; z < 2; z++)
@@ -105,7 +128,6 @@ public class VoxelVisualDesignation
                 }
             }
         }
-
         for (int x = 0; x < 2; x++)
         {
             for (int z = 0; z < 2; z++)
@@ -122,6 +144,11 @@ public class VoxelVisualDesignation
                 }
             }
         }
+    }
+
+    public bool GetIsValid()
+    {
+        return VoxelVisualDesignationValidator.IsValid(this);
     }
 
     public static string GetDesignationKey(Designation[,,] description)
@@ -224,5 +251,64 @@ public class VoxelVisualDesignation
                 yield return rawVariant;
             }
         }
+    }
+}
+
+// Determines if a voxel visual designation is valid
+public static class VoxelVisualDesignationValidator
+{
+    public static bool IsValid(VoxelVisualDesignation designtion)
+    {
+        bool shellAboveNonShell = IsAnyShellAboveNonshell(designtion.Description);
+        bool bottomShellsDiagonal = AreShellDesignationsDiagonal(designtion.Description, 0);
+        bool topShellsDiagonal = AreShellDesignationsDiagonal(designtion.Description, 1);
+        return !shellAboveNonShell && !bottomShellsDiagonal && !topShellsDiagonal;
+    }
+
+    // A shell on the top side is only valid if above a shell
+    private static bool IsAnyShellAboveNonshell(Designation[,,] description)
+    {
+        for (int x = 0; x < 2; x++)
+        {
+            for (int z = 0; z < 2; z++)
+            {
+                if (description[x, 1, z] == Designation.Shell
+                    && description[x, 0, z] != Designation.Shell)
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    // A shell designation can't be diagonal to another shell designation unless the whole set is shell
+    private static bool AreShellDesignationsDiagonal(Designation[,,] description, int height)
+    {
+        int shellCount = 0;
+        for (int x = 0; x < 2; x++)
+        {
+            for (int z = 0; z < 2; z++)
+            {
+                if (description[x, height, z] == Designation.Shell)
+                {
+                    shellCount++;
+                }
+            }
+        }
+        if(shellCount == 2 || shellCount == 3)
+        {
+            if (description[0, height, 0] == Designation.Shell
+                && description[1, height, 1] == Designation.Shell)
+            {
+                return true;
+            }
+            if (description[1, height, 0] == Designation.Shell
+                    && description[0, height, 1] == Designation.Shell)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 }
