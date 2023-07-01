@@ -37,7 +37,7 @@ public class VoxelVisualSetupManager : MonoBehaviour
 #if (UNITY_EDITOR) 
     private void Start()
     {
-        //visualSetup.SetInitialComponents(); // Run To setup initial components. Will overwrite existing visual setup.
+        visualSetup.SetInitialComponents(); // Run To setup initial components. Will overwrite existing visual setup.
         ProceduralBinding();
         viewers = InstantiateSets();
     }
@@ -45,7 +45,9 @@ public class VoxelVisualSetupManager : MonoBehaviour
     private List<VoxelVisualSetViewer> InstantiateSets()
     {
         List<VoxelVisualSetViewer> viewers = new List<VoxelVisualSetViewer>();
-        foreach (VoxelVisualComponentSet set in visualSetup.ComponentSets)
+        IEnumerable<VoxelVisualComponentSet> singleSubsectionSet = SingleSubsectionSelector.Get(visualSetup.ComponentSets); // Comment out when done with this set
+        foreach (VoxelVisualComponentSet set in singleSubsectionSet)
+        //foreach (VoxelVisualComponentSet set in visualSetup.ComponentSets)
         {
             GameObject setGameObject = Instantiate(voxelVisualSetViewerPrefab);
             VoxelVisualSetViewer viewer = setGameObject.GetComponent<VoxelVisualSetViewer>();
@@ -73,17 +75,23 @@ public class VoxelVisualSetupManager : MonoBehaviour
 
     private void PlaceSets(List<VoxelVisualSetViewer> viewers, int offset)
     {
+        List<VoxelVisualSetViewer> onlyGrounds = new List<VoxelVisualSetViewer>();
         List<VoxelVisualSetViewer> noRoofs = new List<VoxelVisualSetViewer>();
         List<VoxelVisualSetViewer> flatRoofs = new List<VoxelVisualSetViewer>();
         List<VoxelVisualSetViewer> slantedRoofs = new List<VoxelVisualSetViewer>();
         List<VoxelVisualSetViewer> mixedRoofs = new List<VoxelVisualSetViewer>();
 
-        foreach (var item in viewers)
+        foreach (VoxelVisualSetViewer item in viewers)
         {
             var designation = item.Model.Designation.ToDesignation();
+            bool onlyGround = designation.FlatDescription.All(item => item == Designation.Empty || item == Designation.Shell);
             bool hasFlatRoofs = GetDoesHaveRoofType(designation, Designation.SquaredWalkableRoof);
             bool hasSlantedRoofs = GetDoesHaveRoofType(designation, Designation.SquaredSlantedRoof);
-            if(hasFlatRoofs)
+            if(onlyGround)
+            {
+                onlyGrounds.Add(item);
+            }
+            else if(hasFlatRoofs)
             {
                 if(hasSlantedRoofs)
                 {
@@ -104,10 +112,11 @@ public class VoxelVisualSetupManager : MonoBehaviour
             }
         }
 
-        PlaceRow(noRoofs, 0 + offset);
-        PlaceRow(flatRoofs, 1 + offset);
-        PlaceRow(slantedRoofs, 2 + offset);
-        PlaceRow(mixedRoofs, 3 + offset);
+        PlaceRow(onlyGrounds, 0 + offset);
+        PlaceRow(noRoofs, 1 + offset);
+        PlaceRow(flatRoofs, 2 + offset);
+        PlaceRow(slantedRoofs, 3 + offset);
+        PlaceRow(mixedRoofs, 4 + offset);
     }
 
     private void PlaceRow(List<VoxelVisualSetViewer> set, int xOffset)
@@ -123,7 +132,7 @@ public class VoxelVisualSetupManager : MonoBehaviour
     private int GetRowVal(VoxelVisualSetViewer item)
     {
         VoxelVisualDesignation des = item.Model.Designation.ToDesignation();
-        return des.FlatDescription.Count(item => item == Designation.Empty);
+        return -des.FlatDescription.Count(item => item == Designation.Empty);
     }
 
     private bool GetDoesHaveRoofType(VoxelVisualDesignation designation, Designation roofType)
@@ -239,4 +248,119 @@ public class VoxelVisualSetupManager : MonoBehaviour
         return designation.ToDesignation().Key;
     }
 #endif
+}
+
+// A componetization strategy. Count the number of contigious empty cells in a designation. Solve all the designations that only have 1.
+// Then later, you can solve all the designations that have more, from the 1s
+// Intended to be a 1-off function that can be archived away later
+public static class SingleSubsectionSelector
+{
+
+    public static IEnumerable<VoxelVisualComponentSet> Get(VoxelVisualComponentSet[] componentSets)
+    {
+        foreach (VoxelVisualComponentSet baseSet in componentSets)
+        {
+            VoxelVisualDesignation voxelDesignation = baseSet.Designation.ToDesignation();
+            SubSelectorGroup asSubGroup = new SubSelectorGroup(voxelDesignation);
+            if(asSubGroup.SubGroupCount == 1)
+            {
+                yield return baseSet;
+            }
+        }
+    }
+
+    private class SubSelectorGroup
+    {
+        public int SubGroupCount { get; }
+
+        private SubSelector[,,] subSelectors;
+
+        public SubSelectorGroup(VoxelVisualDesignation source)
+        {
+            subSelectors = GetSubSelectors(source);
+            SubGroupCount = GetSubGroupCount();
+        }
+
+        private int GetSubGroupCount()
+        {
+            int ret = 0;
+            IEnumerable<SubSelector> empties = GetSubSelectorsAsFlatList().Where(item => item.Designation == Designation.Empty);
+            HashSet<SubSelector> emptiesHash = new HashSet<SubSelector>(empties);
+            while(emptiesHash.Any())
+            {
+                ret++;
+                SubSelector current = emptiesHash.First();
+                MrRecursy(emptiesHash, current);
+            }
+            return ret;
+        }
+
+        private void MrRecursy(HashSet<SubSelector> emptiesHash, SubSelector current)
+        {
+            emptiesHash.Remove(current);
+
+            IEnumerable<SubSelector> adjacent = current.GetAdjacentDesignations(subSelectors);
+            foreach (var item in adjacent)
+            {
+                if (emptiesHash.Contains(item))
+                {
+                    MrRecursy(emptiesHash, item);
+                }
+            }
+        }
+
+        private IEnumerable<SubSelector> GetSubSelectorsAsFlatList()
+        {
+            for (int x = 0; x < 2; x++)
+            {
+                for (int y = 0; y < 2; y++)
+                {
+                    for (int z = 0; z < 2; z++)
+                    {
+                        yield return subSelectors[x, y, z];
+                    }
+                }
+            }
+        }
+
+        private SubSelector[,,] GetSubSelectors(VoxelVisualDesignation source)
+        {
+            SubSelector[,,] ret = new SubSelector[2, 2, 2];
+            for (int x = 0; x < 2; x++)
+            {
+                for (int y = 0; y < 2; y++)
+                {
+                    for (int z = 0; z < 2; z++)
+                    {
+                        ret[x, y, z] = new SubSelector(x, y, z, source.Description[x, y, z]);
+                    }
+                }
+            }
+            return ret;
+        }
+    }
+
+    private class SubSelector
+    {
+        public int X { get; }
+        public int Y { get; }
+        public int Z { get; }
+        public Designation Designation { get; }
+
+        public SubSelector(int x, int y, int z, Designation designation)
+        {
+            X = x;
+            Y = y; 
+            Z = z;
+            Designation = designation;
+        }
+
+        public SubSelector[] GetAdjacentDesignations(SubSelector[,,] subSelectors)
+        {
+            int adjacentX = X == 0 ? 1 : 0;
+            int adjacentY = Y == 0 ? 1 : 0;
+            int adjacentZ = Z == 0 ? 1 : 0;
+            return new[] { subSelectors[adjacentX, Y, Z], subSelectors[X, adjacentY, Z], subSelectors[X, Y, adjacentZ] }; 
+        }
+    }
 }
