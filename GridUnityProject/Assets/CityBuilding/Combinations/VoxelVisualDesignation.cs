@@ -89,7 +89,8 @@ public class VoxelVisualDesignation
                 for (int z = 0; z < 2; z++)
                 {
                     IEnumerable<Designation> adjacentDesignations = GetAdjacentDesignations(x, y, z);
-                    if (description[x, y, z] != Designation.Empty
+                    if (description[x, y, z] != Designation.Empty 
+                        && description[x, y, z] != Designation.Shell
                         && adjacentDesignations.All(item => item != Designation.Empty))
                     {
                         description[x, y, z] = Designation.SquaredWalkableRoof;
@@ -109,7 +110,7 @@ public class VoxelVisualDesignation
         yield return Description[x, y, adjacentZ];
     }
 
-    // If a column or top half of a designation is filled, set those to SquaredWalkableRoof (the default building). 
+    // If a column or top half of a designation is slanted roof, set those to SquaredWalkableRoof (the default building). 
     private void CorrectRoofDesignations()
     {
         for (int x = 0; x < 2; x++)
@@ -296,7 +297,7 @@ public static class VoxelVisualDesignationValidator
                 }
             }
         }
-        if(shellCount == 2 || shellCount == 3)
+        if(shellCount == 2)
         {
             if (description[0, height, 0] == Designation.Shell
                 && description[1, height, 1] == Designation.Shell)

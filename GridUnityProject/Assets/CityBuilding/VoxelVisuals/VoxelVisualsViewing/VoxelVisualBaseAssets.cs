@@ -14,6 +14,7 @@ public class VoxelVisualBaseAssets : MonoBehaviour
     public Color Shell;
 
     public Material WallMat;
+    public Material ShellMat;
     public Material StrutMat;
     public Material SlantedRoofMat;
     public Material PlatformMat;
@@ -53,6 +54,7 @@ public class VoxelVisualBaseAssets : MonoBehaviour
             {"StrutMat", StrutMat },
             {"SlantedRoofMat", SlantedRoofMat },
             {"PlatformMat", PlatformMat },
+            {"ShellMat", ShellMat },
         };
     }
 

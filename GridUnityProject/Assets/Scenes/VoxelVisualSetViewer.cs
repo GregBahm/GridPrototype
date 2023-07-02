@@ -43,15 +43,15 @@ public class VoxelVisualSetViewer : MonoBehaviour
     private string GetName()
     {
         var description = model.Designation.ToDesignation().Description;
-        return model.Up.ToString() + " " +
-                    DesignationToLetter(description[0, 0, 0]) + " " +
-                    DesignationToLetter(description[0, 0, 1]) + " " +
-                    DesignationToLetter(description[0, 1, 0]) + " " +
-                    DesignationToLetter(description[0, 1, 1]) + " " +
-                    DesignationToLetter(description[1, 0, 0]) + " " +
-                    DesignationToLetter(description[1, 0, 1]) + " " +
-                    DesignationToLetter(description[1, 1, 0]) + " " +
-                    DesignationToLetter(description[1, 1, 1]) + " "
+        return model.Up.ToString() + "_" +
+                    DesignationToLetter(description[0, 0, 0]) + "_" +
+                    DesignationToLetter(description[0, 0, 1]) + "_" +
+                    DesignationToLetter(description[0, 1, 0]) + "_" +
+                    DesignationToLetter(description[0, 1, 1]) + "_" +
+                    DesignationToLetter(description[1, 0, 0]) + "_" +
+                    DesignationToLetter(description[1, 0, 1]) + "_" +
+                    DesignationToLetter(description[1, 1, 0]) + "_" +
+                    DesignationToLetter(description[1, 1, 1]) + "_"
                     + model.Down.ToString();
         
     }
