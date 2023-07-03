@@ -76,7 +76,7 @@ public class VoxelVisualSetViewer : MonoBehaviour
         filter.sharedMesh = item.Component.Mesh;
         MeshRenderer renderer = componentObj.AddComponent<MeshRenderer>();
         renderer.materials = GetComponentMaterials(item.Component.Materials).ToArray();
-        objRoot.transform.Rotate(0, -90 * item.Rotations * (item.Flipped ? -1 : 1), 0);
+        objRoot.transform.Rotate(0, 90 * item.Rotations, 0);
         componentObj.transform.localScale = new Vector3(item.Flipped ? -1 : 1, 1, 1);
         return objRoot;
     }

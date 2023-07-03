@@ -158,34 +158,64 @@ public class VoxelVisualSetupManager : MonoBehaviour
 
     private void ProceduralBinding()
     {
-        Dictionary<string, List<VoxelVisualComponentSet>> setsByDesignationKey = GetSetsByDesignation();
-
+        ProceduralBindingBlueprints[] blueprints = visualSetup.ComponentSets.Select(item => new ProceduralBindingBlueprints(item)).ToArray();
+        Dictionary<string, ComponentInSet> componentsByKey = GetComponentsByKey();
         ComponentInSet upStructSetComponent = new ComponentInSet(upStructComponent, false, 0);
         ComponentInSet downStructSetComponent = new ComponentInSet(downStructComponent, false, 0);
-
-        foreach (VoxelVisualComponent component in sourceComponents)
+        
+        foreach (ProceduralBindingBlueprints blueprint in blueprints)
         {
-            ProceeduralBindingComponent bindingComponent = new ProceeduralBindingComponent(component);
-            bindingComponent.Bind(setsByDesignationKey, upStructSetComponent, downStructSetComponent);
+            blueprint.Bind(componentsByKey, upStructSetComponent, downStructSetComponent);
         }
+    }
+
+    private Dictionary<string, ComponentInSet> GetComponentsByKey()
+    {
+        Dictionary<string, ComponentInSet> ret = new Dictionary<string, ComponentInSet>();
+        foreach (VoxelVisualComponent item in sourceComponents)
+        {
+            ProceeduralBindingComponent wrapper = new ProceeduralBindingComponent(item);
+            foreach (var setItem in wrapper.ComponentsByKey)
+            {
+                ret.Add(setItem.Key, setItem.Value);
+            }
+        }
+        return ret;
     }
 
     private class ProceeduralBindingComponent
     {
         private VoxelVisualComponent component;
-        public VoxelVisualComponent Component { get { return component; } }
-        private VoxelVisualDesignation masterDesignation;
-        private GeneratedVoxelDesignation componentDesignation;
-        public GeneratedVoxelDesignation ComponentDesignation { get { return componentDesignation; } }
+        private GeneratedVoxelDesignation designationOfComponent;
+
+        public Dictionary<string, ComponentInSet> ComponentsByKey { get; private set; }
 
         public ProceeduralBindingComponent(VoxelVisualComponent component)
         {
             this.component = component;
             Designation[] description = GetDesignationFromName(component);
             VoxelVisualDesignation baseDesignation = new VoxelVisualDesignation(description);
-            masterDesignation = baseDesignation.GetMasterVariant();
+            VoxelVisualDesignation masterDesignation = baseDesignation.GetMasterVariant();
             IEnumerable<GeneratedVoxelDesignation> variants = masterDesignation.GetUniqueVariants(true);
-            componentDesignation = variants.First(item => item.Key == baseDesignation.Key);
+            GeneratedVoxelDesignation designationOfMesh = variants.First(item => item.Key == baseDesignation.Key);
+            ComponentsByKey = GetComponentSetVariations(designationOfMesh);
+        }
+
+        private Dictionary<string, ComponentInSet> GetComponentSetVariations(GeneratedVoxelDesignation designationOfMesh)
+        {
+            VoxelVisualComponentSet set = new VoxelVisualComponentSet(
+                VoxelConnectionType.None,
+                VoxelConnectionType.None,
+                designationOfMesh, new ComponentInSet[] { new ComponentInSet(component, false, 0) });
+            VisualCellOption[] options = set.GetAllPermutations().ToArray();
+            Dictionary<string, ComponentInSet> ret = new Dictionary<string, ComponentInSet>();
+            foreach (VisualCellOption item in options)
+            {
+                string key = item.Designation.Key;
+                ComponentInSet setComponent = item.Components[0];
+                ret.Add(key, setComponent);
+            }
+            return ret;
         }
 
         private Designation[] GetDesignationFromName(VoxelVisualComponent component)
@@ -212,45 +242,63 @@ public class VoxelVisualSetupManager : MonoBehaviour
                     throw new Exception("typo in export?");
             }
         }
-
-        public void Bind(Dictionary<string, List<VoxelVisualComponentSet>> setsByDesignationKey, ComponentInSet upStruct, ComponentInSet downStruct)
-        {
-            List<VoxelVisualComponentSet> sets = setsByDesignationKey[masterDesignation.Key];
-
-            foreach (VoxelVisualComponentSet set in sets)
-            {
-                ComponentInSet inSet = new ComponentInSet(component, componentDesignation.WasFlipped, componentDesignation.Rotations);
-                List<ComponentInSet> components = new List<ComponentInSet> { inSet };
-                if (set.Up == VoxelConnectionType.BigStrut)
-                {
-                    components.Add(upStruct);
-                }
-                if (set.Down == VoxelConnectionType.BigStrut)
-                {
-                    components.Add(downStruct);
-                }
-                set.Components = components.ToArray();
-            }
-        }
     }
 
-    private Dictionary<string, List<VoxelVisualComponentSet>> GetSetsByDesignation()
+    private class ProceduralBindingBlueprints
     {
-        var ret = new Dictionary<string, List<VoxelVisualComponentSet>>();
-        foreach (var item in visualSetup.ComponentSets)
-        {
-            string key = GetComponentKey(item.Designation);
-            if(ret.ContainsKey(key))
-                ret[key].Add(item);
-            else
-                ret.Add(key, new List<VoxelVisualComponentSet> { item });
-        }
-        return ret;
-    }
+        private readonly VoxelVisualComponentSet set;
+        private readonly VoxelVisualDesignation groundOnlyDesignation;
+        private readonly VoxelVisualDesignation noGroundDesignation;
 
-    private string GetComponentKey(SerializableVisualDesignation designation)
-    { 
-        return designation.ToDesignation().Key;
+        public ProceduralBindingBlueprints(VoxelVisualComponentSet set)
+        {
+            this.set = set;
+            Designation[] baseDescription = set.Designation.ToDesignation().FlatDescription.ToArray();
+            groundOnlyDesignation = GetGroundOnlyDesignation(baseDescription);
+            noGroundDesignation = GetNoGroundDesignation(baseDescription);
+        }
+
+        public void Bind(Dictionary<string, ComponentInSet> components, ComponentInSet upStruct, ComponentInSet downStruct)
+        {
+            List<ComponentInSet> newComponents = new List<ComponentInSet>();
+            if(components.ContainsKey(groundOnlyDesignation.Key))
+            {
+                newComponents.Add(components[groundOnlyDesignation.Key]);
+            }
+            if(components.ContainsKey(noGroundDesignation.Key))
+            {
+                newComponents.Add(components[noGroundDesignation.Key]);
+            }
+            //if (set.Up == VoxelConnectionType.BigStrut) // TODO: Uncomment when getting back into struts
+            //{
+            //    components.Add(upStruct);
+            //}
+            //if (set.Down == VoxelConnectionType.BigStrut)
+            //{
+            //    components.Add(downStruct);
+            //}
+            set.Components = newComponents.ToArray();
+        }
+
+        private VoxelVisualDesignation GetNoGroundDesignation(Designation[] baseDescription)
+        {
+            Designation[] ret = new Designation[8];
+            for (int i = 0; i < 8; i++)
+            {
+                ret[i] = baseDescription[i] == Designation.Shell ? Designation.Empty : baseDescription[i];
+            }
+            return new VoxelVisualDesignation(ret);
+        }
+
+        private VoxelVisualDesignation GetGroundOnlyDesignation(Designation[] baseDescription)
+        {
+            Designation[] ret = new Designation[8];
+            for (int i = 0; i < 8; i++)
+            {
+                ret[i] = baseDescription[i] == Designation.Shell ? Designation.Shell : Designation.Empty;
+            }
+            return new VoxelVisualDesignation(ret);
+        }
     }
 #endif
 }
