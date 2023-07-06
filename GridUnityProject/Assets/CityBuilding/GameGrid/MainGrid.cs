@@ -1,9 +1,12 @@
 ﻿using Interiors;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
 using VoxelVisuals;
+using static UnityEngine.GraphicsBuffer;
 
 namespace GameGrid
 {
@@ -140,13 +143,14 @@ namespace GameGrid
 
         public void DoEase()
         {
-            foreach (GroundQuad quad in Quads)
+            GroundPointEaser[] easers = new GroundPointEaser[points.Count];
+            for (int i = 0; i < points.Count; i++)
             {
-                Squarifier squarifier = new Squarifier(quad, 1);
-                quad.Points[0].Position = Vector2.Lerp(squarifier.OutputA, quad.Points[0].Position, .5f);
-                quad.Points[1].Position = Vector2.Lerp(squarifier.OutputB, quad.Points[1].Position, .5f);
-                quad.Points[2].Position = Vector2.Lerp(squarifier.OutputC, quad.Points[2].Position, .5f);
-                quad.Points[3].Position = Vector2.Lerp(squarifier.OutputD, quad.Points[3].Position, .5f);
+                easers[i] = new GroundPointEaser(points[i]);
+            }
+            foreach (GroundPointEaser easer in easers)
+            {
+                easer.Point.Position = Vector2.Lerp(easer.Point.Position, easer.OptimalPosition, .5f);
             }
         }
 
@@ -428,6 +432,65 @@ namespace GameGrid
                         min = dist;
                         ret = item;
                     }
+                }
+                return ret;
+            }
+        }
+
+        private struct GroundPointEaser
+        {
+            public GroundPoint Point { get; }
+            public Vector2 OptimalPosition { get; }
+
+            public GroundPointEaser(GroundPoint groundPoint)
+            {
+                Point = groundPoint;
+                //OptimalPosition = groundPoint.IsBorder ? groundPoint.Position : GetOptimalPosition(groundPoint);
+                OptimalPosition = GetOptimalPosition(groundPoint);
+            }
+
+            private static Vector2 GetOptimalPosition(GroundPoint groundPoint)
+            {
+                Vector2[] connected = groundPoint.DirectConnections.Select(item => item.Position).ToArray();
+                Vector2 offsetSum = Vector2.zero;
+                for (int i = 0; i < connected.Length; i++)
+                {
+
+                    Vector2 diff = connected[i] - groundPoint.Position;
+                    Vector2 idealPos = diff.normalized;
+                    offsetSum -= idealPos;
+                }
+                offsetSum /= connected.Length;
+                return offsetSum + groundPoint.Position;
+            }
+
+            private static Connection GetConnection(Vector2 source, Vector2 target)
+            {
+                Vector2 diff = source - target;
+                Vector2 idealPos = diff.normalized + source;
+                float weight = Mathf.Abs(diff.magnitude);
+                weight *= weight;
+                return new Connection(idealPos, weight);
+            }
+
+            private struct Connection
+            {
+                public Vector2 Offset { get; }
+                public float Weight { get; }
+
+                public Connection(Vector2 targetPosition, float weight)
+                {
+                    Offset = targetPosition;
+                    Weight = weight;
+                }
+            }
+
+            private static IEnumerable<GroundPoint> GetConnectedPoints(GroundPoint point)
+            {
+                HashSet<GroundPoint> ret = new HashSet<GroundPoint>(point.DirectConnections);
+                foreach (GroundPoint diagonal in point.DiagonalConnections)
+                {
+                    ret.Add(diagonal);
                 }
                 return ret;
             }
