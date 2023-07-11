@@ -143,12 +143,6 @@ namespace GameGrid
 
         public void DoEase()
         {
-            //ShrinkyDinker[] dinkers = edges.Select(item => new ShrinkyDinker(item)).ToArray();
-            //foreach (var item in dinkers)
-            //{
-            //    item.PointA.Position = Vector2.Lerp(item.PointA.Position, item.PointATarget, .5f);
-            //    item.PointB.Position = Vector2.Lerp(item.PointB.Position, item.PointBTarget, .5f);
-            //}
             GroundPointEaser[] easers = new GroundPointEaser[points.Count];
             for (int i = 0; i < points.Count; i++)
             {
@@ -365,102 +359,6 @@ namespace GameGrid
                 return "[" + Key + "] for " + SharedPoint.ToString();
             }
         }
-        private class Squarifier
-        {
-            private readonly Vector2[] outputs;
-            public Vector2 OutputA { get { return outputs[0]; } }
-            public Vector2 OutputB { get { return outputs[1]; } }
-            public Vector2 OutputC { get { return outputs[2]; } }
-            public Vector2 OutputD { get { return outputs[3]; } }
-
-            public Squarifier(GroundQuad quad, float size)
-                : this(quad.Points[0].Position, quad.Points[1].Position, quad.Points[2].Position, quad.Points[3].Position, size)
-            { }
-            public Squarifier(Vector2 inputA, Vector2 inputB, Vector2 inputC, Vector2 inputD, float size)
-            {
-                Vector2 ac = new Vector2(inputA.x, inputA.y) - new Vector2(inputC.x, inputC.y);
-                Vector2 bd = new Vector2(inputB.x, inputB.y) - new Vector2(inputD.x, inputD.y);
-
-                Vector2 crossBd = new Vector2(bd.y, -bd.x);
-
-                Vector2 average = (ac.normalized + crossBd.normalized) / 2;
-                average = average.normalized;
-                Vector2 offsetA = average;
-                Vector2 offsetB = new Vector2(average.y, -average.x);
-                Vector2 offsetC = -average;
-                Vector2 offsetD = new Vector2(-average.y, average.x);
-
-                Vector2 center = (inputA + inputB + inputC + inputD) / 4;
-
-                PositionPair outputA = new PositionPair(offsetA * size + center, 0);
-                PositionPair outputB = new PositionPair(offsetB * size + center, 1);
-                PositionPair outputC = new PositionPair(offsetC * size + center, 2);
-                PositionPair outputD = new PositionPair(offsetD * size + center, 3);
-                List<PositionPair> sourceOutputs = new List<PositionPair> { outputA, outputB, outputC, outputD };
-
-                outputs = new Vector2[4];
-
-                PositionPair bestA = GetBest(inputA, sourceOutputs);
-                outputs[0] = bestA.Pos;
-                sourceOutputs.Remove(bestA);
-
-                PositionPair bestB = GetBest(inputB, sourceOutputs);
-                outputs[1] = bestB.Pos;
-                sourceOutputs.Remove(bestB);
-
-                PositionPair bestC = GetBest(inputC, sourceOutputs);
-                outputs[2] = bestC.Pos;
-                sourceOutputs.Remove(bestC);
-
-                outputs[3] = sourceOutputs[0].Pos;
-            }
-
-            private class PositionPair
-            {
-                public int Index { get; }
-                public Vector2 Pos { get; }
-                public PositionPair(Vector2 pos, int index)
-                {
-                    Index = index;
-                    Pos = pos;
-                }
-            }
-
-            private PositionPair GetBest(Vector2 input, List<PositionPair> options)
-            {
-                float min = Mathf.Infinity;
-                PositionPair ret = null;
-                foreach (var item in options)
-                {
-                    float dist = (input - item.Pos).sqrMagnitude;
-                    if (dist < min)
-                    {
-                        min = dist;
-                        ret = item;
-                    }
-                }
-                return ret;
-            }
-        }
-
-        private struct ShrinkyDinker
-        {
-            public GroundPoint PointA;
-            public GroundPoint PointB;
-            public Vector2 PointATarget;
-            public Vector2 PointBTarget;
-
-            public ShrinkyDinker(GroundEdge edge)
-            {
-                PointA = edge.PointA;
-                PointB = edge.PointB;
-                Vector2 diff = (edge.PointA.Position - edge.PointB.Position).normalized * .5f;
-                Vector2 mid = edge.MidPoint;
-                PointATarget = mid + diff;
-                PointBTarget = mid - diff;
-            }
-        }
-
         private struct GroundPointEaser
         {
             public GroundPoint Point { get; }
