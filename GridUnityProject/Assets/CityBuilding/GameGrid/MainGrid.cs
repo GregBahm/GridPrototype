@@ -143,6 +143,12 @@ namespace GameGrid
 
         public void DoEase()
         {
+            //ShrinkyDinker[] dinkers = edges.Select(item => new ShrinkyDinker(item)).ToArray();
+            //foreach (var item in dinkers)
+            //{
+            //    item.PointA.Position = Vector2.Lerp(item.PointA.Position, item.PointATarget, .5f);
+            //    item.PointB.Position = Vector2.Lerp(item.PointB.Position, item.PointBTarget, .5f);
+            //}
             GroundPointEaser[] easers = new GroundPointEaser[points.Count];
             for (int i = 0; i < points.Count; i++)
             {
@@ -437,6 +443,24 @@ namespace GameGrid
             }
         }
 
+        private struct ShrinkyDinker
+        {
+            public GroundPoint PointA;
+            public GroundPoint PointB;
+            public Vector2 PointATarget;
+            public Vector2 PointBTarget;
+
+            public ShrinkyDinker(GroundEdge edge)
+            {
+                PointA = edge.PointA;
+                PointB = edge.PointB;
+                Vector2 diff = (edge.PointA.Position - edge.PointB.Position).normalized * .5f;
+                Vector2 mid = edge.MidPoint;
+                PointATarget = mid + diff;
+                PointBTarget = mid - diff;
+            }
+        }
+
         private struct GroundPointEaser
         {
             public GroundPoint Point { get; }
@@ -445,54 +469,60 @@ namespace GameGrid
             public GroundPointEaser(GroundPoint groundPoint)
             {
                 Point = groundPoint;
-                //OptimalPosition = groundPoint.IsBorder ? groundPoint.Position : GetOptimalPosition(groundPoint);
-                OptimalPosition = GetOptimalPosition(groundPoint);
+                Vector2[] points = GetPoints(groundPoint);
+                Vector2 centeroid = GetCentroid(points);
+                OptimalPosition = groundPoint.IsBorder ? GetBorderCenteroid(points, centeroid) : centeroid;
             }
 
-            private static Vector2 GetOptimalPosition(GroundPoint groundPoint)
+            private static Vector2 GetBorderCenteroid(Vector2[] points, Vector2 centeroid)
             {
-                Vector2[] connected = groundPoint.DirectConnections.Select(item => item.Position).ToArray();
-                Vector2 offsetSum = Vector2.zero;
-                for (int i = 0; i < connected.Length; i++)
+                float maxDist = points.Max(item => item.magnitude);
+                return centeroid.normalized * maxDist;
+            }
+
+            private static Vector2[] GetPoints(GroundPoint groundPoint)
+            {
+                List<Vector2> points = groundPoint.DirectConnections.Select(item => item.Position)
+                    .Concat(groundPoint.DiagonalConnections.Select(item => item.Position))
+                    .ToList();
+                return points.OrderByDescending(item => Vector2.SignedAngle(Vector2.up, item - groundPoint.Position)).ToArray();
+            }
+
+            public static Vector2 GetCentroid(Vector2[] points)
+            {
+                float centroidX = 0;
+                float centroidY = 0;
+
+                for (int i = 0; i < points.Length; i++)
                 {
+                    Vector2 currentPoint = points[i];
+                    Vector2 nextPoint = points[(i + 1) % points.Length];
 
-                    Vector2 diff = connected[i] - groundPoint.Position;
-                    Vector2 idealPos = diff.normalized;
-                    offsetSum -= idealPos;
+                    float commonFactor = currentPoint.x * nextPoint.y - nextPoint.x * currentPoint.y;
+                    centroidX += (currentPoint.x + nextPoint.x) * commonFactor;
+                    centroidY += (currentPoint.y + nextPoint.y) * commonFactor;
                 }
-                offsetSum /= connected.Length;
-                return offsetSum + groundPoint.Position;
+
+                float area = GetArea(points) * 6;
+
+                return new Vector2(centroidX / area, centroidY / area);
             }
 
-            private static Connection GetConnection(Vector2 source, Vector2 target)
+            private static float GetArea(Vector2[] points)
             {
-                Vector2 diff = source - target;
-                Vector2 idealPos = diff.normalized + source;
-                float weight = Mathf.Abs(diff.magnitude);
-                weight *= weight;
-                return new Connection(idealPos, weight);
-            }
+                float area = 0;
 
-            private struct Connection
-            {
-                public Vector2 Offset { get; }
-                public float Weight { get; }
-
-                public Connection(Vector2 targetPosition, float weight)
+                for (int i = 0; i < points.Length; i++)
                 {
-                    Offset = targetPosition;
-                    Weight = weight;
-                }
-            }
+                    Vector2 currentPoint = points[i];
+                    Vector2 nextPoint = points[(i + 1) % points.Length];
 
-            private static IEnumerable<GroundPoint> GetConnectedPoints(GroundPoint point)
-            {
-                HashSet<GroundPoint> ret = new HashSet<GroundPoint>(point.DirectConnections);
-                foreach (GroundPoint diagonal in point.DiagonalConnections)
-                {
-                    ret.Add(diagonal);
+                    area += currentPoint.x * nextPoint.y;
+                    area -= currentPoint.y * nextPoint.x;
                 }
-                return ret;
+
+                area /= 2;
+                return area;
             }
         }
     }

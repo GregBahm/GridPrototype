@@ -26,6 +26,9 @@ namespace Interaction
         [SerializeField]
         private ExpansionCursor expansionCursor;
 
+        [SerializeField]
+        private bool testSmooth;
+
         private void Start()
         {
             gameMain = GetComponent<CityBuildingMain>();
@@ -34,6 +37,8 @@ namespace Interaction
 
         public void ProceedWithUpdate(bool wasDragging, bool uiHovered)
         {
+            if(testSmooth)
+                DoSmoothing();
             if (uiHovered)
             {
                 expansionCursor.gameObject.SetActive(false);
