@@ -17,9 +17,10 @@ namespace VoxelVisuals
         private readonly HashSet<VisualCell> cellsToRender;
         public int CellsToRender { get { return cellsToRender.Count; } }
 
-        private readonly List<VoxelRenderData> renderData;
+        private List<VoxelRenderData> renderData;
         private ComputeBuffer renderDataBuffer;
         private int renderBufferLength = 1024; // TODO: Lower this and then make it dynamic
+        private MeshDataForArgsBuffer[] meshData;
         private ComputeBuffer[] argsBuffers;
         private const int PositionsBufferStride = VoxelRenderData.Stride;
 
@@ -27,10 +28,21 @@ namespace VoxelVisuals
         {
             renderData = new List<VoxelRenderData>();
             Component = component;
-            this.materials = component.Materials.Select(item => new Material(item)).ToArray();
+            materials = component.Materials.Select(item => new Material(item)).ToArray();
             renderDataBuffer = new ComputeBuffer(renderBufferLength, PositionsBufferStride);
+            meshData = GetMeshData();
             argsBuffers = InitializeArgsBuffers();
             cellsToRender = new HashSet<VisualCell>();
+        }
+
+        private MeshDataForArgsBuffer[] GetMeshData()
+        {
+            MeshDataForArgsBuffer[] ret = new MeshDataForArgsBuffer[materials.Length];
+            for (int i = 0; i < materials.Length; i++)
+            {
+                ret[i] = new MeshDataForArgsBuffer(Component, i);
+            }
+            return ret;
         }
 
         private ComputeBuffer[] InitializeArgsBuffers()
@@ -66,34 +78,56 @@ namespace VoxelVisuals
 
         public void UpdateBuffers()
         {
+            UpdatePositionsBuffer();
             for (int i = 0; i < materials.Length; i++)
             {
-                UpdateArgsBuffer(i);
+                UpdateArgsBuffer(i, renderData.Count);
             }
-            UpdatePositionsBuffer();
+            IsDirty = false;
         }
 
         public void UpdatePositionsBuffer()
         {
-            renderData.Clear();
-            foreach (var cell in cellsToRender)
-            {
-                foreach(var componet in cell.Contents.Components.Where(item => item.Component == Component))
-                {
-                    VoxelRenderData data = cell.GetRenderData(componet);
-                    renderData.Add(data);
-                }
-            }
+            renderData = GetPositionsBufferData();
             renderDataBuffer.SetData(renderData);
         }
 
-        private void UpdateArgsBuffer(int subMeshIndex)
+        private List<VoxelRenderData> GetPositionsBufferData()
         {
+            List<VoxelRenderData> ret = new List<VoxelRenderData>();
+            foreach (VisualCell cell in cellsToRender)
+            {
+                foreach(ComponentInSet componet in cell.Contents.Components.Where(item => item.Component == Component))
+                {
+                    VoxelRenderData data = cell.GetRenderData(componet);
+                    ret.Add(data);
+                }
+            }
+            return ret;
+        }
+
+        private struct MeshDataForArgsBuffer
+        {
+            public uint IndexCountPerInstance;
+            public uint StartIndexLocation;
+            public uint BaseVertexLocation;
+
+            public MeshDataForArgsBuffer(VoxelVisualComponent component, int subMeshIndex)
+            {
+                IndexCountPerInstance = component.Mesh.GetIndexCount(subMeshIndex);
+                StartIndexLocation = component.Mesh.GetIndexStart(subMeshIndex);
+                BaseVertexLocation = component.Mesh.GetBaseVertex(subMeshIndex);
+            }
+        }
+
+        private void UpdateArgsBuffer(int subMeshIndex, int instanceCount)
+        {
+            MeshDataForArgsBuffer meshArgs = meshData[subMeshIndex];
             uint[] args = new uint[5] { 0, 0, 0, 0, 0 };
-            args[0] = Component.Mesh.GetIndexCount(subMeshIndex);
-            args[1] = (uint)renderData.Count;
-            args[2] = Component.Mesh.GetIndexStart(subMeshIndex);
-            args[3] = Component.Mesh.GetBaseVertex(subMeshIndex);
+            args[0] = meshArgs.IndexCountPerInstance;
+            args[1] = (uint)instanceCount;
+            args[2] = meshArgs.StartIndexLocation;
+            args[3] = meshArgs.BaseVertexLocation;
             argsBuffers[subMeshIndex].SetData(args);
         }
 
