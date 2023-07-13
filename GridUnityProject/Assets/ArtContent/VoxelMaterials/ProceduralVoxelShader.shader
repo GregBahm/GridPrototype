@@ -151,7 +151,12 @@ Shader "Voxel/ProceduralVoxelShader"
 
           fixed4 frag(v2f i) : SV_Target
           {
-            //return float4(i.normal, 1);
+              //float3 boxPos = mul(_LightBoxTransform, float4(i.worldPos, 1));
+              //boxPos += float3(0, i.worldPos.y * .1, 0);
+              //float3 norm = normalize(i.worldPos);
+              //float blerg = dot(norm, _WorldSpaceLightPos0.xyz);
+              //return float4(blerg.xxx, 1);
+
               float3 boxLighting = GetBoxLighting(i.worldPos);
               float baseShade = GetBaseShade(i.normal);
               fixed shadow = SHADOW_ATTENUATION(i);
@@ -164,7 +169,7 @@ Shader "Voxel/ProceduralVoxelShader"
               float3 halfAngle = normalize(normalize(i.viewDir) + _WorldSpaceLightPos0.xyz);
               float spec = pow(saturate(dot(halfAngle, i.normal)), 50) * 2;
               ret = lerp(ret * (-spec * .3 + 1), ret * (spec * .3 + 1), saturate(shadow));
-              float fog = saturate(i.pos.z * 300 - 0);
+              float fog = saturate(i.pos.z * 900 - 0);
               ret = lerp(float3(0, .33, 1), ret,  fog);
               return float4(ret, 1);
           }
