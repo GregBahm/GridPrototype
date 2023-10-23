@@ -73,7 +73,7 @@ namespace Interaction
             {
                 // TODO: Handle expansion undo
                 gameMain.UpdateMainGrid(expander);
-                gameMain.UpdateInteractionGrid();
+                gameMain.InteractionMesh.RebuildMesh();
             }
         }
 
@@ -92,7 +92,7 @@ namespace Interaction
             //TODO: handle smoothing undo
             gameMain.MainGrid.DoEase();
             gameMain.UpdateGroundMesh();
-            gameMain.UpdateInteractionGrid();
+            gameMain.InteractionMesh.RebuildMesh();
         }
     }
 }

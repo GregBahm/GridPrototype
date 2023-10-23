@@ -65,24 +65,23 @@ public class CityBuildingMain : MonoBehaviour
             {
                 visualsManager.UpdateColumn(quad);
             }
-            UpdateInteractionGrid();
         }
         else
         {
             MainGrid = GroundSaveState.LoadDefault();
             Initialize();
         }
+        InteractionMesh.RebuildMesh();
     }
 
     private void Initialize()
     {
-        InteractionMesh = new ExteriorsInteractionMesh(interactionMeshObject);
-        GroundMesh = new GroundMesh();
-        UpdateInteractionGrid();
+        InteractionMesh = new ExteriorsInteractionMesh(MainGrid, interactionMeshObject);
+        GroundMesh = new GroundMesh(MainGrid);
         UpdateGroundMesh();
         optionsSource = new VisualOptionsByDesignation(visualSetup.ComponentSets);
         visualsManager = new VoxelVisualsManager(this, optionsSource);
-        Interiors = new InteriorsManager(interiorMeshPrefab);
+        Interiors = new InteriorsManager(MainGrid, interiorMeshPrefab);
     }
 
     private void Update()
@@ -122,7 +121,7 @@ public class CityBuildingMain : MonoBehaviour
 
     public void UpdateGroundMesh()
     {
-        GroundMesh.UpdateMesh(MainGrid);
+        GroundMesh.UpdateMesh();
         groundMesh.GetComponent<MeshFilter>().mesh = GroundMesh.Mesh;
         if (visualsManager != null)
         {
@@ -135,11 +134,6 @@ public class CityBuildingMain : MonoBehaviour
     {
         MainGrid.AddToMesh(expander.Points, expander.Edges);
         UpdateGroundMesh();
-    }
-
-    public void UpdateInteractionGrid()
-    {
-        InteractionMesh.UpdateMesh(MainGrid);
     }
 
     private void OnDestroy()

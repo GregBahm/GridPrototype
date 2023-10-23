@@ -42,7 +42,7 @@ public class DomeTestScript : MonoBehaviour
                 item.Designation = isInside ? Designation.Shell : Designation.Empty;
             }
         }
-        main.UpdateInteractionGrid();
+        main.InteractionMesh.RebuildMesh();
         main.UpdateAllVisuals();
     }
 }

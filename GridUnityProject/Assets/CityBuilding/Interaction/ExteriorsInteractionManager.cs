@@ -44,7 +44,7 @@ namespace Interaction
         public void SetDesignation(DesignationCell cell, Designation type)
         {
             cell.Designation = type;
-            gameMain.UpdateInteractionGrid();
+            gameMain.InteractionMesh.UpdateMesh(cell);
             gameMain.UpdateVoxelVisuals(cell);
         }
 

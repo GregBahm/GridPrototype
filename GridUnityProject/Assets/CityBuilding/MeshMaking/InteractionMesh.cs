@@ -9,12 +9,14 @@ namespace MeshMaking
 {
     public abstract class InteractionMesh
     {
+        protected readonly MainGrid mainGrid;
         private IReadOnlyList<MeshHitTarget> hitTable;
 
         public Mesh Mesh { get; }
 
-        public InteractionMesh()
+        public InteractionMesh(MainGrid mainGrid)
         {
+            this.mainGrid = mainGrid;
             Mesh = new Mesh();
         }
 

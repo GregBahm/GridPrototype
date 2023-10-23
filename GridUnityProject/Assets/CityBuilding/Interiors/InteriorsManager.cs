@@ -1,3 +1,4 @@
+using GameGrid;
 using MeshMaking;
 using System.Collections;
 using System.Collections.Generic;
@@ -7,13 +8,15 @@ namespace Interiors
 {
     public class InteriorsManager
     {
+        private readonly MainGrid mainGrid;
         private readonly GameObject newMeshPrefab;
         private readonly Dictionary<Interior, InteriorInteractionMesh> interactionMeshs;
 
-        public InteriorsManager(GameObject newMeshPrefab)
+        public InteriorsManager(MainGrid mainGrid, GameObject newMeshPrefab)
         {
-            interactionMeshs = new Dictionary<Interior, InteriorInteractionMesh>();
+            this.mainGrid = mainGrid;
             this.newMeshPrefab = newMeshPrefab;
+            interactionMeshs = new Dictionary<Interior, InteriorInteractionMesh>();
         }
 
         public InteriorInteractionMesh GetMeshFor(Interior interior)
@@ -26,7 +29,7 @@ namespace Interiors
             if(!interactionMeshs.ContainsKey(interior))
             {
                 GameObject newObj = Object.Instantiate(newMeshPrefab);
-                interactionMeshs.Add(interior, new InteriorInteractionMesh(interior, newObj));
+                interactionMeshs.Add(interior, new InteriorInteractionMesh(mainGrid, interior, newObj));
             }
             interactionMeshs[interior].UpdateMesh();
         }

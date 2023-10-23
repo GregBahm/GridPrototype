@@ -1,4 +1,5 @@
-﻿using Interiors;
+﻿using GameGrid;
+using Interiors;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -10,7 +11,8 @@ namespace MeshMaking
         public MeshCollider Collider { get; }
 
         private readonly Interior interior;
-        public InteriorInteractionMesh(Interior interior, GameObject gameObj)
+        public InteriorInteractionMesh(MainGrid mainGrid, Interior interior, GameObject gameObj)
+            :base(mainGrid)
         {
             Collider = gameObj.GetComponent<MeshCollider>();
             this.interior = interior;
