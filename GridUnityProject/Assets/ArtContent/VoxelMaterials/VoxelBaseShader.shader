@@ -162,7 +162,6 @@
                 ret *= lerp(ret * float3(0.3, .6, 1), ret, shadow);
                 float shadedSsao = lerp(pow(ssao, 2), pow(ssao, .5), shadow);
                 ret *= shadedSsao;
-
                 return float4(ret, 1);
             }
             ENDHLSL

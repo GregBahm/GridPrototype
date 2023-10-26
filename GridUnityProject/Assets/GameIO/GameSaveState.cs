@@ -16,11 +16,19 @@ public class GameSaveState
         Designations = new DesignationsSaveState(main.MainGrid);
     }
 
-    public void Save()
+    public void SaveToPrefs()
     {
         string asJson = JsonUtility.ToJson(this);
         PlayerPrefs.SetString(SaveFilePath, asJson);
         PlayerPrefs.Save();
+    }
+
+    public void SaveToDisk()
+    {
+        string filePath = Application.dataPath + "/Save.txt";
+        Debug.Log(filePath);
+        string asJson = JsonUtility.ToJson(this);
+        System.IO.File.WriteAllText(filePath, asJson);
     }
 
     public static GameSaveState Load(TextAsset defaultSave)

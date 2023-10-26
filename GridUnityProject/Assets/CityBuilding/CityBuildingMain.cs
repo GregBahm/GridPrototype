@@ -46,25 +46,7 @@ public class CityBuildingMain : MonoBehaviour
         UndoManager = new UndoManager();
         if(LoadLastSave)
         {
-            GameSaveState saveState = GameSaveState.Load(DefaultSave);
-            MainGrid = new MainGrid(newGridMaxHeight, saveState.Ground.Points, saveState.Ground.Edges);
-            Initialize();
-            HashSet<GroundQuad> columnsToUpdate = new HashSet<GroundQuad>();
-            foreach (var item in saveState.Designations.DesignationStates
-                .Where(item => item.Height < newGridMaxHeight - 1))
-            {
-                DesignationCell cell = MainGrid.Points[item.GroundPointIndex].DesignationCells[item.Height];
-                cell.Designation = item.Designation;
-            
-                foreach (GroundQuad column in MainGrid.GetConnectedQuads(cell.GroundPoint))
-                {
-                    columnsToUpdate.Add(column);
-                }
-            }
-            foreach (GroundQuad quad in columnsToUpdate)
-            {
-                visualsManager.UpdateColumn(quad);
-            }
+            Load();
         }
         else
         {
@@ -72,6 +54,29 @@ public class CityBuildingMain : MonoBehaviour
             Initialize();
         }
         InteractionMesh.RebuildMesh();
+    }
+
+    private void Load()
+    {
+        GameSaveState saveState = GameSaveState.Load(DefaultSave);
+        MainGrid = new MainGrid(newGridMaxHeight, saveState.Ground.Points, saveState.Ground.Edges);
+        Initialize();
+        HashSet<GroundQuad> columnsToUpdate = new HashSet<GroundQuad>();
+        foreach (var item in saveState.Designations.DesignationStates
+            .Where(item => item.Height < newGridMaxHeight - 1))
+        {
+            DesignationCell cell = MainGrid.Points[item.GroundPointIndex].DesignationCells[item.Height];
+            cell.Designation = item.Designation;
+
+            foreach (GroundQuad column in MainGrid.GetConnectedQuads(cell.GroundPoint))
+            {
+                columnsToUpdate.Add(column);
+            }
+        }
+        foreach (GroundQuad quad in columnsToUpdate)
+        {
+            visualsManager.UpdateColumn(quad);
+        }
     }
 
     private void Initialize()
@@ -90,14 +95,13 @@ public class CityBuildingMain : MonoBehaviour
         {
             TestSave = false;
             GameSaveState state = new GameSaveState(this);
-            state.Save();
+            state.SaveToPrefs();
             Debug.Log("Grid Saved");
         }
         if(TestLoad)
         {
             TestLoad = false;
-            // TODO: loading
-            //MainGrid = GroundSaveState.Load();
+            Load();
             Debug.Log("Grid Loaded");
         }
         visualsManager.Update();

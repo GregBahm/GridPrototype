@@ -211,7 +211,6 @@
                   bounceLight = pow(bounceLight, 5) * .5;
                   bounceLight *= shadow;
                   ret += float3(1, .75, -.5) * bounceLight;
-
                   return float4(ret, 1);
               }
               ENDHLSL

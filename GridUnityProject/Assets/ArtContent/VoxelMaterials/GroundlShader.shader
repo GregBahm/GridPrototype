@@ -1,4 +1,4 @@
-Shader "Voxel/ProceduralVoxelShader"
+Shader "Voxel/GroundShader"
 {
   Properties
   {
@@ -134,6 +134,8 @@ Shader "Voxel/ProceduralVoxelShader"
           float GetBaseShade(float3 worldNormal)
           {
             float baseShade = dot(worldNormal.xyz, _WorldSpaceLightPos0.xyz);
+            baseShade = baseShade * .5 + .5;
+            baseShade = pow(baseShade, 2);
             baseShade = saturate(baseShade * 5);
             return baseShade;
           }
@@ -153,7 +155,7 @@ Shader "Voxel/ProceduralVoxelShader"
           {
               //float3 boxPos = mul(_LightBoxTransform, float4(i.worldPos, 1));
               //boxPos += float3(0, i.worldPos.y * .1, 0);
-              //float3 norm = normalize(i.worldPos);
+              i.normal = normalize(i.worldPos);
               //float blerg = dot(norm, _WorldSpaceLightPos0.xyz);
               //return float4(norm, 1);
 
@@ -167,7 +169,7 @@ Shader "Voxel/ProceduralVoxelShader"
               ret *= lerp(ret * float3(0.3, .6, 1), ret, shadow);
 
               float3 halfAngle = normalize(normalize(i.viewDir) + _WorldSpaceLightPos0.xyz);
-              float spec = pow(saturate(dot(halfAngle, i.normal)), 50) * 2;
+              float spec = pow(saturate(dot(halfAngle, i.normal)), 1) * 2;
               ret = lerp(ret * (-spec * .3 + 1), ret * (spec * .3 + 1), saturate(shadow));
               float fog = saturate(i.pos.z * 900 - 0);
               ret = lerp(float3(0, .33, 1), ret,  fog);
