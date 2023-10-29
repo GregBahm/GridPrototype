@@ -868,15 +868,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f587faec0a76214b93e49c82cd457d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DefaultSave: {fileID: 4900000, guid: 36285ddb1aacecc499cbb59bcf7feffb, type: 3}
+  DefaultSave: {fileID: 4900000, guid: ccf4b85ac29d303478a0349be1882b65, type: 3}
   interactionMeshObject: {fileID: 1421543770}
   interiorMeshPrefab: {fileID: 0}
   groundMesh: {fileID: 579425808}
   lightingManager: {fileID: 1133595419}
   newGridMaxHeight: 40
   LoadLastSave: 1
-  TestSave: 0
-  TestLoad: 0
+  SaveToPrefs: 0
+  LoadFromFile: 0
   visualSetup: {fileID: 11400000, guid: ac2103bae5254794089e8bedf8582d21, type: 2}
 --- !u!4 &536624979
 Transform:

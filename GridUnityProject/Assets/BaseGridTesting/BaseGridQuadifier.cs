@@ -1,3 +1,4 @@
+using GameGrid;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -21,10 +22,13 @@ public class BaseGridQuadifier : MonoBehaviour
 
     private List<Point>[] points;
 
-    private List<QuadSet> quads;
+    private List<QuadSet> quadSets;
 
     [SerializeField]
     private int axisOfSymetry = 8;
+
+    [SerializeField]
+    private bool DoSave;
 
     private Point ProgressPointA;
     private Point ProgressPointB;
@@ -43,8 +47,17 @@ public class BaseGridQuadifier : MonoBehaviour
         progSegB = Instantiate(progSegment);
         progSegC = Instantiate(progSegment);
         progSegD = Instantiate(progSegment);
-        quads = new List<QuadSet>();
+        quadSets = new List<QuadSet>();
         DoLoad();
+    }
+
+    public void Save()
+    {
+        string filePath = Application.dataPath + "/BaseGridTesting/MainGrid.json";
+        Debug.Log(filePath);
+        GroundSaveState groundSaveState = GetGroundSaveState();
+        string asJson = JsonUtility.ToJson(groundSaveState);
+        System.IO.File.WriteAllText(filePath, asJson);
     }
 
     private void Update()
@@ -57,6 +70,11 @@ public class BaseGridQuadifier : MonoBehaviour
         if(Input.GetMouseButtonUp(1))
         {
             UnselectPoint();
+        }
+        if(DoSave)
+        {
+            DoSave = false;
+            Save();
         }
     }
 
@@ -77,9 +95,9 @@ public class BaseGridQuadifier : MonoBehaviour
             ProgressPointA = null;
             return;
         }
-        QuadSet quadToKill = quads.Last();
+        QuadSet quadToKill = quadSets.Last();
         quadToKill.DeleteSegements();
-        quads.Remove(quadToKill);
+        quadSets.Remove(quadToKill);
     }
 
     private void SelectNewPoint()
@@ -100,7 +118,7 @@ public class BaseGridQuadifier : MonoBehaviour
             return;
         }
         QuadSet set = new QuadSet(points, axisOfSymetry, ProgressPointA, ProgressPointB, ProgressPointC, ClosestPoint, quadSegment);
-        quads.Add(set);
+        quadSets.Add(set);
         ProgressPointA = null; 
         ProgressPointB = null; 
         ProgressPointC = null;
@@ -224,6 +242,54 @@ public class BaseGridQuadifier : MonoBehaviour
             newObj.transform.localPosition = new Vector3(pos.x, 0, pos.y);
         }
     }
+
+    private GroundSaveState GetGroundSaveState()
+    {
+        List<Quad> quads = quadSets.SelectMany(item => item.Quads).ToList();
+        List<Point> allPoints = new HashSet<Point>(quads.SelectMany(item => item.Points)).ToList();
+        Dictionary<Point, GroundPointBuilder> groundPoints = new Dictionary<Point, GroundPointBuilder>();
+        for (int i = 0; i < allPoints.Count; i++)
+        {
+            Point point = allPoints[i];
+            groundPoints.Add(point, new GroundPointBuilder(i, point.Pos));
+        }
+        Dictionary<string, GroundEdgeBuilder> edges = new Dictionary<string, GroundEdgeBuilder>();
+        foreach (Quad quad in quads)
+        {
+            IEnumerable<GroundEdgeBuilder> groundEdgeBuilders = GetEdgeBuilds(quad, groundPoints).ToArray();
+            foreach (GroundEdgeBuilder builder in groundEdgeBuilders)
+            {
+                string key = GetGroundEdgeBuilderKey(builder);
+                if(!edges.ContainsKey(key))
+                {
+                    edges.Add(key, builder);
+                }
+            }
+        }
+        MainGrid grid = new MainGrid(GroundSaveState.DefaultMaxHeight, groundPoints.Values, edges.Values);
+        return new GroundSaveState(grid);
+    }
+
+    private string GetGroundEdgeBuilderKey(GroundEdgeBuilder builder)
+    {
+        if(builder.PointAIndex < builder.PointBIndex)
+        {
+            return builder.PointAIndex.ToString() + " " + builder.PointBIndex.ToString();
+        }
+        return builder.PointBIndex.ToString() + " " + builder.PointAIndex.ToString();
+    }
+
+    private IEnumerable<GroundEdgeBuilder> GetEdgeBuilds(Quad quad, Dictionary<Point, GroundPointBuilder> groundPoints)
+    {
+        GroundPointBuilder pointA = groundPoints[quad.PointA];
+        GroundPointBuilder pointB = groundPoints[quad.PointB];
+        GroundPointBuilder pointC = groundPoints[quad.PointC];
+        GroundPointBuilder pointD = groundPoints[quad.PointD];
+        yield return new GroundEdgeBuilder(pointA.Index, pointB.Index);
+        yield return new GroundEdgeBuilder(pointB.Index, pointC.Index);
+        yield return new GroundEdgeBuilder(pointC.Index, pointD.Index);
+        yield return new GroundEdgeBuilder(pointD.Index, pointA.Index);
+    }
 }
 
 class Point
@@ -244,6 +310,7 @@ class Point
 class QuadSet
 {
     private readonly List<Quad> quads;
+    public IEnumerable<Quad> Quads { get { return quads; } }
 
     public QuadSet(List<Point>[] points,
         int axiOfSymetry,
@@ -287,6 +354,16 @@ class Quad
     public Point PointC { get; }
     public Point PointD { get; }
 
+    public IEnumerable<Point> Points
+    {
+        get
+        {
+            yield return PointA;
+            yield return PointB;
+            yield return PointC;
+            yield return PointD;
+        }
+    }
 
     private GameObject lineA;
     private GameObject lineB;
