@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
 
@@ -23,6 +24,15 @@ public class BaseGridGenerator : MonoBehaviour
 
     private float searchRotationMax;
 
+    [SerializeField]
+    private bool Go;
+
+    [SerializeField]
+    private bool Save;
+
+    [SerializeField]
+    private bool Load;
+
     private void Start()
     {
         points = new List<Vector2>();
@@ -31,7 +41,21 @@ public class BaseGridGenerator : MonoBehaviour
 
     private void Update()
     {
-        Iterate();
+        if (Go)
+            Iterate();
+        if(Save)
+        {
+            Save = false;
+            DoSave();
+        }
+    }
+
+    private void DoSave()
+    {
+        BaseGridGeneratorSave theSave = new BaseGridGeneratorSave(points);
+        string filePath = Application.dataPath + "/BaseGridTesting/gridSave.txt";
+        string asJson = JsonUtility.ToJson(theSave);
+        System.IO.File.WriteAllText(filePath, asJson);
     }
 
     private void Iterate()
@@ -85,5 +109,18 @@ public class BaseGridGenerator : MonoBehaviour
             vect.x * Mathf.Cos(radianAngle) - vect.y * Mathf.Sin(radianAngle),
             vect.x * Mathf.Sin(radianAngle) + vect.y * Mathf.Cos(radianAngle)
         );
+    }
+}
+
+[Serializable]
+public class BaseGridGeneratorSave
+{
+    [SerializeField]
+    private List<Vector2> points;
+    public List<Vector2> Points => points;
+
+    public BaseGridGeneratorSave(List<Vector2> points)
+    {
+        this.points = points;
     }
 }
