@@ -61,6 +61,7 @@ public class CityBuildingMain : MonoBehaviour
         GroundSaveState ground = JsonUtility.FromJson<GroundSaveState>(DefaultSave.text);
         MainGrid = new MainGrid(GroundSaveState.DefaultMaxHeight, ground.Points, ground.Edges);
         Initialize();
+        
         //GameSaveState saveState = GameSaveState.Load(DefaultSave);
         //MainGrid = new MainGrid(newGridMaxHeight, saveState.Ground.Points, saveState.Ground.Edges);
         //Initialize();

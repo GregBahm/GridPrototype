@@ -22,7 +22,7 @@ public class DomeTestScript : MonoBehaviour
     {
         if(DoIt)
         {
-            //DoIt = false;
+            DoIt = false;
             DoTheThing();
         }
     }
