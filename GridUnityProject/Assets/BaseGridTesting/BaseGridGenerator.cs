@@ -43,7 +43,7 @@ public class BaseGridGenerator : MonoBehaviour
     {
         if (Go)
             Iterate();
-        if(Save)
+        if (Save)
         {
             Save = false;
             DoSave();
@@ -53,7 +53,7 @@ public class BaseGridGenerator : MonoBehaviour
     private void DoSave()
     {
         BaseGridGeneratorSave theSave = new BaseGridGeneratorSave(points);
-        string filePath = Application.dataPath + "/BaseGridTesting/gridSave.txt";
+        string filePath = Application.dataPath + "/BaseGridTesting/BasePoints.json";
         string asJson = JsonUtility.ToJson(theSave);
         System.IO.File.WriteAllText(filePath, asJson);
     }
@@ -61,7 +61,7 @@ public class BaseGridGenerator : MonoBehaviour
     private void Iterate()
     {
         searchRotation += searchRotationIncrement;
-        if(searchRotation > searchRotationMax)
+        if (searchRotation > searchRotationMax)
         {
             searchRotation = 0;
             searchDistance += searchDistanceIncrement;
@@ -71,19 +71,24 @@ public class BaseGridGenerator : MonoBehaviour
         bool canPlace = GetCanPlace(prospectivePoint);
         if (canPlace)
         {
-            PlacePoint(prospectivePoint);
+            PlacePointsRadially(prospectivePoint);
         }
     }
 
-    private void PlacePoint(Vector2 prospectivePoint)
+    private void PlacePointsRadially(Vector2 prospectivePoint)
     {
         for (int i = 0; i < axisOfSymetry; i++)
         {
             Vector2 point = Rotate(prospectivePoint, i * searchRotationMax);
-            points.Add(point);
-            GameObject obj = Instantiate(pointMarker);
-            obj.transform.localPosition = new Vector3(point.x, 0, point.y);
+            PlacePoint(point);
         }
+    }
+
+    private void PlacePoint(Vector2 point)
+    {
+        points.Add(point);
+        GameObject obj = Instantiate(pointMarker);
+        obj.transform.localPosition = new Vector3(point.x, 0, point.y);
     }
 
     private bool GetCanPlace(Vector2 prospectivePoint)

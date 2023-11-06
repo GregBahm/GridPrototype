@@ -18,7 +18,7 @@ public class BaseGridQuadifier : MonoBehaviour
     private GameObject quadSegment;
 
     [SerializeField]
-    private TextAsset SaveFile;
+    private TextAsset BasePointsFile;
 
     private List<Point>[] points;
 
@@ -220,7 +220,7 @@ public class BaseGridQuadifier : MonoBehaviour
 
     private void DoLoad()
     {
-        string data = SaveFile.text;
+        string data = BasePointsFile.text;
         BaseGridGeneratorSave saveFile = JsonUtility.FromJson<BaseGridGeneratorSave>(data);
         points = new List<Point>[axisOfSymetry];
         for (int i = 0; i < axisOfSymetry; i++)

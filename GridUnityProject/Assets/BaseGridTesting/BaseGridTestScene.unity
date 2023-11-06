@@ -423,7 +423,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1181206841}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cf54bc2e72f362e4e95250cd7834fba1, type: 3}
   m_Name: 
@@ -467,6 +467,6 @@ MonoBehaviour:
     type: 3}
   quadSegment: {fileID: 2331472477565323962, guid: 01c5bc351d21e1048b43b4fd996d915f,
     type: 3}
-  SaveFile: {fileID: 4900000, guid: e6a9956424b863c43870d2163fcc6ab1, type: 3}
+  BasePointsFile: {fileID: 4900000, guid: e44b01b1b217d404aaaa55024db4e95a, type: 3}
   axisOfSymetry: 8
   DoSave: 0

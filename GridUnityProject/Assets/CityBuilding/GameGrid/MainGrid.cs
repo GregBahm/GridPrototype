@@ -118,7 +118,7 @@ namespace GameGrid
                 GroundPoint c = points[builder.PointCIndex];
                 GroundPoint d = points[builder.PointDIndex];
 
-                Vector2 center = (a.Position = b.Position + c.Position + d.Position) * .25f;
+                Vector2 center = (a.Position + b.Position + c.Position + d.Position) * .25f;
 
                 GroundPoint[] sortedPoints = GetPointsClockwiseAroundCenter(center, a, b, c, d);
                 GroundEdge[] sortedEdges = GetOrCreateEdges(sortedPoints, edgesTable);
