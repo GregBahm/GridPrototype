@@ -19,7 +19,7 @@ namespace VoxelVisuals
 
         private List<VoxelRenderData> renderData;
         private ComputeBuffer renderDataBuffer;
-        private int renderBufferLength = 1024; // TODO: Lower this and then make it dynamic
+        private int renderBufferLength = 0; // TODO: Lower this and then make it dynamic
         private MeshDataForArgsBuffer[] meshData;
         private ComputeBuffer[] argsBuffers;
         private const int PositionsBufferStride = VoxelRenderData.Stride;

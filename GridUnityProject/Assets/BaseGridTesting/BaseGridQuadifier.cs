@@ -223,11 +223,12 @@ public class BaseGridQuadifier : MonoBehaviour
         string data = BasePointsFile.text;
         BaseGridGeneratorSave saveFile = JsonUtility.FromJson<BaseGridGeneratorSave>(data);
         points = new List<Point>[axisOfSymetry];
+        Point pointZero = new Point(Vector2.zero, 0, 0);
         for (int i = 0; i < axisOfSymetry; i++)
         {
             points[i] = new List<Point>
             {
-                new Point(new Vector2(0, 0), i, 0)
+                pointZero
             };
         }
         GameObject obj = Instantiate(pointMarker);
