@@ -431,7 +431,7 @@ MonoBehaviour:
   pointMarker: {fileID: 44216027}
   searchDistanceIncrement: 0.1
   searchRotationIncrement: 1
-  axisOfSymetry: 7
+  axisOfSymetry: 8
   Go: 0
   Save: 0
   Load: 0
@@ -468,5 +468,5 @@ MonoBehaviour:
   quadSegment: {fileID: 2331472477565323962, guid: 01c5bc351d21e1048b43b4fd996d915f,
     type: 3}
   SaveFile: {fileID: 4900000, guid: e6a9956424b863c43870d2163fcc6ab1, type: 3}
-  axisOfSymetry: 7
+  axisOfSymetry: 8
   DoSave: 0

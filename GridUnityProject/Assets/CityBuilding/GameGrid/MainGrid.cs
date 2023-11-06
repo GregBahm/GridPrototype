@@ -12,6 +12,7 @@ namespace GameGrid
 {
     public class MainGrid
     {
+        public const int DefaultMaxHeight = 40;
         public int MaxHeight { get; }
 
         private List<GroundPoint> points = new List<GroundPoint>();
@@ -125,6 +126,7 @@ namespace GameGrid
                 GroundQuad quad = new GroundQuad(sortedPoints, sortedEdges, center);
                 quads.Add(quad);
             }
+            edges = edgesTable.Values.ToList();
         }
 
         private GroundEdge[] GetOrCreateEdges(GroundPoint[] sortedPoints, Dictionary<string, GroundEdge> edgesTable)
@@ -144,6 +146,7 @@ namespace GameGrid
             {
                 return edgesTable[key];
             }
+            edgesTable.Add(key, edge);
             return edge;
         }
 
@@ -155,13 +158,13 @@ namespace GameGrid
 
         private List<GroundPoint> GetGroundPoints(GroundPointBuilder[] newPoints)
         {
-            List<GroundPoint> ret = new List<GroundPoint>(newPoints.Length);
+            GroundPoint[] ret = new GroundPoint[newPoints.Length];
             for (int i = 0; i < newPoints.Length; i++)
             {
                 GroundPointBuilder point = newPoints[i];
                 ret[point.Index] = new GroundPoint(this, i, point.Position);
             }
-            return ret;
+            return ret.ToList();
         }
 
         private void UpdateVoxelVisuals()

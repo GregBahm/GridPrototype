@@ -9,20 +9,20 @@ namespace GameGrid
     [Serializable]
     public class GroundSaveState
     {
-        public const int DefaultMaxHeight = 40;
-        public int MaxHeight;
-
         public GroundPointBuilder[] Points;
 
         public GroundQuadBuilder[] Quads;
 
+        public GroundSaveState(GroundPointBuilder[] points, GroundQuadBuilder[] quads)
+        {
+            Points = points.ToArray();
+            Quads = quads.ToArray();
+        }
+
         public GroundSaveState(MainGrid grid)
         {
-            MaxHeight = grid.MaxHeight;
-            GroundPointBuilder[] points = grid.Points.Select(item => new GroundPointBuilder(item)).ToArray();
-            GroundQuadBuilder[] edges = grid.Quads.Select(item => new GroundQuadBuilder(item)).ToArray();
-            Points = points.ToArray();
-            Quads = edges.ToArray();
+            Points = grid.Points.Select(item => new GroundPointBuilder(item)).ToArray();
+            Quads = grid.Quads.Select(item => new GroundQuadBuilder(item)).ToArray();
         }
     }
 }
