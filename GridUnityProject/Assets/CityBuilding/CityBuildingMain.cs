@@ -7,6 +7,7 @@ using Interaction;
 using System.IO;
 using Interiors;
 using VoxelVisuals;
+using System;
 
 public class CityBuildingMain : MonoBehaviour
 {
@@ -48,18 +49,13 @@ public class CityBuildingMain : MonoBehaviour
         {
             Load();
         }
-        else
-        {
-            MainGrid = GroundSaveState.LoadDefault();
-            Initialize();
-        }
         InteractionMesh.RebuildMesh();
     }
 
     private void Load()
     {
         GroundSaveState ground = JsonUtility.FromJson<GroundSaveState>(DefaultSave.text);
-        MainGrid = new MainGrid(GroundSaveState.DefaultMaxHeight, ground.Points, ground.Edges);
+        MainGrid = new MainGrid(GroundSaveState.DefaultMaxHeight, ground.Points, ground.Quads);
         Initialize();
         
         //GameSaveState saveState = GameSaveState.Load(DefaultSave);
@@ -136,12 +132,6 @@ public class CityBuildingMain : MonoBehaviour
             visualsManager.UpdateForBaseGridModification();
         }
         lightingManager.UpdatePostion(MainGrid);
-    }
-
-    public void UpdateMainGrid(GridExpander expander)
-    {
-        MainGrid.AddToMesh(expander.Points, expander.Edges);
-        UpdateGroundMesh();
     }
 
     private void OnDestroy()

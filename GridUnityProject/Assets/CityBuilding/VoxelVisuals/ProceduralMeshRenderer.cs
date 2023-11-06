@@ -89,6 +89,10 @@ namespace VoxelVisuals
         public void UpdatePositionsBuffer()
         {
             renderData = GetPositionsBufferData();
+            if(renderData.Count > 1024)
+            {
+                Debug.Log("Hey talk to me");
+            }
             renderDataBuffer.SetData(renderData);
         }
 

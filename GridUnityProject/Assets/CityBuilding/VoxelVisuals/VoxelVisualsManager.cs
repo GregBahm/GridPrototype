@@ -168,6 +168,9 @@ namespace VoxelVisuals
 
     public struct VoxelRenderData
     {
+        /// <summary>
+        /// Stried of each voxel  renderer is 40 (could def be optimized)
+        /// </summary>
         public const int Stride = sizeof(float) * 2 * 4  // Anchors
             + sizeof(float) // Height
             + sizeof(float); // FlipNormal

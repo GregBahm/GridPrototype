@@ -16,8 +16,6 @@ public class InteractionManager : MonoBehaviour
     [SerializeField]
     private Toggle InteriorsTabButton;
     [SerializeField]
-    private Toggle FoundationTabButton;
-    [SerializeField]
     private GameObject ExteriorsTab;
     [SerializeField]
     private GameObject InteriorsTab;
@@ -32,7 +30,6 @@ public class InteractionManager : MonoBehaviour
     private CityBuildingMain gameMain;
     private ExteriorsInteractionManager exteriorsInteractor;
     private InteriorsInteractionManager interiorsInteractor;
-    private FoundationInteractionManager foundationInteractor;
 
     private DragDetector leftDragDetector;
     private DragDetector rightDragDetector;
@@ -42,8 +39,7 @@ public class InteractionManager : MonoBehaviour
     public enum UiTab
     {
         Exteriors,
-        Interiors,
-        Foundation
+        Interiors
     }
 
     private static readonly Plane groundPlane = new Plane(Vector3.up, 0);
@@ -54,7 +50,6 @@ public class InteractionManager : MonoBehaviour
         cameraInteraction = GetComponent<CameraInteraction>();
         exteriorsInteractor = GetComponent<ExteriorsInteractionManager>();
         interiorsInteractor = GetComponent<InteriorsInteractionManager>();
-        foundationInteractor = GetComponent<FoundationInteractionManager>();
         leftDragDetector = new DragDetector(dragStartDistance);
         rightDragDetector = new DragDetector(dragStartDistance);
         tabComponents = GetTabComponents();
@@ -63,17 +58,15 @@ public class InteractionManager : MonoBehaviour
 
     private TabComponentGroup[] GetTabComponents()
     {
-        TabComponentGroup foundationGroup = new TabComponentGroup(this, UiTab.Foundation, FoundationTabButton, FoundationTab);
         TabComponentGroup interiorGroup = new TabComponentGroup(this, UiTab.Interiors, InteriorsTabButton, InteriorsTab);
         TabComponentGroup exteriorGroup = new TabComponentGroup(this, UiTab.Exteriors, ExteriorsTabButton, ExteriorsTab);
-        return new TabComponentGroup[] { foundationGroup, interiorGroup, exteriorGroup };
+        return new TabComponentGroup[] { interiorGroup, exteriorGroup };
     }
 
     private void SetInitialTab()
     {
         ExteriorsTabButton.isOn = SelectedTab == UiTab.Exteriors;
         InteriorsTabButton.isOn = SelectedTab == UiTab.Interiors;
-        FoundationTabButton.isOn = SelectedTab == UiTab.Foundation;
     }
 
     private void Update()
@@ -93,14 +86,12 @@ public class InteractionManager : MonoBehaviour
         }
         exteriorsInteractor.ProceedWithUpdate(wasDragging, uiHovered);
         interiorsInteractor.ProceedWithUpdate(wasDragging, uiHovered);
-        foundationInteractor.ProceedWithUpdate(wasDragging, uiHovered);
     }
 
     private void ManageTabs()
     {
         ExteriorsTab.SetActive(SelectedTab == UiTab.Exteriors);
         InteriorsTab.SetActive(SelectedTab == UiTab.Interiors);
-        FoundationTab.SetActive(SelectedTab == UiTab.Foundation);
     }
 
     public void Undo()
