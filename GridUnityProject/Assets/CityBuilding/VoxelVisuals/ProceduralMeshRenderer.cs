@@ -29,7 +29,6 @@ namespace VoxelVisuals
             renderData = new List<VoxelRenderData>();
             Component = component;
             materials = component.Materials.Select(item => new Material(item)).ToArray();
-            renderDataBuffer = new ComputeBuffer(renderBufferLength, PositionsBufferStride);
             meshData = GetMeshData();
             argsBuffers = InitializeArgsBuffers();
             cellsToRender = new HashSet<VisualCell>();
@@ -57,7 +56,8 @@ namespace VoxelVisuals
 
         public void Dispose()
         {
-            renderDataBuffer.Dispose();
+            if(renderDataBuffer != null)
+                renderDataBuffer.Dispose();
             foreach (ComputeBuffer buffer in argsBuffers)
             {
                 buffer.Dispose();
@@ -89,9 +89,12 @@ namespace VoxelVisuals
         public void UpdatePositionsBuffer()
         {
             renderData = GetPositionsBufferData();
-            if(renderData.Count > 1024)
+            if(renderData.Count > renderBufferLength)
             {
-                Debug.Log("Hey talk to me");
+                renderBufferLength = renderData.Count;
+                if (renderDataBuffer != null)
+                    renderDataBuffer.Dispose();
+                renderDataBuffer = new ComputeBuffer(renderBufferLength, PositionsBufferStride);
             }
             renderDataBuffer.SetData(renderData);
         }
